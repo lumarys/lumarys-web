@@ -1,0 +1,285 @@
+---
+slug: arquiteturas-de-dados
+titulo: "Arquiteturas de dados"
+resumo: "Lambda contra Kappa, Data Warehouse contra Data Lake contra Lakehouse, os quatro princípios do Data Mesh e a diferença entre Source of Record e Source of Truth: o vocabulário de arquitetura que a sabatina cobra em nível de trade-off."
+minutos: 35
+nivel: intermediario
+porQue: "Arquitetura é onde a banca mede senioridade. Qualquer pessoa lista nomes; o que separa é dizer o que cada escolha custa e em que condição você mudaria de ideia. A pergunta sobre fonte da verdade é a que mais expõe quem nunca conciliou número com área de negócio."
+comoCai: "O saldo no core diverge do saldo no relatório. Qual é a fonte da verdade?"
+feynman: "Explique para o diretor de operações, em um minuto, por que o número do relatório de saldo pode legitimamente diferir do número da tela do gerente, sem que nenhum dos dois esteja errado."
+preRequisitos:
+  - big-data
+  - batch-vs-stream
+errosComuns:
+  - "Descrever Lambda e Kappa como opções equivalentes. Lambda cobra caro em manter a mesma regra escrita duas vezes; Kappa cobra em reprocessamento de histórico pelo próprio stream. Sem citar esse custo, a resposta vira lista."
+  - "Tratar Lakehouse como marketing de Data Lake. O que muda é concreto: formato de tabela com transação, evolução de schema e time travel sobre armazenamento de objetos."
+  - "Dizer que Data Mesh é arquitetura técnica. Os quatro princípios são organizacionais antes de tudo; sem times de domínio com dono, o Mesh vira lake bagunçado com nome novo."
+  - "Confundir Source of Record com Source of Truth. SoR é onde o dado nasce; SoT é a visão consolidada e governada usada para decidir. Podem ser sistemas diferentes sem que ninguém esteja errado."
+  - "Responder que a fonte da verdade é sempre o core bancário. Para saldo em tempo real, sim; para o número do relatório regulatório de fechamento, a verdade é a visão consolidada e datada, não a tela do momento."
+  - "Propor Data Mesh para uma empresa com um time de dados de oito pessoas. Governança federada e plataforma self-serve exigem escala organizacional; abaixo dela, é overhead."
+preTeste:
+  - enunciado: "Qual é o custo característico da arquitetura Lambda?"
+    alternativas:
+      - texto: "Ela não consegue processar dados em tempo real."
+        correta: false
+        explicacao: "Ao contrário: a camada de velocidade existe justamente para isso. O problema está em outro lugar."
+      - texto: "A mesma regra de negócio precisa ser mantida em duas implementações, batch e stream, que podem divergir."
+        correta: true
+        explicacao: "Duas bases de código para o mesmo cálculo é a dívida estrutural do Lambda, e é o que Kappa tenta eliminar."
+      - texto: "Ela exige um data warehouse proprietário."
+        correta: false
+        explicacao: "Lambda é um padrão de camadas, independente do produto de armazenamento."
+  - enunciado: "O saldo mostrado ao cliente no app diverge do saldo do relatório gerencial do dia anterior. Qual leitura é a correta?"
+    alternativas:
+      - texto: "O relatório está errado, porque o core bancário é sempre a fonte da verdade."
+        correta: false
+        explicacao: "O core é o Source of Record do saldo, mas o relatório responde outra pergunta: qual era o saldo no corte do dia, com as regras contábeis aplicadas."
+      - texto: "Pode não haver erro: o core é o Source of Record em tempo real e o relatório é a Source of Truth consolidada e datada, com corte e regras próprias."
+        correta: true
+        explicacao: "Divergência esperada por diferença de corte e de regra não é defeito. O que precisa existir é a reconciliação que a explica."
+      - texto: "Os dois estão errados enquanto não convergirem para o mesmo número."
+        correta: false
+        explicacao: "Convergência forçada esconde o motivo legítimo da diferença e costuma quebrar a rastreabilidade contábil."
+videos:
+  - id: lnRqhEGTJII
+    titulo: "Big Data no Microsoft Azure - Arquitetura Lambda e Kappa"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 9
+    porQue: "Contrasta as duas arquiteturas em pouco tempo e com desenho de camadas. Ignore o recorte de produto Azure e fique com o raciocínio: o que some quando você tira a camada batch."
+  - id: rNmRcU9A0O0
+    titulo: "Arquitetura Data Mesh"
+    canal: "Data Science Academy"
+    duracao: 8
+    porQue: "Resumo curto dos princípios do Mesh. Assista já perguntando quais deles exigem mudança de organograma, porque é aí que a banca costuma cutucar."
+artigos:
+  - titulo: "Data Mesh Principles and Logical Architecture"
+    url: "https://martinfowler.com/articles/data-mesh-principles.html"
+    fonte: "martinfowler.com (Zhamak Dehghani)"
+  - titulo: "Data Mesh Architecture"
+    url: "https://www.datamesh-architecture.com/"
+    fonte: "Data Mesh Architecture"
+  - titulo: "O que é um Data Lakehouse"
+    url: "https://www.databricks.com/glossary/data-lakehouse"
+    fonte: "Databricks"
+  - titulo: "Lambda architecture"
+    url: "https://en.wikipedia.org/wiki/Lambda_architecture"
+    fonte: "Wikipedia"
+  - titulo: "Single source of truth"
+    url: "https://en.wikipedia.org/wiki/Single_source_of_truth"
+    fonte: "Wikipedia"
+flashcards:
+  - frente: "Arquitetura Lambda em uma frase"
+    verso: "Camada batch que reprocessa o histórico inteiro com precisão, mais camada de velocidade que entrega resultado aproximado em tempo real, e uma camada de serviço que junta as duas na consulta."
+  - frente: "Arquitetura Kappa em uma frase"
+    verso: "Um caminho só: tudo é stream. Reprocessamento é reler o log de eventos desde o início com o código novo, o que elimina a segunda implementação."
+  - frente: "Qual o preço de cada uma?"
+    verso: "Lambda paga em duas bases de código para a mesma regra, que divergem com o tempo. Kappa paga em depender do log reter histórico suficiente e em reprocessar volume grande por stream."
+  - frente: "Data Warehouse, em uma frase"
+    verso: "Repositório de dados estruturados, modelados e limpos antes da carga, otimizado para consulta analítica e governança forte. Schema on write."
+  - frente: "Data Lake, em uma frase"
+    verso: "Armazenamento barato de arquivos em qualquer formato, com schema aplicado na leitura. Flexível, e por isso vira pântano sem catálogo e sem qualidade."
+  - frente: "Lakehouse, em uma frase"
+    verso: "Data lake com formato de tabela por cima (Delta, Iceberg, Hudi) trazendo transação ACID, evolução de schema e time travel: flexibilidade do lake com garantias de warehouse."
+  - frente: "Os quatro princípios do Data Mesh"
+    verso: "Propriedade descentralizada por domínio; dado como produto; plataforma de dados self-serve; governança federada computacional."
+  - frente: "O que caracteriza um data product?"
+    verso: "Dado tratado como produto: tem dono, consumidor conhecido, contrato de interface, SLA de atualização e qualidade, documentação e é descobrível no catálogo."
+  - frente: "O que é contrato de dados?"
+    verso: "Acordo explícito entre produtor e consumidor sobre schema, semântica, frequência, qualidade e política de mudança. Ele transforma quebra silenciosa em violação detectável."
+  - frente: "O que significa governança federada computacional?"
+    verso: "As regras globais (privacidade, nomenclatura, interoperabilidade) são decididas em conjunto pelos domínios e aplicadas por automação na plataforma, não por comitê aprovando caso a caso."
+  - frente: "Quando Data Mesh é overhead?"
+    verso: "Quando não existem domínios com times capazes de manter seus próprios produtos de dados, ou quando o time de dados é pequeno o bastante para que a centralização ainda seja mais rápida que a coordenação."
+  - frente: "Source of Record (SoR)"
+    verso: "O sistema onde o dado nasce e é autoritativo sobre o fato original. O core bancário é o SoR do lançamento; o sistema de cadastro é o SoR do endereço do cliente."
+  - frente: "Source of Truth (SoT)"
+    verso: "A visão consolidada, tratada e governada que a organização usa para decidir. Reúne vários SoRs, aplica regra de negócio, corte temporal e qualidade, e é a referência do relatório."
+  - frente: "O que fazer quando SoR e SoT divergem?"
+    verso: "Reconciliar, não escolher pelo mais bonito. Isolar a causa: diferença de corte temporal, regra de negócio distinta, atraso de ingestão ou defeito real. Documentar a explicação e alertar quando a diferença sair da faixa esperada."
+drills:
+  - titulo: "SoR ou SoT?"
+    instrucao: "Para cada afirmação, classifique o papel do sistema descrito."
+    opcoes: ["Source of Record", "Source of Truth"]
+    itens:
+      - enunciado: "O core bancário, que registra o lançamento no instante em que a transação de cartão é autorizada."
+        resposta: "Source of Record"
+        explicacao: "É onde o fato nasce e onde ele é autoritativo."
+      - enunciado: "A tabela gold de posição consolidada de clientes, usada pelo relatório regulatório e pela diretoria."
+        resposta: "Source of Truth"
+        explicacao: "Reúne vários sistemas, aplica corte e regra e é a referência para decidir."
+      - enunciado: "O sistema de cadastro, onde o cliente informa o endereço no onboarding."
+        resposta: "Source of Record"
+        explicacao: "Origem do dado. Se ele diverge de outra base, é a outra base que precisa se explicar."
+      - enunciado: "A visão unificada de cliente que resolve duplicidade entre cadastro, cartão e seguros e escolhe o endereço vigente."
+        resposta: "Source of Truth"
+        explicacao: "Consolidação com regra de desempate explícita, governada e versionada."
+      - enunciado: "O extrator do PIX, que grava na zona raw o payload cru recebido do SPI."
+        resposta: "Source of Record"
+        explicacao: "A zona raw preserva o registro original como recebido; ela não é consolidada nem governada para decisão."
+  - titulo: "Qual arquitetura responde ao cenário?"
+    instrucao: "Escolha a arquitetura mais adequada e prepare uma frase justificando o custo que você aceita."
+    opcoes: ["Data Warehouse", "Data Lake", "Lakehouse", "Data Mesh"]
+    itens:
+      - enunciado: "Relatório regulatório mensal sobre dados estruturados, com modelagem estável há anos e exigência forte de rastreabilidade."
+        resposta: "Data Warehouse"
+        explicacao: "Modelo estável, dado estruturado e governança forte é exatamente onde o warehouse ainda ganha."
+      - enunciado: "Guardar por sete anos o payload cru de PIX, log de app e áudio de call center, sem saber ainda que perguntas serão feitas."
+        resposta: "Data Lake"
+        explicacao: "Armazenamento barato e schema on read é o caso do lake; a decisão de modelagem fica adiada de propósito."
+      - enunciado: "Tabelas de transação que precisam de atualização corretiva, leitura concorrente por Spark e SQL, e reconstrução de um estado passado para auditoria."
+        resposta: "Lakehouse"
+        explicacao: "Transação ACID, MERGE e time travel sobre arquivos é a definição do lakehouse."
+      - enunciado: "Um conglomerado com áreas de cartão, seguros, crédito e câmbio, cada uma com time de engenharia próprio, e uma fila de meses no time central de dados."
+        resposta: "Data Mesh"
+        explicacao: "O gargalo é organizacional, e domínios com capacidade técnica própria é a precondição do Mesh."
+      - enunciado: "Uma fintech com doze pessoas no total, sendo duas de dados, e um único banco transacional."
+        resposta: "Data Warehouse"
+        explicacao: "Sem domínios nem escala, Mesh é overhead puro. Centralizar ainda é mais rápido."
+perguntas:
+  - tipo: oral
+    enunciado: "O saldo no core diverge do saldo no relatório gerencial. Qual é a fonte da verdade?"
+    respostaModelo: "Depende da pergunta que está sendo feita, e eu começaria separando dois conceitos. O core é o Source of Record do saldo: é onde o lançamento nasce e é autoritativo sobre o fato. O relatório vem da Source of Truth analítica, que é a visão consolidada, datada e governada usada para decidir. As duas podem divergir sem que nenhuma esteja errada, porque o relatório tem corte temporal, regra contábil e às vezes exclusão de lançamentos em contingência. Então minha primeira ação não é escolher um número, é reconciliar: comparar o mesmo corte, isolar se a diferença é de janela de ingestão, de regra de negócio ou defeito real. Para saldo em tempo real ao cliente, a resposta é o core. Para o número que vai ao regulador, é a visão consolidada, porque ela é auditável e reproduzível. O que não pode existir é divergência sem explicação documentada e sem alerta quando ela sai da faixa esperada."
+    rubrica:
+      - "Separou Source of Record de Source of Truth com definição própria"
+      - "Disse que a resposta depende do uso: tempo real ao cliente contra número auditável"
+      - "Listou causas plausíveis da divergência: corte temporal, regra de negócio, atraso de ingestão, defeito"
+      - "Propôs reconciliação documentada com alerta por faixa, em vez de escolher um número"
+  - tipo: oral
+    enunciado: "A diretoria leu sobre Data Mesh e quer adotar. Vocês têm quatro domínios grandes, um time central de dados com fila de três meses e nenhuma plataforma self-serve. O que você recomenda?"
+    respostaModelo: "Eu concordaria com o diagnóstico e discordaria do primeiro passo. A fila de três meses é sintoma clássico do gargalo central que o Mesh ataca, então a direção faz sentido. Mas os quatro princípios se sustentam juntos: sem plataforma self-serve, descentralizar propriedade só transfere o problema para times que não têm ferramenta, e sem governança federada computacional cada domínio inventa seu padrão de qualidade e de privacidade. Eu começaria pela plataforma e pelo contrato de dados, escolheria um domínio piloto com time de engenharia maduro, como cartão, e trataria uma ou duas tabelas como produto de verdade: dono nomeado, SLA de atualização, schema versionado, catálogo. Mediria tempo de entrega antes e depois. Se o piloto não reduzir a fila, o problema é de plataforma ou de capacidade do domínio, e escalar o modelo só multiplicaria o custo de coordenação."
+    rubrica:
+      - "Nomeou os quatro princípios ou pelo menos plataforma self-serve e governança federada"
+      - "Explicou por que descentralizar sem plataforma piora a situação"
+      - "Propôs domínio piloto com critério de escolha e produto de dados com dono e SLA"
+      - "Definiu uma medida verificável de sucesso antes de escalar"
+  - tipo: unica
+    enunciado: "O que o Lakehouse acrescenta a um Data Lake?"
+    alternativas:
+      - texto: "Substitui o armazenamento de objetos por discos locais de alto desempenho."
+        correta: false
+        explicacao: "O armazenamento continua sendo de objetos. O que muda é a camada de tabela sobre ele."
+      - texto: "Uma camada de formato de tabela que traz transação ACID, evolução de schema e consulta de versões passadas."
+        correta: true
+        explicacao: "Delta, Iceberg e Hudi entregam exatamente isso, e é o que permite MERGE e auditoria sobre arquivos."
+      - texto: "Obriga a modelagem dimensional antes da gravação, como no warehouse."
+        correta: false
+        explicacao: "O lakehouse mantém a flexibilidade de schema on read; a modelagem continua sendo escolha, não imposição."
+      - texto: "Elimina a necessidade de catálogo de dados."
+        correta: false
+        explicacao: "Catálogo continua essencial para descoberta e permissão; o lakehouse não substitui governança."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre Data Mesh estão corretas?"
+    alternativas:
+      - texto: "A propriedade do dado passa para o domínio que o gera e o conhece."
+        correta: true
+        explicacao: "É o primeiro princípio, e o que retira o time central do caminho crítico."
+      - texto: "Cada conjunto de dados publicado deve ter dono, consumidor conhecido, contrato e SLA."
+        correta: true
+        explicacao: "É o que significa tratar dado como produto."
+      - texto: "A governança some, porque cada domínio decide suas próprias regras."
+        correta: false
+        explicacao: "A governança fica federada e automatizada, não ausente. Regras globais continuam existindo."
+      - texto: "A plataforma self-serve existe para que o domínio publique dado sem depender do time central."
+        correta: true
+        explicacao: "Sem ela, descentralizar propriedade só transfere o gargalo."
+      - texto: "Data Mesh substitui o lakehouse como tecnologia de armazenamento."
+        correta: false
+        explicacao: "Mesh é modelo organizacional e de arquitetura lógica; ele roda sobre lakehouse, warehouse ou ambos."
+---
+
+## Em uma frase
+
+Arquitetura de dados é a escolha de **onde o dado mora, quem manda nele e quantas
+vezes a mesma regra é escrita** — e cada opção cobra num lugar diferente.
+
+## Lambda contra Kappa
+
+**Lambda** tem duas camadas de processamento. A *batch* reprocessa o histórico
+inteiro e produz o número correto, com latência de horas. A *speed* processa o
+que chega agora e produz um número aproximado, em segundos. A camada de serviço
+junta as duas na hora da consulta: histórico da batch, últimas horas da speed.
+
+**Kappa** elimina a camada batch. Tudo é stream, e reprocessar histórico é reler
+o log de eventos desde o começo com o código novo.
+
+<Comparativo
+  colunas={["", "Lambda", "Kappa"]}
+  linhas={[
+    ["Caminhos de processamento", "Dois: batch e speed", "Um: stream"],
+    ["Custo principal", "A mesma regra escrita duas vezes, que diverge com o tempo", "Depender do log reter histórico e reprocessar volume grande por stream"],
+    ["Quando faz sentido", "Regra batch complexa que não se traduz bem para stream", "Lógica que cabe em stream e log com retenção suficiente"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="A frase que a banca espera">
+O custo do Lambda não é infraestrutura, é manutenção: duas implementações do
+cálculo de exposição de crédito acabam discordando, e descobrir qual está certa
+vira projeto.
+</Callout>
+
+## Warehouse, Lake e Lakehouse
+
+<Comparativo
+  colunas={["", "Data Warehouse", "Data Lake", "Lakehouse"]}
+  linhas={[
+    ["Schema", "On write: modela antes de carregar", "On read: aplica na leitura", "On read com contrato de tabela por cima"],
+    ["Dado que aceita", "Estruturado", "Qualquer formato", "Qualquer formato, com tabelas governadas sobre os arquivos"],
+    ["Transação", "ACID nativo", "Não tem: escrita parcial é visível", "ACID pela camada Delta, Iceberg ou Hudi"],
+    ["Custo de armazenamento", "Alto", "Baixo (objetos)", "Baixo (objetos)"],
+    ["Risco típico", "Rigidez e fila de modelagem", "Virar pântano sem catálogo e qualidade", "Complexidade de operar a camada de tabela"],
+    ["Uso no banco", "Relatório regulatório estável", "Payload cru de PIX, log, áudio", "Tabelas de transação com MERGE e time travel para auditoria"]
+  ]}
+/>
+
+## Data Mesh
+
+Mesh responde a um gargalo **organizacional**: um time central de dados que não
+dá conta da fila de pedidos de quatro áreas de negócio. Quatro princípios:
+
+<Passos itens={[
+  "Propriedade descentralizada por domínio: quem gera o dado responde por ele",
+  "Dado como produto: dono, consumidor, contrato, SLA, documentação, descoberta",
+  "Plataforma de dados self-serve: o domínio publica sem depender do time central",
+  "Governança federada computacional: regras globais decididas em conjunto e aplicadas por automação"
+]} />
+
+Um **data product** não é uma tabela publicada. É uma tabela com dono nomeado,
+consumidor conhecido, SLA de atualização, qualidade medida e presença no
+catálogo. O **contrato de dados** é o acordo explícito de schema, semântica,
+frequência e política de mudança — o que transforma quebra silenciosa em
+violação detectável.
+
+<Callout tipo="erro" titulo="Quando Mesh é overhead">
+Sem domínios que tenham time de engenharia próprio, e sem plataforma self-serve,
+descentralizar propriedade só distribui o problema. Em organização pequena, o
+custo de coordenação supera o ganho e centralizar continua mais rápido.
+</Callout>
+
+## Source of Record e Source of Truth
+
+Este par é o que mais derruba candidato, porque parece sinônimo e não é.
+
+<Termo nome="Source of Record">O sistema onde o dado nasce e que é autoritativo sobre o fato original.</Termo>
+O core bancário é o SoR do lançamento. O sistema de cadastro é o SoR do endereço.
+Se a base analítica discorda do SoR sobre *o que aconteceu*, é a base analítica
+que se explica.
+
+<Termo nome="Source of Truth">A visão consolidada, tratada e governada que a organização usa para decidir.</Termo>
+A SoT reúne vários SoRs, resolve duplicidade, aplica regra de negócio e corte
+temporal, e é a referência do relatório e do indicador.
+
+**Elas divergem por bons motivos.** Corte temporal diferente (o core é agora, o
+relatório é o fechamento de ontem às 23h59). Regra distinta (lançamento em
+contingência que a contabilidade ainda não reconhece). Atraso de ingestão. E, às
+vezes, defeito real.
+
+A resposta profissional não é eleger um número, é **reconciliar**: comparar o
+mesmo corte, isolar a causa, documentar a explicação e configurar alerta para
+quando a diferença sair da faixa esperada. Divergência explicada é operação
+normal; divergência sem explicação é incidente.
+
+## Modern data stack, em uma frase
+
+Conjunto de ferramentas gerenciadas e desacopladas — ingestão, armazenamento em
+nuvem, transformação em SQL, orquestração, catálogo e BI — montadas por
+integração em vez de por plataforma única.

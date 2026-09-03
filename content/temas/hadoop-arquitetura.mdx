@@ -1,0 +1,308 @@
+---
+slug: hadoop-arquitetura
+titulo: "Hadoop: conceito e arquitetura"
+resumo: "Hadoop foi a resposta dos anos 2010 para processar dado em escala com máquinas comuns: HDFS guarda em blocos replicados, YARN reparte os recursos. Entender por que ele venceu, e por que perdeu espaço para S3 com Spark, é o que a banca cobra."
+minutos: 35
+nivel: intermediario
+porQue: "Hadoop é o pano de fundo de quase todo conceito de engenharia de dados moderna. A banca pergunta menos 'o que é' e mais 'ainda faz sentido', porque essa é a pergunta que revela se você entende separação de armazenamento e computação."
+comoCai: "HDFS ainda faz sentido se a empresa está na AWS?"
+feynman: "Explique para um gestor de infraestrutura por que o banco troca um storage caro por trinta máquinas comuns com três cópias de cada arquivo."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Dizer que Hadoop é um banco de dados. Hadoop é um framework de armazenamento e processamento distribuído; quem oferece semântica de tabela é o Hive por cima dele."
+  - "Confundir HDFS com YARN. HDFS guarda arquivo em blocos replicados; YARN reparte CPU e memória entre aplicações. São responsabilidades separadas desde o Hadoop 2."
+  - "Achar que replicação substitui backup. Réplica protege contra falha de disco e de nó; ela copia fielmente o comando de exclusão e a corrupção lógica."
+  - "Tratar o NameNode como detalhe. Ele guarda os metadados de todo o sistema de arquivos; sem alta disponibilidade, é ponto único de falha e limita o número de arquivos pequenos."
+  - "Dizer que Hadoop morreu. O que perdeu espaço foi o HDFS como camada de armazenamento primária; YARN, Hive e o modelo de processamento distribuído deixaram herança direta no que se usa hoje."
+  - "Explicar a queda do Hadoop só por 'Spark é mais rápido'. A razão estrutural é separar armazenamento de computação, o que permite escalar e pagar cada um por conta."
+preTeste:
+  - enunciado: "Por que o HDFS replica cada bloco três vezes em vez de usar RAID no servidor?"
+    alternativas:
+      - texto: "Porque a réplica protege contra a perda do nó inteiro, não só do disco, e ainda permite ler o bloco de várias máquinas em paralelo."
+        correta: true
+        explicacao: "RAID protege dentro de uma máquina. Em cluster de hardware comum, a máquina inteira cai, e a réplica em outro nó (e outro rack) é o que mantém o dado disponível."
+      - texto: "Porque RAID não funciona em Linux."
+        correta: false
+        explicacao: "RAID funciona; ele só resolve um problema diferente, dentro do limite de um servidor."
+      - texto: "Porque três cópias ocupam menos espaço que a paridade do RAID."
+        correta: false
+        explicacao: "É o contrário: replicação 3 custa 200% de espaço extra, mais que a paridade. O que se compra é disponibilidade e paralelismo de leitura."
+  - enunciado: "O que o YARN faz em um cluster Hadoop?"
+    alternativas:
+      - texto: "Reparte CPU e memória do cluster entre as aplicações e acompanha a execução delas."
+        correta: true
+        explicacao: "ResourceManager decide a alocação, NodeManager executa e reporta em cada nó. YARN é gerenciador de recursos, não motor de processamento."
+      - texto: "Armazena os blocos de dados nos discos dos nós."
+        correta: false
+        explicacao: "Isso é o DataNode do HDFS."
+      - texto: "Traduz SQL em jobs distribuídos."
+        correta: false
+        explicacao: "Isso é o Hive, que roda por cima do YARN."
+videos:
+  - id: bFwxZPXRlQc
+    titulo: "The Spark Series | Fundamentos: Apache Hadoop"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 19
+    porQue: "Vem de um canal brasileiro de engenharia de dados e apresenta o Hadoop já no contexto de por que o mercado migrou para Spark. É exatamente o ângulo que a banca cobra."
+  - id: GlkpODgGzAQ
+    titulo: "O QUE É HADOOP | INTRODUÇÃO CURSO BIG DATA"
+    canal: "CNS Analytical"
+    duracao: 16
+    porQue: "Cobre o ecossistema em volta, que o primeiro vídeo trata de passagem. Assista para saber dizer em uma frase o que é Hive, HBase e Sqoop sem hesitar."
+artigos:
+  - titulo: "HDFS Architecture"
+    url: "https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/HdfsDesign.html"
+    fonte: "Apache Hadoop"
+  - titulo: "O que é Hadoop e para que ele é usado?"
+    url: "https://cloud.google.com/learn/what-is-hadoop?hl=pt-br"
+    fonte: "Google Cloud"
+  - titulo: "Como trabalhar com armazenamento e sistemas de arquivos com o Amazon EMR"
+    url: "https://docs.aws.amazon.com/pt_br/emr/latest/ManagementGuide/emr-plan-file-systems.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que é o Hadoop, em uma frase?"
+    verso: "Um framework de código aberto para armazenar e processar grandes volumes de dados em um cluster de hardware comum, com armazenamento distribuído (HDFS) e gerenciamento de recursos (YARN)."
+  - frente: "O que é hardware commodity e por que ele importa aqui?"
+    verso: "Servidor comum, sem storage nem interconexão especializados. Importa porque a premissa do Hadoop é que falha é rotina: o software assume a responsabilidade pela tolerância a falhas que o hardware caro dava antes."
+  - frente: "Qual a diferença entre escalar vertical e horizontalmente?"
+    verso: "Vertical é trocar por uma máquina maior, com teto físico e preço que cresce mais rápido que a capacidade. Horizontal é somar máquinas comuns, o que exige particionar o dado e coordenar o processamento."
+  - frente: "O que faz o NameNode?"
+    verso: "Guarda os metadados do sistema de arquivos: árvore de diretórios, quais blocos compõem cada arquivo e em quais DataNodes cada bloco está. Não trafega dado, só metadado."
+  - frente: "O que faz o DataNode?"
+    verso: "Armazena os blocos nos discos locais, atende leitura e escrita dos clientes e envia heartbeat e relatório de blocos ao NameNode."
+  - frente: "Por que o HDFS usa blocos grandes (128 MB por padrão)?"
+    verso: "Para amortizar o custo de seek e reduzir a quantidade de metadados no NameNode. O HDFS foi desenhado para leitura sequencial de arquivos grandes, não para acesso aleatório."
+  - frente: "Por que replicação 3 em vez de RAID?"
+    verso: "RAID protege contra falha de disco dentro de um servidor; a réplica em outro nó, e de preferência em outro rack, protege contra a perda do servidor ou do rack inteiro, e ainda dá paralelismo de leitura."
+  - frente: "Réplica é backup?"
+    verso: "Não. A réplica copia fielmente o que acontece, inclusive a exclusão acidental e a corrupção lógica. Backup e snapshot resolvem problema diferente."
+  - frente: "Qual o problema dos arquivos pequenos no HDFS?"
+    verso: "Cada arquivo e bloco consome metadado na memória do NameNode. Milhões de arquivos pequenos esgotam o NameNode e destroem a eficiência de leitura sequencial."
+  - frente: "O que o YARN acrescentou ao Hadoop 2?"
+    verso: "Separou gerenciamento de recursos do modelo de processamento. Antes, o cluster só rodava MapReduce; com YARN, Spark, Tez e outros passaram a dividir o mesmo cluster."
+  - frente: "Quais são os dois componentes principais do YARN?"
+    verso: "ResourceManager, que decide a alocação global e escalona as aplicações, e NodeManager, que roda em cada nó, sobe os contêineres e reporta o consumo."
+  - frente: "O que é data locality e por que deixou de ser decisivo?"
+    verso: "É levar a computação até o nó que tem o bloco, para evitar tráfego de rede. Deixou de ser decisivo porque a rede de datacenter ficou muito mais rápida e o gargalo migrou para outros pontos."
+  - frente: "Por que separar armazenamento de computação venceu?"
+    verso: "Porque os dois crescem em ritmos diferentes. Com S3 e um cluster efêmero, você paga armazenamento durável barato o tempo todo e computação só enquanto o job roda, além de subir vários clusters sobre o mesmo dado."
+  - frente: "Em uma frase, o que é Hive, HBase e Sqoop?"
+    verso: "Hive dá interface SQL sobre dado em arquivos; HBase é banco NoSQL orientado a coluna para leitura e escrita aleatória sobre HDFS; Sqoop transfere dado em lote entre banco relacional e HDFS."
+drills:
+  - titulo: "De quem é essa responsabilidade?"
+    instrucao: "Diga qual componente responde por cada função. Fale em voz alta antes de conferir."
+    opcoes: ["NameNode", "DataNode", "ResourceManager", "NodeManager"]
+    itens:
+      - enunciado: "Saber em quais máquinas estão as três réplicas do bloco 7 do arquivo de transações."
+        resposta: "NameNode"
+        explicacao: "Mapa de blocos é metadado, e metadado é do NameNode."
+      - enunciado: "Gravar fisicamente o bloco no disco local e confirmar a escrita."
+        resposta: "DataNode"
+        explicacao: "O DataNode é quem toca o dado."
+      - enunciado: "Decidir que a aplicação de score de fraude recebe 40 contêineres agora e a de fechamento espera."
+        resposta: "ResourceManager"
+        explicacao: "Alocação global e escalonamento entre aplicações é do ResourceManager."
+      - enunciado: "Subir o contêiner naquele servidor específico e reportar quanto de memória ele está usando."
+        resposta: "NodeManager"
+        explicacao: "O NodeManager é o agente por nó do YARN."
+      - enunciado: "Receber o heartbeat que avisa que um servidor sumiu e disparar a recriação das réplicas perdidas."
+        resposta: "NameNode"
+        explicacao: "O NameNode acompanha os heartbeats dos DataNodes e mantém o fator de replicação."
+  - titulo: "HDFS ou armazenamento de objetos?"
+    instrucao: "Para cada situação, decida qual camada de armazenamento faz mais sentido hoje e por quê."
+    opcoes: ["HDFS", "Objetos (S3)"]
+    itens:
+      - enunciado: "Data lake de transações do banco na AWS, consultado por vários times em horários diferentes."
+        resposta: "Objetos (S3)"
+        explicacao: "Durabilidade gerenciada, custo baixo por GB e vários clusters efêmeros lendo o mesmo dado sem manter servidor ligado."
+      - enunciado: "Resultado intermediário de um job pesado dentro de um cluster EMR, descartado ao final."
+        resposta: "HDFS"
+        explicacao: "O HDFS local do cluster continua útil como armazenamento temporário rápido para estágio intermediário."
+      - enunciado: "Histórico de sete anos de extratos que precisa sobreviver ao desligamento do cluster."
+        resposta: "Objetos (S3)"
+        explicacao: "HDFS de cluster efêmero some junto com o cluster; dado persistente precisa viver fora da computação."
+      - enunciado: "Cluster on-premises já pago, com dado sensível que não pode sair do datacenter por decisão regulatória."
+        resposta: "HDFS"
+        explicacao: "Restrição de residência e investimento já feito ainda justificam HDFS em parte do parque bancário."
+perguntas:
+  - tipo: oral
+    enunciado: "A empresa está migrando para a AWS. HDFS ainda faz sentido? Justifique."
+    respostaModelo: "Como camada de armazenamento primária, na maioria dos casos não. O motivo estrutural é que o HDFS acopla armazenamento e computação: para guardar mais dado eu preciso manter mais nós ligados, mesmo sem processar nada. Com S3 eu separo os dois: pago armazenamento durável barato o tempo todo e subo computação só enquanto o job roda, com vários clusters lendo o mesmo dado. Some a isso durabilidade e disponibilidade gerenciadas, sem NameNode para operar, e o custo por terabyte, que é bem menor que manter réplica 3 em disco de servidor. O argumento clássico a favor do HDFS era data locality, mas a rede de datacenter ficou rápida o suficiente para isso deixar de ser decisivo. Onde eu ainda usaria HDFS: como armazenamento temporário dentro do cluster para estágio intermediário, e em parque on-premises já pago ou com restrição regulatória de residência do dado."
+    rubrica:
+      - "Nomeou separação de armazenamento e computação como razão principal"
+      - "Explicou o ganho de elasticidade e de custo com exemplo concreto"
+      - "Disse que data locality perdeu peso e por quê"
+      - "Apontou pelo menos um caso em que HDFS ainda se justifica"
+      - "Não reduziu o argumento a 'Spark é mais rápido'"
+  - tipo: oral
+    enunciado: "Explique a arquitetura do HDFS e por que ele replica cada bloco três vezes."
+    respostaModelo: "O HDFS é mestre e escravo. O NameNode é o mestre e guarda só metadado: a árvore de diretórios, quais blocos formam cada arquivo e em quais nós está cada réplica. Os DataNodes são os escravos, guardam os blocos nos discos locais e mandam heartbeat e relatório de blocos para o mestre. O arquivo é quebrado em blocos grandes, 128 MB por padrão, porque o desenho é para leitura sequencial de arquivo grande: bloco grande amortiza o seek e reduz a quantidade de metadado no NameNode. A replicação três é a resposta à premissa do projeto, que é hardware comum falhando com frequência. RAID protegeria o disco dentro de um servidor, mas o que cai no cluster é o servidor inteiro, ou o rack. Três réplicas, com pelo menos uma em outro rack, cobrem esse cenário e ainda dão paralelismo de leitura. O preço é 200% de espaço extra, e é por isso que armazenamento de objetos com codificação de apagamento acabou ganhando em custo."
+    rubrica:
+      - "Descreveu o papel do NameNode como metadado e o do DataNode como dado"
+      - "Explicou por que o bloco é grande"
+      - "Justificou replicação contra falha de nó e de rack, não só de disco"
+      - "Contrastou com RAID mostrando que resolvem problemas diferentes"
+      - "Citou o custo de espaço da replicação 3"
+  - tipo: unica
+    enunciado: "Qual foi a principal mudança arquitetural que o YARN trouxe no Hadoop 2?"
+    alternativas:
+      - texto: "Separou o gerenciamento de recursos do modelo de processamento, permitindo que outros motores além do MapReduce usassem o cluster."
+        correta: true
+        explicacao: "É o que abriu caminho para Spark e Tez rodarem sobre o mesmo cluster Hadoop."
+      - texto: "Substituiu o HDFS por um sistema de arquivos mais rápido."
+        correta: false
+        explicacao: "YARN não mexe em armazenamento; ele cuida de CPU e memória."
+      - texto: "Passou a executar as tarefas em memória em vez de disco."
+        correta: false
+        explicacao: "Execução em memória é característica do Spark, não do YARN."
+      - texto: "Eliminou o NameNode como ponto único de falha."
+        correta: false
+        explicacao: "Alta disponibilidade do NameNode é outro recurso, com NameNode em standby e journal compartilhado."
+  - tipo: multipla
+    enunciado: "Quais fatores explicam a perda de espaço do HDFS para armazenamento de objetos?"
+    alternativas:
+      - texto: "Armazenamento de objetos desacopla capacidade de armazenar de capacidade de processar."
+        correta: true
+        explicacao: "É a razão estrutural: os dois recursos crescem em ritmos diferentes e passam a ser pagos separadamente."
+      - texto: "Custo por terabyte armazenado menor que manter réplica 3 em disco de servidor ligado."
+        correta: true
+        explicacao: "Além do disco, o HDFS cobra o servidor inteiro ligado para servir aquele disco."
+      - texto: "Durabilidade e disponibilidade viram responsabilidade do provedor, sem NameNode para operar."
+        correta: true
+        explicacao: "Some o custo operacional de manter alta disponibilidade de metadado."
+      - texto: "A rede de datacenter ficou rápida o suficiente para data locality deixar de ser vantagem decisiva."
+        correta: true
+        explicacao: "O argumento técnico mais forte a favor do HDFS perdeu peso."
+      - texto: "O HDFS não suporta arquivos maiores que 2 GB."
+        correta: false
+        explicacao: "Não existe esse limite; o HDFS foi desenhado justamente para arquivos grandes."
+      - texto: "O projeto Apache Hadoop foi descontinuado."
+        correta: false
+        explicacao: "O projeto segue ativo. O que mudou foi o papel dele na arquitetura de referência do mercado."
+---
+
+## Em uma frase
+
+Hadoop é um framework para **armazenar e processar dado em escala usando muitas
+máquinas comuns**, com o HDFS cuidando do armazenamento distribuído e o YARN
+repartindo os recursos entre as aplicações.
+
+## A premissa: hardware comum e falha como rotina
+
+Antes do Hadoop, escalar significava comprar uma máquina maior e um storage
+caro. O Hadoop inverteu a aposta: usar **hardware commodity**, servidor comum
+sem storage especializado, e assumir no software que máquina falha o tempo todo.
+
+Isso muda quem é responsável por quê. Confiabilidade deixa de ser característica
+do equipamento e passa a ser característica do sistema distribuído. E escalar
+deixa de ser trocar de máquina e passa a ser somar máquinas, o que traz três
+problemas novos: como dividir o dado, como sobreviver à perda de um nó e como
+coordenar o processamento.
+
+## HDFS: armazenamento distribuído
+
+O HDFS é mestre e escravo.
+
+O **NameNode** é o mestre e guarda apenas metadado: a árvore de diretórios,
+quais blocos formam cada arquivo e em quais nós está cada réplica. Ele não
+trafega dado. Isso o torna leve, mas também o torna ponto único de falha e o
+limite prático para a quantidade de arquivos do cluster.
+
+Os **DataNodes** são os escravos. Guardam os blocos nos discos locais, atendem
+leitura e escrita dos clientes e mandam heartbeat e relatório de blocos ao
+NameNode. Se um heartbeat para de chegar, o NameNode considera o nó perdido e
+manda recriar as réplicas que estavam nele.
+
+O arquivo é quebrado em **blocos grandes**, 128 MB por padrão. Bloco grande
+amortiza o custo de posicionar a cabeça do disco e reduz o volume de metadado no
+NameNode. É coerente com o desenho: HDFS é para leitura sequencial de arquivo
+grande, não para acesso aleatório.
+
+<Callout tipo="erro" titulo="O problema dos arquivos pequenos">
+Cada arquivo e cada bloco ocupa metadado na memória do NameNode. Milhões de
+arquivos de poucos kilobytes esgotam o mestre e destroem a leitura sequencial.
+Em pipeline bancário isso aparece quando alguém grava um arquivo por transação
+em vez de compactar por partição de data.
+</Callout>
+
+### Por que replicação 3 e não RAID
+
+Cada bloco é gravado em três nós por padrão, com pelo menos uma cópia em outro
+rack. A pergunta que a banca faz é por que não usar RAID.
+
+Porque resolvem problemas diferentes. **RAID protege contra a falha de um disco
+dentro de um servidor.** Em um cluster de hardware comum, o que cai é o servidor
+inteiro — fonte, placa, sistema operacional — ou o rack inteiro, por switch ou
+energia. Réplica em outro nó cobre esse cenário; RAID não.
+
+Tem um segundo ganho: com três cópias, três nós podem servir o mesmo bloco, o
+que dá paralelismo de leitura e mais opções de agendar a tarefa perto do dado.
+
+O preço é 200% de espaço extra. É exatamente esse preço que o armazenamento de
+objetos com codificação de apagamento cobrou mais barato depois.
+
+## YARN: gerenciamento de recursos
+
+O YARN responde por CPU e memória, não por dado.
+
+O **ResourceManager** é o escalonador global: recebe pedidos das aplicações e
+decide quem recebe quantos contêineres, aplicando fila e política de prioridade.
+O **NodeManager** roda em cada nó, sobe os contêineres que o mestre alocou e
+reporta o consumo.
+
+A mudança que o YARN trouxe no Hadoop 2 foi separar o gerenciamento de recursos
+do modelo de processamento. Antes, o cluster só sabia rodar MapReduce. Depois do
+YARN, Spark e outros motores passaram a dividir o mesmo cluster — e isso, na
+prática, foi o que permitiu a migração para Spark sem trocar a infraestrutura.
+
+## O ecossistema em volta
+
+<Comparativo
+  colunas={["Ferramenta", "O que faz em uma frase"]}
+  linhas={[
+    ["Hive", "Interface SQL sobre arquivos no HDFS, traduzindo consulta em job distribuído"],
+    ["HBase", "Banco NoSQL orientado a coluna sobre HDFS, para leitura e escrita aleatória por chave"],
+    ["Sqoop", "Transferência em lote entre banco relacional e HDFS, típica de ingestão de core bancário"]
+  ]}
+/>
+
+## Por que Hadoop perdeu espaço
+
+Não foi só porque Spark é mais rápido. A razão é estrutural: **o HDFS acopla
+armazenamento e computação**, e esses dois recursos crescem em ritmos diferentes.
+
+Para guardar mais dado no HDFS você precisa de mais nós ligados, mesmo que não
+esteja processando nada. Para processar um pico você precisa de nós que ficam
+ociosos no resto do mês. Você paga os dois o tempo todo.
+
+Com armazenamento de objetos, o desenho vira outro:
+
+<Passos itens={[
+  "O dado vive no S3, durável e barato por gigabyte, independente de qualquer cluster estar ligado.",
+  "A computação sobe sob demanda: um cluster Spark efêmero lê do S3, processa e é destruído.",
+  "Vários times sobem clusters diferentes sobre o mesmo dado, sem disputar o mesmo cluster nem duplicar o armazenamento.",
+  "Durabilidade e disponibilidade são responsabilidade do provedor — não há NameNode para operar em alta disponibilidade."
+]} />
+
+O argumento técnico mais forte a favor do HDFS era **data locality**: levar a
+computação ao nó que tem o bloco para evitar tráfego de rede. Ele fazia muito
+sentido quando a rede do datacenter era o gargalo. Com as redes atuais, ler do
+armazenamento de objetos deixou de ser o fator dominante, e o ganho de
+elasticidade e custo passou a pesar mais.
+
+<Callout tipo="atencao" titulo="Não diga que o Hadoop morreu">
+O que perdeu espaço foi o HDFS como armazenamento primário. O modelo de
+processamento distribuído, o metastore do Hive e a ideia de gerenciador de
+recursos continuam vivos no que se usa hoje. E há casos válidos de HDFS: cluster
+on-premises já pago, restrição regulatória de residência do dado e armazenamento
+temporário de estágio intermediário dentro de um cluster.
+</Callout>
+
+## Como responder isso em voz alta
+
+Comece pela premissa — hardware comum, falha como rotina — porque ela explica
+todo o resto. Descreva HDFS e YARN separando quem cuida de dado de quem cuida de
+recurso. Justifique a replicação contra falha de nó e de rack, contrastando com
+RAID. E feche com a separação de armazenamento e computação, dizendo onde o HDFS
+ainda se justifica. Reconhecer o caso que continua válido é o que transforma a
+resposta em julgamento, não em opinião de moda.

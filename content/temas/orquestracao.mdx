@@ -1,0 +1,287 @@
+---
+slug: orquestracao
+titulo: "Orquestração de pipelines"
+resumo: "Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura."
+minutos: 35
+nivel: intermediario
+porQue: "Sabatina de engenharia de dados quase sempre entra em falha e reprocessamento, porque é lá que o candidato mostra se já operou pipeline em produção. Quem só sabe desenhar o fluxo feliz trava na primeira pergunta sobre retry duplicando lançamento."
+comoCai: "Seu pipeline diário falhou às 3h e rodou de novo às 6h. O que precisa ser verdade para isso não duplicar dados?"
+feynman: "Explique para o gerente de operações por que o time precisa de um orquestrador, se o cron do servidor já dispara os scripts todo dia às 2h."
+preRequisitos:
+  - batch-vs-stream
+  - etl-vs-elt
+errosComuns:
+  - "Colocar o processamento pesado dentro da task do Airflow. O orquestrador vira gargalo e ponto único de falha; o certo é ele disparar o job no Databricks ou no EMR e acompanhar o estado."
+  - "Encadear pipelines por horário em vez de por sinal. Se o upstream atrasa 20 minutos, o downstream lê dado incompleto e ninguém percebe até o relatório sair errado."
+  - "Escrever task não idempotente. Qualquer retry, backfill ou clique em rerun duplica dado, e retry é justamente o que o orquestrador faz sozinho de madrugada."
+  - "Configurar retry infinito ou sem backoff. Se a origem caiu, martelar a cada 30 segundos derruba de vez e ainda esconde o incidente atrás de uma task que fica amarela para sempre."
+  - "Tratar SLA como enfeite. Sem prazo declarado, o pipeline que travou às 2h só é descoberto às 9h pelo usuário do relatório, e aí o custo já é reputacional."
+  - "Confundir data lógica da execução com a hora do relógio. Se a task usa current_date em vez da data da janela, o backfill de ontem grava tudo com a data de hoje."
+preTeste:
+  - enunciado: "O que torna uma task de pipeline segura para ser reexecutada automaticamente?"
+    alternativas:
+      - texto: "Ela ser rápida o bastante para caber na janela de retry."
+        correta: false
+        explicacao: "Velocidade não tem relação com segurança de reexecução. Uma task rápida e não idempotente duplica dado igual."
+      - texto: "Ela produzir o mesmo resultado final rodando uma ou várias vezes sobre a mesma janela."
+        correta: true
+        explicacao: "Essa é a definição de idempotência, e é o que permite ao orquestrador tentar de novo sem pedir autorização humana."
+      - texto: "Ela gravar um log de auditoria em cada execução."
+        correta: false
+        explicacao: "Log ajuda a investigar depois, mas não impede a segunda execução de duplicar as linhas."
+  - enunciado: "Uma DAG diária de conciliação de PIX depende do arquivo do parceiro, que costuma chegar às 4h mas às vezes atrasa. Qual desenho é o correto?"
+    alternativas:
+      - texto: "Agendar a DAG para 5h, com uma folga de uma hora sobre o horário habitual."
+        correta: false
+        explicacao: "Dependência por horário é aposta. No dia em que o arquivo chegar às 5h10, a DAG processa o arquivo de ontem ou nada."
+      - texto: "Usar um sensor que espera o arquivo aparecer, com timeout e alerta se estourar."
+        correta: true
+        explicacao: "Dependência por sinal. O pipeline só anda quando o insumo existe, e o timeout transforma o atraso em alerta em vez de dado errado."
+      - texto: "Rodar a DAG de hora em hora e deixar que ela ignore quando não achar o arquivo."
+        correta: false
+        explicacao: "Gasta recurso, polui o histórico de execuções e ainda dificulta distinguir uma falha real de uma execução vazia."
+videos:
+  - id: bPbvebNf4jo
+    titulo: "7 Motivos para você usar o Apache Airflow nos seus Data Pipelines."
+    canal: "Stack"
+    duracao: 14
+    porQue: "Vai direto ao ponto que a banca cobra primeiro: qual problema o orquestrador resolve que o cron não resolve. Anote os motivos que você conseguiria defender com um exemplo bancário próprio."
+  - id: qiGLGU-VY0s
+    titulo: "Como criar uma DAG no [AIRFLOW]?"
+    canal: "Wallace Camargo"
+    duracao: 16
+    porQue: "Mostra a DAG sendo escrita, então você associa nome a coisa: operator, dependência entre tasks e agendamento. Repare em onde o código coloca a lógica de negócio."
+artigos:
+  - titulo: "Dags — conceitos centrais do Airflow"
+    url: "https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dags.html"
+    fonte: "Apache Airflow"
+  - titulo: "Best Practices do Apache Airflow"
+    url: "https://airflow.apache.org/docs/apache-airflow/stable/best-practices.html"
+    fonte: "Apache Airflow"
+  - titulo: "Jobs e Workflows no Databricks"
+    url: "https://docs.databricks.com/aws/en/jobs/"
+    fonte: "Databricks"
+  - titulo: "O que é o AWS Step Functions"
+    url: "https://docs.aws.amazon.com/pt_br/step-functions/latest/dg/welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que um orquestrador resolve?"
+    verso: "Dependência entre etapas, ordem de execução, retry em caso de falha, agendamento e visibilidade do estado. Ele coordena o trabalho; quem processa é o motor."
+  - frente: "O que é uma DAG?"
+    verso: "Grafo dirigido acíclico: as tasks e as dependências entre elas, sem ciclo. É a declaração de o que roda depois de o que, não o código do processamento."
+  - frente: "Diferença entre operator e sensor no Airflow"
+    verso: "Operator executa uma ação (chamar um job, rodar SQL, mover arquivo). Sensor espera uma condição virar verdadeira (arquivo chegou, partição existe) antes de liberar o fluxo."
+  - frente: "O que faz o scheduler do Airflow?"
+    verso: "Lê as DAGs, decide quais task instances estão prontas segundo agendamento e dependências, e as coloca na fila. Ele decide o que rodar, não roda."
+  - frente: "O que faz o executor do Airflow?"
+    verso: "Define onde e como a task enfileirada é executada: no mesmo processo, em processos locais, em workers Celery ou em pods Kubernetes."
+  - frente: "Defina idempotência em uma frase"
+    verso: "Rodar a mesma task sobre a mesma janela uma ou dez vezes deixa o destino no mesmo estado final."
+  - frente: "Como tornar idempotente uma carga diária de transações?"
+    verso: "Sobrescrever a partição da data processada em vez de dar append, ou usar MERGE por chave de negócio. Nunca insert cego."
+  - frente: "Por que retry precisa de backoff?"
+    verso: "Porque a causa mais comum de falha é indisponibilidade temporária. Tentar de novo imediatamente e sem espaçamento pressiona um sistema já degradado e transforma incidente pequeno em queda."
+  - frente: "O que é backfill?"
+    verso: "Reexecutar o pipeline para janelas passadas, seja porque falhou, seja porque a regra mudou. Só é seguro se a task for idempotente e parametrizada pela data da janela."
+  - frente: "Por que usar a data lógica da execução e não current_date?"
+    verso: "Porque no backfill o relógio é hoje, mas a janela é de meses atrás. Quem usa current_date grava todo o histórico reprocessado com a data errada."
+  - frente: "O que é SLA num pipeline?"
+    verso: "O prazo declarado para a entrega estar pronta. Ele transforma atraso em alerta acionável em vez de descoberta pelo usuário do relatório."
+  - frente: "Dependência por sinal versus por horário"
+    verso: "Por sinal, o downstream espera o upstream anunciar que terminou (sensor, trigger, evento). Por horário, ele aposta que o upstream terminou. A aposta falha no dia de pico."
+  - frente: "Airflow, Databricks Workflows e Step Functions: escolha rápida"
+    verso: "Airflow quando o fluxo cruza muitos sistemas e você quer código Python versionado. Databricks Workflows quando quase tudo é job de notebook ou Spark na própria plataforma. Step Functions quando o fluxo é feito de serviços AWS e você quer serverless sem cluster de controle."
+  - frente: "Por que não colocar o processamento dentro da task?"
+    verso: "Porque o worker do orquestrador não escala como cluster de dados, vira ponto único de falha e mistura a responsabilidade de coordenar com a de calcular."
+drills:
+  - titulo: "Ache o defeito na DAG"
+    instrucao: "Cada item descreve uma DAG real. Diga qual é o defeito principal antes de abrir a resposta. Use exatamente uma das categorias."
+    opcoes: ["Task não idempotente", "Dependência por horário", "DAG que processa", "Sem retry ou alerta"]
+    itens:
+      - enunciado: "A DAG de extrato lê o CSV do dia e faz INSERT INTO na tabela de destino, sem chave nem deduplicação."
+        resposta: "Task não idempotente"
+        explicacao: "Qualquer retry ou rerun grava as linhas de novo. O conserto é sobrescrever a partição do dia ou usar MERGE por identificador da transação."
+      - enunciado: "A DAG de fraude roda às 6h porque a DAG de cartão costuma terminar às 5h40."
+        resposta: "Dependência por horário"
+        explicacao: "No dia em que o cartão atrasar, a fraude roda sobre dado incompleto. Amarre por sensor de partição ou por trigger explícito do upstream."
+      - enunciado: "A task de agregação de PIX carrega 400 GB em pandas dentro do worker do Airflow e escreve o resultado no S3."
+        resposta: "DAG que processa"
+        explicacao: "O orquestrador virou motor de processamento. A task deveria submeter um job Spark e apenas acompanhar o estado."
+      - enunciado: "A DAG de cadastro tem retries igual a zero e nenhuma notificação configurada; quando falha, ninguém sabe até alguém abrir a interface."
+        resposta: "Sem retry ou alerta"
+        explicacao: "Falha transitória vira incidente manual, e a descoberta é por acaso. Configure retry com backoff e alerta em callback de falha e em SLA estourado."
+      - enunciado: "A task de reprocessamento usa current_date para montar o caminho de escrita no lake."
+        resposta: "Task não idempotente"
+        explicacao: "No backfill de janeiro, ela grava tudo na pasta de hoje. Parametrize pela data lógica da execução para que a mesma janela sempre caia no mesmo lugar."
+  - titulo: "É idempotente?"
+    instrucao: "Para cada operação de escrita, decida se rodar duas vezes sobre a mesma janela deixa o destino igual."
+    opcoes: ["Idempotente", "Não idempotente"]
+    itens:
+      - enunciado: "INSERT das transações de cartão do dia numa tabela sem chave."
+        resposta: "Não idempotente"
+        explicacao: "Cada execução acrescenta o lote inteiro de novo."
+      - enunciado: "Sobrescrever a partição data_ref igual a 2026-03-11 com o resultado recalculado."
+        resposta: "Idempotente"
+        explicacao: "O estado final da partição depende só do insumo daquela janela, não de quantas vezes rodou."
+      - enunciado: "MERGE por id_transacao atualizando quando existe e inserindo quando não existe."
+        resposta: "Idempotente"
+        explicacao: "A chave de negócio garante convergência para o mesmo estado."
+      - enunciado: "UPDATE saldo igual a saldo mais valor para cada linha do arquivo do dia."
+        resposta: "Não idempotente"
+        explicacao: "Incremento acumula. Na segunda execução o saldo dobra o movimento do dia."
+      - enunciado: "Copiar o arquivo bruto do parceiro para a zona raw usando o nome original como destino."
+        resposta: "Idempotente"
+        explicacao: "A segunda cópia sobrescreve o mesmo objeto com o mesmo conteúdo."
+perguntas:
+  - tipo: oral
+    enunciado: "Seu pipeline diário de conciliação falhou às 3h e o orquestrador rodou de novo às 6h. O que precisa ser verdade para isso não duplicar dados?"
+    respostaModelo: "Precisa que a task seja idempotente: rodar a mesma janela duas vezes tem que deixar o destino no mesmo estado. Na prática eu garanto isso de duas formas. A escrita é por sobrescrita da partição da data de referência, ou é um MERGE pela chave de negócio, como o identificador da transação. Nunca insert cego. Além disso, a task tem que ser parametrizada pela data lógica da execução, não por current_date, senão o retry das 6h escreveria no lugar errado. E a etapa anterior precisa ser repetível também: se ela consome de uma fila e dá commit do offset antes de gravar, o retry perde dado em vez de duplicar. O trade-off do MERGE é custo, porque ele lê o destino; a sobrescrita de partição é mais barata, mas só serve quando a janela é fechada e o dado atrasado é tratado à parte."
+    rubrica:
+      - "Nomeou idempotência e definiu como mesmo estado final após execuções repetidas"
+      - "Citou sobrescrita de partição ou MERGE por chave de negócio como mecanismo concreto"
+      - "Apontou o uso da data lógica da execução em vez da data do relógio"
+      - "Mencionou o trade-off entre custo do MERGE e limitação da sobrescrita de partição"
+  - tipo: oral
+    enunciado: "Um time diz que não precisa de orquestrador porque o cron do servidor já dispara os scripts na ordem certa. Como você responde?"
+    respostaModelo: "Eu perguntaria o que acontece quando o segundo script começa e o primeiro ainda não terminou. Com cron a ordem é uma aposta de horário; com orquestrador ela é uma dependência declarada, e o downstream só sai quando o upstream sinaliza sucesso. Depois eu perguntaria como o time descobre uma falha às 3h da manhã. Cron manda e-mail de erro no melhor caso; o orquestrador tem retry com backoff, alerta por SLA e histórico de execução por janela, que é o que permite reprocessar março inteiro sem editar script. Também vale citar visibilidade: numa auditoria, mostrar qual janela rodou, quando e com qual código é requisito, não conforto. Se o fluxo é um script só, sem dependência e sem reprocessamento, cron resolve mesmo e eu não trocaria. A complexidade do orquestrador se paga quando existem dependências e prazo."
+    rubrica:
+      - "Contrastou dependência declarada com dependência por horário"
+      - "Citou retry, alerta e histórico por janela como ganhos operacionais"
+      - "Ligou visibilidade a auditoria ou rastreabilidade"
+      - "Admitiu o caso em que cron é suficiente, com critério explícito"
+  - tipo: unica
+    enunciado: "Qual afirmação descreve corretamente a divisão de papéis entre scheduler e executor no Airflow?"
+    alternativas:
+      - texto: "O scheduler decide quais tasks estão prontas e as enfileira; o executor determina onde e como cada task enfileirada roda."
+        correta: true
+        explicacao: "Separar decisão de execução é o que permite trocar de executor sem reescrever DAG."
+      - texto: "O scheduler executa as tasks leves e o executor executa as pesadas."
+        correta: false
+        explicacao: "A divisão não é por peso da task; o scheduler não executa trabalho de usuário."
+      - texto: "O executor lê os arquivos de DAG e monta o grafo de dependências."
+        correta: false
+        explicacao: "Interpretar as DAGs e resolver dependências é papel do scheduler."
+      - texto: "Scheduler e executor são nomes diferentes para o mesmo componente."
+        correta: false
+        explicacao: "São componentes distintos, e a escolha do executor muda a topologia do cluster."
+  - tipo: multipla
+    enunciado: "Quais práticas tornam um pipeline diário seguro para reexecução automática?"
+    alternativas:
+      - texto: "Parametrizar a task pela data lógica da janela processada."
+        correta: true
+        explicacao: "Sem isso, retry e backfill escrevem no lugar errado."
+      - texto: "Escrever por sobrescrita de partição ou por MERGE com chave de negócio."
+        correta: true
+        explicacao: "São as duas formas usuais de garantir convergência para o mesmo estado."
+      - texto: "Configurar retry com backoff e um número máximo de tentativas."
+        correta: true
+        explicacao: "Cobre falha transitória sem martelar a origem nem esconder falha permanente."
+      - texto: "Aumentar o intervalo do agendamento para reduzir a chance de sobreposição."
+        correta: false
+        explicacao: "Reduz a frequência do sintoma, não trata a causa. A task continua duplicando quando rodar duas vezes."
+      - texto: "Guardar log detalhado de cada execução."
+        correta: false
+        explicacao: "Log é para diagnóstico. Ele não impede a duplicação, só ajuda a explicá-la depois."
+---
+
+## Em uma frase
+
+Orquestrador é o componente que decide **o que roda, em que ordem, quando e o que
+fazer quando falha** — e que não deve, ele mesmo, processar o dado.
+
+## O que ele resolve
+
+Cinco problemas, sempre os mesmos:
+
+<Passos itens={[
+  "Dependência: a agregação de fraude só pode começar depois que a carga de cartão terminou",
+  "Ordem: o grafo declara a sequência, em vez de deixá-la implícita em horários",
+  "Retry: falha transitória de rede não pode virar chamado às 3h da manhã",
+  "Agendamento: por relógio, por evento ou por chegada de dado",
+  "Visibilidade: qual janela rodou, quando, com qual duração e qual resultado"
+]} />
+
+Cron entrega só o quarto item. Todo o resto vira gambiarra em shell script.
+
+## Airflow em cinco peças
+
+Uma **DAG** é o grafo dirigido acíclico das tasks e das dependências entre elas.
+Ela declara o fluxo; não é o lugar do processamento.
+
+Um **operator** é o molde de uma task que executa uma ação: submeter um job no
+Databricks, rodar um SQL, chamar uma API. Um **sensor** é uma task que espera uma
+condição — arquivo do parceiro no S3, partição criada, tabela liberada.
+
+O **scheduler** lê as DAGs, calcula quais task instances estão prontas e as
+enfileira. O **executor** define onde a task enfileirada roda: processos locais,
+workers Celery ou pods Kubernetes.
+
+<Callout tipo="dica" titulo="Frase que fecha a pergunta">
+Scheduler decide, executor executa, operator descreve a ação, sensor descreve a
+espera, DAG descreve a ordem.
+</Callout>
+
+## Idempotência é o requisito número um
+
+<Termo nome="idempotência">Rodar a mesma task sobre a mesma janela uma ou várias vezes deixa o destino no mesmo estado final.</Termo>
+
+Por que é o mais importante: o orquestrador **vai** reexecutar. É o que ele faz de
+madrugada, sozinho, sem perguntar. Se a task não for idempotente, a
+funcionalidade que existe para dar resiliência passa a ser a maior fonte de dado
+duplicado do lake.
+
+Duas receitas práticas:
+
+- **Sobrescrever a partição** da data de referência em vez de dar append. Barato,
+  mas exige janela fechada.
+- **MERGE pela chave de negócio** (identificador da transação, por exemplo).
+  Aguenta dado atrasado e correção, mas lê o destino, então custa mais.
+
+E o detalhe que derruba backfill: parametrize sempre pela **data lógica da
+execução**, nunca por `current_date`. No reprocessamento de janeiro, o relógio
+marca hoje.
+
+## Retry, backoff e backfill
+
+Retry cobre falha transitória: rede, throttling, cluster subindo. Sem **backoff**,
+tentar de novo a cada 30 segundos pressiona uma origem já degradada. Com número
+máximo de tentativas, falha permanente para de se disfarçar de amarelo eterno.
+
+**Backfill** é reexecutar janelas passadas — porque falhou ou porque a regra
+mudou. Reprocessar seis meses de extrato só é operação de rotina se cada janela
+for independente e idempotente. Caso contrário é projeto.
+
+## SLA e alerta
+
+SLA é o prazo declarado da entrega. Sem ele, o pipeline travado às 2h é
+descoberto às 9h pelo usuário do relatório regulatório. Alerta útil dispara em
+dois eventos: falha da task e SLA estourado — este último pega o pipeline que
+está rodando, mas devagar demais.
+
+## Anti-padrões
+
+<Comparativo
+  colunas={["Anti-padrão", "Por que quebra", "O que fazer"]}
+  linhas={[
+    ["DAG que processa o dado", "Worker do orquestrador não escala e vira ponto único de falha", "Task submete job no Databricks ou EMR e acompanha o estado"],
+    ["Dependência por horário", "No dia de pico o upstream atrasa e o downstream lê dado incompleto", "Sensor de partição, trigger do upstream ou evento"],
+    ["Task não idempotente", "Retry automático duplica lançamento", "Sobrescrita de partição ou MERGE por chave"],
+    ["Retry sem backoff nem limite", "Derruba origem degradada e esconde falha permanente", "Backoff exponencial com tentativas máximas"]
+  ]}
+/>
+
+## Airflow, Databricks Workflows e Step Functions
+
+<Comparativo
+  colunas={["Ferramenta", "Onde brilha", "Custo de escolher"]}
+  linhas={[
+    ["Airflow", "Fluxo que cruza muitos sistemas; DAG em Python versionada; ecossistema grande de operators", "Você opera o cluster de controle: scheduler, banco de metadados, workers"],
+    ["Databricks Workflows", "Quase tudo é notebook ou job Spark na própria plataforma; integra com Unity Catalog e cluster job", "Fica preso ao perímetro Databricks quando o fluxo puxa serviços de fora"],
+    ["AWS Step Functions", "Fluxo feito de serviços AWS, serverless, com máquina de estados e retry declarativos", "Orquestração fica em JSON e a lógica se espalha entre estados e Lambdas"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Onde a banca aperta">
+A pergunta raramente é qual ferramenta é melhor. É por que a sua escolha não vai
+duplicar dado no retry e como você descobre a falha antes do usuário.
+</Callout>

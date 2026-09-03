@@ -1,0 +1,221 @@
+---
+slug: big-data
+titulo: "O que é Big Data"
+resumo: "Big Data não é um volume de dados nem uma ferramenta: é a situação em que volume, velocidade e variedade quebram a abordagem tradicional de um banco só. Os 3 Vs, os 2 que vieram depois e quando o rótulo não se aplica."
+minutos: 25
+nivel: fundamental
+porQue: "É a primeira pergunta de quase toda sabatina e serve de termômetro. Quem responde só 'muitos dados' entrega que decorou; quem separa o problema da ferramenta mostra que entende por que a arquitetura mudou."
+comoCai: "Todo problema com muitos dados é um problema de Big Data?"
+feynman: "Explique para um gerente por que o banco não resolve o relatório de fraude só comprando um servidor maior."
+preRequisitos: []
+errosComuns:
+  - "Tratar Big Data como sinônimo de Hadoop ou Spark. Os Vs descrevem o problema; a ferramenta é a resposta, e ela muda com a década."
+  - "Achar que volume sozinho define Big Data. Um terabyte parado num arquivo é só um arquivo grande; o que quebra é volume com velocidade e variedade juntos."
+  - "Esquecer veracidade e valor. São os dois Vs que ligam a discussão técnica ao negócio, e é neles que a banca separa quem já trabalhou com dado sujo."
+  - "Usar arquitetura distribuída onde um Postgres bem indexado resolveria. Custo e complexidade sobem, e a banca pergunta justamente isso."
+preTeste:
+  - enunciado: "Uma tabela de 800 GB de transações consultada uma vez por mês para fechar o balanço. É um caso de Big Data?"
+    alternativas:
+      - texto: "Sim, pelo volume: acima de centenas de gigabytes já é Big Data."
+        correta: false
+        explicacao: "Volume sozinho não define. Um banco relacional bem modelado e particionado dá conta de 800 GB em consulta mensal."
+      - texto: "Não necessariamente: falta velocidade e variedade, e a carga é previsível."
+        correta: true
+        explicacao: "Os Vs andam juntos. Dado volumoso, estruturado e consultado em lote raro é problema de engenharia tradicional."
+      - texto: "Sim, porque transação financeira é sempre Big Data."
+        correta: false
+        explicacao: "O domínio não define a categoria. O que define é o perfil de volume, velocidade e variedade da carga."
+  - enunciado: "Qual par de Vs foi acrescentado aos três originais?"
+    alternativas:
+      - texto: "Veracidade e valor"
+        correta: true
+        explicacao: "Veracidade trata da confiabilidade do dado; valor, do retorno que ele gera. São os dois que ligam a técnica ao negócio."
+      - texto: "Volatilidade e visibilidade"
+        correta: false
+        explicacao: "Aparecem em algumas listas de mercado, mas não são o par consagrado."
+      - texto: "Validação e versionamento"
+        correta: false
+        explicacao: "São práticas de engenharia, não Vs do conceito."
+videos:
+  - id: eSJYmuvQQw4
+    titulo: "Você REALMENTE sabe o que significa Big Data?"
+    canal: "Meigarom | Comunidade DS"
+    duracao: 22
+    porQue: "Ataca justamente a confusão entre volume e Big Data, que é o erro que a banca procura. Assista pensando em como você defenderia a diferença em voz alta."
+  - id: Zif74kxaPy8
+    titulo: "O Que É Big Data - A Revolução Dos Dados Que Está Moldando Nosso Futuro"
+    canal: "Celso Kitamura | Mentor de Programadores"
+    duracao: 7
+    porQue: "Versão curta, boa para revisar na véspera ou se o primeiro vídeo já cobriu o que você precisava."
+artigos:
+  - titulo: "Big Data: o que é, conceito e definição"
+    url: "https://cetax.com.br/big-data/"
+    fonte: "Cetax"
+  - titulo: "Big Data: o que é e por que importa"
+    url: "https://www.sas.com/pt_pt/insights/big-data/what-is-big-data.html"
+    fonte: "SAS"
+flashcards:
+  - frente: "Quais são os 3 Vs originais do Big Data?"
+    verso: "Volume, velocidade e variedade. Descrevem o problema, não a ferramenta."
+  - frente: "O que o V de veracidade endereça?"
+    verso: "A confiabilidade do dado: origem conhecida, duplicidade, valores faltando, medição errada. Sem veracidade, mais dado só produz decisão errada mais rápido."
+  - frente: "O que o V de valor endereça?"
+    verso: "O retorno que o dado gera. Guardar tudo custa; o que não vira decisão é passivo, não ativo."
+  - frente: "Velocidade em Big Data significa o quê, exatamente?"
+    verso: "A taxa em que o dado chega e o prazo em que ele precisa ser processado para ainda ser útil. Fraude em tempo real e balanço mensal têm velocidades opostas."
+  - frente: "Variedade em Big Data significa o quê?"
+    verso: "Formatos e origens diferentes no mesmo problema: tabela do core bancário, JSON de API, log de aplicação, PDF, áudio de call center."
+  - frente: "Big Data é a mesma coisa que Hadoop?"
+    verso: "Não. Hadoop foi uma resposta ao problema, popular nos anos 2010. O problema continua; a resposta hoje é object storage com Spark e formatos de tabela."
+  - frente: "Quando NÃO usar arquitetura distribuída?"
+    verso: "Quando um banco relacional bem modelado, indexado e particionado atende a carga. Distribuído cobra em custo, latência de desenvolvimento e complexidade operacional."
+  - frente: "Por que escalar verticalmente para de resolver?"
+    verso: "Porque existe um teto físico e de preço por máquina, e ele cresce mais rápido que a capacidade. Escalar horizontalmente troca uma máquina grande por muitas comuns."
+  - frente: "Dê um exemplo bancário de alta velocidade."
+    verso: "Autorização de cartão e detecção de fraude: a decisão precisa sair em milissegundos, enquanto a transação ainda está aberta."
+  - frente: "Dê um exemplo bancário de alta variedade."
+    verso: "Visão 360 do cliente: cadastro relacional, transações, cliques no app, áudio de atendimento e documentos digitalizados no mesmo caso de uso."
+drills:
+  - titulo: "É Big Data ou é engenharia tradicional?"
+    instrucao: "Para cada cenário, decida se o perfil de carga exige arquitetura distribuída ou se um banco relacional bem cuidado resolve. Responda antes de abrir a resposta."
+    opcoes: ["Distribuído", "Relacional"]
+    itens:
+      - enunciado: "Relatório regulatório mensal sobre 900 GB de transações estruturadas."
+        resposta: "Relacional"
+        explicacao: "Volume alto, mas estruturado, previsível e sem pressa. Particionamento por data resolve."
+      - enunciado: "Score de fraude em cada autorização de cartão, com resposta em até 200 ms, sobre 40 mil eventos por segundo no pico."
+        resposta: "Distribuído"
+        explicacao: "Velocidade e vazão inviabilizam consulta transacional; pede processamento de stream."
+      - enunciado: "Visão única do cliente juntando cadastro, cliques no app, áudio de call center e documentos digitalizados."
+        resposta: "Distribuído"
+        explicacao: "Variedade é o V dominante: formatos que não cabem no mesmo schema relacional."
+      - enunciado: "Cadastro de 12 milhões de clientes consultado por CPF pelo aplicativo."
+        resposta: "Relacional"
+        explicacao: "Consulta por chave em volume moderado é exatamente o que um índice relacional faz melhor."
+      - enunciado: "Reprocessar 6 anos de extratos para recalcular um indicador depois de mudar a regra."
+        resposta: "Distribuído"
+        explicacao: "Volume histórico com janela de reprocessamento curta favorece processamento paralelo em lote."
+perguntas:
+  - tipo: oral
+    enunciado: "O que é Big Data e por que o termo existe, se bancos já lidavam com muitos dados há décadas?"
+    respostaModelo: "Big Data é o conjunto de situações em que volume, velocidade e variedade dos dados, juntos, quebram a abordagem de um banco relacional único. O termo existe porque a resposta clássica, comprar uma máquina maior, parou de escalar em custo e em teto físico, e porque passaram a chegar dados que não cabem num schema fixo, como log, JSON e áudio. A virada foi passar a distribuir armazenamento e processamento por muitas máquinas comuns. Hoje eu acrescentaria veracidade, que trata da confiabilidade do dado, e valor, que cobra retorno de tudo que a gente guarda. Na prática, no banco, isso aparece quando o caso de uso mistura transação estruturada com clique de app e áudio de atendimento, e ainda precisa de resposta rápida."
+    rubrica:
+      - "Definiu Big Data como característica do problema, não como ferramenta"
+      - "Citou os 3 Vs e explicou cada um com uma frase própria"
+      - "Explicou por que escalar verticalmente parou de resolver"
+      - "Acrescentou veracidade e valor ligando ao negócio"
+      - "Deu um exemplo concreto do contexto bancário"
+  - tipo: oral
+    enunciado: "Um time quer montar um cluster Spark para processar 200 GB de dados estruturados que hoje rodam num Postgres em 15 minutos. O que você diria?"
+    respostaModelo: "Eu começaria perguntando qual é a dor real, porque 15 minutos em 200 GB estruturados não é um problema de escala. Se a dor é o tempo, olho primeiro índice, plano de execução e particionamento por data, que costumam render mais que trocar de motor. Se a dor é concorrência com a carga transacional, a resposta é separar o analítico do OLTP, com réplica ou uma cópia em um data warehouse, e não necessariamente distribuído. Um cluster traria custo fixo, complexidade operacional e uma curva de aprendizado que não se paga nesse volume. Eu só recomendaria distribuído se houvesse crescimento projetado forte, chegada de dado semiestruturado ou necessidade de reprocessar histórico grande em janela curta, e diria isso com número, não com opinião."
+    rubrica:
+      - "Questionou o problema antes de aceitar a solução proposta"
+      - "Ofereceu alternativas mais baratas: índice, plano, particionamento, separar OLTP de OLAP"
+      - "Nomeou os custos de adotar distribuído sem necessidade"
+      - "Disse em que condição mudaria de ideia, com critério verificável"
+  - tipo: unica
+    enunciado: "Qual afirmação descreve melhor a relação entre Big Data e Hadoop?"
+    alternativas:
+      - texto: "Hadoop é a implementação de referência de Big Data e continua sendo o padrão de mercado."
+        correta: false
+        explicacao: "Hadoop foi dominante nos anos 2010, mas perdeu espaço para object storage com Spark e formatos de tabela."
+      - texto: "Big Data descreve um tipo de problema; Hadoop foi uma das respostas tecnológicas a ele."
+        correta: true
+        explicacao: "Separar problema de ferramenta é exatamente o que a banca quer ouvir."
+      - texto: "São sinônimos: todo pipeline Hadoop é Big Data e vice-versa."
+        correta: false
+        explicacao: "Dá para rodar Hadoop em dado pequeno e resolver Big Data sem Hadoop."
+      - texto: "Hadoop resolve volume; Big Data trata apenas de velocidade."
+        correta: false
+        explicacao: "Big Data cobre volume, velocidade e variedade juntos."
+  - tipo: multipla
+    enunciado: "Quais sinais, em conjunto, sugerem que um caso de uso pede arquitetura distribuída?"
+    alternativas:
+      - texto: "Dados chegam continuamente e a decisão precisa sair em segundos."
+        correta: true
+        explicacao: "Velocidade alta com prazo curto é um dos gatilhos clássicos."
+      - texto: "Formatos diferentes precisam ser combinados no mesmo caso de uso."
+        correta: true
+        explicacao: "Variedade é o V que mais empurra para armazenamento de objetos e schema flexível."
+      - texto: "O volume cresce a ponto de o reprocessamento não caber na janela disponível."
+        correta: true
+        explicacao: "Quando a janela de processamento estoura, paralelizar deixa de ser luxo."
+      - texto: "A tabela passou de 100 GB."
+        correta: false
+        explicacao: "Tamanho isolado não é gatilho; muita coisa de centenas de gigabytes vive bem em relacional."
+      - texto: "O time quer aprender uma tecnologia nova."
+        correta: false
+        explicacao: "Motivação de currículo não é critério de arquitetura, e a banca costuma testar isso."
+---
+
+## Em uma frase
+
+Big Data é a situação em que **volume, velocidade e variedade** de dados, juntos,
+quebram a abordagem de resolver tudo em um banco relacional só.
+
+## O termo descreve um problema, não um produto
+
+Essa é a distinção que separa quem decorou de quem entendeu. Ninguém "compra Big
+Data". O que existe é um perfil de carga que a arquitetura tradicional não
+atende, e um conjunto de respostas que mudou ao longo do tempo: primeiro Hadoop
+com HDFS e MapReduce, depois armazenamento de objetos com Spark, hoje formatos
+de tabela como Delta e Iceberg por cima.
+
+Se a sua definição de Big Data cita uma ferramenta, ela envelhece junto com a
+ferramenta. Se cita o perfil do problema, ela continua válida.
+
+## Os três Vs originais
+
+<Comparativo
+  colunas={["V", "O que mede", "Exemplo no banco"]}
+  linhas={[
+    ["Volume", "Quantidade de dados em repouso e por janela de processamento", "Seis anos de extratos que precisam ser recalculados quando uma regra muda"],
+    ["Velocidade", "Taxa de chegada e prazo para o dado ainda ser útil", "Autorização de cartão: decisão de fraude em milissegundos"],
+    ["Variedade", "Formatos e origens diferentes no mesmo caso de uso", "Cadastro relacional, clique no app, áudio de call center e PDF"]
+  ]}
+/>
+
+Repare que os três aparecem **juntos** nos casos difíceis. Volume sozinho é um
+arquivo grande. Velocidade sozinha é uma fila. Variedade sozinha é um problema de
+parsing. O que estoura a arquitetura é a combinação.
+
+## Os dois Vs que vieram depois
+
+**Veracidade** é a confiabilidade do dado: de onde veio, se está duplicado, se
+tem valores faltando, se a medição está certa. Sem veracidade, mais dado só
+produz decisão errada mais rápido. É o V que conversa direto com o módulo de
+qualidade de dados.
+
+**Valor** cobra retorno. Guardar custa dinheiro todo mês, e dado que nunca vira
+decisão é passivo, não ativo. Em banco isso também tem lado regulatório: guardar
+dado pessoal sem finalidade é risco de LGPD, não é precaução.
+
+<Callout tipo="atencao" titulo="Onde a banca aperta">
+Muitos candidatos param nos 3 Vs. Acrescentar veracidade e valor, e explicar por
+que eles importam para o negócio, é o que costuma diferenciar a resposta.
+</Callout>
+
+## Por que a arquitetura mudou
+
+Durante décadas a saída para "os dados cresceram" foi **escalar verticalmente**:
+comprar uma máquina maior. Isso esbarra em dois tetos. O físico, porque existe um
+limite de CPU, memória e disco por máquina. E o econômico, porque o preço do
+servidor grande cresce mais rápido que a capacidade dele.
+
+Escalar **horizontalmente** troca uma máquina cara por muitas comuns, e traz
+junto os problemas que definem a engenharia de dados moderna: como dividir o dado
+entre máquinas (particionamento), como sobreviver à falha de uma delas
+(replicação) e como coordenar o processamento (MapReduce ontem, Spark hoje).
+
+<Callout tipo="dica" titulo="Quando o rótulo não se aplica">
+Se o dado é estruturado, o volume é previsível e a consulta não tem pressa, um
+banco relacional bem modelado, indexado e particionado quase sempre ganha. Dizer
+isso na sabatina demonstra julgamento, não desconhecimento.
+</Callout>
+
+## Como responder isso em voz alta
+
+Uma estrutura que funciona: comece pela definição em uma frase, cite os três Vs
+com um exemplo cada, explique por que a escala vertical parou de resolver,
+acrescente veracidade e valor ligando ao negócio, e feche com um caso bancário
+concreto. Leva cerca de noventa segundos e cobre tudo que a rubrica procura.

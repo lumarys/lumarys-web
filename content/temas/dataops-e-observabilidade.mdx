@@ -1,0 +1,312 @@
+---
+slug: dataops-e-observabilidade
+titulo: "DataOps e observabilidade"
+resumo: "Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard."
+minutos: 35
+nivel: intermediario
+porQue: "Todo candidato sabe construir um pipeline. A banca quer saber o que acontece quando ele quebra em silêncio, que é o modo de falha mais caro em banco. Este tema separa quem entrega job de quem entrega dado confiável."
+comoCai: "Como você descobre que um pipeline entregou dado errado antes do usuário descobrir?"
+feynman: "Explique para o dono do produto de cartão, em um minuto, por que o time vai gastar duas semanas escrevendo testes de dados em vez de um relatório novo."
+preRequisitos: []
+errosComuns:
+  - "Confundir monitoramento de job com observabilidade de dado. Job verde e dado errado é o cenário mais comum: o pipeline rodou, só entregou lixo."
+  - "Testar só na camada final. Quando o erro aparece na gold, a causa já está três camadas atrás e o reprocessamento é caro."
+  - "Alertar em tudo. Alerta que dispara toda semana e ninguém investiga é ruído: treina o time a ignorar, incluindo o alerta que importava."
+  - "Achar que contrato de dados é documentação. Contrato é acordo com esquema, semântica, prazo e consequência declarada quando alguém quebra."
+  - "Reprocessar com append. Rodar o mesmo dia duas vezes e duplicar transação é o defeito mais visível de pipeline não idempotente."
+  - "Deixar CI/CD de fora porque 'não dá para testar sem dado de produção'. Dá: esquema, transformação em amostra sintética e contrato são testáveis sem tocar em PII."
+  - "Tratar linhagem como diagrama bonito. Linhagem é o que responde, às três da manhã, quais dashboards param se esta tabela estiver errada."
+preTeste:
+  - enunciado: "O job de ingestão de PIX rodou com sucesso, mas hoje trouxe 3% do volume habitual. Qual sinal de observabilidade pegaria isso?"
+    alternativas:
+      - texto: "Freshness"
+        correta: false
+        explicacao: "Freshness mede há quanto tempo o dado foi atualizado. A tabela foi atualizada no horário; o problema é quanto veio."
+      - texto: "Volume"
+        correta: true
+        explicacao: "Contagem de registros contra a faixa esperada para o dia da semana é exatamente o sinal de volume."
+      - texto: "Schema"
+        correta: false
+        explicacao: "O esquema não mudou. Um teste de esquema passaria sem reclamar."
+  - enunciado: "Qual é a diferença essencial entre um teste de dados e um alerta de observabilidade?"
+    alternativas:
+      - texto: "Teste é caro e alerta é barato."
+        correta: false
+        explicacao: "Custo não é o critério, e ambos custam manutenção."
+      - texto: "Teste afirma uma regra conhecida e falha o pipeline; observabilidade detecta desvio de comportamento sem que você tenha enunciado a regra."
+        correta: true
+        explicacao: "Teste é assertivo e determinístico; observabilidade é estatística e cobre o que você não previu."
+      - texto: "Teste roda em produção e observabilidade só em desenvolvimento."
+        correta: false
+        explicacao: "Os dois rodam em produção. Teste também roda em CI, sobre amostra."
+videos:
+  - id: ayuz-YqV3Sc
+    titulo: "Os 5 Pilares da Observabilidade dos Dados (Data Observability)"
+    canal: "Data Science Academy"
+    duracao: 5
+    porQue: "Cinco minutos que te dão o vocabulário exato para responder a pergunta-chave deste tema. Assista e depois tente listar os pilares de memória, porque é assim que a resposta oral sai organizada."
+  - id: qQTBJ9Bylrg
+    titulo: "Data Observability | Monitoração de Pipeline de dados com Grafana"
+    canal: "Meetup Engenharia de Dados"
+    duracao: 66
+    porQue: "Talk longa de engenheira de dados mostrando monitoração de pipeline na prática, em contexto de mercado financeiro. Vale assistir acelerado, procurando quais métricas ela escolheu instrumentar e por quê."
+artigos:
+  - titulo: "Add data tests to your DAG"
+    url: "https://docs.getdbt.com/docs/build/data-tests"
+    fonte: "dbt Labs"
+  - titulo: "Test data quality at scale with Deequ"
+    url: "https://aws.amazon.com/blogs/big-data/test-data-quality-at-scale-with-deequ/"
+    fonte: "AWS Big Data Blog"
+  - titulo: "Lineage in Unity Catalog"
+    url: "https://docs.databricks.com/aws/en/data-governance/unity-catalog/data-lineage"
+    fonte: "Databricks"
+flashcards:
+  - frente: "O que muda ao tratar pipeline como software?"
+    verso: "Código versionado, revisão por par, teste automatizado, ambientes separados, deploy reproduzível e rollback. O que era script no notebook vira artefato com ciclo de vida."
+  - frente: "Quais são os seis tipos de teste de dados que você deve citar?"
+    verso: "Esquema, volume, nulos, domínio, unicidade e integridade referencial. Cobrem a maioria dos defeitos reais de ingestão."
+  - frente: "Great Expectations, em uma frase."
+    verso: "Biblioteca Python em que você declara expectativas sobre a tabela, roda contra Spark ou pandas e recebe um relatório do que passou e do que falhou."
+  - frente: "dbt tests, em uma frase."
+    verso: "Asserções declaradas no YAML do modelo — unique, not_null, accepted_values, relationships — mais testes singulares escritos em SQL, executadas por dbt test."
+  - frente: "Deequ, em uma frase."
+    verso: "Biblioteca da Amazon sobre Spark que calcula métricas de qualidade e verifica restrições em escala; o AWS Glue Data Quality é a versão gerenciada dela."
+  - frente: "O que precisa estar num contrato de dados?"
+    verso: "Esquema, semântica de cada campo, granularidade, prazo de entrega, política de mudança e a consequência de quebrar. Sem consequência declarada, é documentação."
+  - frente: "Quais são os quatro sinais de observabilidade de dados?"
+    verso: "Freshness (quando atualizou), volume (quantos registros), schema (a estrutura mudou) e distribuição (os valores continuam com a cara de sempre). Muitas listas somam linhagem como quinto."
+  - frente: "Job verde e dado errado: por que acontece?"
+    verso: "Porque o monitoramento de job observa a execução, não o conteúdo. O Spark termina com sucesso lendo um arquivo vazio ou aplicando uma regra errada."
+  - frente: "O que faz um alerta ser útil?"
+    verso: "Ser acionável, ter dono, ter limiar calibrado no histórico e vir com contexto suficiente para começar a investigar. Alerta sem dono vira ruído em duas semanas."
+  - frente: "O que é reprocessamento idempotente?"
+    verso: "Rodar a mesma janela duas vezes produzir o mesmo resultado. Na prática, escrita por partição com overwrite ou MERGE por chave, nunca append cego."
+  - frente: "O que dá para testar em CI sem dado de produção?"
+    verso: "Contrato e esquema, lógica de transformação sobre amostra sintética, regras de negócio em casos de borda, e se o job sobe e roda ponta a ponta em ambiente reduzido."
+  - frente: "O que a linhagem responde na madrugada?"
+    verso: "Quais tabelas e dashboards dependem da tabela que quebrou, e de onde veio o dado que está errado. É análise de impacto e causa raiz na mesma estrutura."
+  - frente: "O que é OpenLineage?"
+    verso: "Especificação aberta para eventos de linhagem, com integrações para orquestradores e motores de processamento, para que a linhagem não fique presa a uma ferramenta só."
+  - frente: "Como se versiona dado, na prática?"
+    verso: "Formato de tabela com histórico: Delta com time travel por versão ou timestamp, Iceberg com snapshots. Permite comparar o antes e o depois e voltar atrás."
+drills:
+  - titulo: "Que teste pegaria esse defeito?"
+    instrucao: "Para cada defeito real de pipeline bancário, escolha o teste que o pega mais cedo. Responda antes de abrir."
+    opcoes: ["Esquema", "Volume", "Nulos", "Domínio", "Unicidade", "Integridade referencial"]
+    itens:
+      - enunciado: "A origem renomeou vlr_transacao para valor_transacao e a coluna sumiu na silver."
+        resposta: "Esquema"
+        explicacao: "Teste de esquema compara a estrutura recebida com a contratada e falha antes de a transformação silenciar a coluna."
+      - enunciado: "O campo tipo_operacao passou a trazer o valor PIX_AGENDADO, que nenhuma regra downstream conhece."
+        resposta: "Domínio"
+        explicacao: "Teste de domínio lista os valores aceitos. Valor novo é mudança de contrato, não dado ruim."
+      - enunciado: "A mesma transação de cartão apareceu duas vezes na fato após um reprocessamento."
+        resposta: "Unicidade"
+        explicacao: "Chave de negócio única na fato. É também o sintoma clássico de pipeline não idempotente."
+      - enunciado: "A ingestão trouxe 3% do volume habitual porque um dos arquivos de origem não chegou."
+        resposta: "Volume"
+        explicacao: "Contagem contra faixa esperada por dia da semana. Job verde, dado incompleto."
+      - enunciado: "Transações chegaram com id_cliente que não existe na dimensão de clientes."
+        resposta: "Integridade referencial"
+        explicacao: "Órfão de chave estrangeira. Se não pegar, o join descarta silenciosamente e o total fecha errado."
+      - enunciado: "O campo data_liquidacao veio vazio em 12% dos registros depois de uma mudança no core."
+        resposta: "Nulos"
+        explicacao: "Teste de nulos com limiar. Zero por cento é o alvo em campo obrigatório, mas um limiar evita alerta por um registro isolado."
+  - titulo: "Alerta útil ou ruído?"
+    instrucao: "Decida se o alerta merece existir. Se marcar ruído, diga em voz alta o que você faria no lugar dele."
+    opcoes: ["Útil", "Ruído"]
+    itens:
+      - enunciado: "A tabela de transações não é atualizada há 4 horas, contra SLA de 1 hora. Dispara para o plantão do time dono."
+        resposta: "Útil"
+        explicacao: "Acionável, tem dono, tem limiar ligado a um SLA acordado."
+      - enunciado: "Qualquer variação de mais de 1% no volume diário dispara e-mail para uma lista de trinta pessoas."
+        resposta: "Ruído"
+        explicacao: "Limiar apertado demais, sem dono e por e-mail. Calibre o limiar no histórico e dispare para um plantão."
+      - enunciado: "O job terminou com sucesso. Notificação enviada ao canal do time."
+        resposta: "Ruído"
+        explicacao: "Sucesso não é evento. Notificação de rotina treina o time a ignorar o canal onde a falha vai aparecer."
+      - enunciado: "A distribuição de valor médio da transação de cartão saiu três desvios da média das últimas oito semanas."
+        resposta: "Útil"
+        explicacao: "Sinal de distribuição com limiar estatístico. Pega erro de regra e mudança de comportamento que teste fixo não pega."
+      - enunciado: "Um teste de nulos falhou em uma coluna que é opcional por contrato e sempre teve nulos."
+        resposta: "Ruído"
+        explicacao: "O teste está errado, não o dado. Corrija a expectativa em vez de conviver com falha crônica."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você descobre que um pipeline entregou dado errado antes do usuário descobrir?"
+    respostaModelo: "Eu separo duas camadas. A primeira é teste: regras que eu conheço e que falham o pipeline antes de publicar — esquema contra o contrato, contagem contra a faixa esperada, nulos em campo obrigatório, domínio de valores, unicidade da chave de negócio e integridade com as dimensões. Rodo isso na entrada de cada camada, não só na gold, porque o custo de descobrir sobe a cada salto. A segunda camada é observabilidade, para o que eu não previ: freshness, volume, schema e distribuição monitorados contra o histórico, com limiar calibrado. Junto disso, linhagem, para saber na hora quais dashboards param se a tabela estiver errada. E um detalhe que eu faria questão de dizer: job verde não é sinal de dado certo. O trade-off é que teste demais atrasa entrega e alerta demais vira ruído, então eu começaria pelas tabelas críticas e cresceria a cobertura por criticidade, não por igualdade."
+    rubrica:
+      - "Separou teste determinístico de detecção estatística de desvio"
+      - "Citou pelo menos quatro tipos de teste de dados com exemplo"
+      - "Nomeou os sinais de observabilidade, incluindo freshness e distribuição"
+      - "Disse que job verde não significa dado correto"
+      - "Reconheceu o custo de cobertura e propôs priorizar por criticidade"
+  - tipo: oral
+    enunciado: "O time do core bancário mudou o tipo de um campo sem avisar e quebrou três pipelines seus. Como você evita que isso se repita?"
+    respostaModelo: "A resposta não é técnica sozinha, é contrato. Eu proporia um contrato de dados explícito com o time produtor: esquema versionado, semântica de cada campo, granularidade, prazo de entrega, política de mudança com aviso prévio e o que acontece quando alguém quebra. Do meu lado, implemento o contrato como teste automatizado na entrada da bronze, que falha rápido e não deixa a mudança se propagar. Para mudanças compatíveis, como coluna nova, eu deixo passar; para incompatíveis, como troca de tipo, eu paro e aviso. Em cima disso, registro linhagem para conseguir dizer ao produtor exatamente quais consumidores ele afeta, o que muda muito a conversa. O trade-off é fricção: contrato torna a evolução do produtor mais lenta, e eu reconheceria isso. Mas o custo alternativo é descobrir a quebra pelo dashboard errado do diretor."
+    rubrica:
+      - "Propôs contrato de dados com esquema, prazo e política de mudança"
+      - "Disse que o contrato precisa virar teste executável na entrada"
+      - "Distinguiu mudança compatível de incompatível"
+      - "Usou linhagem para quantificar o impacto junto ao produtor"
+      - "Admitiu a fricção que o contrato impõe ao time produtor"
+  - tipo: oral
+    enunciado: "Você precisa reprocessar 30 dias de transações de cartão porque uma regra de categorização estava errada. Como faz isso com segurança?"
+    respostaModelo: "Primeiro garanto que o pipeline é idempotente, porque reprocessar com append duplica transação. Na prática, escrevo por partição de data com overwrite dinâmico, ou uso MERGE pela chave de negócio. Segundo, versiono: com Delta eu tenho o histórico, então consigo comparar o antes e o depois e voltar atrás se o resultado sair pior. Terceiro, rodo primeiro em um ambiente separado ou em um subconjunto — um dia, uma bandeira — e comparo agregados contra a versão atual antes de liberar os 30 dias. Quarto, aviso os consumidores, porque números publicados vão mudar e alguém já fechou relatório com eles. O trade-off é tempo e custo de computação; a alternativa de corrigir só daqui para frente é mais barata, mas deixa a série histórica inconsistente. Em contexto regulatório eu não aceitaria isso sem alinhar com o dono do dado."
+    rubrica:
+      - "Colocou idempotência como pré-condição e disse como implementá-la"
+      - "Citou versionamento de tabela para comparar e reverter"
+      - "Propôs validar em subconjunto antes do reprocessamento completo"
+      - "Lembrou de comunicar consumidores sobre números que vão mudar"
+      - "Comparou com a alternativa de corrigir só daqui para frente"
+  - tipo: unica
+    enunciado: "Qual afirmação descreve melhor a relação entre monitoramento de job e observabilidade de dados?"
+    alternativas:
+      - texto: "São a mesma coisa, com nomes diferentes conforme a ferramenta."
+        correta: false
+        explicacao: "Um observa a execução, o outro o conteúdo. Confundir os dois é o erro que a banca procura."
+      - texto: "Monitoramento de job diz se a execução terminou; observabilidade de dados diz se o conteúdo entregue faz sentido."
+        correta: true
+        explicacao: "Job verde com dado errado é justamente o vão entre os dois."
+      - texto: "Observabilidade substitui monitoramento de job em plataformas modernas."
+        correta: false
+        explicacao: "Você continua precisando saber se o job caiu, quanto durou e quanto custou."
+      - texto: "Monitoramento de job cobre freshness, e observabilidade cobre apenas schema."
+        correta: false
+        explicacao: "Freshness é sinal de dado. Schema é só um dos quatro sinais."
+  - tipo: multipla
+    enunciado: "O que dá para testar em CI/CD de pipeline sem usar dado de produção?"
+    alternativas:
+      - texto: "Se o esquema de saída bate com o contrato declarado"
+        correta: true
+        explicacao: "Contrato é metadado: testável sem uma única linha real."
+      - texto: "A lógica de transformação sobre uma amostra sintética com casos de borda"
+        correta: true
+        explicacao: "Estorno, valor negativo, fuso e duplicidade cabem em fixtures escritas à mão."
+      - texto: "Se o job sobe, roda ponta a ponta e escreve no destino em ambiente reduzido"
+        correta: true
+        explicacao: "Teste de fumaça pega erro de configuração, permissão e dependência antes do deploy."
+      - texto: "Se o volume diário de transações está dentro da faixa histórica"
+        correta: false
+        explicacao: "Isso depende do dado real do dia. É verificação de produção, não de CI."
+      - texto: "Se a distribuição do valor médio das compras mudou na semana"
+        correta: false
+        explicacao: "Também exige dado de produção e histórico. Roda como monitoração contínua."
+---
+
+## Em uma frase
+
+DataOps é aplicar disciplina de engenharia de software ao pipeline; observabilidade
+é o conjunto de sinais que te avisa que **o dado** quebrou, e não só que o job
+falhou.
+
+## Job verde não é dado certo
+
+Essa é a frase que ancora o tema inteiro. O Spark termina com sucesso lendo um
+arquivo vazio. O `MERGE` roda perfeitamente com a regra de negócio errada. O
+orquestrador pinta tudo de verde e o erro só aparece quando um diretor abre o
+relatório de fraude com número estranho.
+
+Tratar pipeline como software é o que fecha esse vão: código versionado, revisão
+por par, teste automatizado, ambientes separados, deploy reproduzível, rollback
+possível. Sai o script no notebook, entra o artefato com ciclo de vida.
+
+## Teste de dados: seis famílias
+
+<Comparativo
+  colunas={["Teste", "Pergunta que ele faz", "Exemplo bancário"]}
+  linhas={[
+    ["Esquema", "A estrutura é a contratada?", "O core renomeou vlr_transacao e a coluna sumiu"],
+    ["Volume", "Chegou a quantidade esperada?", "Ingestão de PIX trouxe 3% do volume de uma terça normal"],
+    ["Nulos", "Campo obrigatório veio preenchido?", "data_liquidacao vazia em 12% dos registros"],
+    ["Domínio", "Os valores estão na lista aceita?", "tipo_operacao trouxe um código novo que ninguém trata"],
+    ["Unicidade", "A chave de negócio se repete?", "Transação duplicada depois de reprocessar"],
+    ["Integridade", "As chaves existem do outro lado?", "id_cliente órfão na dimensão de clientes"]
+  ]}
+/>
+
+Três ferramentas para citar, uma frase cada. **Great Expectations**: você declara
+expectativas em Python, roda sobre Spark ou pandas e recebe relatório do que passou.
+**dbt tests**: asserções no YAML do modelo — `unique`, `not_null`,
+`accepted_values`, `relationships` — mais testes singulares em SQL. **Deequ**:
+biblioteca da Amazon sobre Spark que calcula métricas e verifica restrições em
+escala, com o AWS Glue Data Quality como versão gerenciada.
+
+<Callout tipo="dica" titulo="Onde colocar o teste">
+Na entrada de cada camada, não só na gold. Um erro que nasce na bronze e é detectado
+na gold custa três reprocessamentos e uma investigação. Detectado na bronze, custa
+um alerta.
+</Callout>
+
+## Contrato de dados
+
+Contrato é o acordo entre quem produz e quem consome, e vale mais que qualquer
+teste isolado. Precisa ter esquema, semântica de cada campo, granularidade, prazo de
+entrega, política de mudança com aviso prévio e **consequência declarada** quando
+alguém quebra. Sem consequência, é documentação.
+
+O contrato só existe de verdade quando vira teste executável na entrada da bronze:
+mudança compatível, como coluna nova, passa; incompatível, como troca de tipo, para
+o pipeline e avisa o produtor.
+
+## Linhagem
+
+<Termo nome="linhagem">Registro de origem e destino de cada tabela e coluna ao longo
+do pipeline.</Termo> responde duas perguntas caras: análise de impacto (quais
+dashboards param se esta tabela estiver errada) e causa raiz (de onde veio o número
+torto). **OpenLineage** é a especificação aberta para esses eventos, com integrações
+para orquestradores e motores, para a linhagem não ficar presa a uma ferramenta só.
+No Databricks, o Unity Catalog captura linhagem até o nível de coluna.
+
+## Os quatro sinais
+
+**Freshness**: há quanto tempo a tabela foi atualizada, contra o SLA. **Volume**:
+quantos registros chegaram, contra a faixa histórica do dia da semana. **Schema**: a
+estrutura mudou sem aviso. **Distribuição**: os valores continuam com a cara de
+sempre — média, nulos, cardinalidade. Muitas listas somam **linhagem** como quinto
+pilar.
+
+A diferença para teste: teste afirma uma regra que você conhece e falha o pipeline.
+Observabilidade detecta desvio de comportamento que você não enunciou.
+
+## Alerta útil e alerta ignorado
+
+<Callout tipo="erro" titulo="O alerta que ninguém lê">
+Alerta sem dono, com limiar não calibrado, disparado para lista de trinta pessoas,
+treina o time a ignorar o canal. Quando o alerta que importava chegar, ele vai para
+a mesma pasta.
+</Callout>
+
+Alerta útil é acionável, tem dono nomeado, tem limiar tirado do histórico e traz
+contexto para começar a investigar. Notificação de job que terminou bem não é
+alerta.
+
+## Reprocessamento idempotente
+
+Rodar a mesma janela duas vezes precisa produzir o mesmo resultado. Na prática:
+escrita por partição com overwrite dinâmico, ou `MERGE` pela chave de negócio.
+Append cego é a causa número um de transação duplicada em fato. Idempotência é o que
+transforma reprocessamento de operação de risco em rotina.
+
+## CI/CD, IaC e versionamento
+
+<Passos itens={[
+  "Em CI, sem dado de produção: valide contrato e esquema, rode a transformação sobre amostra sintética com casos de borda, e um teste de fumaça ponta a ponta em ambiente reduzido",
+  "Mantenha ambientes separados — desenvolvimento, homologação, produção — com o mesmo código e configuração por variável",
+  "Em CD, faça deploy do artefato versionado e mantenha o caminho de rollback testado"
+]} />
+
+**IaC** fecha a conta: Terraform descreve bucket, catálogo, permissão, cluster e job
+como código revisável, e recria o ambiente igual. Docker empacota a dependência do
+job para o que rodou no seu laptop rodar igual no cluster. Ambiente clicado na
+console é ambiente que ninguém consegue reproduzir depois do incidente.
+
+**Versionamento de dado** é a última peça: Delta com time travel por versão ou
+timestamp, Iceberg com snapshots. Permite comparar antes e depois de um
+reprocessamento e voltar atrás sem restaurar backup.
+
+## Como responder isso em voz alta
+
+Comece pela distinção job versus dado. Liste as famílias de teste com um exemplo
+bancário cada. Passe para os quatro sinais. Feche dizendo como prioriza cobertura
+por criticidade, porque testar tudo igual é o que faz o time abandonar a prática.

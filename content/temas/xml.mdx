@@ -1,0 +1,189 @@
+---
+slug: xml
+titulo: "XML"
+resumo: "XML é o formato de marcação que dominou a troca de dados entre sistemas antes do JSON e que continua vivo no Brasil em nota fiscal eletrônica e mensageria financeira. Estrutura, validação por XSD e como lê-lo num pipeline."
+minutos: 18
+nivel: fundamental
+porQue: "Cai como pergunta de realidade, não de teoria: o banco tem integração legada e obrigação fiscal em XML. Quem responde 'XML é coisa antiga' mostra que nunca abriu um arquivo de retorno; quem cita nota fiscal e mensageria mostra que conhece o terreno."
+comoCai: "Onde você ainda encontraria XML dentro de um banco hoje?"
+feynman: "Explique em um minuto por que a empresa não pode simplesmente converter tudo para JSON e aposentar o XML."
+preRequisitos: ["classificacao-tipos-dados"]
+errosComuns:
+  - "Dizer que XML é dado não estruturado. É semiestruturado: a estrutura vem nas próprias tags, e é isso que permite validar e consultar por campo."
+  - "Confundir elemento com atributo. Elemento é o nó que carrega conteúdo e pode ter filhos; atributo é um par nome e valor dentro da tag de abertura, sem filhos. Muita integração antiga usa atributo onde hoje se usaria campo."
+  - "Ignorar namespace. Arquivo fiscal e de mensageria financeira declaram namespace, e um parser configurado sem ele simplesmente não acha os nós."
+  - "Achar que XML morreu. Perdeu espaço em API nova, mas segue obrigatório em documento fiscal eletrônico e presente em padrões de mensageria financeira."
+  - "Ler XML linha a linha com expressão regular. XML é hierárquico e permite aninhamento arbitrário; parser de verdade ou leitor nativo do Spark, nunca regex."
+preTeste:
+  - enunciado: "Um arquivo XML de nota fiscal falha na importação porque um campo obrigatório veio vazio. Qual mecanismo do próprio padrão XML detectaria isso antes do processamento?"
+    alternativas:
+      - texto: "Validação contra o XSD, que declara os campos obrigatórios, tipos e cardinalidade."
+        correta: true
+        explicacao: "O XSD é o contrato de schema do XML: ele rejeita o documento que não obedece à estrutura declarada."
+      - texto: "A checagem de boa formação (well-formed) do parser."
+        correta: false
+        explicacao: "Boa formação garante só sintaxe: tags fechadas e aninhadas corretamente. Campo obrigatório vazio pode ser sintaticamente perfeito."
+      - texto: "A declaração de encoding no cabeçalho do arquivo."
+        correta: false
+        explicacao: "Encoding trata de como os caracteres são codificados, não de regra de conteúdo."
+videos:
+  - id: h7W0UuRd4fc
+    titulo: "XML // Dicionário do Programador"
+    canal: "Código Fonte TV"
+    duracao: 9
+    porQue: "Explicação enxuta de origem, estrutura e propósito, no tempo certo para um tema curto. Assista atento à parte de por que o formato perdeu espaço, que é metade da pergunta oral."
+  - id: ZLexi288M7A
+    titulo: "Aula 1: Introdução aos Arquivos XML"
+    canal: "Bora Analisar"
+    duracao: 14
+    porQue: "Opcional, e vale se você nunca abriu um XML de nota fiscal: mostra o arquivo real que circula no Brasil, que é o exemplo que você vai citar na sabatina."
+artigos:
+  - titulo: "XML"
+    url: "https://pt.wikipedia.org/wiki/XML"
+    fonte: "Wikipédia"
+  - titulo: "Read and write XML files (Databricks)"
+    url: "https://docs.databricks.com/aws/en/query/formats/xml"
+    fonte: "Databricks"
+  - titulo: "Documentos Fiscais Eletrônicos"
+    url: "https://www.gov.br/receitafederal/pt-br/assuntos/empresas-e-negocios/dfe"
+    fonte: "Receita Federal"
+flashcards:
+  - frente: "O que é XML, em uma frase?"
+    verso: "Uma linguagem de marcação extensível que descreve dados hierárquicos em tags auto-descritas, criada para troca de informação entre sistemas diferentes."
+  - frente: "Diferença entre elemento e atributo."
+    verso: "Elemento é o nó, delimitado por tag de abertura e fechamento, que pode conter texto e outros elementos. Atributo é um par nome e valor dentro da tag de abertura e não tem filhos."
+  - frente: "Para que serve namespace em XML?"
+    verso: "Evitar colisão de nomes quando um documento combina vocabulários diferentes. Na prática, é o que faz o parser encontrar o nó certo: leitor configurado sem o namespace declarado não acha nada."
+  - frente: "O que é XSD e o que ele garante?"
+    verso: "XML Schema Definition: o contrato do documento. Declara elementos, tipos, obrigatoriedade e cardinalidade, e permite rejeitar um arquivo inválido antes de processá-lo."
+  - frente: "Bem formado é o mesmo que válido?"
+    verso: "Não. Bem formado é obedecer à sintaxe: tag fechada e aninhamento correto. Válido é obedecer também ao XSD ou DTD declarado. Um documento pode ser bem formado e inválido."
+  - frente: "Onde XML ainda é obrigatório no Brasil?"
+    verso: "Nos documentos fiscais eletrônicos, como a NF-e e suas variantes, que trafegam e são armazenados em XML assinado digitalmente."
+  - frente: "Por que XML perdeu espaço para JSON?"
+    verso: "Verbosidade, que aumenta payload e custo de rede e armazenamento; parsing mais pesado; e o fato de JSON mapear direto em estruturas nativas das linguagens usadas em API web."
+  - frente: "Como ler XML num pipeline Spark ou Databricks?"
+    verso: "Com o leitor nativo de XML, informando a opção rowTag para dizer qual elemento vira uma linha do DataFrame. Nunca com expressão regular, porque o aninhamento é arbitrário."
+drills:
+  - titulo: "Diagnóstico rápido de XML"
+    instrucao: "Diga em uma frase o que está acontecendo em cada situação e qual seria o próximo passo."
+    itens:
+      - enunciado: "O parser não encontra nenhum nó, embora o arquivo abra normalmente no editor."
+        resposta: "Provável namespace declarado e não considerado na consulta."
+        explicacao: "Configure o parser com o namespace ou use uma consulta que o ignore explicitamente."
+      - enunciado: "O arquivo passa no parser mas o sistema fiscal recusa o documento."
+        resposta: "Bem formado, porém inválido contra o XSD."
+        explicacao: "Valide contra o schema para descobrir o campo obrigatório ausente ou o tipo errado."
+      - enunciado: "Você leu o XML no Spark e veio uma linha só, com tudo aninhado dentro."
+        resposta: "rowTag apontando para o elemento raiz em vez do elemento que representa um registro."
+        explicacao: "Aponte o rowTag para o nó que se repete e depois achate o que o negócio consulta."
+      - enunciado: "Acentos aparecem trocados depois da leitura."
+        resposta: "Encoding declarado no cabeçalho difere do encoding real do arquivo."
+        explicacao: "Confirme o encoding real na origem; grave o arquivo cru na raw como veio e corrija na transformação."
+perguntas:
+  - tipo: oral
+    enunciado: "Onde você ainda encontraria XML dentro de um banco hoje, e como lidaria com ele?"
+    respostaModelo: "Em três lugares, principalmente. Documento fiscal eletrônico, como a NF-e, que é obrigatório em XML assinado e precisa ser guardado pelo prazo legal. Integração legada com sistemas internos e com parceiros que expõem SOAP em vez de REST. E mensageria financeira, onde o padrão ISO 20022 estruturou as mensagens em esquemas XML. Do ponto de vista de engenharia, eu trato XML como qualquer semiestruturado: gravo o arquivo cru na raw, exatamente como chegou, porque em documento fiscal o original assinado é a evidência; leio com o leitor nativo do Spark, indicando o rowTag do elemento que representa um registro, e cuidando do namespace, que é onde a maioria trava; valido contra o XSD quando existe, para o erro estourar na ingestão e não no relatório; e achato para tabela Delta na trusted. O que eu não faço é parsear com expressão regular, porque o aninhamento é arbitrário."
+    rubrica:
+      - "Citou pelo menos dois usos reais: documento fiscal, integração legada ou mensageria financeira"
+      - "Disse que grava o arquivo original cru e explicou por quê"
+      - "Mencionou rowTag ou leitor nativo, e citou namespace como armadilha"
+      - "Citou validação por XSD como controle de qualidade na ingestão"
+  - tipo: oral
+    enunciado: "Um time propõe converter todos os XML recebidos para JSON na entrada, para padronizar o pipeline. O que você responde?"
+    respostaModelo: "Eu concordo com padronizar o consumo, mas não com descartar o original. Em documento fiscal o XML assinado é a evidência legal, e converter na entrada destrói a assinatura e o valor probatório, além de nos deixar sem como reprocessar se a conversão tiver bug. Então minha proposta é: raw recebe o XML como chegou, com retenção alinhada ao prazo fiscal; a conversão vira um passo rastreável, e o resultado padronizado vive na trusted como tabela Delta, que é melhor que JSON para consumo analítico de qualquer jeito. Também levantaria o custo de manutenção: cada conversão é código que precisa acompanhar mudança de layout do emissor, e o XSD nos dá validação de graça, coisa que perdemos ao converter cedo. Padronizar sim, mas na camada de consumo, não na entrada."
+    rubrica:
+      - "Recusou a conversão na entrada preservando o original, com justificativa concreta"
+      - "Citou valor legal ou probatório do documento assinado, ou a necessidade de reprocessamento"
+      - "Propôs onde a padronização deve acontecer, na camada de consumo"
+      - "Mencionou um custo ou risco adicional da conversão precoce, como perda do XSD ou manutenção"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre XML e JSON é mais defensável numa sabatina?"
+    alternativas:
+      - texto: "JSON dominou a troca em APIs novas pela verbosidade menor e pelo mapeamento direto às estruturas da linguagem, mas XML continua em documentos fiscais e em padrões de mensageria."
+        correta: true
+        explicacao: "Reconhece a mudança de mercado sem declarar morte de um formato que ainda é obrigatório por lei em vários fluxos."
+      - texto: "XML é obsoleto e todo sistema que ainda o usa é legado mal mantido."
+        correta: false
+        explicacao: "Ignora obrigação fiscal e padrões de mensageria; é o tipo de resposta que abre a repergunta."
+      - texto: "XML é superior porque tem XSD, e JSON não tem forma de validar schema."
+        correta: false
+        explicacao: "JSON Schema existe e cumpre papel equivalente, ainda que com adoção diferente."
+      - texto: "São equivalentes: a escolha entre eles é só questão de gosto do time."
+        correta: false
+        explicacao: "Verbosidade, custo de parsing, suporte a namespace e obrigatoriedade legal são diferenças concretas."
+---
+
+## Em uma frase
+
+XML é uma **linguagem de marcação extensível** que descreve dados hierárquicos
+em tags auto-descritas, e continua obrigatório no Brasil em documento fiscal
+eletrônico mesmo tendo perdido as APIs novas para o JSON.
+
+## A estrutura em três peças
+
+Um documento XML tem **elementos**, que são os nós delimitados por tag de
+abertura e fechamento e podem conter texto ou outros elementos; **atributos**,
+que são pares nome e valor dentro da tag de abertura e não têm filhos; e
+**namespaces**, que qualificam os nomes para evitar colisão quando o documento
+combina vocabulários diferentes.
+
+O namespace é a peça que mais causa dor prática. Arquivos fiscais e de
+mensageria financeira declaram namespace, e um leitor configurado sem ele
+simplesmente não encontra nó nenhum — o arquivo abre no editor e o parser
+devolve vazio.
+
+## Bem formado não é válido
+
+<Comparativo
+  colunas={["Nível", "O que checa", "Exemplo de falha"]}
+  linhas={[
+    ["Bem formado", "Sintaxe: tags fechadas, aninhamento correto, um único elemento raiz", "Tag aberta e nunca fechada"],
+    ["Válido", "Conformidade com o XSD ou DTD declarado: elementos, tipos, obrigatoriedade, cardinalidade", "Campo obrigatório ausente num documento sintaticamente perfeito"]
+  ]}
+/>
+
+O <Termo nome="XSD">XML Schema Definition: o arquivo que declara a estrutura
+esperada do documento, com tipos e obrigatoriedade, permitindo rejeitar o que
+não obedece.</Termo> é o que te dá validação na porta do pipeline. Quando ele
+existe, use: erro que estoura na ingestão custa muito menos que erro que estoura
+no relatório.
+
+## Onde XML ainda vive no Brasil
+
+<Passos itens={[
+  "Documento fiscal eletrônico: NF-e e variantes trafegam e são armazenadas em XML assinado digitalmente, com prazo de guarda legal.",
+  "Integração legada: serviços SOAP internos e de parceiros continuam trocando envelopes XML.",
+  "Mensageria financeira: o padrão ISO 20022 organiza as mensagens em esquemas XML e é a base de vários fluxos do setor. [verificar o alcance exato da adoção no arranjo do Pix na documentação do Banco Central]"
+]} />
+
+## Por que perdeu espaço para JSON
+
+Dois motivos práticos. **Verbosidade**: repetir o nome do campo na abertura e no
+fechamento infla o payload, o que custa rede, armazenamento e tempo. E
+**parsing**: JSON mapeia direto para dicionário e lista nas linguagens usadas em
+API web, enquanto XML exige percorrer uma árvore com namespace, atributo e texto
+misturados.
+
+Isso explica a preferência em API nova. Não explica desaparecimento: obrigação
+legal e padrão de setor não mudam porque o formato ficou fora de moda.
+
+## Como ler XML num pipeline
+
+<Callout tipo="atencao" titulo="Nunca com expressão regular">
+XML permite aninhamento arbitrário, e regex não descreve estrutura recursiva. Use
+o leitor nativo do Spark ou Databricks, informando a opção `rowTag` para dizer
+qual elemento vira uma linha do DataFrame, e trate o namespace explicitamente.
+</Callout>
+
+O fluxo recomendado é o mesmo de qualquer semiestruturado: **grave o arquivo cru
+na raw**, porque em documento fiscal o original assinado é a evidência; valide
+contra o XSD; achate o que o negócio consulta; e materialize em tabela Delta na
+trusted, que é onde a consulta fica barata.
+
+<Callout tipo="dica" titulo="Resposta de 40 segundos">
+"Semiestruturado, hierárquico, validável por XSD. Continua obrigatório em nota
+fiscal eletrônica e presente em mensageria financeira. Eu guardo o original na
+raw, leio com rowTag cuidando do namespace, valido pelo XSD e materializo
+colunar na trusted." Isso já cobre a rubrica.
+</Callout>

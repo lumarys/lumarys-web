@@ -1,0 +1,302 @@
+---
+slug: sql-para-dados
+titulo: "SQL para engenharia de dados"
+resumo: "O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional."
+minutos: 40
+nivel: intermediario
+porQue: "SQL é o único tema em que a banca pode pedir para você escrever ou descrever a consulta na hora. É teste de fluência: quem hesita entre ROW_NUMBER e GROUP BY entrega que usa SQL só para conferir resultado, não para transformar dado."
+comoCai: "Como você pegaria a última transação de cada conta?"
+feynman: "Explique para um analista de negócio, sem escrever código, o que uma window function faz de diferente de um GROUP BY."
+preRequisitos: []
+errosComuns:
+  - "Usar NOT IN com subconsulta que pode retornar NULL. Um único NULL faz a condição virar desconhecida e o resultado volta vazio. NOT EXISTS não tem esse problema."
+  - "Achar que GROUP BY resolve 'a última transação de cada conta'. GROUP BY colapsa a linha e você perde as outras colunas; o certo é ROW_NUMBER particionado pela conta."
+  - "Filtrar window function no WHERE. A janela é avaliada depois do WHERE; ou você envolve numa CTE e filtra fora, ou usa QUALIFY onde o motor suporta."
+  - "Confundir RANK com DENSE_RANK e com ROW_NUMBER. Em empate, ROW_NUMBER desempata arbitrariamente, RANK pula posições e DENSE_RANK não pula."
+  - "Pedir índice para tabela analítica em Parquet. Em Spark SQL e Athena não existe índice como no OLTP; o que ganha é particionamento, ordenação de arquivos e poda por estatística."
+  - "Empilhar subquery aninhada onde uma CTE resolveria. Além de ilegível, dificulta reaproveitar o mesmo bloco e conversar sobre o plano com outra pessoa."
+preTeste:
+  - enunciado: "Você quer as contas que NÃO tiveram transação em janeiro. A tabela de transações permite id_conta nulo. Qual construção é mais segura?"
+    alternativas:
+      - texto: "WHERE id_conta NOT IN (SELECT id_conta FROM transacoes WHERE mes = 1)"
+        correta: false
+        explicacao: "Se a subconsulta devolver um único NULL, a comparação vira desconhecida para todas as linhas e o resultado sai vazio."
+      - texto: "NOT EXISTS com subconsulta correlacionada pelo id_conta"
+        correta: true
+        explicacao: "NOT EXISTS avalia existência linha a linha e não é afetado por NULL na subconsulta. É a forma canônica de anti-join."
+      - texto: "INNER JOIN com a tabela de transações filtrando mes diferente de 1"
+        correta: false
+        explicacao: "Isso traz contas que transacionaram em outros meses, não contas sem transação em janeiro."
+  - enunciado: "Você quer a última transação de cada conta, com valor e estabelecimento. Qual caminho preserva as colunas?"
+    alternativas:
+      - texto: "GROUP BY id_conta com MAX(data_transacao)"
+        correta: false
+        explicacao: "Devolve a data máxima, mas não as demais colunas daquela linha. Você precisaria de um segundo join para recuperá-las."
+      - texto: "ROW_NUMBER() OVER (PARTITION BY id_conta ORDER BY data_transacao DESC) e filtrar igual a 1"
+        correta: true
+        explicacao: "A janela numera as linhas dentro de cada conta sem colapsá-las, então a linha inteira sobrevive."
+      - texto: "DISTINCT ON id_conta ordenando por data"
+        correta: false
+        explicacao: "Existe no PostgreSQL, mas não é portável para Spark SQL nem Athena, que é o contexto do stack."
+videos:
+  - id: uxR7xyHMR0A
+    titulo: "SQL - ROW_NUMBER e Window Functions (Funções de Janela) - Curso Introdução ao SQL Pt.8"
+    canal: "Aprendiz Moderno"
+    duracao: 31
+    porQue: "Mostra a janela sendo montada pedaço por pedaço: PARTITION BY, ORDER BY e o efeito de cada um na saída. Pare o vídeo antes de cada resultado e tente prever a saída — é assim que a fluência se instala."
+  - id: bQYPb44RU9I
+    titulo: "SQL Tutorial Avançado | Como usar CTE (Expressão de tabela comum)? 1/7"
+    canal: "Mrs. Data"
+    duracao: 9
+    porQue: "Curto e direto na troca de subquery aninhada por CTE. Assista pensando em como você justificaria essa troca em voz alta para um revisor de código."
+artigos:
+  - titulo: "Window Functions - Spark SQL Reference"
+    url: "https://spark.apache.org/docs/latest/sql-ref-syntax-qry-select-window.html"
+    fonte: "Apache Spark"
+  - titulo: "QUALIFY clause"
+    url: "https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-syntax-qry-select-qualify"
+    fonte: "Databricks"
+  - titulo: "Window functions"
+    url: "https://docs.databricks.com/aws/en/sql/language-manual/sql-ref-window-functions"
+    fonte: "Databricks"
+flashcards:
+  - frente: "Qual a forma canônica de anti-join e por quê?"
+    verso: "NOT EXISTS com subconsulta correlacionada. LEFT JOIN com IS NULL também funciona, mas NOT IN quebra silenciosamente quando a subconsulta devolve NULL."
+  - frente: "Diferença entre WHERE e HAVING."
+    verso: "WHERE filtra linha antes da agregação; HAVING filtra grupo depois dela. Condição sobre SUM ou COUNT só cabe em HAVING."
+  - frente: "Por que trocar subquery aninhada por CTE?"
+    verso: "Legibilidade e reaproveitamento: a CTE nomeia o passo, permite encadear transformações na ordem em que você pensa e pode ser referenciada mais de uma vez na mesma consulta."
+  - frente: "Como pegar a última transação de cada conta?"
+    verso: "ROW_NUMBER() OVER (PARTITION BY id_conta ORDER BY data_transacao DESC) numa CTE, filtrando rn igual a 1. Preserva todas as colunas da linha."
+  - frente: "ROW_NUMBER, RANK e DENSE_RANK: qual a diferença em empate?"
+    verso: "ROW_NUMBER desempata arbitrariamente e nunca repete número. RANK repete o número e pula as posições seguintes. DENSE_RANK repete e não pula."
+  - frente: "Para que servem LAG e LEAD?"
+    verso: "Acessar a linha anterior e a seguinte dentro da partição, sem self-join. Uso típico: variação de saldo entre extratos consecutivos e intervalo entre transações."
+  - frente: "Como calcular soma acumulada com window function?"
+    verso: "SUM(valor) OVER (PARTITION BY id_conta ORDER BY data ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW). O frame é o que transforma a soma total em acumulada."
+  - frente: "Por que não dá para filtrar window function no WHERE?"
+    verso: "Porque a janela é calculada depois de WHERE e GROUP BY na ordem lógica da consulta. Filtre fora, numa CTE, ou use QUALIFY."
+  - frente: "O que faz o QUALIFY?"
+    verso: "Filtra o resultado de window function sem precisar de subconsulta, como o HAVING faz com agregação. Existe em Databricks SQL, Snowflake e BigQuery, não em Spark SQL puro."
+  - frente: "O que procurar num plano de execução?"
+    verso: "Varredura completa onde deveria haver poda, ordem dos joins, estratégia de join escolhida, estimativa de linhas muito distante do real e operação de ordenação inesperada."
+  - frente: "Quando índice atrapalha?"
+    verso: "Em tabela com escrita intensa, porque todo INSERT e UPDATE mantém a estrutura; e quando a consulta lê grande parte da tabela, caso em que a varredura sequencial é mais barata."
+  - frente: "O que substitui o índice no SQL analítico?"
+    verso: "Particionamento por coluna de filtro frequente, ordenação dos dados dentro do arquivo, estatísticas por row group do Parquet e poda de arquivos pelo formato de tabela."
+  - frente: "Uma diferença prática entre Spark SQL e SQL transacional."
+    verso: "Spark SQL trabalha sobre arquivos distribuídos: não há índice nem transação multi-tabela clássica, e o custo dominante é leitura e shuffle, não busca por chave."
+drills:
+  - titulo: "Qual construção SQL você usaria?"
+    instrucao: "Esquema fictício: transacoes(id_transacao, id_conta, data_transacao, valor, estabelecimento, canal), contas(id_conta, id_cliente, tipo_conta, data_abertura), clientes(id_cliente, nome, cpf, segmento). Para cada requisito, diga em voz alta qual construção resolve, antes de conferir."
+    itens:
+      - enunciado: "A última transação de cada conta, com valor e estabelecimento."
+        resposta: "ROW_NUMBER particionado por id_conta, ordenado por data_transacao desc, filtrando rn = 1"
+        explicacao: "GROUP BY com MAX devolveria só a data. A janela numera sem colapsar, então a linha inteira sobrevive."
+      - enunciado: "Contas que nunca transacionaram."
+        resposta: "NOT EXISTS correlacionado por id_conta (ou LEFT JOIN com id_transacao IS NULL)"
+        explicacao: "Anti-join. NOT IN é arriscado se id_conta admitir NULL na tabela de transações."
+      - enunciado: "Clientes com mais de 50 transações no mês."
+        resposta: "GROUP BY id_cliente com HAVING COUNT(*) > 50"
+        explicacao: "Condição sobre agregado só cabe em HAVING; WHERE filtra antes de existir a contagem."
+      - enunciado: "Variação de valor entre cada transação e a anterior da mesma conta."
+        resposta: "valor - LAG(valor) OVER (PARTITION BY id_conta ORDER BY data_transacao)"
+        explicacao: "LAG evita o self-join que a mesma pergunta exigiria em SQL sem janela."
+      - enunciado: "Saldo acumulado de gastos por conta ao longo do mês."
+        resposta: "SUM(valor) OVER (PARTITION BY id_conta ORDER BY data_transacao ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)"
+        explicacao: "Sem a cláusula de frame, a soma tende a virar total da partição em vez de acumulada."
+      - enunciado: "As três maiores transações de cada segmento de cliente, mantendo empates na terceira posição."
+        resposta: "DENSE_RANK particionado por segmento, ordenado por valor desc, filtrando o rank menor ou igual a 3"
+        explicacao: "ROW_NUMBER cortaria o empate arbitrariamente; RANK pularia posições e poderia devolver menos linhas do que se espera."
+      - enunciado: "Remover transações duplicadas pela mesma chave de autorização, mantendo a de ingestão mais recente, num motor que suporta a cláusula."
+        resposta: "QUALIFY ROW_NUMBER() OVER (PARTITION BY id_transacao ORDER BY data_ingestao DESC) = 1"
+        explicacao: "QUALIFY dispensa a CTE intermediária. Em Spark SQL puro, envolva numa CTE e filtre fora."
+      - enunciado: "Total transacionado por conta, incluindo contas sem nenhuma transação, com zero no lugar de nulo."
+        resposta: "LEFT JOIN de contas com transacoes e COALESCE(SUM(valor), 0), agrupando por id_conta"
+        explicacao: "INNER JOIN eliminaria justamente as contas que a pergunta quer ver."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você pegaria a última transação de cada conta? Descreva a consulta e diga por que não usa GROUP BY."
+    respostaModelo: "Eu uso window function. Numa CTE, faço ROW_NUMBER particionado por id_conta e ordenado por data_transacao descendente, e fora da CTE filtro pela numeração igual a um. Não uso GROUP BY porque a agregação colapsa o grupo: eu conseguiria o MAX da data, mas perderia valor, estabelecimento e canal daquela linha, e precisaria de um segundo join com a mesma tabela para recuperá-los, o que custa outra leitura e outro shuffle. Um detalhe que eu cuidaria é o desempate: se duas transações tiverem exatamente o mesmo timestamp, ROW_NUMBER escolhe uma arbitrariamente, então eu acrescento o id_transacao como segundo critério de ordenação para o resultado ser determinístico e o reprocessamento dar sempre o mesmo dado. Em Databricks eu escreveria isso com QUALIFY, que dispensa a CTE; em Spark SQL puro, mantenho a CTE."
+    rubrica:
+      - "Escolheu ROW_NUMBER com PARTITION BY e ORDER BY corretos"
+      - "Explicou por que GROUP BY perde as demais colunas e custaria um segundo join"
+      - "Tratou desempate para tornar o resultado determinístico"
+      - "Citou QUALIFY como alternativa e disse em qual motor ela existe"
+  - tipo: oral
+    enunciado: "Uma consulta que roda em 2 segundos no ambiente de desenvolvimento leva 8 minutos em produção sobre a tabela real de transações. Como você investiga?"
+    respostaModelo: "Começo pelo volume: dev costuma ter amostra, então o primeiro fato a estabelecer é quantas linhas cada lado realmente lê. Depois abro o plano com EXPLAIN e procuro quatro coisas: se há varredura completa onde deveria haver poda por partição, qual estratégia de join foi escolhida, se a estimativa de linhas está muito longe do real, e se apareceu ordenação ou agregação que eu não pedi. O suspeito número um em tabela de transações é filtro que não usa a coluna de partição, por exemplo filtrar por uma data derivada com função em cima da coluna, o que impede a poda. O segundo é join com tabela pequena que não virou broadcast. Corrijo o filtro para bater na coluna particionada, confiro estatísticas e, se ainda estiver lento, olho distribuição da chave de join para descartar concentração num punhado de contas. Só mexo em configuração depois de entender o plano."
+    rubrica:
+      - "Estabeleceu o volume real antes de acusar a consulta"
+      - "Disse que leria o plano de execução e nomeou o que procura nele"
+      - "Levantou poda de partição impedida por função sobre a coluna filtrada"
+      - "Considerou estratégia de join e distribuição da chave"
+      - "Deixou o ajuste de configuração para depois do diagnóstico"
+  - tipo: unica
+    enunciado: "Em qual situação DENSE_RANK é a escolha certa em vez de ROW_NUMBER?"
+    alternativas:
+      - texto: "Quando você quer deduplicar registros mantendo exatamente uma linha por chave."
+        correta: false
+        explicacao: "Aí é ROW_NUMBER, justamente porque ele nunca repete o número dentro da partição."
+      - texto: "Quando empates devem receber a mesma posição e as posições seguintes não devem pular números."
+        correta: true
+        explicacao: "É a definição de DENSE_RANK; RANK também empata, mas deixa buracos na sequência."
+      - texto: "Quando você precisa da linha anterior dentro da partição."
+        correta: false
+        explicacao: "Isso é LAG."
+      - texto: "Quando a consulta roda em Athena e não em Spark SQL."
+        correta: false
+        explicacao: "As duas funções existem nos dois motores; a escolha é semântica, não de engine."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre índices em bancos transacionais estão corretas?"
+    alternativas:
+      - texto: "Índice acelera consulta seletiva por chave, como buscar o cadastro por CPF."
+        correta: true
+        explicacao: "Alta seletividade é exatamente o cenário em que o índice paga."
+      - texto: "Índice tem custo de escrita: todo INSERT e UPDATE precisa mantê-lo."
+        correta: true
+        explicacao: "É o principal motivo para não indexar tudo numa tabela de alta ingestão."
+      - texto: "Quando a consulta lê a maior parte da tabela, a varredura sequencial costuma ganhar do índice."
+        correta: true
+        explicacao: "O acesso aleatório página a página fica mais caro que ler tudo em sequência."
+      - texto: "Em Spark SQL sobre Parquet, criar índice é a primeira otimização a tentar."
+        correta: false
+        explicacao: "Não existe índice nesse modelo; o equivalente é particionamento, ordenação e poda por estatística."
+      - texto: "Índice em coluna de baixa cardinalidade, como um flag de dois valores, quase sempre resolve."
+        correta: false
+        explicacao: "Baixa seletividade traz metade da tabela; o índice tende a ser ignorado pelo otimizador."
+---
+
+## Em uma frase
+
+O SQL que a sabatina cobra é o de **transformação**: anti-join, CTE, window
+function, leitura de plano — e saber que o SQL analítico sobre arquivos joga com
+regras diferentes do SQL transacional sobre índice.
+
+## Join, anti-join e o perigo do NOT IN
+
+Anti-join é "traga o que não tem correspondência". Duas formas seguras e uma
+armadilha:
+
+```sql
+-- Forma canônica: NOT EXISTS
+SELECT c.id_conta
+FROM contas c
+WHERE NOT EXISTS (
+  SELECT 1 FROM transacoes t WHERE t.id_conta = c.id_conta
+);
+
+-- Equivalente: LEFT JOIN com IS NULL
+SELECT c.id_conta
+FROM contas c
+LEFT JOIN transacoes t ON t.id_conta = c.id_conta
+WHERE t.id_transacao IS NULL;
+```
+
+<Callout tipo="erro" titulo="Por que NOT IN quebra">
+Se a subconsulta devolver um único NULL, a comparação vira desconhecida para
+toda linha e a consulta retorna **vazio**, sem erro nenhum. É falha silenciosa,
+e a banca gosta de perguntar exatamente isso.
+</Callout>
+
+## Agregação e HAVING
+
+WHERE filtra **linha** antes da agregação. HAVING filtra **grupo** depois dela.
+"Clientes com mais de 50 transações no mês" precisa de HAVING, porque a contagem
+só existe depois do GROUP BY.
+
+## CTE no lugar de subquery aninhada
+
+CTE nomeia o passo. Três subqueries aninhadas obrigam a leitura de dentro para
+fora; a mesma lógica em CTE se lê na ordem em que foi pensada, e cada bloco pode
+ser executado isolado durante a depuração. Em consulta de pipeline, isso vale
+mais do que qualquer ganho de performance — o otimizador costuma produzir o
+mesmo plano.
+
+## Window functions: o coração do tema
+
+<Termo nome="window function">Função que calcula um valor por linha olhando um conjunto de linhas relacionadas (a janela), sem colapsar o resultado como o GROUP BY faz.</Termo>
+
+```sql
+-- Deduplicar / última transação por conta
+WITH ordenadas AS (
+  SELECT t.*,
+         ROW_NUMBER() OVER (
+           PARTITION BY id_conta
+           ORDER BY data_transacao DESC, id_transacao DESC
+         ) AS rn
+  FROM transacoes t
+)
+SELECT * FROM ordenadas WHERE rn = 1;
+
+-- Variação em relação à transação anterior
+SELECT id_conta, data_transacao, valor,
+       valor - LAG(valor) OVER (PARTITION BY id_conta ORDER BY data_transacao) AS variacao
+FROM transacoes;
+
+-- Gasto acumulado no mês
+SELECT id_conta, data_transacao, valor,
+       SUM(valor) OVER (
+         PARTITION BY id_conta ORDER BY data_transacao
+         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       ) AS acumulado
+FROM transacoes;
+```
+
+<Comparativo
+  colunas={["Função", "Em caso de empate", "Uso típico"]}
+  linhas={[
+    ["ROW_NUMBER", "Desempata arbitrariamente, nunca repete", "Deduplicar, pegar a linha mais recente"],
+    ["RANK", "Repete o número e pula as posições seguintes", "Ranking em que o buraco é informativo"],
+    ["DENSE_RANK", "Repete o número e não pula", "Top N por categoria mantendo empates"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Janela não se filtra no WHERE">
+A window function é avaliada **depois** de WHERE e GROUP BY. Envolva numa CTE e
+filtre fora, ou use `QUALIFY` — que existe em Databricks SQL, Snowflake e
+BigQuery, mas não em Spark SQL puro.
+</Callout>
+
+```sql
+-- Mesma dedupe, com QUALIFY
+SELECT *
+FROM transacoes
+QUALIFY ROW_NUMBER() OVER (PARTITION BY id_transacao ORDER BY data_ingestao DESC) = 1;
+```
+
+## Ler o plano de execução
+
+`EXPLAIN` mostra o que o motor pretende fazer. O que procurar, em ordem:
+
+<Passos itens={[
+  "Varredura completa onde deveria haver poda de partição — quase sempre é filtro com função aplicada sobre a coluna particionada.",
+  "Estratégia de join escolhida: broadcast, sort-merge ou hash, e se ela faz sentido para o tamanho dos lados.",
+  "Estimativa de linhas muito distante do real, sinal de estatística desatualizada.",
+  "Ordenação ou agregação que você não pediu, geralmente induzida por DISTINCT ou por window mal escrita.",
+  "Ordem dos joins: filtrar cedo e juntar tarde costuma valer mais que qualquer hint."
+]} />
+
+## Índice: quando ajuda e quando atrapalha
+
+Ajuda em consulta **seletiva por chave** — cadastro por CPF, transação por id.
+Atrapalha em tabela com escrita intensa, porque cada INSERT mantém a estrutura,
+e quando a consulta lê boa parte da tabela, caso em que a varredura sequencial
+sai mais barata que o acesso aleatório.
+
+## SQL analítico não é SQL transacional
+
+<Comparativo
+  colunas={["Aspecto", "OLTP (Postgres, core bancário)", "Analítico (Spark SQL, Athena)"]}
+  linhas={[
+    ["Unidade de acesso", "Linha, via índice", "Arquivo e coluna, via varredura podada"],
+    ["Otimização principal", "Índice e estatística de coluna", "Particionamento, ordenação, poda por estatística do Parquet"],
+    ["Custo dominante", "Busca aleatória em disco", "Leitura de dados e shuffle na rede"],
+    ["Atualização", "UPDATE e DELETE por linha, transacional", "Reescrita de arquivo; MERGE só com formato de tabela como Delta"],
+    ["Transação", "ACID multi-tabela", "ACID por tabela, quando há Delta ou Iceberg"]
+  ]}
+/>
+
+Dizer isso em voz alta muda o tom da resposta: você não está usando "o mesmo
+SQL num lugar maior", está usando uma linguagem parecida sobre um motor com
+outra física de custo.

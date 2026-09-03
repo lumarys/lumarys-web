@@ -1,0 +1,79 @@
+# Lumarys
+
+> Trilhas de estudo para as provas, sabatinas e certificações que as empresas pedem.
+> Cada trilha parte de uma ementa oficial e vira estudo ativo: vídeo em português,
+> explicação própria, repetição espaçada e simulado no formato real da prova.
+> Lumarys é uma marca da Cernyn (cernyn.com), Joinville-SC, CNPJ 65.962.788/0001-62.
+
+Conteúdo em português do Brasil. Licença do conteúdo: CC BY-NC-SA 4.0.
+Ao citar, atribua a Lumarys e linke a página do tema.
+
+## Engenharia de Dados
+
+A ementa oficial da carreira de Engenharia de Dados do Itaú, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.
+
+Origem da ementa: Itaú · Hub de Dados e Analytics
+Página: https://lumarys.com.br/trilhas/engenharia-de-dados/
+
+### Fundamentos
+
+- [O que é Big Data](https://lumarys.com.br/trilhas/engenharia-de-dados/fundamentos/big-data/): Big Data não é um volume de dados nem uma ferramenta: é a situação em que volume, velocidade e variedade quebram a abordagem tradicional de um banco só. Os 3 Vs, os 2 que vieram depois e quando o rótulo não se aplica.
+- [OLAP, OLTP e ETL](https://lumarys.com.br/trilhas/engenharia-de-dados/fundamentos/olap-oltp-etl/): OLTP registra a transação enquanto ela acontece; OLAP responde perguntas sobre o histórico. ETL é a ponte entre os dois. Por que separar, quais camadas existem no data warehouse e o que muda no modelo de dados.
+- [Data Centric e Data Driven](https://lumarys.com.br/trilhas/engenharia-de-dados/fundamentos/data-centric-data-driven/): Data centric é sobre arquitetura: o dado é o ativo permanente e as aplicações giram em torno dele. Data driven é sobre decisão: o número entra antes da escolha, não depois. Um sustenta o outro, e a maioria das empresas confunde os dois.
+
+### Hadoop
+
+- [Hadoop: conceito e arquitetura](https://lumarys.com.br/trilhas/engenharia-de-dados/hadoop/hadoop-arquitetura/): Hadoop foi a resposta dos anos 2010 para processar dado em escala com máquinas comuns: HDFS guarda em blocos replicados, YARN reparte os recursos. Entender por que ele venceu, e por que perdeu espaço para S3 com Spark, é o que a banca cobra.
+- [MapReduce](https://lumarys.com.br/trilhas/engenharia-de-dados/hadoop/mapreduce/): Map transforma cada registro em pares chave-valor, o shuffle agrupa tudo que tem a mesma chave e o reduce agrega. É simples de entender e caro de executar: entre cada estágio o resultado vai para o disco, e é aí que mora o gargalo.
+
+### Processamento de dados
+
+- [Processamento batch e stream](https://lumarys.com.br/trilhas/engenharia-de-dados/processamento/batch-vs-stream/): Batch processa um lote fechado, com começo e fim; stream processa um fluxo que não acaba. A diferença real está em latência, custo e complexidade — e em event time versus processing time, que é onde a maioria das respostas desmonta.
+- [ETL e ELT](https://lumarys.com.br/trilhas/engenharia-de-dados/processamento/etl-vs-elt/): A sigla muda de ordem, mas o que muda de verdade é onde a transformação roda e o que aterrissa no destino. ELT ganhou espaço porque armazenar ficou barato e computar no destino ficou elástico — e trouxe riscos de PII, custo e governança junto.
+- [Particionamento de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/processamento/particionamento-de-dados/): Particionar é dividir o dado por uma chave para que a consulta leia só o pedaço que interessa. Acertar a chave decide desempenho e custo; errar a cardinalidade produz milhões de arquivos pequenos ou uma partição quente que trava o cluster.
+
+### Spark
+
+- [Spark: introdução](https://lumarys.com.br/trilhas/engenharia-de-dados/spark/spark-introducao/): Spark é um motor de processamento distribuído que substituiu o MapReduce por manter dado intermediário em memória e por montar um plano antes de executar. Driver, cluster manager e executores; lazy evaluation, DAG e a fronteira de stage que o shuffle cria.
+- [Spark: RDD, transformações e ações](https://lumarys.com.br/trilhas/engenharia-de-dados/spark/spark-rdd/): RDD é a coleção distribuída, imutável e particionada que está na base do Spark. Transformações montam plano, ações executam; narrow encadeia, wide causa shuffle. É também API legada: hoje se escreve DataFrame, que passa pelo Catalyst.
+
+### Camada de dados
+
+- [As zonas de um Data Lake](https://lumarys.com.br/trilhas/engenharia-de-dados/camada-de-dados/zonas-data-lake/): Zonear é o que separa um Data Lake de um pântano de dados. As quatro zonas (transient, raw, trusted e refined), o que cada uma garante, como elas se mapeiam na arquitetura medalhão e o que fazer com dado pessoal na entrada.
+
+### Databricks
+
+- [Lakehouse e Delta Lake](https://lumarys.com.br/trilhas/engenharia-de-dados/databricks/lakehouse-delta-lake/): O Lakehouse resolve o dilema entre o data lake barato mas sem garantia e o data warehouse confiável mas caro e fechado. O Delta Lake é o formato de tabela que traz ACID, time travel e controle de schema para arquivos no object storage.
+- [Databricks: a plataforma](https://lumarys.com.br/trilhas/engenharia-de-dados/databricks/databricks-plataforma/): Databricks é o Spark gerenciado mais tudo o que falta em volta dele: workspace, clusters, orquestração de jobs, ingestão incremental com Auto Loader e governança com Unity Catalog, rodando sobre o S3 na AWS.
+
+### Tipos de dados
+
+- [Classificação de tipos de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/tipos-de-dados/classificacao-tipos-dados/): Classificar dado não é exercício de vocabulário: é o que decide onde armazenar, como modelar, que conta você pode fazer e quem pode ver. Estruturado, semi e não estruturado; qualitativo e quantitativo; e a classificação por sensibilidade.
+- [XML](https://lumarys.com.br/trilhas/engenharia-de-dados/tipos-de-dados/xml/): XML é o formato de marcação que dominou a troca de dados entre sistemas antes do JSON e que continua vivo no Brasil em nota fiscal eletrônica e mensageria financeira. Estrutura, validação por XSD e como lê-lo num pipeline.
+- [JSON](https://lumarys.com.br/trilhas/engenharia-de-dados/tipos-de-dados/json/): JSON virou o formato padrão de troca entre sistemas por ser simples, auto-descrito e mapear direto nas estruturas das linguagens. O que a engenharia de dados precisa saber: tipos, JSON Schema, aninhamento, evolução de schema e como o Spark lê tudo isso.
+
+### Qualidade de dados
+
+- [Governança de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/qualidade/governanca-de-dados/): Governança de dados é o conjunto de políticas, papéis, processos e padrões que fazem o dado ser confiável e usável. Quem responde pelo dado, onde ele está catalogado, de onde ele veio e quem pode vê-lo.
+- [Qualidade de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/qualidade/data-quality/): Qualidade de dados é o quanto o dado serve para a decisão que ele sustenta, medido por dimensões: acurácia, completude, consistência, unicidade, atualidade e validade. E, principalmente, o que o pipeline faz quando uma delas falha.
+
+### Além da ementa
+
+- [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
+- [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
+- [Formatos de arquivo e formatos de tabela](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/formatos-e-tabelas/): CSV, JSON e Avro guardam por linha; Parquet e ORC guardam por coluna e é por isso que ganham em analytics. Delta, Iceberg e Hudi não substituem o Parquet: acrescentam ACID, time travel e evolução de schema sobre ele.
+- [Spark avançado: DataFrame, tuning e streaming](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/spark-avancado/): Como o Spark realmente executa: Catalyst planeja, AQE replaneja em tempo de execução e o shuffle é onde o tempo vai embora. Skew, broadcast, cache, UDF em Python e as noções de Structured Streaming que a banca cobra.
+- [Orquestração de pipelines](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/orquestracao/): Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura.
+- [Ingestão e CDC](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/ingestao-e-cdc/): Como o dado entra no lake sem derrubar o sistema de origem: carga full contra incremental, marca d água e dado atrasado, CDC lendo o log de transações, MERGE no destino e os conceitos de Kafka que a banca cobra.
+- [Arquiteturas de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/arquiteturas-de-dados/): Lambda contra Kappa, Data Warehouse contra Data Lake contra Lakehouse, os quatro princípios do Data Mesh e a diferença entre Source of Record e Source of Truth: o vocabulário de arquitetura que a sabatina cobra em nível de trade-off.
+- [AWS para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/aws-para-dados/): Os serviços que aparecem num pipeline de dados na AWS e o critério para escolher entre eles: S3, Glue, Athena, EMR, Redshift, Lake Formation, Kinesis, Lambda, Step Functions e o IAM que amarra tudo.
+- [Segurança e privacidade de dados em banco](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/seguranca-e-privacidade/): Como a LGPD chega dentro do pipeline: dado pessoal e sensível, o que anonimização, pseudonimização e tokenização mudam no escopo da lei, e como controlar quem vê qual linha e qual coluna sem travar o analista.
+- [DataOps e observabilidade](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/dataops-e-observabilidade/): Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard.
+- [Custo e performance](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/custo-e-performance/): O que realmente gera fatura numa plataforma de dados, por que arquivo pequeno é caro, como particionamento e data skipping cortam varredura, e o método para investigar um custo que dobrou sem chutar.
+- [Como responder na sabatina](https://lumarys.com.br/trilhas/engenharia-de-dados/alem-da-ementa/como-responder-na-sabatina/): A estrutura que faz uma resposta oral pontuar: contexto, opções, trade-offs e recomendação. Como abrir com pergunta de esclarecimento, como admitir que não sabe sem perder ponto e os erros de comunicação que derrubam candidato bom.
+
+## Páginas
+
+- [O método](https://lumarys.com.br/metodo/): os nove princípios de Ultraaprendizado aplicados ao site.
+- [Sobre](https://lumarys.com.br/sobre/): quem publica, política editorial e como corrigir um erro.
+- [Privacidade](https://lumarys.com.br/privacidade/) · [Termos](https://lumarys.com.br/termos/)

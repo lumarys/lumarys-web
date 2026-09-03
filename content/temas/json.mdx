@@ -1,0 +1,272 @@
+---
+slug: json
+titulo: "JSON"
+resumo: "JSON virou o formato padrão de troca entre sistemas por ser simples, auto-descrito e mapear direto nas estruturas das linguagens. O que a engenharia de dados precisa saber: tipos, JSON Schema, aninhamento, evolução de schema e como o Spark lê tudo isso."
+minutos: 32
+nivel: intermediario
+porQue: "Praticamente toda ingestão de evento no banco chega em JSON: autorização de cartão, evento de app, resposta de API interna. A banca usa o tema para chegar em evolução de schema, que é o problema que mais quebra pipeline em produção."
+comoCai: "Como você trata um JSON cujo schema muda sem aviso?"
+feynman: "Explique para o time de produto por que o campo novo que eles adicionaram na API derrubou o painel, sem culpar ninguém e propondo o que fazer."
+preRequisitos: ["classificacao-tipos-dados", "zonas-data-lake"]
+errosComuns:
+  - "Deixar o Spark inferir o schema em produção. Inferência custa uma passada extra pelos dados e, pior, muda de resultado quando a amostra muda: o mesmo pipeline entrega tipos diferentes em dias diferentes."
+  - "Guardar JSON cru na camada analítica. Ler JSON é caro: parsing linha a linha, sem compressão colunar, sem estatística por arquivo e sem data skipping. Cru é para a raw; a trusted é colunar."
+  - "Confundir array com struct. Struct vira colunas aninhadas e se resolve com seleção por caminho; array precisa de explode e multiplica linhas, o que muda a granularidade da tabela."
+  - "Tratar campo novo como incidente. Campo novo é o comportamento normal de um produtor de eventos; o pipeline precisa ter uma política para isso antes de acontecer."
+  - "Achar que JSON Lines é um formato diferente de JSON. É a convenção de um objeto JSON completo por linha, que é o que permite ler o arquivo em paralelo e por pedaços."
+  - "Deixar o campo aninhado inteiro como string para 'resolver depois'. Depois vira nunca, e o consumidor acaba parseando string em SQL, que é o pior lugar para fazer isso."
+preTeste:
+  - enunciado: "Um pipeline lê JSON de eventos com inferência de schema. Numa madrugada, o campo 'valor' passa a chegar como texto em alguns registros. O que tende a acontecer?"
+    alternativas:
+      - texto: "O tipo inferido pode mudar entre execuções, e a tabela de destino recebe dado com tipo diferente do esperado."
+        correta: true
+        explicacao: "Inferência depende do que a amostra contém. É por isso que schema declarado é a prática em produção."
+      - texto: "O job falha imediatamente, porque JSON tem tipagem forte."
+        correta: false
+        explicacao: "JSON não impõe tipos entre documentos: cada objeto é independente."
+      - texto: "O Spark converte tudo para o tipo mais específico automaticamente e mantém a consistência."
+        correta: false
+        explicacao: "A resolução tende ao tipo mais genérico, e isso já é uma mudança de contrato para o consumidor."
+  - enunciado: "Qual conjunto descreve os tipos que o JSON suporta?"
+    alternativas:
+      - texto: "String, número, booleano, null, objeto e array."
+        correta: true
+        explicacao: "São os seis tipos do formato. Não existe tipo nativo de data nem de decimal exato."
+      - texto: "String, inteiro, decimal, data, booleano e objeto."
+        correta: false
+        explicacao: "JSON tem um único tipo numérico e nenhum tipo de data; data trafega como string por convenção."
+      - texto: "Apenas string e objeto; o resto é convenção da aplicação."
+        correta: false
+        explicacao: "Número, booleano, null e array são tipos do próprio formato."
+videos:
+  - id: P81dE-tkaaA
+    titulo: "JSON // Dicionário do Programador"
+    canal: "Código Fonte TV"
+    duracao: 7
+    porQue: "Base rápida de sintaxe e propósito, para você não gastar tempo no que já sabe. Vá direto ao segundo vídeo se a parte conceitual já estiver resolvida."
+  - id: _UXm-2Jx3Go
+    titulo: "Do Zero ao Expert: Manipulando Arquivos JSON com o Poder do Spark e PySpark!"
+    canal: "Codifike"
+    duracao: 19
+    porQue: "É a parte que a sabatina cobra: leitura no Spark, schema, aninhamento e achatamento. Assista com o código aberto e repita o explode em um exemplo seu."
+artigos:
+  - titulo: "JSON"
+    url: "https://pt.wikipedia.org/wiki/JSON"
+    fonte: "Wikipédia"
+  - titulo: "JSON Files (Spark SQL Guide)"
+    url: "https://spark.apache.org/docs/latest/sql-data-sources-json.html"
+    fonte: "Apache Spark"
+  - titulo: "Read and write JSON files (Databricks)"
+    url: "https://docs.databricks.com/aws/en/query/formats/json"
+    fonte: "Databricks"
+flashcards:
+  - frente: "Por que JSON virou o padrão de troca entre sistemas?"
+    verso: "É auto-descrito, legível, leve comparado ao XML e mapeia direto para dicionário e lista nas linguagens usadas em API web. O custo de adoção é quase zero."
+  - frente: "Quais tipos o JSON suporta?"
+    verso: "String, número, booleano, null, objeto e array. Não há tipo nativo de data nem de decimal exato: data vai como string e valor monetário exige cuidado com precisão."
+  - frente: "O que é JSON Schema?"
+    verso: "Um vocabulário para descrever e validar a estrutura de documentos JSON: campos obrigatórios, tipos, formatos e restrições. Cumpre para JSON o papel que o XSD cumpre para XML."
+  - frente: "O que é JSON Lines?"
+    verso: "A convenção de um objeto JSON completo por linha, sem vírgula entre eles e sem array externo. É o que permite ao Spark dividir o arquivo e ler em paralelo."
+  - frente: "Por que multiLine é caro no Spark?"
+    verso: "Porque um JSON que ocupa várias linhas não pode ser dividido: o arquivo inteiro precisa ser lido por uma única tarefa, o que elimina paralelismo e vira gargalo em arquivo grande."
+  - frente: "Por que declarar o schema é melhor que inferir?"
+    verso: "Inferência custa uma passada extra pelos dados e depende da amostra, então o tipo pode mudar entre execuções. Schema declarado é contrato: o que não bate vira erro visível ou campo resgatado, não surpresa silenciosa."
+  - frente: "Diferença entre struct e array no tratamento com Spark."
+    verso: "Struct vira colunas aninhadas e se acessa por caminho, sem mudar o número de linhas. Array precisa de explode, que gera uma linha por elemento e muda a granularidade da tabela."
+  - frente: "O que fazer quando um campo novo aparece sem aviso?"
+    verso: "Ter política definida antes: resgatar o desconhecido em uma coluna de dado resgatado, alertar o dono do dado e promover o campo ao contrato quando ele for de fato necessário. Falhar em silêncio é a única opção inaceitável."
+  - frente: "O que é uma coluna de dado resgatado?"
+    verso: "Uma coluna onde o leitor guarda os campos que não batem com o schema declarado, em vez de descartá-los. Você não perde o dado e ainda ganha um sinal de que a origem mudou."
+  - frente: "Por que ler JSON é mais caro que ler Parquet?"
+    verso: "JSON é texto: exige parsing de cada registro, não tem compressão colunar, não permite ler só as colunas necessárias e não tem estatística por arquivo para o motor pular blocos."
+  - frente: "Quando NÃO guardar JSON cru na camada analítica?"
+    verso: "Praticamente sempre. Cru fica na raw como evidência; a trusted e a refined devem ser colunares. A exceção é um trecho genuinamente variável, que pode ficar em coluna de mapa ou string."
+  - frente: "Como lidar com um campo cujo formato varia de verdade?"
+    verso: "Modele o núcleo estável em colunas tipadas e deixe a parte variável em um mapa ou em uma string JSON. Assim o consumidor comum não paga pelo caso raro."
+  - frente: "Como validar JSON na entrada do pipeline?"
+    verso: "Com JSON Schema quando existe contrato publicado, ou com regras de qualidade na ingestão: campo obrigatório presente, tipo esperado, domínio permitido e volume dentro da faixa."
+drills:
+  - titulo: "Struct, array ou campo variável?"
+    instrucao: "Para cada estrutura de um evento de autorização de cartão, diga como você modelaria na trusted e por quê."
+    opcoes: ["Colunas tipadas", "Explode em linhas", "Mapa ou string JSON"]
+    itens:
+      - enunciado: "Objeto 'cartao' com bin, bandeira e ultimos_digitos."
+        resposta: "Colunas tipadas"
+        explicacao: "Struct estável e sempre consultado: achate em colunas nomeadas na trusted."
+      - enunciado: "Array 'parcelas', com número e valor de cada parcela."
+        resposta: "Explode em linhas"
+        explicacao: "Array vira uma linha por elemento. Cuide da granularidade: a tabela deixa de ser uma linha por transação."
+      - enunciado: "Objeto 'metadados_adquirente', diferente para cada adquirente e sem contrato."
+        resposta: "Mapa ou string JSON"
+        explicacao: "Não vale criar coluna para cada variação; mantenha flexível e materialize só o que virar consulta recorrente."
+      - enunciado: "Campo 'valor' com o montante autorizado."
+        resposta: "Colunas tipadas"
+        explicacao: "Núcleo do evento, tipado como decimal para evitar erro de precisão em ponto flutuante."
+      - enunciado: "Array 'tags_antifraude' com rótulos aplicados pelo motor de regras."
+        resposta: "Explode em linhas"
+        explicacao: "Se a análise é por tag, exploda em tabela satélite ligada pelo id da transação, preservando a granularidade original."
+  - titulo: "O schema mudou. O que você faz?"
+    instrucao: "Diga a conduta para cada mudança, pensando em não derrubar consumidor e em não perder dado."
+    itens:
+      - enunciado: "Chegou um campo novo, opcional, que ninguém pediu."
+        resposta: "Resgatar em coluna de dado resgatado, registrar o alerta e não promover ao contrato ainda."
+        explicacao: "Nada quebra, o dado não se perde e você tem evidência para conversar com o produtor."
+      - enunciado: "Um campo obrigatório sumiu dos eventos."
+        resposta: "Falhar de forma visível ou quarentenar o lote, e acionar o dono do dado."
+        explicacao: "Deixar passar com nulo propaga erro silencioso para todos os indicadores derivados."
+      - enunciado: "O campo 'valor' passou de número para texto em parte dos registros."
+        resposta: "Rejeitar ou resgatar os divergentes, mantendo o tipo do contrato na tabela."
+        explicacao: "Afrouxar o tipo para string na trusted transfere o problema para todo consumidor a jusante."
+      - enunciado: "O produtor renomeou um campo sem avisar."
+        resposta: "Mapear o nome antigo e o novo na transformação e versionar o contrato."
+        explicacao: "A raw guarda os dois formatos; a trusted apresenta um nome só, com a tradução documentada."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você trata um JSON cujo schema muda sem aviso?"
+    respostaModelo: "Primeiro eu paro de tratar isso como incidente: campo novo é o comportamento normal de um produtor de eventos, então o pipeline precisa ter política definida antes de acontecer. Na raw eu guardo o JSON cru, então nunca perco a versão original. Na leitura eu declaro o schema em vez de inferir, porque inferência muda de resultado conforme a amostra e me dá tipos diferentes em dias diferentes. O que não bate com o contrato vai para uma coluna de dado resgatado, em vez de ser descartado: o pipeline não quebra, o dado não some e eu ganho um sinal de que a origem mudou. Aí eu separo os casos: campo novo opcional gera alerta e entra no contrato quando o negócio precisar dele; campo obrigatório ausente ou mudança de tipo em campo do núcleo eu falho ou quarentena, porque deixar passar com nulo propaga erro silencioso. E fecho o ciclo com contrato de dados versionado e conversa com o time produtor, que é a parte que resolve de verdade."
+    rubrica:
+      - "Disse que declara o schema em vez de inferir, com justificativa técnica"
+      - "Citou coluna de dado resgatado ou equivalente, em vez de descartar ou quebrar"
+      - "Diferenciou a conduta para campo novo opcional e para mudança em campo obrigatório"
+      - "Mencionou a raw como garantia de reprocessamento"
+      - "Levantou contrato de dados ou acordo com o produtor como solução de fundo"
+  - tipo: oral
+    enunciado: "O time de analytics quer consultar direto os arquivos JSON de eventos na camada analítica, para não esperar o pipeline. Qual sua posição?"
+    respostaModelo: "Eu entendo a pressa, mas seria caro e frágil. JSON é texto: cada consulta reparsa registro por registro, não há compressão colunar, não dá para ler só as colunas necessárias e não existe estatística por arquivo para o motor pular blocos. Na prática, a mesma pergunta custa várias vezes mais que sobre uma tabela Delta, e o custo aparece toda vez que alguém roda. Além disso, sem schema declarado, cada analista interpreta o aninhamento do seu jeito e os números começam a divergir. Minha proposta é entregar rápido o que eles precisam: uma tabela Delta na trusta com o núcleo estável achatado, particionada por data, e o que for genuinamente variável em um campo de mapa. Se a urgência for de horas, eu crio uma view temporária sobre a raw, com prazo e dono definidos, e trato como dívida com data de vencimento, não como arquitetura."
+    rubrica:
+      - "Explicou o custo técnico de ler JSON: parsing, ausência de compressão colunar, ausência de data skipping"
+      - "Citou o risco de divergência de número por falta de contrato"
+      - "Ofereceu alternativa concreta e rápida, em vez de só negar"
+      - "Se aceitou exceção, limitou com prazo, dono ou escopo"
+  - tipo: unica
+    enunciado: "Por que JSON Lines importa para processamento distribuído?"
+    alternativas:
+      - texto: "Porque um objeto completo por linha permite dividir o arquivo em blocos e processá-los em paralelo."
+        correta: true
+        explicacao: "Sem essa convenção, o leitor precisa da estrutura inteira e perde a capacidade de fatiar o arquivo."
+      - texto: "Porque comprime melhor que o JSON convencional."
+        correta: false
+        explicacao: "A convenção não muda a compressão; ela muda a divisibilidade do arquivo."
+      - texto: "Porque adiciona tipagem forte aos campos."
+        correta: false
+        explicacao: "JSON Lines não altera a tipagem: continua sendo JSON em cada linha."
+      - texto: "Porque valida o schema automaticamente a cada linha."
+        correta: false
+        explicacao: "Validação é papel do JSON Schema ou das regras de qualidade do pipeline."
+  - tipo: multipla
+    enunciado: "Quais práticas reduzem o custo e o risco de trabalhar com JSON num pipeline Spark?"
+    alternativas:
+      - texto: "Declarar o schema explicitamente na leitura."
+        correta: true
+        explicacao: "Evita a passada extra da inferência e torna o tipo estável entre execuções."
+      - texto: "Materializar o resultado achatado em tabela colunar na trusted."
+        correta: true
+        explicacao: "Consulta passa a aproveitar compressão, leitura de colunas e data skipping."
+      - texto: "Usar JSON Lines em vez de um único documento multiLine."
+        correta: true
+        explicacao: "Permite dividir o arquivo e paralelizar a leitura."
+      - texto: "Manter uma coluna de dado resgatado para campos fora do contrato."
+        correta: true
+        explicacao: "Preserva o dado inesperado e sinaliza mudança de origem sem derrubar o job."
+      - texto: "Converter todos os campos para string na entrada, para nunca falhar."
+        correta: false
+        explicacao: "Elimina validação, piora compressão e transfere o parsing para cada consumidor."
+      - texto: "Explodir todos os arrays já na raw, para simplificar."
+        correta: false
+        explicacao: "A raw deve permanecer fiel à origem; explodir ali destrói a evidência e a granularidade original."
+---
+
+## Em uma frase
+
+JSON é um formato de texto **auto-descrito e hierárquico** que virou o padrão de
+troca entre sistemas, e o trabalho da engenharia de dados é transformá-lo em
+tabela colunar sem perder o original nem quebrar quando o schema muda.
+
+## Por que ele venceu
+
+JSON tem seis tipos: string, número, booleano, `null`, objeto e array. Só isso.
+A simplicidade é o argumento: um objeto JSON mapeia direto em dicionário e lista
+nas linguagens usadas em API web, então o custo de adotar é quase zero.
+
+Note duas ausências que causam problema em banco: **não existe tipo de data**,
+que trafega como string por convenção, e **não existe decimal exato**, o que
+exige cuidado ao tipar valor monetário para não herdar erro de ponto flutuante.
+
+## JSON Schema: o contrato que quase ninguém escreve
+
+JSON Schema descreve a estrutura esperada de um documento: campos obrigatórios,
+tipos, formatos e restrições. É o equivalente ao XSD do mundo XML.
+
+Ele raramente vem pronto de um produtor interno. Quando não vem, o substituto
+prático é um conjunto de regras de qualidade na ingestão: campo obrigatório
+presente, tipo esperado, domínio permitido e volume dentro da faixa. O ponto não
+é a ferramenta; é ter contrato.
+
+## Aninhamento: struct e array não são a mesma coisa
+
+<Comparativo
+  colunas={["Estrutura", "Como tratar", "Efeito na tabela"]}
+  linhas={[
+    ["Objeto (struct)", "Selecionar por caminho e achatar em colunas nomeadas", "Número de linhas não muda"],
+    ["Array", "Explode: uma linha por elemento", "Muda a granularidade da tabela"],
+    ["Parte genuinamente variável", "Mapa ou string JSON preservada", "Mantém flexibilidade sem criar coluna por variação"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Explode muda o significado da tabela">
+Ao explodir o array de parcelas de uma autorização, a tabela deixa de ser "uma
+linha por transação" e passa a ser "uma linha por parcela". Somar valor nessa
+tabela sem perceber isso é como se produz um indicador inflado que ninguém
+consegue explicar depois.
+</Callout>
+
+## JSON no Spark: declare o schema
+
+Inferência de schema é conveniente no notebook e perigosa em produção, por dois
+motivos. Ela **custa uma passada extra pelos dados**, o que pesa em volume alto.
+E ela **depende da amostra**: se numa madrugada alguns registros vierem com o
+campo `valor` como texto, o tipo resolvido muda, e o mesmo pipeline entrega
+contratos diferentes em dias diferentes.
+
+Declarar o schema transforma isso em algo visível: o que não bate vira erro ou
+vai para uma <Termo nome="coluna de dado resgatado">Coluna onde o leitor guarda
+os campos que não batem com o schema declarado, para que nada se perca e a
+mudança de origem fique registrada.</Termo>
+
+Sobre o formato do arquivo: prefira **JSON Lines**, um objeto completo por linha.
+É o que permite dividir o arquivo em blocos e ler em paralelo. Um documento
+`multiLine` grande precisa ser lido por uma tarefa só e vira gargalo.
+
+## Evolução de schema: o problema de verdade
+
+Campo novo não é incidente, é rotina de quem consome evento. A política precisa
+existir antes:
+
+<Passos itens={[
+  "Grave o JSON cru na raw, sempre: é o que permite reprocessar depois de descobrir a mudança.",
+  "Declare o schema na leitura e resgate o desconhecido em vez de descartar.",
+  "Campo novo opcional: alerte o dono do dado e promova ao contrato só quando o negócio precisar.",
+  "Campo obrigatório ausente ou tipo alterado no núcleo: falhe ou quarentene, nunca preencha com nulo em silêncio.",
+  "Versione o contrato e leve a mudança para o time produtor: é lá que o problema se resolve de fato."
+]} />
+
+## Quando NÃO guardar JSON cru na camada analítica
+
+<Callout tipo="erro" titulo="O custo escondido">
+Ler JSON exige parsing de cada registro, não tem compressão colunar, não permite
+ler só as colunas necessárias e não oferece estatística por arquivo para o motor
+pular blocos. Cada consulta paga tudo isso de novo. Cru pertence à raw; a
+trusted e a refined são colunares.
+</Callout>
+
+A única exceção razoável é o trecho **genuinamente variável** do documento, que
+pode viver em uma coluna de mapa ou string. Modele o núcleo estável em colunas
+tipadas e deixe o caso raro fora do caminho do consumidor comum.
+
+<Callout tipo="dica" titulo="Como fechar em voz alta">
+Diga a política inteira em quatro movimentos: cru na raw, schema declarado na
+leitura, resgate do desconhecido, conduta diferente para campo opcional e para
+campo do núcleo. Termine com contrato de dados versionado. É a resposta que
+mostra que você já viveu isso, não que leu sobre.
+</Callout>

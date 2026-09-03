@@ -1,0 +1,273 @@
+---
+slug: zonas-data-lake
+titulo: "As zonas de um Data Lake"
+resumo: "Zonear é o que separa um Data Lake de um pântano de dados. As quatro zonas (transient, raw, trusted e refined), o que cada uma garante, como elas se mapeiam na arquitetura medalhão e o que fazer com dado pessoal na entrada."
+minutos: 30
+nivel: intermediario
+porQue: "É o tema que testa se você pensa em governança, e não só em pipeline. A banca usa as zonas para puxar retenção, controle de acesso e LGPD na mesma pergunta. Quem sabe só os nomes das camadas trava na primeira repergunta."
+comoCai: "Dado pessoal pode ficar na zona raw do lake?"
+feynman: "Explique para o gerente de compliance por que o banco guarda o arquivo cru do PIX mesmo depois de já ter a tabela tratada, e como isso não vira risco."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Decorar os nomes das zonas sem saber o que cada uma garante. A banca não quer a lista; quer saber que contrato a zona oferece a quem lê dela."
+  - "Tratar zona como pasta. Zona é pasta mais retenção, mais permissão, mais schema esperado, mais dono. Sem isso é só um diretório com nome bonito."
+  - "Dizer que dado pessoal não pode entrar na raw. Pode, e normalmente entra, porque a raw é cópia fiel da origem; o que muda é criptografia, restrição de acesso e prazo de retenção."
+  - "Transformar dado na raw. Se você limpa na raw, perde a capacidade de reprocessar quando descobrir que a regra de limpeza estava errada."
+  - "Achar que medalhão e zonas são coisas diferentes e incompatíveis. São vocabulários distintos para o mesmo escalonamento de confiança; saber traduzir um no outro é o que a banca cobra."
+  - "Deixar a refined virar depósito de tabela de projeto. Sem dono e sem contrato, a camada de consumo vira o novo pântano."
+preTeste:
+  - enunciado: "Um arquivo de retorno do adquirente chega em CSV com encoding errado. Onde ele deve ser gravado primeiro?"
+    alternativas:
+      - texto: "Na raw, exatamente como chegou, encoding errado incluído."
+        correta: true
+        explicacao: "A raw é cópia fiel e imutável da origem. Corrigir ali destrói a evidência de como o dado chegou e impede reprocessamento."
+      - texto: "Na trusted, depois de corrigir o encoding."
+        correta: false
+        explicacao: "A trusted recebe dado já validado, mas a correção precisa ser um passo rastreável a partir da raw, não a primeira gravação."
+      - texto: "Direto na refined, porque já é um dado de negócio."
+        correta: false
+        explicacao: "A refined é modelada para consumo. Arquivo de origem nunca entra ali sem passar pelas camadas anteriores."
+  - enunciado: "Qual é a equivalência mais defensável entre zonas e arquitetura medalhão?"
+    alternativas:
+      - texto: "raw ≈ bronze, trusted ≈ silver, refined ≈ gold"
+        correta: true
+        explicacao: "É o mapeamento aceito. A transient não tem equivalente no medalhão porque é área de passagem, não camada de dado."
+      - texto: "raw ≈ silver, trusted ≈ gold, refined ≈ platinum"
+        correta: false
+        explicacao: "Não existe camada platinum no medalhão original, e o deslocamento desalinha o nível de confiança."
+      - texto: "transient ≈ bronze, raw ≈ silver, trusted ≈ gold"
+        correta: false
+        explicacao: "Confunde área temporária com camada de ingestão. Bronze é a cópia bruta persistida, que é a raw."
+videos:
+  - id: GXsWT92G8fg
+    titulo: "Curso Montando Data Lake para Engenheiro de Dados (Big Data) - Aula 17"
+    canal: "Talk Sudoers"
+    duracao: 11
+    porQue: "Percorre as zonas na ordem em que o dado atravessa o lake. Assista anotando qual garantia cada zona oferece a quem lê dela, porque é isso que a banca pede, não a lista de nomes."
+  - id: poM8wtB41xQ
+    titulo: "Arquitetura Medalhão Simplificada para Engenharia de Dados (Bronze, Prata e Ouro)"
+    canal: "Xperiun | Data Analytics"
+    duracao: 13
+    porQue: "Serve de tradutor: enquanto assiste, escreva ao lado de cada camada o nome da zona correspondente. Você vai precisar fazer essa tradução em voz alta se a banca trocar o vocabulário no meio da pergunta."
+artigos:
+  - titulo: "Recommended data layers (camadas recomendadas para data lake na AWS)"
+    url: "https://docs.aws.amazon.com/prescriptive-guidance/latest/defining-bucket-names-data-lakes/data-layer-definitions.html"
+    fonte: "AWS Prescriptive Guidance"
+  - titulo: "What is the medallion lakehouse architecture?"
+    url: "https://docs.databricks.com/aws/en/lakehouse/medallion"
+    fonte: "Databricks"
+  - titulo: "O que é um data lake?"
+    url: "https://aws.amazon.com/pt/what-is/data-lake/"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que é um pântano de dados (data swamp)?"
+    verso: "Um lake onde o dado entrou sem zona, sem catálogo e sem dono. Ninguém sabe o que existe nem em que confiar, então o custo continua e o valor não aparece."
+  - frente: "Quais são as quatro zonas de um Data Lake?"
+    verso: "Transient (passagem), raw (cópia fiel da origem), trusted (validada e padronizada) e refined (modelada para consumo)."
+  - frente: "O que a zona transient garante?"
+    verso: "Nada sobre o dado: é área de pouso temporária, onde o arquivo espera checagem de integridade antes de virar registro permanente. Costuma ter expurgo em horas ou dias."
+  - frente: "O que a zona raw garante?"
+    verso: "Fidelidade à origem. Nada é corrigido, nada é apagado, nada é normalizado. É a única camada que permite reprocessar tudo quando uma regra de negócio muda ou uma transformação se revela errada."
+  - frente: "O que a zona trusted garante?"
+    verso: "Que o dado passou por validação, deduplicação, tipagem e padronização, e que o schema é conhecido e estável. É a camada em que outro time pode confiar sem reler a origem."
+  - frente: "O que a zona refined garante?"
+    verso: "Que o dado está modelado para uma pergunta de negócio: agregado, enriquecido, com métrica calculada e nome que a área entende. É a camada que o BI e o modelo consomem."
+  - frente: "Como as zonas se mapeiam na arquitetura medalhão?"
+    verso: "raw ≈ bronze, trusted ≈ silver, refined ≈ gold. A transient não tem equivalente porque é área de passagem, não camada de dado persistido."
+  - frente: "Por que a raw é imutável?"
+    verso: "Porque ela é a evidência do que a origem enviou. Se você corrige na raw, perde auditoria e perde a possibilidade de reconstruir as camadas de cima com uma regra nova."
+  - frente: "Dado pessoal pode ficar na zona raw?"
+    verso: "Pode, e em geral fica, porque a raw copia a origem. O que a LGPD exige é finalidade declarada, criptografia em repouso e em trânsito, acesso restrito por perfil, log de acesso e prazo de retenção definido."
+  - frente: "Como varia a retenção entre as zonas?"
+    verso: "Transient: horas a dias. Raw: longa, presa ao prazo regulatório do dado. Trusted: média, o suficiente para reprocessar a refined. Refined: presa ao ciclo de uso do relatório ou do modelo."
+  - frente: "Como varia o acesso entre as zonas?"
+    verso: "Raw é a mais fechada: só a engenharia de ingestão e casos de auditoria. Trusted abre para engenharia e ciência de dados. Refined é a mais aberta, para analistas e áreas de negócio."
+  - frente: "Por que não deixar o analista de negócio consultar a raw?"
+    verso: "Dois motivos: risco, porque a raw concentra dado pessoal sem mascaramento; e qualidade, porque números tirados da raw divergem do oficial e a discussão vira sobre qual número está certo."
+  - frente: "O que caracteriza uma zona, além da pasta?"
+    verso: "Contrato de schema, política de retenção, política de acesso, dono responsável e regra de qualidade na entrada. Pasta sem isso não é zona."
+drills:
+  - titulo: "Em que zona esse dado deve estar?"
+    instrucao: "Para cada item, escolha a zona correta. Justifique em voz alta antes de conferir a resposta: a justificativa é o que a banca avalia."
+    opcoes: ["Transient", "Raw", "Trusted", "Refined"]
+    itens:
+      - enunciado: "Arquivo CNAB do adquirente recém-baixado, ainda sem checagem de integridade."
+        resposta: "Transient"
+        explicacao: "Área de pouso: o arquivo espera validação de checksum e contagem antes de virar registro permanente."
+      - enunciado: "Cópia byte a byte do JSON de eventos de autorização de cartão, como o produtor enviou."
+        resposta: "Raw"
+        explicacao: "Fidelidade à origem, inclusive com os defeitos dela. É o que permite reprocessar depois."
+      - enunciado: "Tabela de transações PIX deduplicada, com CPF padronizado e tipos declarados."
+        resposta: "Trusted"
+        explicacao: "Passou por validação e padronização, com schema estável. Outro time pode consumir sem reler a origem."
+      - enunciado: "Tabela de gasto mensal por cliente e categoria, usada no painel de crédito."
+        resposta: "Refined"
+        explicacao: "Agregada e modelada para uma pergunta de negócio específica."
+      - enunciado: "Features de risco de fraude prontas para o modelo pontuar."
+        resposta: "Refined"
+        explicacao: "Dado enriquecido e modelado para consumo, mesmo que o consumidor seja um modelo e não uma pessoa."
+      - enunciado: "Extrato de conta em PDF digitalizado, exatamente como veio do sistema de origem."
+        resposta: "Raw"
+        explicacao: "Formato não estruturado entra igual entrou. Extração de texto é transformação e vai para a camada seguinte."
+  - titulo: "Retenção e acesso por zona"
+    instrucao: "Responda com uma frase curta para cada situação. O objetivo é treinar a resposta de governança, não a de pipeline."
+    itens:
+      - enunciado: "Qual zona tem a política de acesso mais restritiva e por quê?"
+        resposta: "A raw, porque concentra dado pessoal sem mascaramento e é a cópia fiel da origem."
+        explicacao: "Acesso restrito à engenharia de ingestão e a casos de auditoria, com log de quem leu o quê."
+      - enunciado: "Qual zona costuma ter o menor prazo de retenção?"
+        resposta: "A transient, com expurgo em horas ou dias."
+        explicacao: "Ela é área de passagem; manter arquivo ali por muito tempo só amplia superfície de risco."
+      - enunciado: "O time quer apagar a raw para economizar armazenamento depois de carregar a trusted. O que você responde?"
+        resposta: "Não, enquanto o prazo regulatório do dado não vencer e enquanto houver chance de reprocessar."
+        explicacao: "Perder a raw é perder a auditoria e a capacidade de reconstruir as camadas superiores com regra nova. A saída de custo é classe de armazenamento fria, não exclusão."
+      - enunciado: "Um analista pede acesso à raw para conferir um número do painel. O que você propõe?"
+        resposta: "Investigar a divergência com ele na trusted e, se o problema for de ingestão, trazer a evidência da raw eu mesmo."
+        explicacao: "Abrir a raw para consumo cria caminho paralelo de número e expõe dado pessoal sem necessidade."
+perguntas:
+  - tipo: oral
+    enunciado: "Por que um Data Lake precisa de zonas? O que acontece com um lake sem elas?"
+    respostaModelo: "Sem zona, o lake vira pântano: todo mundo grava onde quer, ninguém sabe o que existe, e o dado deixa de ser confiável mesmo estando lá. Zonear é declarar um contrato por camada. A transient é área de pouso, onde o arquivo espera checagem de integridade e é expurgado em horas. A raw é a cópia fiel da origem, imutável, e é o que me permite reprocessar quando uma regra muda. A trusted é o dado já validado, deduplicado e padronizado, com schema estável, que outro time consome sem reler a origem. A refined é o dado modelado para uma pergunta de negócio, como gasto por cliente e categoria. E zona não é só pasta: cada uma tem retenção, permissão, dono e regra de qualidade próprios. É isso que evita que o lake vire um diretório caro de arquivos órfãos."
+    rubrica:
+      - "Nomeou o pântano de dados como o risco concreto de não zonear"
+      - "Listou as quatro zonas e disse a garantia de cada uma, não só o nome"
+      - "Explicou por que a raw é imutável, ligando a reprocessamento e auditoria"
+      - "Disse que zona inclui retenção, acesso, dono e contrato de schema, não só pasta"
+      - "Usou pelo menos um exemplo bancário concreto"
+  - tipo: oral
+    enunciado: "O time de compliance pergunta se dado pessoal de cadastro pode ficar na zona raw. Como você responde?"
+    respostaModelo: "Pode, e na prática fica, porque a raw é cópia fiel do que a origem mandou, e o cadastro chega com CPF, nome e endereço. Negar isso seria fingir uma arquitetura que não existe. O que a LGPD cobra não é ausência de dado pessoal, é controle. Então eu respondo com quatro coisas: finalidade declarada e registrada, para saber por que aquele dado está lá; criptografia em repouso e em trânsito, com chave gerenciada e rotacionada; acesso restrito por perfil, com a raw fechada para a engenharia de ingestão e auditoria, mais log de quem leu o quê; e prazo de retenção definido pelo requisito regulatório, com expurgo automático no fim. O mascaramento e a tokenização eu aplico na entrada da trusted, que é a camada onde ciência de dados e analytics trabalham. Se compliance quiser reduzir superfície, o caminho é encurtar retenção e apertar perfil, não proibir a raw."
+    rubrica:
+      - "Respondeu que sim, dado pessoal fica na raw, sem contornar a pergunta"
+      - "Justificou pela natureza da raw como cópia fiel da origem"
+      - "Citou ao menos três controles: criptografia, acesso restrito, retenção definida, log de acesso ou finalidade"
+      - "Disse em que camada aplica mascaramento ou tokenização e por quê"
+      - "Ofereceu alternativa concreta para reduzir risco sem quebrar a arquitetura"
+  - tipo: unica
+    enunciado: "Uma regra de conversão de moeda estava errada há oito meses e precisa ser recalculada em todo o histórico. Qual zona torna isso possível?"
+    alternativas:
+      - texto: "A raw, porque guarda a origem intacta e permite reconstruir as camadas acima."
+        correta: true
+        explicacao: "É exatamente a razão de existir da raw: reprocessamento com regra nova a partir do dado original."
+      - texto: "A trusted, porque já tem o dado limpo e tipado."
+        correta: false
+        explicacao: "A trusted já foi produzida com a regra errada. Reprocessar a partir dela propaga o erro."
+      - texto: "A refined, porque é onde a métrica é calculada."
+        correta: false
+        explicacao: "A refined é a saída, não a fonte. Ela é justamente o que precisa ser refeito."
+      - texto: "A transient, porque mantém os arquivos originais em espera."
+        correta: false
+        explicacao: "A transient é temporária e já foi expurgada; ela não guarda histórico."
+  - tipo: multipla
+    enunciado: "Quais características, em conjunto, transformam uma pasta em uma zona de verdade?"
+    alternativas:
+      - texto: "Política de retenção explícita."
+        correta: true
+        explicacao: "Sem prazo definido, o dado se acumula e o risco de LGPD cresce junto com a conta."
+      - texto: "Política de acesso por perfil, com log de leitura."
+        correta: true
+        explicacao: "Acesso diferenciado por zona é o principal controle de dado sensível no lake."
+      - texto: "Dono responsável e contrato de schema conhecido."
+        correta: true
+        explicacao: "Sem dono e sem contrato, ninguém responde pelo dado e o consumidor não sabe o que esperar."
+      - texto: "Nome de pasta padronizado em inglês."
+        correta: false
+        explicacao: "Convenção de nome ajuda a navegar, mas não garante nada sobre o dado."
+      - texto: "Estar num bucket separado do restante."
+        correta: false
+        explicacao: "Separar buckets facilita aplicar política, mas o bucket sozinho não é a política."
+---
+
+## Em uma frase
+
+Zonear um Data Lake é dividir o armazenamento em camadas com **contrato,
+retenção, dono e permissão próprios**, para que quem lê saiba exatamente em que
+pode confiar.
+
+## O problema: o pântano de dados
+
+Object storage é barato e aceita qualquer coisa. Essas duas virtudes, juntas e
+sem disciplina, produzem o **pântano de dados**: milhares de arquivos que
+ninguém sabe de onde vieram, quem mantém, se estão corretos ou se podem ser
+apagados. O custo de armazenamento continua chegando todo mês; o valor não.
+
+O sintoma clássico no banco é a reunião em que duas áreas trazem números
+diferentes para a mesma pergunta, e a discussão vira sobre qual planilha está
+certa em vez de sobre a decisão.
+
+## As quatro zonas
+
+<Comparativo
+  colunas={["Zona", "O que garante", "Retenção típica", "Quem acessa"]}
+  linhas={[
+    ["Transient", "Nada sobre o conteúdo: é área de pouso até a checagem de integridade", "Horas a dias, com expurgo automático", "Só o processo de ingestão"],
+    ["Raw", "Fidelidade total à origem, imutável, defeitos incluídos", "Longa, presa ao prazo regulatório do dado", "Engenharia de ingestão e auditoria"],
+    ["Trusted", "Dado validado, deduplicado, tipado e padronizado, com schema estável", "Média: o bastante para reconstruir a refined", "Engenharia e ciência de dados"],
+    ["Refined", "Dado modelado para uma pergunta de negócio, com métrica calculada", "Presa ao ciclo de uso do relatório ou modelo", "Analistas e áreas de negócio"]
+  ]}
+/>
+
+O erro comum é tratar isso como quatro pastas. Uma zona só existe quando tem
+**contrato de schema, política de retenção, política de acesso, dono e regra de
+qualidade na entrada**. Sem isso, você tem um diretório com nome bonito.
+
+<Callout tipo="atencao" titulo="A raw é imutável, e isso não é preciosismo">
+Se você corrige o encoding, remove duplicata ou normaliza o CPF já na raw,
+perde duas coisas: a evidência de como a origem enviou o dado, que é o que a
+auditoria pede, e a possibilidade de reconstruir tudo quando descobrir que a
+regra de limpeza estava errada. Correção é sempre um passo rastreável a partir
+da raw, nunca uma sobrescrita nela.
+</Callout>
+
+## O mapeamento para a arquitetura medalhão
+
+Os dois vocabulários descrevem o mesmo escalonamento de confiança. Traduzir um
+no outro em voz alta é a parte que a banca costuma cobrar quando troca de termo
+no meio da pergunta.
+
+<Comparativo
+  colunas={["Zona", "Medalhão", "Observação"]}
+  linhas={[
+    ["Transient", "sem equivalente", "É área de passagem, não camada de dado persistido"],
+    ["Raw", "Bronze", "Ingestão bruta, append-only, cópia fiel da origem"],
+    ["Trusted", "Silver", "Limpeza, deduplicação, conformidade de schema, junção leve"],
+    ["Refined", "Gold", "Modelagem dimensional, agregação, métrica de negócio"]
+  ]}
+/>
+
+A diferença de ênfase é real e vale citar: o vocabulário de zonas nasceu falando
+de **governança** (retenção, acesso, dono), enquanto o medalhão nasceu falando de
+**qualidade progressiva** em tabelas de um lakehouse. Na prática você implementa
+os dois ao mesmo tempo, com Delta Lake por cima do S3.
+
+## Retenção: o custo e o risco andam juntos
+
+Retenção não é só conta de armazenamento. Guardar dado pessoal além da
+finalidade é exposição de LGPD, não precaução. E apagar cedo demais quebra a
+capacidade de reprocessar e pode violar prazo regulatório.
+
+<Passos itens={[
+  "Descubra o prazo regulatório do dado antes de definir a política, porque ele é o piso.",
+  "Defina expurgo automático em cada zona; política que depende de alguém lembrar não existe.",
+  "Use classe de armazenamento fria na raw antiga em vez de apagar, quando o prazo ainda corre.",
+  "Registre a finalidade de cada conjunto: é ela que justifica a existência do dado pessoal."
+]} />
+
+## Controle de acesso: a raw é a mais fechada
+
+A intuição de muita gente é o contrário, porque a raw "não tem nada de pronto".
+É justo o oposto: a raw concentra dado pessoal **sem mascaramento nenhum**,
+exatamente como a origem enviou. O mascaramento e a
+<Termo nome="tokenização">Substituição do valor sensível por um substituto sem
+significado, reversível apenas por quem tem acesso ao cofre de tokens.</Termo>
+entram na porta da trusted, que é onde ciência de dados trabalha.
+
+Quanto mais a jusante, mais aberta a camada e menos sensível o conteúdo. Se um
+analista precisa do dado da raw para fechar um número, o problema quase sempre é
+de qualidade na trusted, e é lá que ele deve ser resolvido.
+
+<Callout tipo="dica" titulo="Como fechar a resposta oral">
+Diga a garantia de cada zona, não o nome; traduza para bronze, silver e gold
+sem que peçam; e termine com retenção e acesso. Esses três movimentos cobrem
+quase toda rubrica que essa pergunta costuma ter.
+</Callout>

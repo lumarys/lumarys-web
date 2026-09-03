@@ -1,0 +1,244 @@
+---
+slug: etl-vs-elt
+titulo: "ETL e ELT"
+resumo: "A sigla muda de ordem, mas o que muda de verdade é onde a transformação roda e o que aterrissa no destino. ELT ganhou espaço porque armazenar ficou barato e computar no destino ficou elástico — e trouxe riscos de PII, custo e governança junto."
+minutos: 30
+nivel: fundamental
+porQue: "É a pergunta que separa quem sabe a sigla de quem sabe decidir. A banca não quer ouvir 'no ELT o T vem depois'; quer ouvir por que o mercado migrou, o que se ganha guardando o bruto e em que situação, num banco, você ainda transforma antes de aterrissar."
+comoCai: "Vocês vão usar ELT no Lakehouse. Quais os riscos disso?"
+feynman: "Explique para o gerente de risco por que guardar o dado cru custa dinheiro e mesmo assim vale a pena — e em que caso não vale."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Resumir a diferença a 'a ordem das letras'. A pergunta real é onde a computação da transformação acontece e o que fica gravado no destino, porque é isso que muda custo, governança e capacidade de reprocessar."
+  - "Dizer que ELT é sempre melhor porque é moderno. Sem contrato e sem catálogo, ELT vira despejo de tabela crua que ninguém entende, e o lake vira pântano."
+  - "Esquecer que ELT joga o custo para o destino. Transformação pesada no warehouse aparece na fatura de computação todo mês, e não em um servidor de ETL comprado uma vez."
+  - "Ignorar LGPD ao defender ELT. Carregar CPF, dado de saúde ou biometria cru na zona bronze cria uma cópia de dado sensível fora do perímetro de controle da origem."
+  - "Achar que guardar o bruto é bagunça. O bruto é o que permite recalcular seis anos de indicador quando a regra de negócio muda; sem ele, você depende da origem ainda ter o histórico."
+  - "Tratar ETL como legado. Origem que só pode ser lida uma vez, contrato rígido com o consumidor e mascaramento obrigatório antes do pouso continuam pedindo transformação em trânsito."
+preTeste:
+  - enunciado: "Qual é a diferença essencial entre ETL e ELT?"
+    alternativas:
+      - texto: "Apenas a ordem em que as três etapas são escritas na sigla."
+        correta: false
+        explicacao: "A ordem é a consequência. O que muda é onde a transformação é computada e o que aterrissa no destino."
+      - texto: "Onde a transformação é executada: em um motor no meio do caminho, ou no próprio destino, depois que o dado já pousou."
+        correta: true
+        explicacao: "Essa é a diferença que gera todos os trade-offs de custo, governança e reprocessamento."
+      - texto: "ETL só funciona com dados estruturados e ELT só com dados semiestruturados."
+        correta: false
+        explicacao: "Os dois lidam com ambos. A restrição é de arquitetura, não de formato."
+  - enunciado: "Uma origem de cadastro traz CPF e dado de renda. A área de segurança exige que nada identificável fique na zona bruta. Qual abordagem atende?"
+    alternativas:
+      - texto: "ELT: carrega tudo cru e mascara depois, na camada prata."
+        correta: false
+        explicacao: "A cópia crua já existiria na zona bruta, que é justamente o que a exigência proíbe."
+      - texto: "ETL: mascarar ou tokenizar em trânsito, antes de gravar no destino."
+        correta: true
+        explicacao: "Quando o requisito é que o dado sensível não aterrisse, a transformação precisa acontecer antes do pouso."
+      - texto: "Tanto faz: criptografia em repouso resolve os dois casos."
+        correta: false
+        explicacao: "Criptografia em repouso protege o disco, não impede que quem tem acesso à zona bruta leia o CPF."
+videos:
+  - id: YNGHRSWp7nM
+    titulo: "ETL vs ELT - Arquitetura de Dados"
+    canal: "Faculdados"
+    duracao: 8
+    porQue: "Trata o assunto como decisão de arquitetura, que é o ângulo da banca. Assista tentando antecipar, a cada vantagem citada, qual é o custo que vem junto."
+  - id: AOtHaZbEZ_I
+    titulo: "CCDD 203 - Pipeline de Dados - ETL vs ELT"
+    canal: "Ignorância Zero"
+    duracao: 5
+    porQue: "Revisão curta e no vocabulário de pipeline, boa para consolidar antes de responder em voz alta."
+artigos:
+  - titulo: "ETL (extração, transformação, carregamento) e ELT"
+    url: "https://learn.microsoft.com/pt-br/azure/architecture/data-guide/relational-data/etl"
+    fonte: "Microsoft Learn"
+  - titulo: "What is Extract, Load, Transform (ELT)?"
+    url: "https://www.databricks.com/glossary/elt"
+    fonte: "Databricks"
+  - titulo: "Lei Geral de Proteção de Dados Pessoais (Lei 13.709/2018)"
+    url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+    fonte: "Planalto"
+flashcards:
+  - frente: "Onde a transformação roda em ETL?"
+    verso: "Em um motor no meio do caminho, entre origem e destino. O destino recebe o dado já limpo, tipado e no formato do contrato."
+  - frente: "Onde a transformação roda em ELT?"
+    verso: "No próprio destino, depois que o dado bruto já pousou. Quem computa é o warehouse ou o cluster do lakehouse."
+  - frente: "Por que o ELT ganhou espaço?"
+    verso: "Armazenamento de objetos ficou barato e a computação no destino ficou elástica. Passou a ser mais barato guardar o bruto e transformar sob demanda do que dimensionar um motor de ETL."
+  - frente: "Qual é a maior vantagem de guardar o dado bruto?"
+    verso: "Reprocessar quando a regra muda. Se a definição de cliente ativo mudar, você recalcula seis anos a partir do bruto, sem depender de a origem ainda ter o histórico."
+  - frente: "Qual é o risco de LGPD no ELT?"
+    verso: "Dado pessoal entra cru na zona bruta e cria uma cópia identificável fora do controle da origem, com toda a base de usuários do lake podendo acessá-la."
+  - frente: "Qual é o risco de custo no ELT?"
+    verso: "A transformação vira consumo de computação no destino, recorrente e mensal. Consulta mal escrita sobre tabela crua grande aparece direto na fatura."
+  - frente: "Qual é o risco de governança no ELT?"
+    verso: "Sem catálogo, contrato e linhagem, o lake acumula tabelas cruas sem dono e sem significado. É assim que data lake vira data swamp."
+  - frente: "Quando ETL ainda é a resposta certa?"
+    verso: "Quando é preciso mascarar ou tokenizar PII antes do pouso, quando o contrato com o consumidor é rígido, quando a origem só pode ser lida uma vez e quando o destino não tem capacidade de computar."
+  - frente: "O que é uma origem que não pode ser lida duas vezes?"
+    verso: "Fila que consome a mensagem, arquivo de terceiro disponível por 24 horas, extração de mainframe com janela contratada. Se a leitura é única, a transformação precisa acontecer em trânsito."
+  - frente: "ELT no Lakehouse costuma se organizar como?"
+    verso: "Zonas: bronze com o bruto quase intocado, prata com o dado limpo e conformado, ouro com o agregado de consumo. A transformação acontece entre as camadas, dentro do próprio destino."
+  - frente: "ELT elimina a modelagem?"
+    verso: "Não. Ele adia a modelagem para depois do pouso. Adiar sem nunca fazer é o que produz a bagunça que a banca chama de pântano."
+drills:
+  - titulo: "ETL ou ELT para esse cenário?"
+    instrucao: "Para cada situação do banco, escolha a abordagem e justifique em uma frase pelo requisito que manda na decisão."
+    opcoes: ["ETL", "ELT"]
+    itens:
+      - enunciado: "Cadastro com CPF e renda, com exigência de que nada identificável fique na zona bruta."
+        resposta: "ETL"
+        explicacao: "Se o dado sensível não pode aterrissar, o mascaramento tem que acontecer antes do pouso."
+      - enunciado: "Log de eventos do aplicativo, em JSON, cujo esquema muda a cada release."
+        resposta: "ELT"
+        explicacao: "Guardar o bruto protege contra mudança de esquema e permite recuperar campo que você ainda não sabia que ia precisar."
+      - enunciado: "Arquivo de uma bandeira de cartão, disponível por 24 horas e depois apagado."
+        resposta: "ETL"
+        explicacao: "Origem que não pode ser lida duas vezes obriga a tratar em trânsito. Ou você pousa o bruto imediatamente e assume o dever de guardá-lo."
+      - enunciado: "Histórico de transações que o time de risco quer reprocessar sempre que a regra de segmentação muda."
+        resposta: "ELT"
+        explicacao: "É o caso de uso clássico do bruto guardado: recalcular sem voltar à origem."
+      - enunciado: "Carga para um data mart contábil com esquema fixo, validado e assinado pela área de controles."
+        resposta: "ETL"
+        explicacao: "Contrato rígido pede que o dado chegue já conformado e validado, com rejeição no meio do caminho."
+      - enunciado: "Ingestão de várias origens novas para exploração, sem consumidor definido ainda."
+        resposta: "ELT"
+        explicacao: "Sem consumidor definido não há transformação a definir. Pousar o bruto e catalogar é o movimento certo."
+perguntas:
+  - tipo: oral
+    enunciado: "O time vai adotar ELT no Lakehouse. Quais os riscos e como você os mitigaria?"
+    respostaModelo: "Vejo três riscos. O primeiro é de dado sensível: no ELT o bruto aterrissa como veio, então CPF, renda e dado de saúde passam a existir numa cópia dentro do lake. Eu mitigo com tokenização na ingestão para os campos críticos, controle de acesso por coluna na zona bronze e retenção definida. O segundo é custo: a transformação vira consumo de computação recorrente no destino, e uma consulta mal escrita sobre tabela crua grande vira fatura. Eu mitigo com particionamento, formato colunar, materialização das camadas intermediárias e monitoramento de custo por job. O terceiro é governança: sem catálogo, contrato de dados e linhagem, o bruto acumula e ninguém sabe o que é o quê. Eu mitigo exigindo dono, contrato e testes de qualidade em cada tabela promovida de bronze para prata. E deixaria claro que ELT adia a modelagem, não a elimina."
+    rubrica:
+      - "Citou risco de dado sensível entrando cru e propôs mitigação concreta, como tokenização ou controle por coluna"
+      - "Citou custo de computação no destino e propôs mitigação técnica, não apenas 'monitorar'"
+      - "Citou governança e nomeou os artefatos que evitam o pântano: catálogo, dono, contrato, linhagem"
+      - "Afirmou que ELT adia a modelagem em vez de eliminá-la"
+      - "Manteve os exemplos no contexto bancário"
+  - tipo: oral
+    enunciado: "Se ELT é tão vantajoso, por que ainda se faz ETL?"
+    respostaModelo: "Porque em alguns casos o dado não pode aterrissar como veio. O primeiro é regulatório e de privacidade: se a exigência é que nenhum campo identificável exista na zona bruta, mascarar ou tokenizar tem que acontecer em trânsito, antes da gravação. O segundo é contrato: quando o consumidor é um data mart contábil ou um reporte assinado pela área de controles, o dado precisa chegar já validado, com o registro ruim rejeitado no meio do caminho e não descoberto três camadas depois. O terceiro é origem que não pode ser lida duas vezes: fila que consome a mensagem, arquivo de parceiro disponível por 24 horas, janela contratada de extração de mainframe. O quarto é destino sem capacidade de computação, como um banco operacional que não aguenta transformação pesada. Fora esses casos, eu prefiro ELT, porque guardar o bruto me deixa reprocessar quando a regra muda."
+    rubrica:
+      - "Deu ao menos três situações concretas em que ETL é a escolha certa"
+      - "Citou mascaramento de PII antes do pouso como requisito, não como preferência"
+      - "Citou origem que não pode ser relida e explicou por que isso força transformação em trânsito"
+      - "Fechou dizendo em que condição prefere ELT, mantendo julgamento em vez de dogma"
+  - tipo: unica
+    enunciado: "Qual é o principal ganho operacional de guardar o dado bruto no destino?"
+    alternativas:
+      - texto: "Reduzir o espaço em disco, porque o bruto é menor que o transformado."
+        correta: false
+        explicacao: "É o contrário: o bruto costuma ocupar mais, e essa é justamente a conta que se aceita pagar."
+      - texto: "Poder reprocessar o histórico quando a regra de negócio muda, sem depender de a origem ainda ter o dado."
+        correta: true
+        explicacao: "É o argumento central do ELT, e o que mais aparece na prática bancária."
+      - texto: "Dispensar a modelagem dimensional."
+        correta: false
+        explicacao: "ELT adia a modelagem; não a elimina. Sem ela, o consumo fica inviável."
+      - texto: "Garantir conformidade com a LGPD por padrão."
+        correta: false
+        explicacao: "Guardar bruto aumenta o risco de LGPD, não diminui. Exige controle adicional."
+  - tipo: multipla
+    enunciado: "Quais são riscos reais de adotar ELT sem governança?"
+    alternativas:
+      - texto: "Dado pessoal cru replicado em uma zona com acesso amplo."
+        correta: true
+        explicacao: "É o risco de LGPD mais direto do desenho."
+      - texto: "Custo de computação recorrente e imprevisível no destino."
+        correta: true
+        explicacao: "A transformação sai do capex de um motor e vira opex mensal."
+      - texto: "Proliferação de tabelas cruas sem dono, sem contrato e sem significado."
+        correta: true
+        explicacao: "É a definição operacional de data swamp."
+      - texto: "Impossibilidade técnica de reprocessar o histórico."
+        correta: false
+        explicacao: "Reprocessar é justamente o que o ELT facilita, porque o bruto está guardado."
+      - texto: "Perda automática do dado de origem após a carga."
+        correta: false
+        explicacao: "Nada no ELT apaga a origem; o bruto é preservado por definição."
+---
+
+## Em uma frase
+
+ETL transforma o dado **em trânsito**, antes de gravar no destino; ELT grava o
+dado bruto no destino e transforma **lá dentro**.
+
+## O que realmente muda
+
+A ordem das letras é consequência. A decisão é sobre duas coisas: **quem paga a
+conta da computação** e **o que fica gravado no destino**.
+
+<Comparativo
+  colunas={["Aspecto", "ETL", "ELT"]}
+  linhas={[
+    ["Onde transforma", "Motor intermediário, entre origem e destino", "No próprio destino, depois do pouso"],
+    ["O que aterrissa", "Dado já limpo, tipado e conformado", "Dado bruto, como veio da origem"],
+    ["Custo", "Capacidade do motor de ETL, dimensionada para o pico", "Computação elástica no destino, recorrente"],
+    ["Reprocessar regra nova", "Depende de a origem ainda ter o histórico", "Recalcula a partir do bruto guardado"],
+    ["Dado sensível", "Pode ser mascarado antes de gravar", "Aterrissa cru, exige controle na zona bruta"],
+    ["Esquema", "Rígido: definido antes da carga", "Flexível: interpretado na leitura"]
+  ]}
+/>
+
+## Por que o ELT ganhou espaço
+
+Duas mudanças econômicas. Armazenamento de objetos ficou barato o suficiente para
+guardar tudo, inclusive o que talvez nunca seja usado. E a computação no destino
+ficou elástica: em vez de dimensionar um servidor de ETL para o pico do
+fechamento, você liga um cluster por vinte minutos e desliga.
+
+Somado a isso, a variedade cresceu. JSON de API, log de aplicação e arquivo de
+parceiro não cabem num esquema fixo definido antes da carga. Pousar primeiro e
+interpretar depois deixou de ser gambiarra e virou desenho.
+
+## O bruto é uma apólice
+
+<Callout tipo="dica" titulo="O argumento que mais convence banca">
+Se a definição de cliente ativo mudar, o time com o bruto guardado recalcula seis
+anos de indicador em uma execução. O time que só guardou o transformado precisa
+pedir o histórico de volta para a origem — e o core bancário raramente ainda tem.
+</Callout>
+
+Guardar o bruto custa armazenamento. Não guardar custa a impossibilidade de
+corrigir o passado. No banco, onde regra de segmentação, de provisão e de risco
+muda com frequência, essa apólice se paga.
+
+## Os riscos do ELT
+
+<Passos itens={[
+  "Dado sensível entra cru: CPF, renda e dado de saúde passam a existir numa cópia dentro do lake, fora do perímetro da origem.",
+  "Custo migra para o destino: transformação vira consumo recorrente de computação, e consulta ruim sobre tabela crua grande aparece na fatura.",
+  "Governança vira gargalo: sem catálogo, dono, contrato e linhagem, o bruto acumula e ninguém sabe o que é cada tabela."
+]} />
+
+<Callout tipo="erro" titulo="ELT não elimina modelagem">
+Ele adia. Adiar e nunca fazer é como um data lake vira pântano: milhares de
+tabelas cruas, nenhuma com dono e nenhuma com significado documentado.
+</Callout>
+
+As mitigações são conhecidas e você deve saber citá-las: tokenização dos campos
+críticos já na ingestão, controle de acesso por coluna na zona bronze, retenção
+definida, particionamento e formato colunar para o custo, e contrato mais teste
+de qualidade como condição para promover de bronze para prata.
+
+## Quando ETL ainda é a resposta
+
+Quatro situações resistem, e todas aparecem em banco:
+
+1. **Mascarar PII antes do pouso.** Se a exigência é que nenhum campo
+   identificável exista na zona bruta, a transformação tem que acontecer antes de
+   gravar. Não há como corrigir isso depois.
+2. **Contrato rígido.** Data mart contábil e reporte regulatório precisam que o
+   registro ruim seja rejeitado no caminho, não descoberto três camadas adiante.
+3. **Origem que não pode ser lida duas vezes.** Fila que consome a mensagem,
+   arquivo de parceiro disponível por 24 horas, janela contratada de extração de
+   mainframe.
+4. **Destino sem capacidade de computação.** Se o alvo é um banco operacional que
+   não aguenta transformação pesada, empurrar o T para lá é criar incidente.
+
+## Como responder em voz alta
+
+Comece pela diferença em uma frase — onde a transformação roda. Explique a
+economia que fez o ELT ganhar. Defenda o bruto pelo reprocessamento. Liste os três
+riscos com uma mitigação cada. Feche com as situações em que você ainda faria ETL.
+Isso mostra decisão, e não preferência.

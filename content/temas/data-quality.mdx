@@ -1,0 +1,268 @@
+---
+slug: data-quality
+titulo: "Qualidade de dados"
+resumo: "Qualidade de dados é o quanto o dado serve para a decisão que ele sustenta, medido por dimensões: acurácia, completude, consistência, unicidade, atualidade e validade. E, principalmente, o que o pipeline faz quando uma delas falha."
+minutos: 30
+nivel: intermediario
+porQue: "Toda banca de engenharia de dados pergunta como você garante qualidade, porque é onde se separa quem escreve pipeline de quem opera pipeline em produção. Em banco, dado ruim vira número errado para o regulador, e o entrevistador quer ouvir teste, limiar e decisão de falha."
+comoCai: "Como você garantiria qualidade num pipeline diário de transações?"
+feynman: "Explique para o gerente de operações por que vale atrasar o relatório de fechamento em duas horas em vez de publicá-lo com 3% das transações faltando."
+preRequisitos: ["governanca-de-dados"]
+errosComuns:
+  - "Listar as dimensões sem dizer como se mede cada uma. Citar 'acurácia' não vale ponto; dizer que se mede confrontando uma amostra com o sistema de origem, vale."
+  - "Achar que todo teste que falha deve derrubar o pipeline. Derrubar tudo por um domínio inesperado numa coluna secundária custa mais que quarentenar a linha."
+  - "Confundir completude com acurácia. Campo preenchido com valor errado é completo e impreciso; campo vazio é incompleto e pode até ser correto."
+  - "Ignorar frescor. Dado certo que chega depois da decisão é dado inútil, e é a dimensão que mais gera reclamação em painel de diretoria."
+  - "Medir qualidade só na camada final. Quanto mais tarde o teste, mais caro o reprocessamento; teste na ingestão pega o problema antes de ele se espalhar."
+  - "Tratar SLA de dados como promessa verbal. Sem número, janela e consequência acordada, não existe SLA, existe expectativa."
+preTeste:
+  - enunciado: "O pipeline diário de transações de cartão carregou 12 milhões de linhas ontem e 400 mil hoje, sem erro de execução. Qual dimensão de qualidade isso viola primeiro?"
+    alternativas:
+      - texto: "Validade, porque os valores devem estar fora do formato esperado."
+        correta: false
+        explicacao: "Validade trata de formato e tipo. Nada indica que as 400 mil linhas estejam malformadas."
+      - texto: "Completude, medida como volume esperado versus volume recebido."
+        correta: true
+        explicacao: "Queda abrupta de volume é o teste de completude mais barato e mais eficaz que existe num pipeline diário."
+      - texto: "Unicidade, porque faltam linhas duplicadas."
+        correta: false
+        explicacao: "Unicidade trata de duplicidade indevida, não de volume."
+  - enunciado: "Um teste de integridade referencial detecta 30 transações com id_conta que não existe na dimensão de contas, num lote de 12 milhões. Qual a decisão mais defensável?"
+    alternativas:
+      - texto: "Falhar o pipeline inteiro e não publicar nada."
+        correta: false
+        explicacao: "Bloquear 12 milhões de linhas boas por 30 órfãs custa mais em atraso do que o erro custa em precisão, salvo se for cálculo regulatório."
+      - texto: "Mandar as 30 linhas para quarentena, publicar o resto e alertar o steward com o motivo."
+        correta: true
+        explicacao: "Quarentena preserva o dado suspeito para apuração, mantém o SLA e deixa rastro. É a resposta padrão para falha localizada e pequena."
+      - texto: "Descartar as 30 linhas silenciosamente para o teste passar."
+        correta: false
+        explicacao: "Descarte sem registro esconde o problema e some com dinheiro do cliente, que é exatamente o que auditoria procura."
+videos:
+  - id: F2HFRKKdyz4
+    titulo: "O que é Data Quality? na teoria e na prática... Com ferramenta SODA"
+    canal: "Wallace Camargo"
+    duracao: 16
+    porQue: "Sai do discurso e mostra teste declarado em ferramenta rodando no pipeline. Observe o formato das expectativas: é assim que você deve descrever seus testes na sabatina, com regra e limiar explícitos."
+  - id: wTwWg7W9Bcc
+    titulo: "6 Principais Dimensões de Qualidade de Dados | Governança de Dados"
+    canal: "Diário de Dados"
+    duracao: 6
+    porQue: "Fecha a lista das dimensões em poucos minutos. Use para checar se você consegue recitar as seis e dar um exemplo bancário de cada sem travar."
+artigos:
+  - titulo: "AWS Glue Data Quality"
+    url: "https://docs.aws.amazon.com/pt_br/glue/latest/dg/glue-data-quality.html"
+    fonte: "AWS"
+  - titulo: "Manage data quality with pipeline expectations"
+    url: "https://docs.databricks.com/aws/en/dlt/expectations"
+    fonte: "Databricks"
+flashcards:
+  - frente: "Quais são as dimensões clássicas de qualidade de dados?"
+    verso: "Acurácia, completude, consistência, unicidade, atualidade (frescor) e validade. Algumas listas acrescentam integridade referencial e relevância."
+  - frente: "Como se mede acurácia?"
+    verso: "Confrontando uma amostra do dado com a fonte da verdade, tipicamente o sistema de origem, e medindo a taxa de divergência. É a dimensão mais cara de medir."
+  - frente: "Como se mede completude?"
+    verso: "Duas frentes: percentual de nulos em campo obrigatório e volume recebido versus volume esperado na janela, comparado com a média histórica."
+  - frente: "Como se mede consistência?"
+    verso: "Comparando o mesmo indicador em fontes ou camadas diferentes: soma de transações no lakehouse contra o total do extrato do core, na mesma data."
+  - frente: "Como se mede unicidade?"
+    verso: "Contando chaves de negócio repetidas: COUNT(*) versus COUNT(DISTINCT chave). Em transação, a chave costuma ser id da autorização mais a data."
+  - frente: "Como se mede atualidade (frescor)?"
+    verso: "Diferença entre o instante do evento na origem e o instante em que ele fica disponível para consulta, comparada com o prazo acordado no SLA."
+  - frente: "Como se mede validade?"
+    verso: "Testando cada campo contra a regra de formato e domínio: CPF com 11 dígitos e dígito verificador válido, valor de transação não negativo, moeda dentro da lista permitida."
+  - frente: "Quais são as três respostas possíveis a um teste que falha?"
+    verso: "Falhar o pipeline e não publicar, mandar as linhas ruins para quarentena e publicar o resto, ou apenas alertar e publicar tudo. A escolha depende do impacto e do volume atingido."
+  - frente: "Quando derrubar o pipeline em vez de quarentenar?"
+    verso: "Quando o dado alimenta cálculo regulatório ou financeiro em que publicar errado é pior que atrasar, ou quando a falha é sistêmica: volume despencou, chave sumiu, schema mudou."
+  - frente: "Diferença entre SLA e SLO de dados."
+    verso: "SLO é a meta interna, por exemplo 99% dos dias com a tabela pronta até 6h. SLA é o compromisso acordado com o consumidor, com consequência quando é rompido."
+  - frente: "O que é detecção de anomalia em qualidade de dados?"
+    verso: "Comparar a métrica do dia com a distribuição histórica em vez de um limiar fixo, para pegar desvio que nenhuma regra escrita previu, como queda de 30% no volume de PIX numa terça."
+  - frente: "Cite três custos de dado ruim num banco."
+    verso: "Decisão errada de crédito ou de fraude, retrabalho e reprocessamento do time de dados, e risco regulatório com multa e reputação quando o número reportado não fecha."
+  - frente: "Por que testar na ingestão e não só na camada final?"
+    verso: "Porque o custo de corrigir cresce com a distância: erro que passa da bronze contamina silver, gold, painéis e modelos, e o reprocessamento vira cascata."
+drills:
+  - titulo: "Qual dimensão foi violada?"
+    instrucao: "Para cada sintoma no pipeline diário de transações, diga qual dimensão de qualidade está sendo violada. Fale a resposta antes de conferir."
+    opcoes: ["Acurácia", "Completude", "Consistência", "Unicidade", "Atualidade", "Validade"]
+    itens:
+      - enunciado: "A mesma autorização de cartão aparece três vezes na tabela de transações."
+        resposta: "Unicidade"
+        explicacao: "Chave de negócio repetida. Costuma vir de reprocessamento sem idempotência ou de reentrega do produtor."
+      - enunciado: "12% das linhas de cadastro têm o campo de data de nascimento vazio."
+        resposta: "Completude"
+        explicacao: "Campo obrigatório sem valor. Mede-se por percentual de nulos sobre o total."
+      - enunciado: "O valor de uma transação está gravado como 1.500,00 numa coluna numérica e virou 1,5."
+        resposta: "Validade"
+        explicacao: "Formato incompatível com o tipo esperado. Regra de parsing e domínio pega isso na ingestão."
+      - enunciado: "A soma de transações PIX do dia no lakehouse não bate com o total informado pelo core bancário."
+        resposta: "Consistência"
+        explicacao: "Mesmo indicador com valores diferentes em duas fontes. É o teste de reconciliação clássico."
+      - enunciado: "A tabela de transações de ontem só ficou disponível às 14h, e o time de fraude precisa dela às 7h."
+        resposta: "Atualidade"
+        explicacao: "O dado está certo, mas chegou depois da decisão. Frescor é medido contra o prazo do SLA."
+      - enunciado: "O CEP do cliente existe e tem formato válido, mas não corresponde ao endereço real dele."
+        resposta: "Acurácia"
+        explicacao: "Completo e válido, porém errado. Só se detecta confrontando com fonte da verdade externa."
+  - titulo: "Falhar, quarentenar ou alertar?"
+    instrucao: "Para cada falha de teste, escolha a ação e prepare a justificativa em uma frase. O critério é impacto do erro contra custo do atraso."
+    opcoes: ["Falhar o pipeline", "Quarentena", "Alertar e seguir"]
+    itens:
+      - enunciado: "Volume do lote caiu 96% em relação à média dos últimos 30 dias."
+        resposta: "Falhar o pipeline"
+        explicacao: "Sinal de falha sistêmica na origem. Publicar contamina toda a cadeia e gera painel visivelmente errado."
+      - enunciado: "0,0002% das transações têm id_conta inexistente na dimensão de contas."
+        resposta: "Quarentena"
+        explicacao: "Falha localizada e pequena. Isola as órfãs, publica o resto, mantém o SLA e deixa rastro para apuração."
+      - enunciado: "Uma coluna descritiva opcional passou a vir com um valor novo, fora da lista de domínio conhecida."
+        resposta: "Alertar e seguir"
+        explicacao: "Coluna secundária e provável evolução legítima do domínio. Alerta o steward para atualizar a regra."
+      - enunciado: "O total consolidado do relatório regulatório diverge do core bancário em 0,3%."
+        resposta: "Falhar o pipeline"
+        explicacao: "Em número regulatório, publicar errado é pior que atrasar. Reconciliação tem que fechar antes de sair."
+      - enunciado: "A coluna de CPF passou de 0,1% para 6% de nulos."
+        resposta: "Falhar o pipeline"
+        explicacao: "Salto dessa ordem em campo chave indica quebra na origem ou no join; investigar antes de publicar."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você garantiria qualidade num pipeline diário de transações de cartão?"
+    respostaModelo: "Eu testaria em camadas e o mais cedo possível. Na ingestão, checo contrato: schema esperado, tipos e colunas obrigatórias, e volume do lote contra a média histórica com banda de tolerância. Na camada de negócio, testo nulos em campos chave como conta, valor e data, unicidade da chave de autorização, domínio de bandeira e de moeda, valor não negativo, e integridade referencial contra a dimensão de contas. Fecho com reconciliação: soma de transações do dia contra o total do core. Cada teste tem limiar e ação declarada: falha sistêmica derruba o job, falha localizada vai para quarentena e alerta o steward. Publico as métricas num painel de qualidade com histórico, porque tendência revela problema que limiar fixo não pega. E acordo um SLO de frescor, por exemplo pronto até 6h em 99% dos dias, senão não existe critério para decidir entre atrasar e publicar."
+    rubrica:
+      - "Distribuiu testes em camadas, começando na ingestão"
+      - "Citou ao menos quatro tipos de teste concretos: volume, nulos, unicidade, domínio, integridade referencial"
+      - "Declarou a ação de cada falha e o critério para escolher entre falhar e quarentenar"
+      - "Mencionou reconciliação contra a fonte da verdade"
+      - "Definiu SLO ou SLA de frescor com número"
+  - tipo: oral
+    enunciado: "Um teste de qualidade falhou às 3h da manhã no pipeline que alimenta o painel da diretoria às 8h. Descreva sua decisão."
+    respostaModelo: "Minha decisão depende de duas perguntas que eu já deveria ter respondido antes: qual a criticidade do consumidor e qual o alcance da falha. Se a falha é localizada, poucas linhas afetadas e nada regulatório, eu quarentenei as linhas, publico o resto no horário e mando o alerta com contagem e amostra para o steward. Se a falha é sistêmica, volume despencou, schema mudou ou a reconciliação não fecha, eu não publico. Prefiro o painel vazio com aviso de indisponibilidade a um painel com número errado, porque número errado na diretoria vira decisão errada e depois vira retratação. Em qualquer dos casos eu comunico antes das 8h, digo o que aconteceu, o impacto e a previsão. Depois abro a causa raiz e transformo o achado em teste novo, para a mesma falha não passar duas vezes."
+    rubrica:
+      - "Condicionou a decisão à criticidade do consumidor e ao alcance da falha"
+      - "Disse explicitamente que não publica número errado em caso sistêmico"
+      - "Incluiu comunicação proativa ao consumidor dentro da janela"
+      - "Fechou com causa raiz virando teste novo"
+  - tipo: unica
+    enunciado: "Qual é a melhor definição operacional de frescor (atualidade) de dados?"
+    alternativas:
+      - texto: "Quantos dias de histórico a tabela guarda."
+        correta: false
+        explicacao: "Isso é profundidade histórica, ligada a retenção, não a frescor."
+      - texto: "O intervalo entre o evento acontecer na origem e ele ficar disponível para consulta, comparado ao prazo acordado."
+        correta: true
+        explicacao: "Frescor é latência fim a fim medida contra um SLA, não uma sensação de 'está atualizado'."
+      - texto: "A frequência com que o job roda no orquestrador."
+        correta: false
+        explicacao: "Job que roda de hora em hora e falha metade das vezes tem alta frequência e péssimo frescor."
+      - texto: "O percentual de linhas sem valor nulo."
+        correta: false
+        explicacao: "Isso é completude."
+  - tipo: multipla
+    enunciado: "Quais testes você declararia na ingestão de um lote diário de transações, antes de qualquer transformação?"
+    alternativas:
+      - texto: "Volume do lote dentro de uma banda em relação à média histórica."
+        correta: true
+        explicacao: "É o teste mais barato e o que pega falha sistêmica de origem."
+      - texto: "Schema esperado: colunas presentes e tipos compatíveis."
+        correta: true
+        explicacao: "Contrato de dados quebrado na origem precisa ser barrado antes de contaminar as camadas seguintes."
+      - texto: "Nulos em campos obrigatórios como conta, valor e data."
+        correta: true
+        explicacao: "Campo chave nulo inviabiliza join e agregação adiante."
+      - texto: "Unicidade da chave de negócio do lote."
+        correta: true
+        explicacao: "Reentrega do produtor e reprocessamento sem idempotência duplicam linha; detectar cedo evita dupla contagem."
+      - texto: "Comparação da margem de lucro do produto com a meta do trimestre."
+        correta: false
+        explicacao: "É regra de negócio de análise, não teste de qualidade de dado na ingestão."
+---
+
+## Em uma frase
+
+Qualidade de dados é **o quanto o dado serve para a decisão que ele sustenta**,
+medida por dimensões objetivas e defendida por testes automáticos que têm
+limiar e ação declarados.
+
+## As dimensões, com exemplo e com medição
+
+Recitar as dimensões não vale ponto. O que vale é dizer **como se mede cada
+uma**. Guarde a tabela abaixo com as duas colunas juntas.
+
+<Comparativo
+  colunas={["Dimensão", "Exemplo no banco", "Como se mede"]}
+  linhas={[
+    ["Acurácia", "O endereço do cliente no cadastro não é o endereço real", "Amostra confrontada com a fonte da verdade; taxa de divergência"],
+    ["Completude", "12% dos cadastros sem data de nascimento", "Percentual de nulos em campo obrigatório e volume recebido contra o esperado"],
+    ["Consistência", "Total de PIX do dia não bate com o core bancário", "Reconciliação do mesmo indicador entre duas fontes ou camadas"],
+    ["Unicidade", "A mesma autorização de cartão gravada três vezes", "COUNT(*) contra COUNT(DISTINCT chave de negócio)"],
+    ["Atualidade", "Tabela de ontem só pronta às 14h; fraude precisa às 7h", "Latência do evento até a disponibilidade, contra o prazo do SLA"],
+    ["Validade", "Valor de transação negativo, moeda fora da lista", "Teste de formato, tipo e domínio por campo"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Completude não é acurácia">
+Campo preenchido com valor errado é **completo e impreciso**. Campo vazio é
+**incompleto** e pode até estar correto em relação à realidade. Misturar as duas
+é o escorregão mais comum nessa pergunta.
+</Callout>
+
+## Testes automatizados no pipeline
+
+O teste vira código junto do pipeline e roda toda execução. As famílias que
+cobrem quase tudo:
+
+<Passos itens={[
+  "Volume: linhas do lote dentro de uma banda em relação à média histórica da mesma janela e do mesmo dia da semana.",
+  "Nulos: percentual máximo tolerado por coluna, com limiar mais rígido em campo chave.",
+  "Domínio: valores permitidos por coluna categórica, e faixas para numéricas — valor de transação não negativo.",
+  "Unicidade: chave de negócio sem repetição, tipicamente id da autorização com a data.",
+  "Integridade referencial: toda transação aponta para uma conta que existe na dimensão.",
+  "Reconciliação: total agregado confrontado com a fonte da verdade do core."
+]} />
+
+No stack de AWS e Databricks isso aparece como regras de DQDL no Glue Data
+Quality ou como expectativas declaradas no pipeline do Databricks, que já
+oferecem os três comportamentos nativos: avisar, descartar a linha ou falhar a
+atualização.
+
+## O que fazer quando um teste falha
+
+Aqui é onde a banca aperta. Três ações possíveis, e o critério é **impacto do
+erro contra custo do atraso**:
+
+<Comparativo
+  colunas={["Ação", "Quando usar", "Exemplo"]}
+  linhas={[
+    ["Falhar o pipeline", "Falha sistêmica, ou dado regulatório e financeiro em que publicar errado é pior que atrasar", "Volume caiu 96%; reconciliação regulatória não fecha"],
+    ["Quarentena", "Falha localizada e pequena, resto do lote confiável, SLA precisa ser mantido", "30 transações órfãs em 12 milhões vão para uma tabela de rejeitados"],
+    ["Alertar e seguir", "Coluna secundária, provável evolução legítima do domínio", "Valor novo numa coluna descritiva opcional"]
+  ]}
+/>
+
+<Callout tipo="erro" titulo="O que nunca fazer">
+Descartar linha ruim sem registrar. Some com transação do cliente, o teste passa
+verde e a auditoria encontra o buraco depois. Quarentena existe justamente para
+o dado suspeito continuar existindo em algum lugar.
+</Callout>
+
+## SLA, SLO e monitoramento
+
+<Termo nome="SLO de dados">Meta interna e mensurável sobre um dado: por exemplo, a tabela de transações fica pronta até 6h em 99% dos dias úteis.</Termo>
+
+SLA é o compromisso acordado com o consumidor e tem consequência quando é
+rompido. Sem SLA não existe critério para decidir entre atrasar e publicar — a
+decisão vira gosto pessoal, e é isso que o entrevistador quer ver você evitar.
+
+Limiar fixo pega o erro grosseiro. O que pega o sutil é **detecção de anomalia**:
+comparar a métrica do dia com a distribuição histórica, considerando
+sazonalidade. Volume de PIX numa segunda-feira não se compara com o de um
+domingo, e um teste ingênuo alerta todo fim de semana até alguém desligá-lo.
+
+## O custo do dado ruim
+
+Amarre sempre no dinheiro, porque é isso que muda a resposta de técnica para
+sênior: decisão errada de crédito ou de fraude, retrabalho e reprocessamento
+consumindo cluster, e risco regulatório quando o número reportado não fecha.
+Some ainda o custo invisível: quando a área de negócio deixa de confiar na
+tabela, ela monta a planilha paralela dela, e aí você perdeu a fonte única.

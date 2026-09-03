@@ -1,0 +1,324 @@
+---
+slug: seguranca-e-privacidade
+titulo: "Segurança e privacidade de dados em banco"
+resumo: "Como a LGPD chega dentro do pipeline: dado pessoal e sensível, o que anonimização, pseudonimização e tokenização mudam no escopo da lei, e como controlar quem vê qual linha e qual coluna sem travar o analista."
+minutos: 35
+nivel: intermediario
+porQue: "Em banco, privacidade não é assunto jurídico: é requisito de arquitetura. A banca usa este tema para ver se você projeta pensando em quem pode ver o quê, ou se joga tudo cru no lake e resolve depois. Também é o tema em que responder 'a gente criptografa' sem qualificar derruba a nota."
+comoCai: "Um analista precisa cruzar transações por cliente sem ver o CPF. Como você resolve?"
+feynman: "Explique para o gerente de crédito, em um minuto, por que a área dele não vai receber a base com CPF em claro e o que ela ganha em troca."
+preRequisitos: []
+errosComuns:
+  - "Dizer que dado pseudonimizado está fora da LGPD. Só o dado anonimizado sai do escopo da lei; pseudonimizado continua sendo dado pessoal, porque existe uma chave que reverte a operação."
+  - "Chamar hash de CPF de anonimização. O hash é determinístico e o universo de CPFs é pequeno e enumerável: dá para montar a tabela inteira por força bruta e reidentificar todo mundo."
+  - "Tratar mascaramento como se fosse criptografia. Mascaramento age na exibição do dado; criptografia protege o dado armazenado ou em trânsito. Cada um responde a uma ameaça diferente."
+  - "Achar que criptografia em repouso resolve acesso indevido. Quem tem permissão de leitura recebe o dado já decifrado; contra o analista curioso o controle é RBAC, ABAC e máscara de coluna."
+  - "Confundir base legal com consentimento. Consentimento é uma das dez hipóteses do art. 7º; em banco a maior parte do tratamento se apoia em execução de contrato, obrigação legal, prevenção à fraude e proteção ao crédito."
+  - "Despejar tudo cru na zona raw e adiar a proteção para a camada de consumo. A raw costuma ser a zona com menos controle e mais retenção: é ali que o vazamento acontece."
+  - "Esquecer o direito de eliminação no desenho. Formato imutável, backup e log de auditoria transformam um DELETE simples em projeto se ninguém pensou nisso antes."
+preTeste:
+  - enunciado: "O time criou a coluna cpf_hash com SHA-256 do CPF e apagou o CPF original. A base ficou anonimizada para efeito de LGPD?"
+    alternativas:
+      - texto: "Sim: hash é operação de mão única, então o dado deixou de ser pessoal."
+        correta: false
+        explicacao: "Hash é determinístico e o universo de CPFs é enumerável. Dá para gerar o hash de todos os CPFs possíveis e reverter a tabela inteira."
+      - texto: "Não: o registro continua permitindo identificar o titular por esforço razoável, então isso é pseudonimização."
+        correta: true
+        explicacao: "Anonimizado é o dado que perde a possibilidade de associação ao titular. Enquanto a reidentificação é viável, o dado segue sob a lei."
+      - texto: "Depende só de o hash usar sal."
+        correta: false
+        explicacao: "Sal com segredo bem guardado aproxima o resultado de tokenização, mas se o segredo existe a reversão existe. Continua sendo dado pessoal."
+  - enunciado: "Um analista de risco deve enxergar todas as colunas da tabela de transações, mas só as linhas das agências da região dele. Qual controle resolve?"
+    alternativas:
+      - texto: "Column-level security"
+        correta: false
+        explicacao: "Column-level restringe colunas, não linhas. Aqui o recorte é por registro."
+      - texto: "Row-level security"
+        correta: true
+        explicacao: "Filtro de linha aplicado na consulta, tipicamente ligado a um atributo do usuário, como a região da agência."
+      - texto: "Criptografia em repouso"
+        correta: false
+        explicacao: "Criptografia em repouso protege contra quem acessa o storage por fora, não contra um usuário legítimo consultando a tabela."
+videos:
+  - id: xS_e6rqyDkU
+    titulo: "Introdução à LGPD e seus princípios fundamentais"
+    canal: "Cidacs Fiocruz"
+    duracao: 10
+    porQue: "Curto e focado nos princípios, que é a parte que a banca cobra de você e não do jurídico. Assista anotando finalidade, necessidade e adequação, e pense em que decisão de pipeline cada princípio muda."
+  - id: FA4_nzMiK0g
+    titulo: "Como funciona a Segurança de Dados na nuvem? - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 9
+    porQue: "Traduz a discussão legal para os controles que você de fato configura na AWS. Preste atenção na separação entre proteger o dado guardado e controlar quem pode lê-lo."
+artigos:
+  - titulo: "Lei nº 13.709/2018 — Lei Geral de Proteção de Dados Pessoais (LGPD)"
+    url: "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+    fonte: "Planalto"
+  - titulo: "Row filters and column masks"
+    url: "https://docs.databricks.com/aws/en/tables/row-and-column-filters"
+    fonte: "Databricks"
+  - titulo: "Data filtering and cell-level security in Lake Formation"
+    url: "https://docs.aws.amazon.com/pt_br/lake-formation/latest/dg/data-filtering.html"
+    fonte: "AWS"
+  - titulo: "AWS Key Management Service — visão geral"
+    url: "https://docs.aws.amazon.com/pt_br/kms/latest/developerguide/overview.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que a LGPD chama de dado pessoal?"
+    verso: "Informação relacionada a pessoa natural identificada ou identificável. O teste não é o campo isolado, é a possibilidade de chegar na pessoa combinando campos."
+  - frente: "Quais categorias a lei trata como dado pessoal sensível?"
+    verso: "Origem racial ou étnica, convicção religiosa, opinião política, filiação a sindicato ou a organização religiosa, filosófica ou política, dado de saúde ou vida sexual, e dado genético ou biométrico, quando ligados a uma pessoa natural."
+  - frente: "Anonimização, pseudonimização e tokenização: qual é a diferença que importa?"
+    verso: "Anonimizado perde a possibilidade de associação ao titular e sai do escopo da LGPD. Pseudonimizado e tokenizado continuam sendo dado pessoal, porque existe chave ou cofre que reverte."
+  - frente: "Diferença entre mascaramento estático e dinâmico."
+    verso: "Estático grava a versão mascarada em uma cópia da tabela. Dinâmico mantém o dado original e aplica a máscara na consulta, conforme quem está perguntando."
+  - frente: "Criptografia em repouso protege contra o quê, exatamente?"
+    verso: "Contra quem acessa a mídia ou o bucket por fora do plano de controle: disco roubado, snapshot copiado, bucket exposto. Não protege contra usuário legítimo com permissão de leitura."
+  - frente: "Para que serve um KMS?"
+    verso: "Guardar e rotacionar as chaves fora do sistema que guarda os dados, e registrar cada uso de chave. Separar chave de dado é o que faz a criptografia valer alguma coisa."
+  - frente: "RBAC e ABAC: qual a diferença?"
+    verso: "RBAC dá acesso pelo papel do usuário (analista de crédito). ABAC decide por atributos do usuário e do dado no momento da consulta (região da agência, classificação da tabela). ABAC escala melhor, custa mais para governar."
+  - frente: "Row-level e column-level security resolvem que perguntas?"
+    verso: "Row-level: quais registros esta pessoa pode ver. Column-level: quais campos ela pode ver dentro dos registros permitidos."
+  - frente: "Qual o risco específico de PII na zona raw?"
+    verso: "A raw guarda o dado como veio, tem retenção longa e costuma ter menos controle de acesso. É a zona com maior superfície de vazamento e a mais difícil de corrigir depois."
+  - frente: "O que o princípio da necessidade exige do pipeline?"
+    verso: "Trazer só os campos que o caso de uso precisa. Ingerir a tabela inteira do core bancário porque é mais fácil é violação de princípio, não zelo."
+  - frente: "O que o direito de eliminação cobra do pipeline?"
+    verso: "Capacidade de localizar o titular em todas as camadas e apagar de verdade, incluindo histórico, backup e cópias em zonas analíticas. Formato de tabela com DELETE, como Delta, torna isso viável."
+  - frente: "O que o direito de portabilidade cobra do pipeline?"
+    verso: "Entregar os dados do titular em formato estruturado e interoperável, em prazo definido. Isso pede um mapa de onde o dado daquele CPF vive."
+  - frente: "Qual o papel do encarregado (DPO)?"
+    verso: "Ser o canal entre titulares, ANPD e a empresa, orientar as áreas e receber reclamações. Ele não escreve o pipeline; você fornece a ele a capacidade de responder."
+  - frente: "Como um analista cruza transações por cliente sem ver o CPF?"
+    verso: "Com um identificador pseudônimo estável (token) no lugar do CPF: mantém a capacidade de agrupar e juntar tabelas, sem expor o identificador direto."
+drills:
+  - titulo: "Classifique o campo e escolha a proteção"
+    instrucao: "Para cada campo de uma base bancária, diga a classificação. Antes de abrir a resposta, diga em voz alta também qual técnica de proteção você aplicaria — é isso que a banca pede em seguida."
+    opcoes: ["Não é dado pessoal", "Dado pessoal", "Dado pessoal sensível"]
+    itens:
+      - enunciado: "CPF do titular da conta."
+        resposta: "Dado pessoal"
+        explicacao: "Identificador direto. Proteção: tokenizar na entrada da zona curada, guardar o de-para em cofre separado com acesso auditado, e expor só o token para análise."
+      - enunciado: "Biometria facial capturada na abertura de conta pelo app."
+        resposta: "Dado pessoal sensível"
+        explicacao: "A lei lista dado biométrico como sensível. Proteção: não desce para a zona analítica; fica no sistema de origem, cifrado com chave dedicada e acesso nominal."
+      - enunciado: "Valor e horário de uma compra no cartão, já ligados a um id_cliente pseudonimizado."
+        resposta: "Dado pessoal"
+        explicacao: "Pseudonimizado continua pessoal, porque a chave de reversão existe. Proteção: controle de acesso por papel na tabela e proibição de rejuntar com o cofre de tokens."
+      - enunciado: "Quantidade e valor total de PIX por agência, por dia."
+        resposta: "Não é dado pessoal"
+        explicacao: "Agregado sem granularidade que permita voltar ao indivíduo. Cuidado com agregados de grupo muito pequeno: uma agência com um cliente ativo deixa de ser agregado."
+      - enunciado: "Filiação sindical informada no cadastro de crédito consignado."
+        resposta: "Dado pessoal sensível"
+        explicacao: "Filiação a sindicato está na lista do art. 5º. Proteção: coluna com máscara por padrão, liberada só para o processo que precisa dela, com registro de acesso."
+      - enunciado: "Código MCC do estabelecimento onde a compra foi feita."
+        resposta: "Não é dado pessoal"
+        explicacao: "Isolado, é atributo do lojista. Mas MCC ligado a um titular pode revelar saúde ou religião: na tabela transacional, trate a combinação como potencialmente sensível."
+      - enunciado: "Score interno de propensão a churn calculado para cada cliente."
+        resposta: "Dado pessoal"
+        explicacao: "Dado inferido continua sendo dado pessoal quando está ligado a pessoa identificável. Proteção: mesmo controle de acesso da base que o originou."
+  - titulo: "Qual controle resolve o pedido?"
+    instrucao: "Cada linha é um pedido real que chega ao time de dados. Escolha o controle principal antes de ver a resposta."
+    opcoes: ["RBAC", "ABAC", "Row-level security", "Column-level security", "Tokenização", "Criptografia em trânsito"]
+    itens:
+      - enunciado: "O time de marketing pode consultar a tabela de clientes, mas o campo e-mail precisa aparecer parcialmente oculto."
+        resposta: "Column-level security"
+        explicacao: "Máscara dinâmica na coluna: o dado continua íntegro na tabela e a exibição muda conforme quem consulta."
+      - enunciado: "Cada gerente regional só pode ver os contratos da própria regional, e são quarenta regionais."
+        resposta: "Row-level security"
+        explicacao: "Filtro de linha alimentado por um atributo do usuário. Criar quarenta views seria o caminho que não escala."
+      - enunciado: "Analistas de fraude precisam juntar transações do mesmo cliente entre cartão e PIX sem ver o CPF."
+        resposta: "Tokenização"
+        explicacao: "Token estável por titular preserva a capacidade de junção e agrupamento sem expor o identificador direto."
+      - enunciado: "O acesso a tabelas classificadas como confidenciais deve valer só para quem está no time dono do dado, sem criar um papel novo por tabela."
+        resposta: "ABAC"
+        explicacao: "Decisão por atributo do usuário cruzado com a classificação da tabela. RBAC puro explodiria em número de papéis."
+      - enunciado: "Um job lê de um banco on-premises e escreve no S3 atravessando a rede corporativa."
+        resposta: "Criptografia em trânsito"
+        explicacao: "TLS no caminho, além de rota privada. Criptografia em repouso não cobre o dado enquanto ele viaja."
+      - enunciado: "Todo engenheiro do time de dados precisa dos mesmos acessos de leitura nas camadas bronze e silver."
+        resposta: "RBAC"
+        explicacao: "Acesso homogêneo por função é exatamente o caso em que papel resolve, e é mais simples de auditar que política por atributo."
+perguntas:
+  - tipo: oral
+    enunciado: "Um analista precisa cruzar transações de cartão e de PIX por cliente, mas não pode ver o CPF. Como você resolve?"
+    respostaModelo: "Primeiro eu confirmo o que ele precisa de verdade: agrupar por titular e juntar as duas bases, não identificar a pessoa. Se for isso, a resposta é tokenizar. Na entrada da camada curada eu troco o CPF por um token estável por titular, gerado de forma consistente entre cartão e PIX, e guardo o de-para em um cofre com acesso separado e auditado. O analista mantém junção e agrupamento e nunca vê o identificador direto. Deixo claro o trade-off: isso ainda é dado pseudonimizado, então continua sob a LGPD, e a reidentificação segue possível para quem tem o cofre. Por isso não basta o token: preciso de controle de acesso na tabela e de proibição explícita de rejuntar com o cadastro. Se o caso de uso fosse só relatório agregado, eu iria mais longe e entregaria agregado, que sai do escopo da lei. Como aqui ele precisa de grão de cliente, tokenizar é o ponto certo."
+    rubrica:
+      - "Perguntou ou explicitou qual é a necessidade real antes de propor a solução"
+      - "Propôs token estável por titular, consistente entre as duas bases"
+      - "Disse que o de-para fica em cofre separado com acesso auditado"
+      - "Afirmou que pseudonimizado continua sob a LGPD e por quê"
+      - "Ofereceu a alternativa de agregação e disse em que condição ela seria melhor"
+  - tipo: oral
+    enunciado: "Chega um pedido de eliminação de dados de um cliente, encaminhado pelo encarregado. O que acontece no seu pipeline?"
+    respostaModelo: "Começo verificando o escopo, porque eliminação não é absoluta: o que está sob obrigação legal ou regulatória de guarda continua, e eu preciso saber qual parte é essa antes de apagar qualquer coisa. Feito isso, o problema vira localizar o titular em todas as camadas. É aqui que linhagem e catálogo pagam a conta: sem mapa de onde aquele CPF vive, viram semanas de caça. Com formato de tabela como Delta, eu executo DELETE na bronze, silver e gold, e depois preciso do VACUUM para que os arquivos antigos saiam de fato do storage, senão o dado continua lá em versão anterior. Trato à parte backup e log de auditoria, que têm regra própria. Fecho registrando a execução, porque o encarregado precisa provar o atendimento dentro do prazo. O ponto que eu diria na sabatina é que isso se projeta antes: se o desenho não previu eliminação, ela custa caro."
+    rubrica:
+      - "Disse que parte do dado pode permanecer por obrigação legal ou regulatória"
+      - "Citou catálogo ou linhagem como pré-requisito para localizar o titular"
+      - "Mencionou que apagar em formato imutável exige remover versões antigas, por exemplo com VACUUM"
+      - "Tratou backup e log de auditoria como caso separado"
+      - "Disse que a capacidade de eliminar precisa ser prevista no desenho"
+  - tipo: oral
+    enunciado: "Sua zona raw recebe um dump diário completo do cadastro, com CPF, endereço e dados de saúde do seguro. Qual o problema e o que você faz?"
+    respostaModelo: "O problema é que a raw é a zona com maior retenção e menor controle, então é onde o risco se acumula. Além disso, ingerir a tabela inteira porque é mais fácil fere o princípio da necessidade: não é zelo, é exposição. Eu atacaria em três frentes. Na origem, negocio o contrato de ingestão para trazer só os campos que os casos de uso justificam, e o dado de saúde do seguro provavelmente não é um deles. No caminho, aplico tokenização de CPF já na aterrissagem, com o cofre em conta separada. Na zona, fecho o acesso: a raw passa a ser legível só por serviço, nunca por pessoa, com criptografia por chave dedicada no KMS e log de acesso. Se algum caso de uso realmente exigir o dado sensível, ele vira uma tabela à parte, com base legal declarada e acesso nominal. O trade-off é perder flexibilidade de exploração, e eu aceito esse custo."
+    rubrica:
+      - "Nomeou retenção longa e controle fraco como o risco específico da raw"
+      - "Invocou o princípio da necessidade contra o dump completo"
+      - "Propôs proteção na entrada, e não só na camada de consumo"
+      - "Restringiu o acesso humano à raw e citou criptografia com chave gerenciada"
+      - "Reconheceu o custo da decisão em vez de vendê-la como sem trade-off"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre anonimização e pseudonimização está correta?"
+    alternativas:
+      - texto: "Dado anonimizado sai do escopo da LGPD; dado pseudonimizado continua dentro, porque a reversão é possível."
+        correta: true
+        explicacao: "É exatamente a distinção que muda a obrigação. Pseudonimizar reduz risco, não retira o dado da lei."
+      - texto: "Os dois saem do escopo da LGPD, já que em nenhum dos casos o CPF aparece."
+        correta: false
+        explicacao: "A lei olha a possibilidade de associação ao titular, não a presença literal do CPF."
+      - texto: "Pseudonimização é irreversível e anonimização é reversível por chave."
+        correta: false
+        explicacao: "Está invertido. Anonimização é a que precisa ser irreversível por meios razoáveis."
+      - texto: "Tokenização é uma forma de anonimização, porque o token não tem significado."
+        correta: false
+        explicacao: "O token não tem significado, mas o cofre de-para existe. Isso é pseudonimização."
+  - tipo: multipla
+    enunciado: "Quais controles atacam o risco de um usuário legítimo, com acesso concedido, ver mais dado do que precisa?"
+    alternativas:
+      - texto: "Máscara dinâmica em colunas com PII"
+        correta: true
+        explicacao: "Age no momento da consulta e depende de quem pergunta, que é exatamente o cenário."
+      - texto: "Filtro de linha ligado a atributo do usuário"
+        correta: true
+        explicacao: "Restringe o recorte de registros sem multiplicar views."
+      - texto: "Revisão periódica de acesso e log de auditoria de consulta"
+        correta: true
+        explicacao: "Detecta acesso excessivo que os controles preventivos deixaram passar e sustenta a resposta a incidente."
+      - texto: "Criptografia em repouso no bucket do lake"
+        correta: false
+        explicacao: "Protege contra acesso por fora do plano de controle. O usuário legítimo recebe o dado já decifrado."
+      - texto: "TLS entre o cluster e o object storage"
+        correta: false
+        explicacao: "Protege o dado em trânsito contra interceptação, não contra quem tem permissão de leitura."
+---
+
+## Em uma frase
+
+Privacidade em pipeline de banco é decidir, **campo a campo e usuário a usuário**,
+quem pode ver o quê — e provar depois que foi assim que aconteceu.
+
+## Dado pessoal, dado sensível e o teste que importa
+
+A LGPD chama de **dado pessoal** a informação relacionada a pessoa natural
+identificada ou identificável. Repare no "identificável": o teste não é o campo
+isolado, é a chance de chegar na pessoa combinando campos. CEP, data de
+nascimento e valor da fatura, juntos, identificam.
+
+**Dado pessoal sensível** é uma lista fechada: origem racial ou étnica, convicção
+religiosa, opinião política, filiação a sindicato ou a organização religiosa,
+filosófica ou política, dado de saúde ou vida sexual, dado genético e dado
+biométrico. Sensível tem base legal mais estreita e, no seu desenho, deve virar
+tabela à parte com acesso nominal.
+
+<Callout tipo="atencao" titulo="Cuidado com o dado inferido">
+Score de propensão, cluster de comportamento e classificação de risco também são
+dado pessoal quando ligados a alguém identificável. Muita gente protege o cadastro
+e deixa a tabela de modelo aberta.
+</Callout>
+
+## Bases legais, uma linha cada
+
+O art. 7º traz dez hipóteses. Você não precisa recitar, precisa saber que existem
+dez e citar as que aparecem em banco: **consentimento**; **cumprimento de obrigação
+legal ou regulatória**; **execução de políticas públicas**; **estudo por órgão de
+pesquisa**; **execução de contrato**; **exercício regular de direitos** em
+processo; **proteção da vida**; **tutela da saúde**; **legítimo interesse**; e
+**proteção do crédito**. Em banco, a maior parte do tratamento se apoia em contrato,
+obrigação legal e proteção ao crédito — não em consentimento.
+
+Dois princípios do art. 6º mandam no seu pipeline. **Finalidade**: o dado foi
+coletado para um propósito declarado e não pode migrar de propósito no silêncio.
+**Necessidade**: traga o mínimo de campos que resolve o caso de uso. Ingerir a
+tabela inteira do core porque é mais fácil não é precaução, é exposição.
+
+## Direitos do titular e o que cada um cobra de você
+
+<Comparativo
+  colunas={["Direito", "O que o pipeline precisa ter"]}
+  linhas={[
+    ["Confirmação e acesso", "Saber onde o dado daquele titular vive: catálogo e linhagem confiáveis"],
+    ["Correção", "Caminho de atualização que se propague às camadas derivadas, não só ao cadastro"],
+    ["Eliminação", "Capacidade de apagar de verdade, incluindo versões antigas do formato de tabela e cópias em zonas analíticas"],
+    ["Portabilidade", "Exportar os dados do titular em formato estruturado e interoperável, dentro de prazo"],
+    ["Informação sobre compartilhamento", "Registro de com quem o dado foi compartilhado, o que na prática é linhagem para fora"]
+  ]}
+/>
+
+Eliminação e portabilidade são as duas que mais quebram desenho. Formato imutável,
+backup e log de auditoria transformam um DELETE em projeto. O **encarregado** é o
+canal entre titular, ANPD e a empresa — ele não escreve o pipeline, mas depende de
+você para conseguir responder no prazo.
+
+## Anonimizar, pseudonimizar, tokenizar
+
+<Comparativo
+  colunas={["Técnica", "O que faz", "Continua sob a LGPD?"]}
+  linhas={[
+    ["Anonimização", "Remove a possibilidade de associação ao titular por meios razoáveis: agregação, generalização, supressão", "Não"],
+    ["Pseudonimização", "Substitui o identificador por um substituto, mantendo chave de reversão em separado", "Sim"],
+    ["Tokenização", "Troca o valor por um token sem significado, com o de-para em cofre", "Sim"]
+  ]}
+/>
+
+Essa é a distinção que a banca procura: **anonimizado sai do escopo da lei,
+pseudonimizado não**. Hash de CPF é pseudonimização, não anonimização — o universo
+de CPFs é enumerável e a tabela reversa é trivial de montar.
+
+## Mascaramento, criptografia e chave
+
+**Mascaramento estático** grava a versão mascarada em uma cópia: bom para ambiente
+de desenvolvimento e teste. **Mascaramento dinâmico** mantém o dado original e
+decide na consulta o que exibir, conforme quem pergunta.
+
+**Criptografia em repouso** protege contra quem acessa a mídia por fora: snapshot
+copiado, bucket exposto. **Em trânsito**, TLS protege o dado enquanto ele viaja
+entre origem, cluster e storage. Um **KMS** guarda e rotaciona as chaves fora do
+sistema que guarda o dado, e registra cada uso — separar chave de dado é o que faz
+a criptografia valer alguma coisa.
+
+<Callout tipo="erro" titulo="O erro clássico">
+"Está tudo criptografado" não responde à pergunta sobre um analista que vê CPF
+demais. Ele tem permissão: recebe o dado já decifrado. Criptografia e controle de
+acesso resolvem ameaças diferentes.
+</Callout>
+
+## Quem vê o quê: RBAC, ABAC, linha e coluna
+
+<Termo nome="RBAC">Acesso concedido pelo papel do usuário.</Termo> é simples de
+auditar e explode em número de papéis quando as regras ficam finas.
+<Termo nome="ABAC">Acesso decidido por atributos do usuário e do dado no momento da
+consulta.</Termo> escala melhor, custa mais para governar.
+
+Em cima disso vêm os dois recortes: **row-level security** decide quais registros a
+pessoa vê (só a regional dela); **column-level security** decide quais campos ela vê
+dentro dos registros permitidos (e-mail parcialmente oculto).
+
+## Raw, auditoria e retenção
+
+A zona **raw** guarda o dado como veio, com a maior retenção e, normalmente, o menor
+controle. É a pior combinação possível. O tratamento é proteger na entrada:
+tokenizar identificadores na aterrissagem, negociar no contrato de ingestão só os
+campos necessários, e tornar a raw legível por serviço, não por pessoa.
+
+Auditoria fecha o ciclo. Você precisa registrar quem consultou o quê e quando, e
+manter esse log fora do alcance de quem ele audita. Retenção é a outra metade:
+guardar além do necessário é risco, não zelo — e o prazo mínimo de guarda vem de
+obrigação legal e regulatória do domínio [verificar o prazo aplicável ao seu caso].
+
+## Como responder isso em voz alta
+
+Comece separando as duas perguntas: proteger o dado guardado é criptografia e
+chave; controlar quem lê é RBAC, ABAC, linha e coluna. Depois nomeie a técnica
+certa para o caso e diga o que ela **não** resolve. Fechar admitindo o limite da
+sua própria solução é o que soa sênior.

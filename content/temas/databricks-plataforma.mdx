@@ -1,0 +1,261 @@
+---
+slug: databricks-plataforma
+titulo: "Databricks: a plataforma"
+resumo: "Databricks é o Spark gerenciado mais tudo o que falta em volta dele: workspace, clusters, orquestração de jobs, ingestão incremental com Auto Loader e governança com Unity Catalog, rodando sobre o S3 na AWS."
+minutos: 35
+nivel: intermediario
+porQue: "É a plataforma que o banco usa no dia a dia, então a banca deixa de perguntar conceito e passa a perguntar operação: onde roda, quanto custa, quem tem acesso. Errar a diferença entre cluster interativo e cluster de job entrega que você nunca respondeu por uma fatura."
+comoCai: "Como você organizaria o acesso a dados sensíveis dentro do Databricks?"
+feynman: "Explique para o gerente de infraestrutura por que o time de dados precisa do Databricks se a empresa já tem EMR e S3."
+preRequisitos: ["big-data", "lakehouse-delta-lake"]
+errosComuns:
+  - "Dizer que Databricks é o Spark. Databricks é uma plataforma gerenciada construída em volta do Spark, com runtime próprio, catálogo, orquestração e governança; o Spark é o motor dentro dela."
+  - "Rodar pipeline de produção em cluster all-purpose. Além de custar mais por DBU do que job compute, o cluster fica ligado ocioso entre execuções e vira a maior linha da fatura."
+  - "Tratar Unity Catalog como um catálogo de metadados a mais. Ele é o ponto único de permissão, linhagem e auditoria; sem ele, o controle de acesso volta a ser por bucket e some a rastreabilidade."
+  - "Achar que Auto Loader é só um read de diretório. Ele mantém checkpoint do que já foi processado, então reprocessamento não duplica e arquivo novo é detectado sem varrer o diretório inteiro toda vez."
+  - "Confundir schema do Unity Catalog com schema de dados. No namespace de três níveis, schema é o nível intermediário, equivalente ao database; schema de dados é o contrato das colunas."
+  - "Esquecer que o dado continua no S3 do banco. Databricks não guarda os dados: a computação é gerenciada, o armazenamento é da conta AWS da instituição, e isso muda a conversa com segurança."
+preTeste:
+  - enunciado: "Um pipeline roda todo dia às 3h e leva 40 minutos. Que tipo de compute é o mais adequado?"
+    alternativas:
+      - texto: "Job compute (cluster efêmero criado pelo job e encerrado no fim)."
+        correta: true
+        explicacao: "O cluster nasce para a execução e morre depois, sem ociosidade, e a tarifa por DBU de job compute é menor que a de all-purpose."
+      - texto: "All-purpose cluster ligado o dia inteiro, para evitar tempo de subida."
+        correta: false
+        explicacao: "Paga-se 23 horas de ociosidade para economizar minutos de startup, na tarifa mais cara."
+      - texto: "Um cluster all-purpose por analista, para isolar cargas."
+        correta: false
+        explicacao: "Isso multiplica custo e não tem relação com o problema, que é execução agendada."
+  - enunciado: "No Unity Catalog, o que significa o namespace de três níveis?"
+    alternativas:
+      - texto: "catalog.schema.objeto — o objeto pode ser tabela, view, volume, função ou modelo."
+        correta: true
+        explicacao: "É o endereçamento padrão do Unity Catalog e o que permite separar ambientes e domínios com permissão herdada."
+      - texto: "workspace.cluster.tabela"
+        correta: false
+        explicacao: "Cluster é recurso de computação e não faz parte do endereçamento de dados."
+      - texto: "bucket.pasta.arquivo"
+        correta: false
+        explicacao: "Esse é o endereçamento físico no S3, que o Unity Catalog justamente abstrai."
+videos:
+  - id: -4fXiIeWzTE
+    titulo: "Tudo que você precisa saber sobre Databricks (em 12 minutos)"
+    canal: "Matheus Gentil 🎲"
+    duracao: 13
+    porQue: "Panorama rápido das peças da plataforma. Assista anotando, para cada peça, qual problema ela resolve que o Spark sozinho não resolveria."
+  - id: 5iv9VPOumes
+    titulo: "Governança de Dados na prática com Databricks Unity Catalog"
+    canal: "Databricks Brazil"
+    duracao: 57
+    porQue: "Canal oficial em português, e a parte que interessa para a sabatina é a de permissões e linhagem. Não precisa assistir inteiro: vá até entender como o grant e a linhagem funcionam e volte para a lista de perguntas."
+artigos:
+  - titulo: "What is Databricks?"
+    url: "https://docs.databricks.com/aws/en/introduction/"
+    fonte: "Databricks"
+  - titulo: "What is Unity Catalog?"
+    url: "https://docs.databricks.com/aws/en/data-governance/unity-catalog/"
+    fonte: "Databricks"
+  - titulo: "Compute (tipos de computação no Databricks)"
+    url: "https://docs.databricks.com/aws/en/compute/"
+    fonte: "Databricks"
+  - titulo: "What is Auto Loader?"
+    url: "https://docs.databricks.com/aws/en/ingestion/cloud-object-storage/auto-loader/"
+    fonte: "Databricks"
+flashcards:
+  - frente: "Qual é a relação entre Databricks e Apache Spark?"
+    verso: "O Spark é o motor de processamento; o Databricks é a plataforma gerenciada em volta dele, com runtime otimizado, workspace, catálogo, orquestração e governança. Foi criada pelas mesmas pessoas que criaram o Spark."
+  - frente: "O que é o workspace no Databricks?"
+    verso: "O ambiente de trabalho: notebooks, repositórios de código, jobs, clusters e permissões. É a unidade que os times costumam separar por ambiente (dev, homologação, produção)."
+  - frente: "Diferença entre all-purpose cluster e job cluster."
+    verso: "All-purpose é interativo, compartilhado, fica ligado até alguém encerrar e tem tarifa por DBU mais alta. Job cluster nasce quando o job começa, morre quando termina e sai mais barato. Produção agendada vai em job cluster."
+  - frente: "O que muda com o compute serverless?"
+    verso: "A Databricks provisiona e gerencia a capacidade, o tempo de subida cai muito e você deixa de administrar VM e autoscaling. Em troca, perde parte do controle fino de configuração do cluster."
+  - frente: "O que são Jobs e Workflows no Databricks?"
+    verso: "A orquestração nativa: um job tem tarefas com dependência entre si, agendamento, política de retentativa, notificação e histórico de execução. Evita ter que subir um Airflow só para encadear notebooks."
+  - frente: "O que o Auto Loader resolve?"
+    verso: "Ingestão incremental de arquivos que chegam no object storage. Ele mantém checkpoint do que já processou, detecta arquivo novo sem revarrer tudo e trata inferência e evolução de schema, inclusive com coluna de dado resgatado."
+  - frente: "O que são Delta Live Tables?"
+    verso: "Uma forma declarativa de definir pipelines: você declara as tabelas e as regras de qualidade (expectations), e a plataforma cuida da ordem de execução, do estado incremental e do tratamento de erro."
+  - frente: "O que é o Unity Catalog?"
+    verso: "A camada única de governança de dados e IA do Databricks: namespace de três níveis, permissões, linhagem, auditoria e compartilhamento, válidos para todos os workspaces ligados ao mesmo metastore."
+  - frente: "Como se endereça um objeto no Unity Catalog?"
+    verso: "catalog.schema.objeto. Tabelas, views, volumes, funções e modelos seguem esse padrão de três níveis."
+  - frente: "Que controles finos o Unity Catalog oferece além do GRANT em tabela?"
+    verso: "Permissão por coluna via views, máscara de coluna e filtro de linha, além de linhagem que mostra quem consome cada tabela e auditoria de quem consultou o quê."
+  - frente: "Onde ficam os dados quando o banco usa Databricks na AWS?"
+    verso: "No S3 da própria conta AWS da instituição. O Databricks gerencia o plano de controle e o provisionamento de computação; o armazenamento continua sendo do cliente."
+  - frente: "Por que Unity Catalog importa especialmente em banco?"
+    verso: "Porque substitui permissão por bucket, que é grosseira e não sabe o que é uma coluna de CPF, por permissão no nível do objeto, com máscara, filtro e trilha de auditoria — que é o que a LGPD e o regulador pedem."
+  - frente: "Qual é o risco de deixar todo mundo criar cluster à vontade?"
+    verso: "Custo sem teto e ambiente inconsistente. O controle é por cluster policy, que limita tipo de máquina, autoscaling, tempo de ociosidade e tags de rateio."
+drills:
+  - titulo: "Que peça da plataforma resolve isso?"
+    instrucao: "Diga qual recurso do Databricks você usaria em cada caso. Justifique com custo ou com governança, porque é assim que a banca puxa a repergunta."
+    opcoes: ["Job compute", "All-purpose cluster", "Serverless", "Auto Loader", "Jobs/Workflows", "Delta Live Tables", "Unity Catalog"]
+    itens:
+      - enunciado: "Analista explorando dados de fraude num notebook durante a tarde."
+        resposta: "All-purpose cluster"
+        explicacao: "Trabalho interativo é o caso legítimo do all-purpose. Configure encerramento automático por ociosidade."
+      - enunciado: "Pipeline noturno de fechamento de extrato, agendado e sem interação humana."
+        resposta: "Job compute"
+        explicacao: "Cluster efêmero, sem ociosidade e com tarifa por DBU menor."
+      - enunciado: "Arquivos de retorno do adquirente caem no S3 ao longo do dia e precisam ser carregados sem duplicar."
+        resposta: "Auto Loader"
+        explicacao: "Checkpoint de arquivos já processados garante exatamente-uma-vez na ingestão sem varrer o diretório inteiro."
+      - enunciado: "Três notebooks precisam rodar em ordem, com retentativa e alerta em caso de falha."
+        resposta: "Jobs/Workflows"
+        explicacao: "Orquestração nativa com dependência entre tarefas, retry e notificação."
+      - enunciado: "O time quer declarar as tabelas do pipeline e as regras de qualidade, deixando a ordem de execução para a plataforma."
+        resposta: "Delta Live Tables"
+        explicacao: "Abordagem declarativa com expectations de qualidade e resolução automática de dependência."
+      - enunciado: "Ciência de dados precisa da tabela de transações, mas sem enxergar o CPF em claro."
+        resposta: "Unity Catalog"
+        explicacao: "Máscara de coluna ou view com permissão específica, em vez de criar uma cópia paralela mascarada."
+      - enunciado: "Consulta ad hoc rápida de um analista que não quer esperar cluster subir."
+        resposta: "Serverless"
+        explicacao: "Tempo de subida muito menor e nenhuma administração de VM; o trade-off é menos controle de configuração."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você organizaria o acesso a dados sensíveis dentro do Databricks, num banco?"
+    respostaModelo: "Eu partiria do Unity Catalog como ponto único de permissão, porque acesso por bucket do S3 é grosseiro demais: ele não sabe o que é uma coluna de CPF. Primeiro, desenho o namespace de três níveis com intenção: catálogo por ambiente ou domínio, schema por assunto, e nome de tabela que diga a camada. Depois, concedo permissão a grupo, nunca a usuário, e mapeio esses grupos ao diretório corporativo. Para o dado sensível em si, uso máscara de coluna e filtro de linha, para que o mesmo objeto sirva a perfis diferentes sem eu criar cópias mascaradas que depois divergem. A raw fica restrita à engenharia de ingestão. Ligo linhagem e auditoria para saber quem consumiu o quê, que é o que o regulador pede. E fecho o cerco na computação: cluster policy para impedir configuração fora do padrão, e acesso ao S3 via storage credential do próprio Unity Catalog, não via chave espalhada em notebook."
+    rubrica:
+      - "Colocou o Unity Catalog como ponto único de permissão, em vez de acesso por bucket"
+      - "Citou o namespace de três níveis e um critério de organização (ambiente, domínio ou camada)"
+      - "Propôs controle fino: máscara de coluna, filtro de linha ou view, em vez de cópia mascarada"
+      - "Mencionou permissão por grupo e trilha de auditoria ou linhagem"
+      - "Tratou também da computação: cluster policy ou credenciais gerenciadas em vez de chave em notebook"
+  - tipo: oral
+    enunciado: "A fatura do Databricks dobrou em dois meses sem aumento de volume de dados. Como você investigaria?"
+    respostaModelo: "Eu começaria separando computação de armazenamento, porque são contas diferentes e a causa quase sempre está na computação. Olho o consumo por tipo de compute: se pipeline de produção está rodando em cluster all-purpose, já achei metade do problema, porque a tarifa por DBU é maior e o cluster fica ligado ocioso entre execuções. Depois checo tempo de ociosidade e se os clusters têm encerramento automático configurado. Em seguida, olho autoscaling: máximo de workers alto demais faz um job mal escrito consumir tudo que puder. Uso as tags de rateio para descobrir qual time e qual job cresceram, e comparo a duração das execuções ao longo do tempo, porque job que ficou mais lento por small files ou por shuffle também custa mais. A correção costuma ser cluster policy limitando tipo de máquina e teto de workers, migrar produção para job compute e rodar OPTIMIZE onde a ingestão fragmentou a tabela."
+    rubrica:
+      - "Separou computação de armazenamento antes de investigar"
+      - "Identificou uso de all-purpose em produção como suspeita principal"
+      - "Citou ao menos duas alavancas concretas: encerramento por ociosidade, teto de autoscaling, cluster policy ou tags de rateio"
+      - "Ligou degradação de performance a custo, com uma causa técnica plausível"
+  - tipo: unica
+    enunciado: "Onde ficam fisicamente os dados de um lakehouse Databricks rodando na AWS?"
+    alternativas:
+      - texto: "No S3 da conta AWS da própria instituição."
+        correta: true
+        explicacao: "O Databricks gerencia plano de controle e computação; o armazenamento permanece na conta do cliente."
+      - texto: "Em um banco de dados proprietário dentro da conta Databricks."
+        correta: false
+        explicacao: "Não há armazenamento proprietário: as tabelas são arquivos Delta em object storage."
+      - texto: "No disco local dos nós do cluster, replicado entre eles."
+        correta: false
+        explicacao: "Disco local é temporário e some quando o cluster termina; ele serve a cache e spill, não a persistência."
+      - texto: "No Unity Catalog, que armazena dados e metadados juntos."
+        correta: false
+        explicacao: "O Unity Catalog guarda metadados, permissões e linhagem, não os dados."
+  - tipo: multipla
+    enunciado: "Quais medidas reduzem custo de computação no Databricks sem sacrificar governança?"
+    alternativas:
+      - texto: "Migrar pipelines agendados de all-purpose para job compute."
+        correta: true
+        explicacao: "Elimina ociosidade e usa a tarifa por DBU mais baixa."
+      - texto: "Configurar encerramento automático por ociosidade nos clusters interativos."
+        correta: true
+        explicacao: "Cluster interativo esquecido ligado é uma das fontes de desperdício mais comuns."
+      - texto: "Aplicar cluster policies com teto de workers e tipos de máquina permitidos."
+        correta: true
+        explicacao: "Coloca limite antes do gasto acontecer, em vez de descobrir na fatura."
+      - texto: "Dar permissão de administrador a todos, para ninguém ficar bloqueado."
+        correta: false
+        explicacao: "Reduz atrito e destrói governança; não tem relação com custo."
+      - texto: "Desligar a auditoria do Unity Catalog para diminuir escrita de log."
+        correta: false
+        explicacao: "A economia é irrelevante e o custo regulatório de não ter trilha é alto."
+---
+
+## Em uma frase
+
+Databricks é a **plataforma gerenciada construída em volta do Apache Spark**:
+ela entrega o motor, mais o ambiente de trabalho, a orquestração, a ingestão
+incremental e a governança que o Spark sozinho não tem.
+
+## Databricks não é o Spark
+
+A distinção parece pedante até a banca perguntar. O Spark é um motor de
+processamento distribuído: você o instala, configura, orquestra e monitora. O
+Databricks empacota o Spark num runtime próprio e acrescenta o que falta em
+volta dele — workspace, catálogo, permissões, agendamento, monitoramento e
+provisionamento de máquina.
+
+Na AWS, o desenho é: o **plano de controle** fica com a Databricks, a
+**computação** roda em máquinas provisionadas para você, e os **dados continuam
+no S3 da conta da própria instituição**. Isso importa na sabatina porque muda a
+conversa com segurança: o banco não está entregando os dados, está terceirizando
+o gerenciamento da computação.
+
+## As peças que você precisa saber nomear
+
+<Comparativo
+  colunas={["Peça", "Para que serve", "Onde erra quem não usou"]}
+  linhas={[
+    ["Workspace", "Ambiente com notebooks, código, jobs e permissões", "Misturar dev e produção no mesmo workspace"],
+    ["Notebook", "Interface de desenvolvimento e exploração", "Deixar lógica de produção só no notebook, sem versionamento"],
+    ["Cluster", "A computação que executa o Spark", "Escolher o tipo errado e pagar ociosidade"],
+    ["Jobs / Workflows", "Orquestração nativa com dependência, retry e alerta", "Subir um orquestrador externo para encadear dois notebooks"],
+    ["Auto Loader", "Ingestão incremental de arquivos do object storage", "Reler o diretório inteiro toda madrugada"],
+    ["Unity Catalog", "Governança: permissão, linhagem, auditoria", "Controlar acesso por bucket e perder rastreabilidade"]
+  ]}
+/>
+
+## Escolha de cluster é decisão de custo
+
+Esta é a parte em que a banca separa quem já respondeu por uma fatura.
+
+<Comparativo
+  colunas={["Tipo", "Quando usar", "Efeito no custo"]}
+  linhas={[
+    ["All-purpose", "Exploração interativa em notebook, trabalho compartilhado", "Fica ligado até alguém encerrar e tem a tarifa por DBU mais alta"],
+    ["Job cluster", "Pipeline agendado, execução automatizada", "Nasce com o job e morre no fim: sem ociosidade e com tarifa menor"],
+    ["Serverless", "Consulta e job em que o tempo de subida incomoda", "Sem VM para administrar e partida rápida; menos controle fino de configuração"]
+  ]}
+/>
+
+<Callout tipo="erro" titulo="O clássico caro">
+Rodar pipeline de produção em cluster all-purpose ligado 24 horas. Você paga a
+tarifa mais alta e ainda paga as 23 horas em que nada roda. A correção é
+migrar para job compute e aplicar cluster policy para que ninguém refaça isso.
+</Callout>
+
+## Auto Loader: ingestão incremental sem gambiarra
+
+Arquivo caindo em S3 ao longo do dia é o padrão de ingestão bancária: retorno de
+adquirente, arquivo de câmbio, extração do core. O Auto Loader mantém um
+<Termo nome="checkpoint">Registro persistente de quais arquivos já foram
+processados, para que a próxima execução continue de onde parou.</Termo>
+Com isso, reprocessamento não duplica, arquivo novo é detectado sem revarrer o
+diretório inteiro e a evolução de schema é tratada em vez de derrubar o job.
+
+## Delta Live Tables, em poucas linhas
+
+DLT é a forma declarativa de escrever pipeline: você declara as tabelas e as
+regras de qualidade (as *expectations*), e a plataforma resolve a ordem de
+execução, o estado incremental e o que fazer com o registro que viola a regra —
+descartar, deixar passar com aviso ou falhar. Vale citar como opção; não invente
+detalhe de configuração que você não usou. [verificar o nome comercial vigente
+do produto na documentação, que a Databricks reposicionou sob a família Lakeflow]
+
+## Unity Catalog: onde a governança acontece
+
+Sem Unity Catalog, permissão em lakehouse é permissão de bucket, e bucket não
+sabe o que é coluna de CPF. Com ele, você endereça tudo em três níveis —
+`catalog.schema.objeto` — e concede acesso no nível do objeto.
+
+<Passos itens={[
+  "Desenhe o namespace com intenção: catálogo por ambiente ou domínio, schema por assunto.",
+  "Conceda a grupos mapeados no diretório corporativo, nunca a usuários individuais.",
+  "Use máscara de coluna e filtro de linha em vez de criar cópias mascaradas que divergem.",
+  "Ative linhagem e auditoria: é o que responde 'quem consultou o CPF desse cliente'.",
+  "Dê acesso ao S3 por credencial gerenciada no catálogo, não por chave dentro do notebook."
+]} />
+
+<Callout tipo="dica" titulo="Como responder a pergunta-chave">
+Comece dizendo por que acesso por bucket não serve. Depois desça para o
+namespace de três níveis, grupos, máscara e filtro. Termine com auditoria e
+linhagem, e acrescente a camada de computação (cluster policy, credencial
+gerenciada). Quem só fala de GRANT em tabela responde metade.
+</Callout>

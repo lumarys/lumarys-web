@@ -1,0 +1,107 @@
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: "Motivo do deploy manual (opcional)"
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    # O ambiente é o que restringe o papel OIDC: o `sub` da role exige
+    # environment:production. Sem isso, qualquer branch publicaria.
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+          NEXT_PUBLIC_COGNITO_CLIENT_ID: ${{ vars.NEXT_PUBLIC_COGNITO_CLIENT_ID }}
+
+      - name: credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: assets com hash (cache longo)
+        run: |
+          aws s3 sync out/ s3://${{ vars.SITE_BUCKET }}/ \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "*.html" --exclude "*.txt" --exclude "*.xml" --exclude "*.md" --exclude "*.json" \
+            --no-cli-pager
+
+      - name: html e metadados (revalidar sempre)
+        run: |
+          aws s3 sync out/ s3://${{ vars.SITE_BUCKET }}/ \
+            --cache-control "public, max-age=0, s-maxage=300, must-revalidate" \
+            --exclude "*" \
+            --include "*.html" --include "*.txt" --include "*.xml" --include "*.md" --include "*.json" \
+            --no-cli-pager
+
+      - name: invalidar cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*" --no-cli-pager
+
+      - name: avisar buscadores (IndexNow)
+        continue-on-error: true
+        env:
+          CHAVE: ${{ vars.INDEXNOW_KEY }}
+        run: |
+          if [ -z "$CHAVE" ]; then echo "sem chave IndexNow; pulando"; exit 0; fi
+          node scripts/indexnow.mjs "$CHAVE"
+
+  api:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: empacotar a API de progresso
+        run: node scripts/bundle-lambda.mjs services/progress-api
+
+      - name: credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: publicar código da Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ vars.LAMBDA_PROGRESSO }} \
+            --zip-file fileb://services/progress-api/dist/lambda.zip \
+            --no-cli-pager

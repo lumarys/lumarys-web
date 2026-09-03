@@ -1,0 +1,298 @@
+---
+slug: spark-avancado
+titulo: "Spark avançado: DataFrame, tuning e streaming"
+resumo: "Como o Spark realmente executa: Catalyst planeja, AQE replaneja em tempo de execução e o shuffle é onde o tempo vai embora. Skew, broadcast, cache, UDF em Python e as noções de Structured Streaming que a banca cobra."
+minutos: 40
+nivel: avancado
+porQue: "É o tema em que a sabatina para de perguntar conceito e começa a perguntar diagnóstico. Quem sabe nomear shuffle, skew e broadcast e dizer como confirmaria cada hipótese na Spark UI mostra que já operou job em produção."
+comoCai: "Seu job passou de 10 para 40 minutos sem mudar o código. Por onde começa?"
+feynman: "Explique para um gestor por que redistribuir dados entre máquinas é a parte cara de um processamento distribuído, usando uma analogia sem falar em Spark."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Culpar o cluster antes de olhar o plano e a Spark UI. Job que dobra de tempo sem mudança de código quase sempre mudou de dado: volume, distribuição de chave ou quantidade de arquivos."
+  - "Usar repartition onde coalesce bastava. Repartition dispara shuffle completo; coalesce só junta partições existentes e é a escolha certa para reduzir número de arquivos de saída."
+  - "Fazer cache de tudo. Cache ocupa memória do executor, pode empurrar dado para disco e piorar o job; só compensa quando o mesmo DataFrame é reutilizado várias vezes."
+  - "Escrever UDF em Python por comodidade. A serialização entre JVM e Python custa caro e o Catalyst não enxerga dentro da função, então ele não otimiza nada ali."
+  - "Achar que AQE resolve todo skew. AQE trata partições de shuffle desbalanceadas em alguns tipos de join, mas não conserta concentração extrema numa única chave nem skew antes do shuffle."
+  - "Confundir broadcast join com broadcast variable. Broadcast join é a estratégia de enviar a tabela pequena inteira para cada executor; variável de broadcast é outro mecanismo, para dado auxiliar."
+  - "Aumentar shuffle partitions sem olhar o tamanho da partição. Partição pequena demais vira sobrecarga de tarefa; grande demais vira spill em disco."
+preTeste:
+  - enunciado: "Na Spark UI, um stage tem 200 tarefas: 199 terminam em 20 segundos e uma leva 25 minutos. Qual a hipótese mais provável?"
+    alternativas:
+      - texto: "Cluster subdimensionado; falta executor."
+        correta: false
+        explicacao: "Se faltasse recurso, o atraso seria distribuído entre as tarefas, não concentrado numa só."
+      - texto: "Data skew: uma chave concentra volume desproporcional na partição daquela tarefa."
+        correta: true
+        explicacao: "Tarefa isolada muito mais lenta é a assinatura clássica de distribuição desigual de chave."
+      - texto: "O formato de arquivo está errado."
+        correta: false
+        explicacao: "Formato ruim degradaria a leitura de todas as tarefas, não de uma."
+  - enunciado: "Você junta a tabela de transações, com bilhões de linhas, com a dimensão de bandeiras, com 8 linhas. O que deveria acontecer?"
+    alternativas:
+      - texto: "Sort-merge join, com shuffle dos dois lados."
+        correta: false
+        explicacao: "Embaralhar bilhões de linhas por causa de uma tabela de 8 linhas é desperdício puro."
+      - texto: "Broadcast join: a tabela pequena é enviada inteira a cada executor e o shuffle do lado grande é eliminado."
+        correta: true
+        explicacao: "É a otimização mais rentável em join com lado pequeno, e o Spark costuma escolhê-la sozinho quando a estimativa de tamanho é confiável."
+      - texto: "Cartesian join, porque a tabela pequena cabe em memória."
+        correta: false
+        explicacao: "Produto cartesiano não tem relação com o tamanho da tabela; seria um erro de correlação."
+videos:
+  - id: 6ZeC1OYCNag
+    titulo: "Resolvendo Problemas de Performance no Apache Spark"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 78
+    porQue: "É o vídeo mais próximo de uma sabatina de tuning em português: diagnóstico guiado, não lista de dicas. Com pouco tempo, vá direto aos blocos de shuffle, skew e join, que são os que a banca cobra."
+  - id: jsOclRka2mk
+    titulo: "O que é o Adaptive Query Execution (AQE) no Apache Spark?"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 5
+    porQue: "Cinco minutos para fechar o conceito de replanejamento em tempo de execução. Guarde as três otimizações que ele cita: elas são a resposta pronta para a pergunta sobre AQE."
+artigos:
+  - titulo: "Performance Tuning - Spark SQL"
+    url: "https://spark.apache.org/docs/latest/sql-performance-tuning.html"
+    fonte: "Apache Spark"
+  - titulo: "Adaptive query execution"
+    url: "https://docs.databricks.com/aws/en/optimizations/aqe"
+    fonte: "Databricks"
+flashcards:
+  - frente: "Por que DataFrame e Spark SQL são a API atual, e não RDD?"
+    verso: "Porque expressam a intenção de forma declarativa, o que permite ao Catalyst otimizar. Com RDD você descreve o como, e o motor não tem o que reescrever."
+  - frente: "O que o Catalyst faz?"
+    verso: "Analisa, otimiza logicamente e gera o plano físico da consulta: resolve nomes, empurra filtros e projeções para perto da leitura, reordena operações e escolhe estratégia de join."
+  - frente: "O que é AQE?"
+    verso: "Replanejamento em tempo de execução usando estatísticas reais dos estágios já concluídos: junta partições de shuffle pequenas, divide partições desbalanceadas e converte sort-merge em broadcast join."
+  - frente: "O que é shuffle?"
+    verso: "Redistribuição de dados entre executores para agrupar por chave. Envolve escrita em disco, transferência pela rede e leitura do outro lado; é o operador mais caro do Spark."
+  - frente: "O que provoca shuffle?"
+    verso: "join por chave, groupBy e agregação, distinct, repartition, orderBy e window function com partição diferente da atual."
+  - frente: "repartition contra coalesce."
+    verso: "repartition redistribui com shuffle completo e pode aumentar ou reduzir o número de partições. coalesce só funde partições vizinhas, sem shuffle, e serve para reduzir arquivos de saída."
+  - frente: "Quando o Spark escolhe broadcast join sozinho?"
+    verso: "Quando estima que um dos lados cabe no limite configurado de broadcast. A estimativa vem da estatística da fonte; se ela estiver errada ou ausente, ele não escolhe."
+  - frente: "Como perceber data skew?"
+    verso: "Na Spark UI, dentro de um stage, quase todas as tarefas terminam rápido e uma ou poucas demoram muito, com volume de shuffle read desproporcional."
+  - frente: "Como tratar data skew?"
+    verso: "Habilitar o skew join do AQE, isolar as chaves quentes e tratá-las à parte, aplicar salting acrescentando um sufixo aleatório à chave, ou eliminar o join com broadcast quando o outro lado for pequeno."
+  - frente: "O que é salting?"
+    verso: "Acrescentar um componente aleatório à chave de join para espalhar uma chave quente em várias partições, replicando o lado pequeno para cada valor do sal."
+  - frente: "Quando NÃO usar cache?"
+    verso: "Quando o DataFrame é lido uma vez só, quando ele não cabe na memória dos executores e quando a leitura da origem já é barata. Cache mal usado tira memória de execução e provoca spill."
+  - frente: "Por que evitar UDF em Python, e o que usar no lugar?"
+    verso: "Cada linha atravessa a fronteira JVM-Python com serialização e o Catalyst não enxerga a lógica interna, então nada é otimizado. Prefira função nativa do Spark SQL; na falta dela, UDF vetorizada com Pandas, que processa em lote via Arrow."
+  - frente: "Como o Structured Streaming processa dados?"
+    verso: "Por micro-batches: o stream é tratado como uma tabela que cresce, e cada intervalo de trigger dispara um pequeno job em lote sobre o que chegou."
+  - frente: "Para que serve o checkpoint no streaming?"
+    verso: "Guardar o progresso, ou seja, até onde a fonte foi consumida, e o estado das agregações, permitindo retomar depois de falha sem reprocessar nem perder dado."
+drills:
+  - titulo: "Diagnostique o job lento"
+    instrucao: "Para cada sintoma, diga a hipótese mais provável e como você a confirmaria. Fale em voz alta antes de conferir, como se estivesse na sabatina."
+    itens:
+      - enunciado: "Um stage com 200 tarefas: 199 terminam em 20 segundos, uma leva 25 minutos."
+        resposta: "Data skew numa chave de join ou de agregação"
+        explicacao: "Confirmação: comparar shuffle read entre as tarefas na Spark UI e contar linhas por chave nos dados de entrada. Tratamento: skew join do AQE, isolamento da chave quente ou salting."
+      - enunciado: "O job lê a tabela inteira embora a consulta filtre por uma única data particionada."
+        resposta: "Poda de partição não aconteceu"
+        explicacao: "Confirmação: ler o plano e ver se o filtro virou partition filter. Causa comum: função aplicada sobre a coluna de partição ou comparação entre tipos diferentes."
+      - enunciado: "O job passou de 10 para 40 minutos e ninguém alterou o código."
+        resposta: "Mudou o dado, não o código: volume, distribuição de chave ou quantidade de arquivos"
+        explicacao: "Confirmação: comparar volume lido e número de arquivos com execuções anteriores. Muitos arquivos pequenos após ingestão frequente é o suspeito número um."
+      - enunciado: "A Spark UI mostra spill de memória para disco no estágio de agregação."
+        resposta: "Partições grandes demais para a memória do executor"
+        explicacao: "Confirmação: tamanho médio de partição no stage. Tratamento: aumentar o número de partições de shuffle ou reduzir o que é carregado antes da agregação."
+      - enunciado: "Uma tabela de 8 linhas é juntada com bilhões e o plano mostra sort-merge join."
+        resposta: "Broadcast não aconteceu por falta de estatística"
+        explicacao: "Confirmação: ver a estimativa de tamanho no plano. Tratamento: atualizar estatísticas ou dar hint de broadcast."
+      - enunciado: "O job escreve 40 mil arquivos minúsculos na tabela de saída."
+        resposta: "Número de partições de saída alto demais"
+        explicacao: "Tratamento: coalesce antes da escrita, em vez de repartition, para não pagar shuffle só para reduzir arquivo. E rodar compaction na tabela."
+      - enunciado: "Uma transformação simples de string sobre 2 bilhões de linhas domina o tempo do job."
+        resposta: "UDF em Python no caminho quente"
+        explicacao: "Confirmação: procurar BatchEvalPython no plano. Tratamento: trocar por função nativa do Spark SQL ou, no limite, por UDF vetorizada com Pandas."
+      - enunciado: "O mesmo DataFrame intermediário é usado em cinco saídas diferentes e o job recomputa tudo cinco vezes."
+        resposta: "Falta de cache ou persist no ponto de reuso"
+        explicacao: "Aqui o cache paga: uma materialização evita cinco recomputações da mesma cadeia de transformações."
+perguntas:
+  - tipo: oral
+    enunciado: "Seu job Spark passou de 10 para 40 minutos sem mudança de código. Por onde você começa?"
+    respostaModelo: "Parto do princípio de que mudou o dado, não o código. Primeiro comparo a execução lenta com uma boa: volume lido, número de arquivos de entrada, número de partições e duração por stage. Na Spark UI eu procuro qual stage cresceu e olho a distribuição das tarefas dentro dele. Se uma tarefa destoa, é skew, e eu confirmo contando linhas por chave de join. Se todas cresceram junto, é volume ou fragmentação, e o suspeito é excesso de arquivos pequenos vindos de ingestão frequente. Também confiro se a poda de partição continua acontecendo no plano, porque mudança de tipo na origem ou filtro com função em cima da coluna mata a poda silenciosamente. Só depois eu penso em configuração: partições de shuffle, limite de broadcast, skew join do AQE. Encerro registrando o que mudou, porque se foi o dado, isso vai voltar."
+    rubrica:
+      - "Assumiu mudança no dado como hipótese inicial e disse como compararia com execução anterior"
+      - "Nomeou a Spark UI e o que olharia nela: stage, distribuição de tarefas, shuffle read"
+      - "Distinguiu skew de crescimento uniforme e disse como confirmar cada um"
+      - "Verificou poda de partição no plano"
+      - "Deixou ajuste de configuração para depois do diagnóstico"
+  - tipo: oral
+    enunciado: "Explique o que é shuffle, por que ele é caro e o que você faz para reduzi-lo num pipeline de transações."
+    respostaModelo: "Shuffle é a redistribuição dos dados entre executores para agrupar as linhas da mesma chave no mesmo lugar. É caro porque envolve serializar, escrever em disco local, transferir pela rede e ler do outro lado, e porque cria uma barreira: o próximo estágio só começa quando o anterior termina. Provocam shuffle join por chave, groupBy, distinct, orderBy e repartition. Para reduzir num pipeline de transações eu faço quatro coisas. Filtro e projeto o mais cedo possível, para atravessar menos dado. Uso broadcast quando um lado é pequeno, como dimensão de bandeira ou de canal, eliminando o shuffle do lado grande. Evito repartition desnecessário e uso coalesce quando só quero reduzir arquivo de saída. E cuido do particionamento físico por data, para que a poda diminua o volume antes do join. Se ainda sobrar shuffle, aí eu ajusto o número de partições para o tamanho ficar razoável e evitar spill."
+    rubrica:
+      - "Definiu shuffle como redistribuição por chave, citando disco e rede"
+      - "Mencionou a barreira entre estágios"
+      - "Listou pelo menos três operações que provocam shuffle"
+      - "Deu ações concretas de redução, incluindo broadcast e filtrar cedo"
+      - "Distinguiu repartition de coalesce corretamente"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre UDF em Python no Spark é correta?"
+    alternativas:
+      - texto: "O Catalyst otimiza a lógica interna da UDF como faria com uma expressão nativa."
+        correta: false
+        explicacao: "A UDF é uma caixa-preta para o otimizador; ele não consegue empurrar filtro nem reescrever a lógica interna."
+      - texto: "Cada linha atravessa a fronteira entre JVM e Python com custo de serialização, e o otimizador não enxerga dentro da função."
+        correta: true
+        explicacao: "São exatamente os dois motivos para preferir função nativa ou, na falta dela, UDF vetorizada com Pandas."
+      - texto: "UDF em Python é mais rápida que a função nativa equivalente porque roda fora da JVM."
+        correta: false
+        explicacao: "É o contrário: sair da JVM é justamente o que custa."
+      - texto: "UDF em Python impede o uso de DataFrame e obriga a voltar para RDD."
+        correta: false
+        explicacao: "Ela funciona com DataFrame; o problema é de desempenho e de otimização, não de compatibilidade."
+  - tipo: multipla
+    enunciado: "Quais medidas fazem sentido diante de data skew num join de transações por id_conta?"
+    alternativas:
+      - texto: "Habilitar o tratamento de skew join do AQE."
+        correta: true
+        explicacao: "Ele divide partições desbalanceadas em subpartições durante a execução."
+      - texto: "Isolar as chaves mais frequentes e processá-las em um caminho separado."
+        correta: true
+        explicacao: "Tratar as chaves quentes à parte e unir o resultado é eficaz quando são poucas e conhecidas."
+      - texto: "Aplicar salting, acrescentando sufixo aleatório à chave e replicando o lado menor."
+        correta: true
+        explicacao: "É a solução manual clássica quando o AQE não dá conta."
+      - texto: "Trocar o join por broadcast, se o outro lado for pequeno o bastante."
+        correta: true
+        explicacao: "Sem shuffle não há partição desbalanceada; o skew desaparece com o join."
+      - texto: "Aumentar a memória do driver."
+        correta: false
+        explicacao: "O gargalo está numa tarefa de executor; memória de driver não tem relação com isso."
+---
+
+## Em uma frase
+
+Spark avançado é saber que **Catalyst planeja, AQE replaneja e o shuffle é onde o
+tempo vai embora** — e conseguir provar cada hipótese na Spark UI.
+
+## DataFrame e Spark SQL: por que a API mudou
+
+Com RDD você descreve **como** processar; o motor executa o que você mandou.
+Com DataFrame e Spark SQL você descreve **o que** quer, e aí o otimizador tem
+espaço para reescrever. Essa é a razão técnica da mudança, não preferência de
+sintaxe. Se a banca perguntar quando usar RDD, a resposta honesta é: quase
+nunca, só em manipulação de baixo nível que a API estruturada não expressa.
+
+## Catalyst
+
+<Termo nome="Catalyst">Otimizador de consultas do Spark: analisa a expressão, aplica regras de otimização lógica, gera planos físicos candidatos e escolhe um.</Termo>
+
+O que ele faz de mais visível no dia a dia:
+
+<Passos itens={[
+  "Empurra o filtro para perto da leitura (predicate pushdown), inclusive para dentro do Parquet.",
+  "Empurra a projeção: se você usa 3 colunas, ele não lê as outras 57.",
+  "Poda partições quando o filtro bate na coluna de particionamento.",
+  "Reordena joins e escolhe a estratégia de cada um: broadcast, sort-merge ou hash.",
+  "Gera código Java especializado para o estágio, em vez de interpretar operador por operador."
+]} />
+
+O ponto prático: **tudo isso depende de o Catalyst enxergar sua lógica**. É por
+isso que UDF em Python custa caro — ela é opaca para o otimizador.
+
+## AQE: replanejar durante a execução
+
+O plano do Catalyst nasce de estimativas. AQE usa **estatísticas reais** dos
+estágios já concluídos para corrigir o plano no meio do caminho. Três
+otimizações que valem decorar:
+
+- Junta partições de shuffle pequenas demais, evitando milhares de tarefas
+  minúsculas.
+- Divide partições de shuffle desbalanceadas, atacando skew em alguns tipos de
+  join.
+- Converte sort-merge join em broadcast join quando descobre que um lado é
+  pequeno de verdade.
+
+<Callout tipo="atencao" titulo="AQE não é bala de prata">
+Ele atua sobre partições de shuffle. Concentração extrema numa única chave, ou
+desbalanceamento que existe antes do shuffle, continuam pedindo salting ou
+tratamento manual das chaves quentes.
+</Callout>
+
+## Shuffle: o operador caro
+
+Shuffle é redistribuir dados entre executores para que as linhas da mesma chave
+fiquem juntas. Custa por três motivos somados: serialização e escrita em disco
+local, transferência pela rede, e a **barreira** — o próximo estágio só começa
+quando o anterior termina inteiro.
+
+Provocam shuffle: `join` por chave, `groupBy` e agregações, `distinct`,
+`orderBy`, `repartition` e window function cuja partição difere da atual.
+
+<Comparativo
+  colunas={["", "repartition", "coalesce"]}
+  linhas={[
+    ["Faz shuffle", "Sim, completo", "Não"],
+    ["Pode aumentar partições", "Sim", "Não, só reduz"],
+    ["Distribuição resultante", "Equilibrada", "Pode ficar desigual"],
+    ["Uso típico", "Rebalancear antes de um join pesado", "Reduzir número de arquivos antes de escrever"]
+  ]}
+/>
+
+## Broadcast join
+
+Quando um lado do join é pequeno, o Spark envia a tabela inteira para cada
+executor e elimina o shuffle do lado grande. Junta transações com a dimensão de
+bandeira sem embaralhar bilhões de linhas.
+
+Ele escolhe sozinho quando **estima** que o lado cabe no limite configurado. A
+estimativa vem das estatísticas da fonte; sem elas, ou com elas desatualizadas,
+o plano cai em sort-merge join. Quando você vê isso no plano, atualize
+estatísticas — e só então considere um hint.
+
+## Data skew
+
+<Termo nome="data skew">Distribuição desigual das chaves, em que uma ou poucas concentram volume desproporcional e caem todas na mesma partição.</Termo>
+
+**Como perceber**: na Spark UI, dentro de um stage, quase todas as tarefas
+terminam rápido e uma ou poucas demoram muito, com shuffle read muito maior.
+Confirme contando linhas por chave.
+
+**Como tratar**, em ordem de esforço: habilitar o skew join do AQE; usar
+broadcast, se o outro lado for pequeno; isolar as chaves quentes num caminho
+separado e unir o resultado; e, por último, **salting** — acrescentar um sufixo
+aleatório à chave para espalhá-la em várias partições, replicando o lado menor
+para cada valor do sal.
+
+Em banco isso é comum: conta agregadora de lojista, cliente institucional com
+milhões de transações, ou chave nula usada como preenchimento.
+
+## Cache e persist
+
+Cache só paga quando o **mesmo** DataFrame é reutilizado várias vezes numa
+cadeia cara. Não use quando o dado é lido uma vez só, quando ele não cabe na
+memória dos executores ou quando ler a origem já é barato. Cache mal colocado
+rouba memória de execução e provoca spill, deixando o job mais lento
+exatamente enquanto você tenta acelerá-lo.
+
+## UDF em Python
+
+Cada linha atravessa a fronteira JVM-Python com serialização, e o Catalyst não
+enxerga o que a função faz — logo não empurra filtro, não reordena, não gera
+código. A ordem de preferência é: função nativa do Spark SQL, depois UDF
+vetorizada com Pandas (que processa em lote via Arrow), e só então UDF comum.
+
+## Structured Streaming, em noções
+
+O stream é tratado como uma tabela que cresce. O motor processa em
+**micro-batches**: a cada intervalo de trigger, um pequeno job em lote roda
+sobre o que chegou desde a última execução. Três conceitos que a banca cobra:
+
+- **Trigger**: define quando o micro-batch dispara — por intervalo fixo, o mais
+  rápido possível, ou uma única passada sobre o que existe.
+- **Checkpoint**: guarda até onde a fonte foi consumida e o estado das
+  agregações. É o que permite retomar após falha sem perder nem duplicar.
+- **Modo de saída**: append, update ou complete, conforme o que faz sentido para
+  a agregação e para o destino.
+
+Num banco, o caso típico é scoring de fraude sobre autorizações: janela curta,
+checkpoint obrigatório e destino em tabela Delta para o histórico continuar
+consultável em lote.

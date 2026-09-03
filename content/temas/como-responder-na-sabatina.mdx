@@ -1,0 +1,304 @@
+---
+slug: como-responder-na-sabatina
+titulo: "Como responder na sabatina"
+resumo: "A estrutura que faz uma resposta oral pontuar: contexto, opções, trade-offs e recomendação. Como abrir com pergunta de esclarecimento, como admitir que não sabe sem perder ponto e os erros de comunicação que derrubam candidato bom."
+minutos: 30
+nivel: fundamental
+porQue: "A sabatina avalia raciocínio em voz alta, não recall. Dois candidatos com o mesmo conhecimento tiram notas diferentes por causa de estrutura de resposta. Este é o único tema que melhora sua nota em todos os outros."
+comoCai: "Você não sabe a resposta. O que faz?"
+feynman: "Explique para um amigo de fora da área, em um minuto, por que dizer 'depende' pode ser a melhor resposta técnica possível — e quando vira desculpa."
+preRequisitos: []
+errosComuns:
+  - "Responder rápido demais. Começar a falar em dois segundos sinaliza reflexo, não raciocínio, e você perde a chance de fazer a pergunta que reduziria o escopo."
+  - "Monólogo de dez minutos. A banca precisa cobrir vários assuntos; quem não devolve a palavra é interrompido e leva a nota de quem não sabe ouvir."
+  - "Jargão sem explicar. Dizer shuffle, CDC ou idempotência sem uma frase de tradução não prova domínio, prova que você decorou o termo."
+  - "Negar a premissa da pergunta. Se o entrevistador diz 'o pipeline está lento', responder 'mas não deveria estar' queima tempo. Aceite o cenário e trabalhe dentro dele."
+  - "Chutar quando não sabe. Um chute errado contamina toda a resposta anterior; dizer o que você faria para descobrir mantém a credibilidade e ainda mostra método."
+  - "Só teoria, sem exemplo. Resposta correta e genérica pontua menos que resposta correta com um caso que você viveu, mesmo pequeno."
+  - "Fechar sem recomendar. Listar três opções e não escolher nenhuma é o jeito mais comum de parecer indeciso justamente quando você tinha a resposta certa."
+preTeste:
+  - enunciado: "O entrevistador pergunta: 'Como você faria a ingestão do sistema de cartões para o lake?'. Qual é a melhor primeira frase?"
+    alternativas:
+      - texto: "Eu usaria Kafka com Spark Structured Streaming e Delta."
+        correta: false
+        explicacao: "Pulou direto para a ferramenta sem saber volume, latência exigida e se a origem suporta captura de mudança. Fecha portas cedo demais."
+      - texto: "Antes de escolher a abordagem, posso confirmar duas coisas: qual a latência aceitável e se a origem expõe log de transação?"
+        correta: true
+        explicacao: "Pergunta de esclarecimento reduz o escopo, mostra que você sabe o que determina a decisão e compra tempo para organizar a resposta."
+      - texto: "Depende de muitos fatores, é difícil dizer sem conhecer o ambiente."
+        correta: false
+        explicacao: "Depende sem dizer de que depende é evasiva. A versão boa nomeia as variáveis e segue."
+  - enunciado: "Você não sabe o que é uma tecnologia que o entrevistador citou. Qual resposta pontua mais?"
+    alternativas:
+      - texto: "Ficar em silêncio e esperar que ele mude de assunto."
+        correta: false
+        explicacao: "Silêncio prolongado é lido como despreparo e desperdiça o tempo que você tinha para mostrar raciocínio."
+      - texto: "Arriscar uma definição plausível, porque pode ser que acerte."
+        correta: false
+        explicacao: "Chute errado em definição derruba a confiança em tudo que você disse antes, inclusive no que estava certo."
+      - texto: "Dizer que não conhece, e em seguida raciocinar pelo problema que a ferramenta provavelmente resolve e como você descobriria."
+        correta: true
+        explicacao: "Honestidade mais método. A banca avalia raciocínio, e você acabou de demonstrar o seu."
+videos:
+  - id: 75DNnsNnYr0
+    titulo: "Como eu me prepararia para uma ENTREVISTA TÉCNICA como programador(a)!"
+    canal: "Attekita Dev"
+    duracao: 19
+    porQue: "Foco em preparação e em como conduzir a conversa, que é o que você controla. Assista anotando o que ela faz antes de responder, não as respostas em si."
+  - id: KG8uusPVdsA
+    titulo: "Simulação de ENTREVISTA TÉCNICA para PROGRAMADORES"
+    canal: "Attekita Dev"
+    duracao: 17
+    porQue: "Vale mais que qualquer teoria: você ouve alguém raciocinando em voz alta sob pressão. Pause a cada pergunta, responda você primeiro e só depois compare a estrutura."
+artigos:
+  - titulo: "Situation, task, action, result (método STAR)"
+    url: "https://en.wikipedia.org/wiki/Situation,_task,_action,_result"
+    fonte: "Wikipedia"
+  - titulo: "Soft skills para desenvolvedores: o guia completo para a carreira"
+    url: "https://www.alura.com.br/artigos/soft-skills-para-devs"
+    fonte: "Alura"
+  - titulo: "As 4 principais soft skills para desenvolvedores"
+    url: "https://www.alura.com.br/artigos/4-principais-soft-skills-carreira-desenvolvimento-tecnologia"
+    fonte: "Alura"
+flashcards:
+  - frente: "Qual é a estrutura de quatro passos para resposta oral?"
+    verso: "Contexto (o que a pergunta está pedindo e o que assumo), opções (dois ou três caminhos reais), trade-offs (o que cada um custa) e recomendação (qual eu escolho e por quê)."
+  - frente: "Por que abrir uma questão de cenário com pergunta de esclarecimento?"
+    verso: "Porque reduz o escopo, evita responder o problema errado, mostra que você sabe quais variáveis mandam na decisão e te dá alguns segundos para organizar a resposta."
+  - frente: "Quantas perguntas de esclarecimento fazer?"
+    verso: "Uma ou duas, das que mudam a resposta. Três ou mais viram fuga e a banca corta."
+  - frente: "Como falar de trade-off sem parecer indeciso?"
+    verso: "Nomeie o custo de cada opção, escolha uma e diga a condição objetiva que te faria mudar de ideia. Indecisão é parar antes de escolher."
+  - frente: "O que dizer quando você não sabe?"
+    verso: "'Não sei, mas raciocinaria assim: ...' e então o método — o que o problema parece ser, o que você testaria, onde procuraria. Isso pontua mais que chute."
+  - frente: "Por que chutar custa mais caro do que admitir?"
+    verso: "Porque o erro contamina o resto: a banca passa a duvidar do que você acertou antes e ainda gasta tempo desmontando a afirmação errada."
+  - frente: "Quanto tempo deve durar uma resposta oral típica?"
+    verso: "De um a dois minutos para a maioria, até três em questão de arquitetura. Depois disso, devolva a palavra perguntando se quer que aprofunde algum ponto."
+  - frente: "O que fazer quando o entrevistador dá uma premissa que você acha improvável?"
+    verso: "Aceite o cenário e trabalhe dentro dele. Se a premissa for mesmo o ponto, diga em uma frase e siga; discutir a premissa por dois minutos é perda de tempo."
+  - frente: "Como usar exemplo da própria experiência?"
+    verso: "Em três frases, no formato situação, o que você fez, qual foi o resultado. Exemplo pequeno e verdadeiro vale mais que projeto grande e vago."
+  - frente: "Qual é o risco de usar jargão?"
+    verso: "Termo sem tradução soa decorado. Diga o termo e emende uma frase curta de explicação — isso demonstra domínio e cabe em cinco segundos."
+  - frente: "O que fazer no silêncio depois da pergunta?"
+    verso: "Dois a quatro segundos pensando são bem vistos. Se precisar de mais, verbalize: 'deixa eu organizar isso em duas frentes'."
+  - frente: "Como fechar uma resposta?"
+    verso: "Com a recomendação e um convite: 'eu iria por aqui; quer que eu detalhe a parte de X?'. Fechar devolvendo a palavra evita monólogo."
+  - frente: "O que a rubrica de uma banca costuma procurar?"
+    verso: "Clareza da definição, exemplo concreto, trade-off explícito, decisão assumida e honestidade sobre limites. Não é quantidade de termos citados."
+drills:
+  - titulo: "Qual passo da estrutura está faltando?"
+    instrucao: "Leia a resposta resumida e diga qual dos quatro passos ficou de fora. Depois reescreva mentalmente a versão completa em voz alta."
+    opcoes: ["Contexto", "Opções", "Trade-offs", "Recomendação"]
+    itens:
+      - enunciado: "'Para detectar fraude em cartão eu usaria Structured Streaming com Kafka.' Fim."
+        resposta: "Opções"
+        explicacao: "Uma solução só, sem alternativa considerada. A banca não consegue avaliar se você escolheu ou se só conhece uma coisa."
+      - enunciado: "'Dá para fazer em batch ou em streaming. Batch é mais simples e barato; streaming dá latência baixa e custa mais operação.' Fim."
+        resposta: "Recomendação"
+        explicacao: "Trade-off bem feito e nenhuma escolha. É o jeito mais comum de parecer indeciso tendo entendido tudo."
+      - enunciado: "'Eu recomendo streaming, porque é o padrão de mercado para fraude.' Fim."
+        resposta: "Trade-offs"
+        explicacao: "Recomendação sem custo declarado. Padrão de mercado não é argumento; custo de operação e complexidade são."
+      - enunciado: "'Tem batch, tem streaming, tem micro-batch. Streaming custa mais. Eu iria de streaming.' Fim."
+        resposta: "Contexto"
+        explicacao: "Faltou dizer qual latência o caso exige e o que foi assumido. Sem isso, a recomendação flutua no ar."
+      - enunciado: "'Assumindo que a decisão precisa sair em milissegundos, eu iria de streaming, porque batch não atende a janela.' Fim."
+        resposta: "Opções"
+        explicacao: "Contexto e recomendação estão lá, mas a alternativa nunca foi nomeada. Cite micro-batch nem que seja para descartar."
+  - titulo: "Que erro de comunicação é esse?"
+    instrucao: "Cada linha é uma cena de sabatina. Nomeie o erro antes de abrir a resposta e diga o que você faria no lugar."
+    opcoes: ["Respondeu rápido demais", "Monólogo", "Jargão sem explicar", "Negou a premissa", "Chutou"]
+    itens:
+      - enunciado: "A pergunta terminou e o candidato já estava falando, sem saber ainda qual era o volume de dados do cenário."
+        resposta: "Respondeu rápido demais"
+        explicacao: "Perdeu a pergunta de esclarecimento que teria reduzido o escopo. Dois segundos de pausa não custam nota."
+      - enunciado: "Sete minutos depois, o entrevistador interrompe para conseguir fazer a próxima pergunta."
+        resposta: "Monólogo"
+        explicacao: "Ser interrompido é sinal claro. Feche em dois minutos e ofereça aprofundar."
+      - enunciado: "'A gente resolveria com CDC e um MERGE idempotente na bronze.' O entrevistador é de negócio."
+        resposta: "Jargão sem explicar"
+        explicacao: "Emende: 'CDC é capturar só o que mudou na origem, em vez de trazer a tabela inteira'. Cinco segundos, outra nota."
+      - enunciado: "'O pipeline está lento.' — 'Na verdade, com Delta bem configurado ele não deveria estar lento.'"
+        resposta: "Negou a premissa"
+        explicacao: "O cenário é dado. Aceite e investigue dentro dele; discutir a premissa consome o tempo da sua resposta."
+      - enunciado: "Perguntado sobre uma ferramenta que nunca usou, o candidato inventa uma definição que soa plausível."
+        resposta: "Chutou"
+        explicacao: "Se errar, derruba a confiança no resto. 'Não conheço, mas pelo nome e pelo contexto imagino que resolva X; eu confirmaria assim' pontua mais."
+perguntas:
+  - tipo: oral
+    enunciado: "O banco quer detectar fraude em transações de cartão. Como você desenharia isso?"
+    respostaModelo: "Antes de desenhar, confirmo duas coisas: a decisão precisa sair durante a autorização, em milissegundos, ou pode ser uma detecção posterior para bloqueio e contestação? E qual o volume de pico? Vou assumir autorização em tempo real, com pico alto. Nesse recorte há três caminhos. Batch noturno é o mais barato e mais simples de operar, mas não atende: a transação já passou. Micro-batch reduz a latência para segundos e reaproveita o time que já conhece Spark, o que resolve detecção pós-autorização. Streaming contínuo entrega milissegundos, mas custa mais em operação, exige tratamento de estado, de evento fora de ordem e de reprocessamento. Eu recomendaria streaming para o score na autorização, com um pipeline batch em paralelo para retreinar o modelo e auditar. Mudaria de ideia se a exigência de latência fosse de minutos: aí micro-batch entrega o mesmo valor por muito menos complexidade."
+    rubrica:
+      - "Abriu com pergunta de esclarecimento sobre latência e volume, e declarou a premissa assumida"
+      - "Apresentou pelo menos duas alternativas reais além da escolhida"
+      - "Nomeou o custo concreto de cada opção, não só a vantagem"
+      - "Deu uma recomendação explícita"
+      - "Declarou a condição objetiva que o faria mudar de decisão"
+  - tipo: oral
+    enunciado: "Vou te perguntar sobre uma tecnologia específica que talvez você não conheça. Se for o caso, o que você faz?"
+    respostaModelo: "Eu digo que não conheço, sem rodeio, e imediatamente ofereço o raciocínio. Algo assim: não conheço essa ferramenta pelo nome; pelo contexto em que você citou, imagino que ela resolva o problema de X, porque é aí que essa camada costuma doer. Se eu tivesse que avaliá-la, olharia primeiro se ela se integra ao que já temos, qual o custo operacional e se resolve algo que o nosso stack atual não resolve. E eu procuraria a documentação oficial e alguém do time que já usou antes de opinar. Faço assim por dois motivos. Primeiro, chute errado contamina o resto da conversa: você passa a duvidar do que eu disse antes. Segundo, o que está sendo avaliado é raciocínio, e eu consigo demonstrar raciocínio sem conhecer a ferramenta. Prefiro perder um ponto de conhecimento a perder a credibilidade da resposta inteira."
+    rubrica:
+      - "Admitiu o desconhecimento de forma direta, sem rodeio nem desculpa"
+      - "Ofereceu raciocínio sobre o problema que a ferramenta provavelmente resolve"
+      - "Disse como descobriria: documentação, integração, custo, alguém do time"
+      - "Justificou por que isso pontua mais que chutar"
+  - tipo: oral
+    enunciado: "Me conte uma vez em que você errou em um projeto de dados e o que aconteceu."
+    respostaModelo: "Vou usar um caso concreto e curto. Situação: um pipeline que eu mantinha carregava a tabela de transações do dia e eu tratei a carga como append. Tarefa: reprocessar um dia que tinha chegado incompleto. Ação: rodei o reprocessamento e dupliquei todas as transações daquele dia, o que apareceu no relatório de fechamento antes de eu perceber. Resultado: corrigi apagando a partição e recarregando, e mudei a escrita para overwrite por partição, com chave de negócio única testada no pipeline. O aprendizado que eu levo é que idempotência não é refinamento, é requisito: enquanto reprocessar for arriscado, ninguém reprocessa, e o dado errado fica. Depois disso eu passei a tratar 'esse job pode rodar duas vezes?' como pergunta de revisão de código. [verificar: substituir por um caso real seu, com o número e o sistema corretos]"
+    rubrica:
+      - "Usou a estrutura situação, ação e resultado, sem se perder em contexto"
+      - "Assumiu o erro sem terceirizar a culpa"
+      - "Explicou a correção técnica concreta que aplicou"
+      - "Fechou com um aprendizado que mudou a prática, não com uma frase genérica"
+  - tipo: unica
+    enunciado: "Você listou três abordagens e explicou o custo de cada uma, mas não escolheu nenhuma. Como a banca costuma ler isso?"
+    alternativas:
+      - texto: "Como maturidade: reconhecer que depende do contexto é a resposta mais correta."
+        correta: false
+        explicacao: "Reconhecer que depende é o começo. Parar aí transfere a decisão para o entrevistador."
+      - texto: "Como indecisão: você demonstrou conhecimento, mas não demonstrou capacidade de decidir."
+        correta: true
+        explicacao: "A banca contrata alguém que vai decidir. Escolher e declarar a condição de mudança é o que fecha a resposta."
+      - texto: "Como economia de tempo, o que é bem visto em prova oral."
+        correta: false
+        explicacao: "A recomendação leva dez segundos. Não é economia, é omissão do passo mais importante."
+      - texto: "Como resposta incompleta apenas se a pergunta pedia explicitamente uma escolha."
+        correta: false
+        explicacao: "Em questão de cenário a escolha é sempre esperada, mesmo quando não é pedida com todas as letras."
+  - tipo: multipla
+    enunciado: "Quais atitudes aumentam a nota numa resposta oral de sabatina?"
+    alternativas:
+      - texto: "Fazer uma ou duas perguntas de esclarecimento antes de responder cenário aberto"
+        correta: true
+        explicacao: "Reduz escopo, evita responder o problema errado e mostra quais variáveis mandam."
+      - texto: "Declarar em voz alta as premissas que você assumiu"
+        correta: true
+        explicacao: "Permite que a banca corrija o rumo em vez de te ver responder o cenário errado por dois minutos."
+      - texto: "Dizer a condição objetiva que te faria mudar de recomendação"
+        correta: true
+        explicacao: "É o que separa decisão fundamentada de opinião, e costuma render ponto direto na rubrica."
+      - texto: "Citar o maior número possível de ferramentas para demonstrar amplitude"
+        correta: false
+        explicacao: "Nome de ferramenta sem critério de escolha soa a lista decorada e convida a pergunta que você não quer."
+      - texto: "Falar sem pausa até esgotar tudo que você sabe sobre o assunto"
+        correta: false
+        explicacao: "Monólogo faz a banca interromper e reduz o número de assuntos em que você poderia pontuar."
+---
+
+## Em uma frase
+
+Resposta oral que pontua tem quatro movimentos: **contexto, opções, trade-offs e
+recomendação** — nessa ordem, em até dois minutos.
+
+## A estrutura, passo a passo
+
+<Passos itens={[
+  "Contexto: diga o que entendeu da pergunta e qual premissa está assumindo",
+  "Opções: nomeie dois ou três caminhos reais, mesmo os que você vai descartar",
+  "Trade-offs: diga o que cada caminho custa, não só o que ele entrega",
+  "Recomendação: escolha um, justifique e declare o que te faria mudar de ideia"
+]} />
+
+Parece longo escrito. Falado, cabe em noventa segundos. A vantagem é que a banca
+consegue te acompanhar e marcar a rubrica dela enquanto você fala — e rubrica marcada
+é ponto.
+
+### Como isso soa na prática
+
+Pergunta: *"O banco quer detectar fraude em transações de cartão. Como você
+desenharia?"*
+
+**Contexto:** "Antes de desenhar, a decisão precisa sair durante a autorização, em
+milissegundos, ou é detecção posterior? Vou assumir tempo real, com pico alto."
+
+**Opções:** "Há três caminhos: batch noturno, micro-batch e streaming contínuo."
+
+**Trade-offs:** "Batch é o mais barato e o mais simples de operar, mas não atende: a
+transação já passou. Micro-batch traz a latência para segundos e reaproveita quem já
+conhece Spark. Streaming entrega milissegundos e cobra em operação, estado e evento
+fora de ordem."
+
+**Recomendação:** "Eu iria de streaming para o score na autorização, com batch em
+paralelo para retreino e auditoria. Mudaria de ideia se a latência exigida fosse de
+minutos — aí micro-batch entrega o mesmo valor por muito menos complexidade."
+
+## Comece pela pergunta de esclarecimento
+
+Questão de cenário é ambígua **de propósito**. Ela testa se você desenha para o
+problema certo. Uma ou duas perguntas que realmente mudam a resposta — latência,
+volume, se a origem suporta captura de mudança, quem é o consumidor — valem mais que
+cinco minutos de solução para o problema errado.
+
+<Callout tipo="atencao" titulo="Limite: duas perguntas">
+Três ou mais perguntas de esclarecimento deixam de parecer método e passam a parecer
+fuga. Se não vier resposta, assuma em voz alta: "vou assumir X" — e siga.
+</Callout>
+
+## Trade-off sem parecer indeciso
+
+A diferença é uma frase. Indeciso para em "depende". Sênior diz **de que** depende,
+escolhe, e nomeia a condição de mudança:
+
+<Comparativo
+  colunas={["Soa indeciso", "Soa sênior"]}
+  linhas={[
+    ["Depende de vários fatores", "Depende da latência exigida e do volume de pico"],
+    ["Os dois têm vantagens", "Batch custa menos e não atende milissegundos; streaming atende e cobra operação"],
+    ["Eu ficaria em cima do muro", "Eu iria de streaming; mudaria para micro-batch se a janela for de minutos"]
+  ]}
+/>
+
+## Quando você não sabe
+
+A frase é: **"Não sei, mas raciocinaria assim: ..."** — e então o método. Que
+problema essa coisa provavelmente resolve, o que você testaria, onde procuraria,
+quem consultaria.
+
+Isso pontua mais que chute por dois motivos. Chute errado **contamina o que veio
+antes**: a banca passa a duvidar do que você já tinha acertado. E o que está sendo
+avaliado é raciocínio, que você consegue demonstrar sem conhecer a ferramenta.
+
+<Callout tipo="erro" titulo="O que não fazer">
+Silêncio longo, mudança de assunto e definição inventada que soa plausível. As três
+são lidas como a mesma coisa: você não sabe e não quis dizer.
+</Callout>
+
+## Erros de comunicação que derrubam candidato bom
+
+**Responder rápido demais.** Dois a quatro segundos de pausa são bem vistos. Se
+precisar de mais, verbalize: "deixa eu organizar isso em duas frentes".
+
+**Monólogo.** Ser interrompido é o sinal. Feche em dois minutos e devolva: "eu iria
+por aqui; quer que eu detalhe a parte de X?".
+
+**Jargão sem tradução.** Diga o termo e emende uma frase: "CDC, que é capturar só o
+que mudou na origem em vez de trazer a tabela inteira". Cinco segundos, outra nota.
+
+**Negar a premissa.** "O pipeline está lento" é o cenário, não um convite ao debate.
+Aceite e investigue dentro dele.
+
+## Exemplo da sua experiência
+
+Use o formato **situação, ação, resultado**, em três frases. Caso pequeno e
+verdadeiro vale mais que projeto grande e vago. Assuma o erro quando o exemplo for de
+erro: terceirizar culpa é o que a banca menos quer ouvir. E prepare dois ou três
+casos antes, porque improvisar história sob pressão sai confuso.
+
+## Tempo, voz e corpo
+
+De um a dois minutos por resposta, até três em arquitetura. Se a pergunta tem duas
+partes, anuncie: "vou responder em duas frentes" — isso segura a atenção e evita que
+você esqueça a segunda.
+
+Fale mais devagar do que o instinto pede: ansiedade acelera e a banca perde o fio.
+Faça pausa entre os quatro movimentos, é ela que dá estrutura audível à resposta. Em
+vídeo, olhe para a câmera nos fechamentos, não para a sua própria imagem. Mãos
+visíveis, tronco à frente, e nada de ler resposta pronta — dá para ouvir.
+
+## O último conselho
+
+Ensaie **em voz alta**, cronometrado, respondendo às perguntas orais de cada tema
+desta trilha. Ler a resposta modelo não treina a fala. Gravar sessenta segundos e se
+ouvir é desconfortável e é o exercício que mais melhora a nota em pouco tempo.
