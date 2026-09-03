@@ -44,7 +44,8 @@ export function Simulado({
 }) {
   const [modulo, setModulo] = useState<string>(moduloInicial ?? "todos");
   const [iniciado, setIniciado] = useState(false);
-  const [semente] = useState(() => Date.now());
+  // Semente fixa por montagem: o mesmo simulado não reembaralha a cada render.
+  const [semente] = useState(() => Math.floor(Math.random() * 2 ** 31));
   const [indice, setIndice] = useState(0);
   const [revelado, setRevelado] = useState(false);
   const [notas, setNotas] = useState<Record<string, number>>({});
@@ -205,7 +206,7 @@ export function Simulado({
           maximo: atual.maximo + NOTA_MAXIMA,
         };
       }
-      registrarSimulado(trilhaSlug, { em: Date.now(), porModulo });
+      registrarSimulado(trilhaSlug, { porModulo });
       setTerminou(true);
       return;
     }
@@ -253,7 +254,7 @@ export function Simulado({
         </p>
       </div>
 
-      <Gravador chave={pergunta.id} />
+      <Gravador key={pergunta.id} />
 
       {!revelado ? (
         <button

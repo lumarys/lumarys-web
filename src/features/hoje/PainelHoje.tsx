@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
+import { Card, RotuloAcento } from "@/components/ui/Card";
 import { BarraProgresso } from "@/components/ui/ProgressRing";
 import { IconeCards, IconeDrill, IconeRelogio, IconeSeta } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";

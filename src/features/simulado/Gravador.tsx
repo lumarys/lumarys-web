@@ -10,30 +10,26 @@ import { cx } from "@/lib/utils";
  * navegador, não vai para a conta e é descartado ao trocar de pergunta. Sem
  * permissão de microfone, o bloco vira só um cronômetro.
  */
-export function Gravador({ chave }: { chave: string }) {
+export function Gravador() {
   const [estado, setEstado] = useState<"parado" | "gravando" | "pronto" | "negado">("parado");
   const [segundos, setSegundos] = useState(0);
   const [audio, setAudio] = useState<string | null>(null);
   const gravador = useRef<MediaRecorder | null>(null);
   const pedacos = useRef<Blob[]>([]);
 
-  // Trocar de pergunta descarta o áudio anterior.
+  // O pai remonta este componente a cada pergunta (via key), então o estado
+  // nasce limpo sozinho. Aqui só soltamos o que o navegador segurou.
   useEffect(() => {
     return () => {
       gravador.current?.stream.getTracks().forEach((t) => t.stop());
-      if (audio) URL.revokeObjectURL(audio);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chave]);
+  }, []);
 
   useEffect(() => {
-    setEstado("parado");
-    setSegundos(0);
-    setAudio((atual) => {
-      if (atual) URL.revokeObjectURL(atual);
-      return null;
-    });
-  }, [chave]);
+    return () => {
+      if (audio) URL.revokeObjectURL(audio);
+    };
+  }, [audio]);
 
   useEffect(() => {
     if (estado !== "gravando") return;
