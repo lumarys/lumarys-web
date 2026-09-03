@@ -1,0 +1,9 @@
+# Copie para terraform.tfvars (que fica fora do git) e preencha.
+
+# E-mail da Cernyn que recebe relatórios DMARC, avisos de bounce do SES e
+# alertas de orçamento. A Lumarys não tem caixa de e-mail própria.
+email_operacional = "pinus@cernyn.com"
+
+# Enquanto a organização "lumarys" não existir no GitHub, autorize também o
+# repositório pessoal. Apague esta linha depois de transferir o repositório.
+# github_repo_alternativo = "vieiradiego/lumarys-web"

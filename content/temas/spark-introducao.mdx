@@ -1,0 +1,250 @@
+---
+slug: spark-introducao
+titulo: "Spark: introdução"
+resumo: "Spark é um motor de processamento distribuído que substituiu o MapReduce por manter dado intermediário em memória e por montar um plano antes de executar. Driver, cluster manager e executores; lazy evaluation, DAG e a fronteira de stage que o shuffle cria."
+minutos: 35
+nivel: intermediario
+porQue: "Spark é o motor por trás de quase todo pipeline moderno, incluindo o Databricks que o banco usa. A banca não quer a definição de marketing: quer que você descreva o que cada processo faz e o que acontece de verdade entre a linha de código e o resultado."
+comoCai: "O que acontece quando você chama .count()?"
+feynman: "Explique para um gestor por que o Spark ficou mais rápido que o Hadoop sem que o disco tenha ficado mais rápido."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Dizer que Spark é rápido porque 'roda em memória', sem explicar o quê. O ganho é não gravar o resultado intermediário de cada etapa em disco, como o MapReduce fazia entre map e reduce."
+  - "Achar que Spark carrega a base inteira na RAM. Ele processa por partição e derrama para disco quando não cabe; memória é otimização, não requisito."
+  - "Confundir driver com nó mestre do cluster. O driver é o processo da sua aplicação, que monta o plano e agenda tasks; o cluster manager é quem aloca recursos, e pode ser YARN, Kubernetes ou o standalone."
+  - "Não saber dizer o que uma transformação faz. Transformação não executa nada: ela acrescenta um nó ao plano. Só a ação dispara execução."
+  - "Trazer resultado para o driver sem pensar. collect() puxa todas as partições para a memória de um único processo, e é assim que se derruba o driver com uma tabela de bilhões de linhas."
+  - "Não relacionar shuffle com stage. A fronteira de stage é definida pelo shuffle: enquanto os dados não precisam ser redistribuídos entre executores, tudo cabe no mesmo stage."
+preTeste:
+  - enunciado: "Você executa df.filter(...).select(...) e nada acontece. Por quê?"
+    alternativas:
+      - texto: "Porque o cluster está sem recursos e o job ficou na fila."
+        correta: false
+        explicacao: "Pode acontecer, mas não é a explicação padrão. Nem job foi criado ainda."
+      - texto: "Porque filter e select são transformações: elas só acrescentam nós ao plano, e nada executa até uma ação."
+        correta: true
+        explicacao: "É lazy evaluation. O plano é montado e só é submetido quando uma ação pede um resultado."
+      - texto: "Porque falta chamar cache() antes."
+        correta: false
+        explicacao: "cache também é lazy e só tem efeito quando uma ação materializa os dados."
+  - enunciado: "O que define a fronteira entre dois stages de um job Spark?"
+    alternativas:
+      - texto: "O número de executores disponíveis."
+        correta: false
+        explicacao: "Isso influencia paralelismo, não a divisão do plano em stages."
+      - texto: "Um shuffle: quando os dados precisam ser redistribuídos entre executores, o stage precisa terminar."
+        correta: true
+        explicacao: "Tudo que pode ser feito partição a partição, sem trocar dados, cabe no mesmo stage."
+      - texto: "Cada transformação vira um stage."
+        correta: false
+        explicacao: "Várias transformações estreitas são encadeadas dentro do mesmo stage."
+videos:
+  - id: cM3vSUW3Zns
+    titulo: "Uma breve introdução ao Apache Spark"
+    canal: "Apoena Stack - Iury Rosal"
+    duracao: 15
+    porQue: "Panorama em português no tamanho certo para uma primeira passada. Assista com a pergunta 'quem faz o quê' na cabeça: driver, cluster manager e executor precisam ficar separados na sua fala."
+  - id: 4TE6AGQ0IzI
+    titulo: "Apache Spark (Data Analytics poderoso) // Dicionário do Programador"
+    canal: "Código Fonte TV"
+    duracao: 11
+    porQue: "Boa para o contexto histórico e para a comparação com o MapReduce, que é a primeira metade da resposta oral. Serve também como revisão de véspera."
+artigos:
+  - titulo: "Cluster Mode Overview"
+    url: "https://spark.apache.org/docs/latest/cluster-overview.html"
+    fonte: "Apache Spark"
+  - titulo: "Série Spark e Databricks Parte 1 - Arquitetura e Componentes do Apache Spark"
+    url: "https://blog.dsacademy.com.br/serie-spark-e-databricks-parte-1-arquitetura-e-componentes-do-apache-spark/"
+    fonte: "Data Science Academy"
+  - titulo: "Apache Spark: Introdução aos Internals"
+    url: "https://brains.dev/2023/spark-introducao-internals/"
+    fonte: "BRAINS"
+flashcards:
+  - frente: "O que é o Apache Spark, em uma frase?"
+    verso: "Um motor de processamento distribuído que divide o dado em partições, monta um plano de execução antes de rodar e processa em paralelo em um cluster, mantendo o intermediário em memória quando possível."
+  - frente: "Por que o Spark substituiu o MapReduce?"
+    verso: "MapReduce grava o resultado de cada etapa em disco. Encadear etapas custa uma ida e volta ao disco por etapa. Spark encadeia em memória e só materializa quando precisa, além de oferecer API muito mais expressiva."
+  - frente: "O que o driver faz?"
+    verso: "Executa o programa principal, mantém a SparkSession, converte as operações em um DAG, divide em stages e tasks e agenda as tasks nos executores. É também quem recebe o resultado de uma ação."
+  - frente: "O que o cluster manager faz?"
+    verso: "Aloca recursos do cluster para a aplicação: quantos executores, com quanta memória e quantos núcleos. Pode ser o standalone do Spark, YARN ou Kubernetes."
+  - frente: "O que o executor faz?"
+    verso: "É o processo que roda nos nós de trabalho. Executa as tasks que o driver enviou sobre as partições de dado e guarda dado em cache quando pedido."
+  - frente: "Processamento em memória significa carregar tudo na RAM?"
+    verso: "Não. Significa não escrever o resultado intermediário em disco a cada etapa. Spark trabalha por partição e derrama para disco quando não cabe."
+  - frente: "O que é lazy evaluation no Spark?"
+    verso: "Transformações não executam: acrescentam nós ao plano. Só uma ação dispara a execução. Isso permite ao otimizador ver o plano inteiro antes de rodar."
+  - frente: "O que é o DAG?"
+    verso: "O grafo acíclico dirigido das operações. Representa o plano lógico: quais transformações dependem de quais, sem ciclos."
+  - frente: "Qual é a diferença entre transformação e ação?"
+    verso: "Transformação devolve outro conjunto distribuído e é lazy (filter, select, join). Ação devolve um valor ao driver ou escreve num destino e dispara a execução (count, collect, show, write)."
+  - frente: "Job, stage e task: o que é cada um?"
+    verso: "Job é o que uma ação dispara. Job se divide em stages, e a fronteira de stage é o shuffle. Cada stage vira um conjunto de tasks, uma por partição."
+  - frente: "Por que o shuffle define a fronteira do stage?"
+    verso: "Porque tudo que pode ser feito partição a partição é encadeado sem parar. Quando o dado precisa ser redistribuído entre executores, o stage anterior precisa terminar e gravar sua saída antes de o próximo começar."
+  - frente: "Por que collect() é perigoso?"
+    verso: "Ele traz todas as partições para a memória do driver, um único processo. Em tabela grande, derruba o driver. Para inspecionar, use show ou take."
+drills:
+  - titulo: "Transformação ou ação?"
+    instrucao: "Diga se a operação apenas monta plano (transformação) ou dispara execução (ação)."
+    opcoes: ["Transformação", "Ação"]
+    itens:
+      - enunciado: "df.filter(col('valor') > 1000)"
+        resposta: "Transformação"
+        explicacao: "Devolve outro DataFrame e não executa nada."
+      - enunciado: "df.count()"
+        resposta: "Ação"
+        explicacao: "Precisa de um número no driver, então executa o plano inteiro."
+      - enunciado: "df.groupBy('id_cartao').sum('valor')"
+        resposta: "Transformação"
+        explicacao: "É wide e vai causar shuffle, mas continua lazy: nada roda até uma ação."
+      - enunciado: "df.write.parquet('/lake/bronze/transacoes')"
+        resposta: "Ação"
+        explicacao: "Escrever no destino materializa o resultado e dispara o job."
+      - enunciado: "df.show(20)"
+        resposta: "Ação"
+        explicacao: "Traz linhas para o driver para exibir; executa o plano, ainda que possa limitar as partições lidas."
+      - enunciado: "df.withColumn('mes', month(col('data')))"
+        resposta: "Transformação"
+        explicacao: "Acrescenta uma coluna ao plano lógico, sem executar."
+perguntas:
+  - tipo: oral
+    enunciado: "O que acontece, do começo ao fim, quando você chama .count() num DataFrame que passou por filtros e um groupBy?"
+    respostaModelo: "Até a chamada de count, nada tinha executado: filter, withColumn e groupBy só foram acrescentando nós ao plano lógico, porque transformação no Spark é lazy. Quando eu chamo count, que é uma ação, o driver fecha o plano, passa pelo Catalyst para otimizar, gera o plano físico e monta o DAG. Aí ele divide esse DAG em stages, e a fronteira de cada stage é um shuffle: o groupBy precisa juntar a mesma chave no mesmo executor, então tudo que vem antes vira um stage e o que vem depois vira outro. Cada stage é quebrado em tasks, uma por partição, e o driver agenda essas tasks nos executores que o cluster manager alocou. Os executores leem suas partições, aplicam as operações e, no fim do stage com shuffle, gravam a saída para o próximo stage ler. No último estágio, cada task devolve uma contagem parcial e o driver soma. O único dado que volta ao driver é esse número."
+    rubrica:
+      - "Afirmou que nada executou antes da ação e nomeou lazy evaluation"
+      - "Descreveu a cadeia plano lógico, otimização, plano físico, DAG"
+      - "Explicou a divisão em stages pelo shuffle causado pelo groupBy"
+      - "Disse que cada stage vira tasks, uma por partição, agendadas pelo driver nos executores"
+      - "Deixou claro o que volta ao driver e por que isso é pouco no caso do count"
+  - tipo: oral
+    enunciado: "Explique a arquitetura do Spark e por que ele substituiu o MapReduce no processamento em lote."
+    respostaModelo: "São três papéis. O driver é o processo da minha aplicação: mantém a SparkSession, converte o código em um DAG, divide em stages e tasks e agenda essas tasks. O cluster manager é quem tem os recursos do cluster e aloca executores para a aplicação, e pode ser o standalone do Spark, o YARN ou o Kubernetes. Os executores são os processos nos nós de trabalho que efetivamente rodam as tasks sobre as partições e guardam dado em cache. Sobre o MapReduce, o problema dele era gravar em disco o resultado de cada etapa: encadear cinco etapas custava cinco idas e voltas ao disco. O Spark encadeia as operações em memória dentro do stage e só materializa quando há shuffle ou quando eu peço. Some a isso o fato de o Spark montar o plano inteiro antes de executar, o que permite otimizar, e uma API muito mais expressiva que escrever map e reduce à mão. Em cargas iterativas a diferença é grande."
+    rubrica:
+      - "Separou driver, cluster manager e executor dizendo o que cada um faz"
+      - "Citou pelo menos dois cluster managers reais"
+      - "Explicou o ganho sobre MapReduce pela ausência de gravação em disco entre etapas"
+      - "Citou o plano montado antes da execução como fonte de otimização"
+      - "Evitou dizer que o Spark carrega tudo na memória"
+  - tipo: unica
+    enunciado: "Qual é a função do cluster manager numa aplicação Spark?"
+    alternativas:
+      - texto: "Converter o código em DAG e agendar as tasks."
+        correta: false
+        explicacao: "Isso é papel do driver."
+      - texto: "Alocar recursos do cluster para a aplicação, decidindo quantos executores ela recebe e com quanta memória e CPU."
+        correta: true
+        explicacao: "Standalone, YARN e Kubernetes ocupam esse papel."
+      - texto: "Executar as tasks sobre as partições de dado."
+        correta: false
+        explicacao: "Isso é papel do executor."
+      - texto: "Guardar o resultado final e devolvê-lo ao usuário."
+        correta: false
+        explicacao: "O resultado de uma ação volta ao driver, ou é escrito no destino pelos executores."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre lazy evaluation no Spark estão corretas?"
+    alternativas:
+      - texto: "Transformações apenas acrescentam nós ao plano, sem executar."
+        correta: true
+        explicacao: "É a definição."
+      - texto: "O plano completo permite ao otimizador reordenar e combinar operações antes de rodar."
+        correta: true
+        explicacao: "É o principal benefício prático, e o que o Catalyst explora."
+      - texto: "Um erro em uma transformação pode só aparecer quando a ação é chamada."
+        correta: true
+        explicacao: "Consequência direta e fonte comum de confusão em depuração."
+      - texto: "Cada transformação dispara um job separado."
+        correta: false
+        explicacao: "Job é disparado por ação, não por transformação."
+      - texto: "Lazy evaluation elimina a necessidade de shuffle."
+        correta: false
+        explicacao: "Shuffle depende do tipo de operação, não do momento da execução."
+---
+
+## Em uma frase
+
+Spark é um motor de processamento distribuído que divide o dado em partições,
+**monta um plano antes de executar** e processa em paralelo num cluster,
+encadeando etapas em memória em vez de gravar cada uma em disco.
+
+## Por que ele substituiu o MapReduce
+
+O MapReduce resolveu o problema de processar dado em muitas máquinas comuns, mas
+com um custo estrutural: **cada etapa grava o resultado em disco**. Um pipeline de
+cinco etapas paga cinco idas e voltas ao HDFS. Em carga iterativa — treino de
+modelo, recálculo de score — isso domina o tempo.
+
+O Spark encadeia operações dentro de um mesmo estágio sem materializar em disco, e
+só grava quando é obrigado. Some a isso duas coisas: uma API muito mais expressiva
+que escrever `map` e `reduce` à mão, e o fato de montar o plano inteiro antes de
+executar, o que abre espaço para otimização.
+
+<Callout tipo="atencao" titulo="Cuidado com a frase pronta">
+"Spark é rápido porque roda em memória" é meia resposta e a banca percebe. Diga o
+que ele deixa de fazer: não grava o intermediário de cada etapa em disco. E deixe
+claro que ele não carrega a base inteira na RAM — trabalha por partição e derrama
+para disco quando não cabe.
+</Callout>
+
+## Arquitetura: quem faz o quê
+
+<Comparativo
+  colunas={["Componente", "Onde roda", "Responsabilidade"]}
+  linhas={[
+    ["Driver", "Processo da sua aplicação", "Mantém a SparkSession, converte o código em DAG, divide em stages e tasks, agenda nos executores e recebe o resultado das ações"],
+    ["Cluster manager", "Serviço externo (standalone, YARN, Kubernetes)", "Aloca recursos: quantos executores, com quanta memória e quantos núcleos"],
+    ["Executor", "Nós de trabalho", "Roda as tasks sobre as partições, mantém cache e grava a saída de shuffle"]
+  ]}
+/>
+
+Repare que o driver **não processa dado**. Ele coordena. Quando você chama
+`collect()`, aí sim o dado vem para ele — e é por isso que essa ação derruba
+aplicação.
+
+## Lazy evaluation
+
+<Termo nome="transformação">Operação que devolve outro conjunto distribuído e apenas acrescenta um nó ao plano: filter, select, join, groupBy.</Termo>
+<Termo nome="ação">Operação que devolve um valor ao driver ou escreve num destino, e por isso dispara a execução: count, collect, show, write.</Termo>
+
+Você pode encadear vinte transformações e não ver nada acontecer. Isso é
+proposital. Com o plano completo em mãos, o otimizador consegue empurrar filtros
+para perto da leitura, descartar colunas que ninguém usa e combinar operações.
+
+Um efeito colateral que você deve saber citar: **erro de transformação aparece na
+ação**. O rastreamento de pilha aponta a linha do `count()`, não a do `join`
+errado — saber disso poupa horas de depuração.
+
+## DAG, job, stage e task
+
+<Passos itens={[
+  "Ação chamada: o driver fecha o plano lógico e o otimizador gera o plano físico.",
+  "Job: cada ação dispara um job.",
+  "DAG: o job vira um grafo acíclico dirigido de operações.",
+  "Stage: o DAG é cortado nos pontos de shuffle. Sem shuffle, tudo cabe num stage só.",
+  "Task: cada stage vira N tasks, uma por partição, e é isso que roda no executor."
+]} />
+
+<Termo nome="shuffle">Redistribuição de dados entre executores, necessária quando a mesma chave precisa terminar no mesmo lugar.</Termo>
+
+A fronteira do stage é o shuffle porque, enquanto cada partição pode ser
+processada isoladamente, o Spark encadeia tudo sem parar. No momento em que o
+`groupBy` exige que todas as transações do mesmo cartão fiquem juntas, o estágio
+anterior precisa terminar e gravar sua saída antes de o próximo poder ler.
+
+<Callout tipo="dica" titulo="Como isso vira resposta de sabatina">
+Se perguntarem por que um job está lento, a primeira hipótese defensável é
+shuffle: quantos stages, quanto cada um lê e escreve, e se há uma task destoando
+das demais na Spark UI. Isso é raciocínio, não chute.
+</Callout>
+
+## O que acontece de verdade num .count()
+
+Você chama a ação. O driver fecha e otimiza o plano, monta o DAG e o corta em
+stages nos pontos de shuffle. Cada stage vira tasks, uma por partição. O cluster
+manager já entregou os executores; o driver agenda as tasks neles. Os executores
+leem suas partições, aplicam as operações e, se houver shuffle, gravam a saída
+para o estágio seguinte. No último estágio cada task devolve uma contagem parcial,
+o driver soma e imprime um número.
+
+O detalhe que impressiona: **o único dado que volta ao driver é esse número**. Foi
+o cluster inteiro que trabalhou, e a resposta cabe num inteiro.

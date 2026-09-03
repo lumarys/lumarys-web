@@ -1,0 +1,267 @@
+---
+slug: data-centric-data-driven
+titulo: "Data Centric e Data Driven"
+resumo: "Data centric é sobre arquitetura: o dado é o ativo permanente e as aplicações giram em torno dele. Data driven é sobre decisão: o número entra antes da escolha, não depois. Um sustenta o outro, e a maioria das empresas confunde os dois."
+minutos: 30
+nivel: fundamental
+porQue: "A banca usa este tema para ver se você enxerga além do pipeline. Engenheiro de dados que só fala de ferramenta não convence; quem liga arquitetura, governança e decisão mostra que entende para que o pipeline existe."
+comoCai: "Como você tornaria um time data-driven?"
+feynman: "Explique para o superintendente da área comercial a diferença entre ter dashboard e ser data-driven, sem usar jargão de tecnologia."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Tratar os dois termos como sinônimo. Centric é arquitetura e propriedade do dado; driven é comportamento na hora de decidir. Dá para ser um sem o outro, e é aí que a banca aperta."
+  - "Achar que dashboard resolve. Painel sem métrica acordada, sem confiança no número e sem alguém com poder de decidir vira decoração cara."
+  - "Confundir data-driven com decidir só por número. Contexto, risco regulatório e restrição de negócio continuam valendo; data-driven é o dado entrar antes da decisão, não substituir julgamento."
+  - "Ignorar acesso. Se o analista espera duas semanas por um chamado para ver o dado, o time decide por intuição e chama de agilidade."
+  - "Usar o dado para justificar decisão já tomada. É o erro mais comum e o mais fácil de detectar: o número aparece depois da escolha, não antes."
+  - "Separar governança de cultura. Sem catálogo, dono e definição de métrica, cada área traz um número diferente para a mesma pergunta e a discussão morre no 'meu Excel diz outra coisa'."
+preTeste:
+  - enunciado: "Um banco tem catálogo de dados, dono definido por domínio e um lakehouse com dado histórico confiável. Mesmo assim, os comitês decidem por opinião do diretor mais sênior. Como classificar essa empresa?"
+    alternativas:
+      - texto: "Data centric, mas não data driven."
+        correta: true
+        explicacao: "A base de dado como ativo está montada; o comportamento na hora de decidir não mudou. É a combinação mais comum em empresa grande."
+      - texto: "Data driven, mas não data centric."
+        correta: false
+        explicacao: "Seria o inverso: decidir com número sem ter o dado organizado como ativo, o que costuma se apoiar em planilha e extração manual."
+      - texto: "Nem um nem outro, porque sem decisão baseada em dado o catálogo não conta."
+        correta: false
+        explicacao: "Data centric é uma propriedade da arquitetura e da governança. Ela existe independentemente de como o comitê decide."
+  - enunciado: "Qual sinal indica melhor que um time é de fato data-driven?"
+    alternativas:
+      - texto: "O time definiu a métrica e o critério de decisão antes de rodar o teste, e mudou de rumo quando o número contrariou a hipótese."
+        correta: true
+        explicacao: "Definir critério antes e aceitar o resultado contrário é o teste prático. O resto é justificativa."
+      - texto: "O time tem um dashboard atualizado em tempo real na parede."
+        correta: false
+        explicacao: "Visibilidade não é decisão. Painel sem critério acordado é informação passiva."
+      - texto: "O time contratou dois cientistas de dados."
+        correta: false
+        explicacao: "Capacidade técnica ajuda, mas não altera sozinha como as decisões são tomadas."
+videos:
+  - id: L8qI5V5YXx8
+    titulo: "A importância da cultura Data Driven para o sucesso de uma empresa | TDC 2023"
+    canal: "Serasa Experian"
+    duracao: 36
+    porQue: "Vem de uma empresa do setor financeiro, então os exemplos são do mundo de crédito e risco, próximos do que você vai ter que citar. Ouça atrás dos obstáculos organizacionais que eles mencionam, não só da parte técnica."
+  - id: LpmYrMONBkY
+    titulo: "O que é uma cultura data driven? Quais são as etapas para construí-la?"
+    canal: "Data Driven School"
+    duracao: 7
+    porQue: "Versão curta e estruturada em etapas, útil para você montar a resposta da pergunta 'como você tornaria um time data-driven' com começo, meio e fim."
+artigos:
+  - titulo: "O que é tomada de decisões baseada em dados?"
+    url: "https://www.ibm.com/br-pt/think/topics/data-driven-decision-making"
+    fonte: "IBM"
+  - titulo: "O que é uma cultura Data Driven e qual é a sua importância"
+    url: "https://www.alura.com.br/artigos/data-driven"
+    fonte: "Alura"
+  - titulo: "Data Mesh Principles and Logical Architecture"
+    url: "https://martinfowler.com/articles/data-mesh-principles.html"
+    fonte: "martinfowler.com"
+flashcards:
+  - frente: "O que significa uma organização ser data centric?"
+    verso: "O dado é o ativo permanente e as aplicações são periféricas: elas vêm, mudam e saem, o dado fica. Modelo, propriedade e contrato do dado existem fora de qualquer sistema específico."
+  - frente: "O que significa uma organização ser data driven?"
+    verso: "As decisões passam pelo dado antes de serem tomadas. Existe métrica acordada, critério definido antes do teste e disposição de mudar de rumo quando o número contraria a hipótese."
+  - frente: "Qual a diferença em uma frase entre centric e driven?"
+    verso: "Centric é onde o dado mora e quem responde por ele; driven é o que acontece na sala em que se decide. Um é arquitetura e governança, o outro é comportamento."
+  - frente: "Dá para ser data centric sem ser data driven?"
+    verso: "Sim, e é comum. Empresa com catálogo, lakehouse e dono de domínio, mas cujos comitês decidem por senioridade. O ativo existe, o comportamento não mudou."
+  - frente: "Dá para ser data driven sem ser data centric?"
+    verso: "Dá, mas não escala. Time que decide com número extraído na mão, em planilha, sem definição comum, chega ao ponto em que duas áreas trazem valores diferentes para a mesma métrica."
+  - frente: "Quais são os quatro requisitos práticos para um time ser data-driven?"
+    verso: "Acesso ao dado sem fila; confiança no número (linhagem, qualidade, atualização conhecida); métrica definida e única; e alguém com mandato para decidir com base nela."
+  - frente: "Como detectar o falso data-driven?"
+    verso: "Observe a ordem dos eventos. Se o número aparece depois da decisão, para justificá-la, é decisão por opinião com anexo de gráfico."
+  - frente: "Qual o papel da governança nesses dois conceitos?"
+    verso: "Governança é o que torna centric possível e driven confiável: dono por domínio, catálogo, definição única de métrica, qualidade monitorada e controle de acesso."
+  - frente: "Como a LGPD entra nessa conversa?"
+    verso: "Ser centric não é guardar tudo. Dado pessoal precisa de finalidade, base legal, prazo de retenção e controle de acesso. Acúmulo sem finalidade é passivo jurídico, não ativo."
+  - frente: "O que é uma métrica única e por que ela importa?"
+    verso: "É a definição acordada e documentada de como se calcula um indicador, com dono. Sem ela, cada área traz um cliente ativo diferente e a reunião discute o número em vez da decisão."
+  - frente: "Dê um exemplo bancário de virada data-driven concreta."
+    verso: "A área de cobrança define antes do teste que só mantém a régua nova se a recuperação em 30 dias subir acima de um limiar acordado, roda em grupo de controle, e desliga a régua quando o número não bate."
+  - frente: "Data-driven significa ignorar julgamento humano?"
+    verso: "Não. Significa que o dado entra antes da decisão e que a hipótese pode ser derrubada por ele. Contexto, risco regulatório e restrição operacional continuam pesando."
+  - frente: "Por que 'dado como produto' aparece nessa discussão?"
+    verso: "Porque tratar o dado como produto — com dono, contrato, SLA e consumidor conhecido — é a forma prática de tornar centric operável em empresa grande, em vez de virar só discurso."
+drills:
+  - titulo: "Centric, driven ou nenhum dos dois?"
+    instrucao: "Para cada situação, classifique o que ela evidencia. Justifique em voz alta antes de olhar a resposta."
+    opcoes: ["Data centric", "Data driven", "Nenhum"]
+    itens:
+      - enunciado: "O banco mantém um modelo canônico de cliente com dono por domínio; três sistemas de canal consomem esse modelo em vez de manter cadastro próprio."
+        resposta: "Data centric"
+        explicacao: "O dado é o centro e as aplicações orbitam. Clássico exemplo de arquitetura centrada no dado."
+      - enunciado: "A área de crédito define o limiar de aprovação antes de rodar o piloto e desliga a política quando a inadimplência estoura o limiar."
+        resposta: "Data driven"
+        explicacao: "Critério definido antes, decisão condicionada ao resultado. É o teste prático de data-driven."
+      - enunciado: "A diretoria decide lançar o produto e depois pede um estudo que sustente a decisão para o comitê."
+        resposta: "Nenhum"
+        explicacao: "O dado entra depois. Isso é decisão por opinião com apoio decorativo de número."
+      - enunciado: "Cada área mantém sua própria planilha de clientes ativos, com definições diferentes, e todas defendem seu número na reunião mensal."
+        resposta: "Nenhum"
+        explicacao: "Sem definição única não há confiança, e sem confiança não há decisão baseada em dado."
+      - enunciado: "O time de dados publica contratos versionados das tabelas de transação, com SLA de atualização, e os consumidores dependem do contrato e não do schema físico."
+        resposta: "Data centric"
+        explicacao: "Contrato de dado desacopla o ativo das aplicações. É centric operável."
+  - titulo: "O que está faltando neste time?"
+    instrucao: "Cada cenário descreve um time que quer ser data-driven e não é. Aponte qual dos quatro requisitos está faltando: acesso, confiança, métrica ou mandato."
+    opcoes: ["Acesso", "Confiança", "Métrica", "Mandato"]
+    itens:
+      - enunciado: "O analista abre chamado para receber um extrato de transações e recebe o arquivo doze dias depois."
+        resposta: "Acesso"
+        explicacao: "Latência de acesso maior que a janela da decisão equivale a não ter dado."
+      - enunciado: "Duas áreas apresentam volumes diferentes de PIX no mesmo mês porque cada uma conta estorno de um jeito."
+        resposta: "Métrica"
+        explicacao: "Falta definição única e documentada, com dono."
+      - enunciado: "O painel existe e é acessível, mas ninguém usa porque na semana passada a carga falhou e o número ficou dois dias desatualizado sem aviso."
+        resposta: "Confiança"
+        explicacao: "Sem monitoramento de qualidade e aviso de atraso, o consumidor volta para a planilha dele."
+      - enunciado: "A análise mostra que o canal não se paga, mas a decisão de encerrar depende de um comitê que se reúne uma vez por semestre."
+        resposta: "Mandato"
+        explicacao: "Sem alguém com poder de decidir no ritmo do dado, a análise vira relatório de gaveta."
+perguntas:
+  - tipo: oral
+    enunciado: "Qual é a diferença entre uma empresa data centric e uma empresa data driven? Dê um exemplo de empresa que é uma coisa e não é a outra."
+    respostaModelo: "Data centric é uma escolha de arquitetura e de governança: o dado é o ativo permanente, e as aplicações são periféricas. O modelo, o dono e o contrato do dado existem fora de qualquer sistema, então trocar o sistema de canal não recria o cadastro do zero. Data driven é uma escolha de comportamento: na hora de decidir, o dado entra antes, com métrica acordada e critério definido de antemão. Os dois se sustentam, mas não são a mesma coisa. O caso mais comum que eu vejo é a empresa data centric que não é data driven: tem catálogo, dono de domínio e um lakehouse confiável, e mesmo assim o comitê decide pela opinião do executivo mais sênior e usa o número depois, para justificar. O inverso existe e não escala: time que decide com dado extraído na mão em planilha, até o dia em que duas áreas trazem valores diferentes para a mesma métrica."
+    rubrica:
+      - "Definiu centric como arquitetura e propriedade do dado, não como cultura"
+      - "Definiu driven como o dado entrar antes da decisão, com critério"
+      - "Deu exemplo de uma organização que é centric sem ser driven"
+      - "Explicou por que driven sem centric não escala"
+  - tipo: oral
+    enunciado: "Você assume a engenharia de dados de uma área do banco que se diz data-driven mas decide por intuição. O que você faz nos primeiros noventa dias?"
+    respostaModelo: "Eu começo escolhendo uma decisão recorrente que a área toma, algo como a régua de cobrança ou a política de limite, porque cultura não muda por discurso, muda por caso. Aí ataco quatro coisas. Acesso: garantir que o analista veja o dado em minutos, com perfil e mascaramento, e não por chamado de duas semanas. Confiança: linhagem, monitoramento de atraso e de volume, e aviso quando a carga falha, porque um número errado sem aviso queima a credibilidade de tudo. Métrica: uma definição única, documentada, com dono, para 'cliente ativo' e para 'recuperação em 30 dias'. Mandato: acordar com o gestor, antes do teste, qual limiar muda a decisão. Depois disso eu rodo o caso com grupo de controle e publico o resultado, inclusive se for contra a hipótese. O ganho não é o dashboard, é o precedente de que o número decidiu. E deixo claro que dado pessoal segue com finalidade e retenção, senão a LGPD trava a iniciativa no meio."
+    rubrica:
+      - "Escolheu uma decisão concreta como ponto de partida, em vez de projeto genérico de cultura"
+      - "Cobriu acesso, confiança, métrica e mandato"
+      - "Propôs definir o critério de decisão antes do experimento"
+      - "Citou grupo de controle ou forma verificável de medir o efeito"
+      - "Lembrou de privacidade e controle de acesso ao ampliar o acesso ao dado"
+  - tipo: unica
+    enunciado: "Um time apresenta um painel bonito, atualizado e amplamente acessado, mas as decisões continuam saindo iguais às de antes. O que isso indica?"
+    alternativas:
+      - texto: "Visibilidade aumentou, mas falta critério de decisão acordado e mandato para agir sobre o número."
+        correta: true
+        explicacao: "Painel entrega informação. Decisão depende de alguém que se comprometa antes com o que o número vai mudar."
+      - texto: "O painel está tecnicamente errado; se estivesse certo, a decisão mudaria."
+        correta: false
+        explicacao: "Qualidade importa, mas painel correto e ignorado é situação corriqueira."
+      - texto: "O time precisa de mais fontes de dados no painel."
+        correta: false
+        explicacao: "Adicionar dado a um processo que não usa dado não muda o processo."
+      - texto: "É prova de que a empresa não é data centric."
+        correta: false
+        explicacao: "O sintoma é de comportamento de decisão, não de arquitetura do dado."
+  - tipo: multipla
+    enunciado: "Quais condições precisam existir para um time ser efetivamente data-driven?"
+    alternativas:
+      - texto: "Acesso ao dado em prazo compatível com a janela da decisão."
+        correta: true
+        explicacao: "Dado que chega depois da decisão não participa dela."
+      - texto: "Confiança no número, sustentada por linhagem, monitoramento e aviso de falha."
+        correta: true
+        explicacao: "Sem confiança o consumidor volta para a planilha própria."
+      - texto: "Definição única e documentada das métricas, com dono."
+        correta: true
+        explicacao: "Sem isso a reunião discute o número em vez da decisão."
+      - texto: "Alguém com mandato para agir no ritmo em que o dado chega."
+        correta: true
+        explicacao: "Análise sem decisor vira relatório arquivado."
+      - texto: "Um data lake com todos os dados históricos da instituição."
+        correta: false
+        explicacao: "Volume de dado armazenado não produz decisão, e acumular sem finalidade cria risco de LGPD."
+      - texto: "Substituir o julgamento dos especialistas pelo resultado dos modelos."
+        correta: false
+        explicacao: "Data-driven é o dado entrar antes da decisão, não eliminar contexto, risco e restrição regulatória."
+---
+
+## Em uma frase
+
+**Data centric** é sobre onde o dado mora e quem responde por ele; **data
+driven** é sobre o que acontece na sala em que se decide.
+
+## Centric: o dado é o que fica
+
+Em uma arquitetura centrada em aplicação, cada sistema é dono do seu banco. O
+canal de atendimento tem o cadastro dele, o cartão tem o dele, o crédito tem o
+dele. Quando o sistema é substituído, o dado vai junto ou é migrado às pressas,
+e a definição de "cliente" muda de significado conforme a tela.
+
+Em uma arquitetura **centrada no dado**, a ordem se inverte. O modelo, a
+propriedade e o contrato do dado existem fora de qualquer sistema. As aplicações
+são periféricas: elas vêm, mudam e saem; o dado permanece. Na prática isso
+aparece como modelo canônico de cliente, dono por domínio, catálogo e contrato
+versionado das tabelas que outros times consomem.
+
+<Callout tipo="dica" titulo="A frase que resume">
+Aplicação é efêmera, dado é permanente. Se trocar o sistema de canal obriga a
+recriar o cadastro do zero, a empresa é centrada em aplicação, não em dado.
+</Callout>
+
+## Driven: o dado entra antes da decisão
+
+Data driven não é sobre quantidade de painel. É sobre a ordem dos eventos.
+
+Se a métrica é acordada, o critério é definido antes do teste e o time muda de
+rumo quando o número contraria a hipótese, o time é data-driven. Se o número
+aparece depois da escolha, para sustentar o que já foi decidido, o time é
+opinião-driven com anexo de gráfico.
+
+<Callout tipo="erro" titulo="O falso data-driven">
+O sinal mais confiável é temporal: pergunte quando o número foi calculado em
+relação à decisão. "Rodamos a análise para embasar a apresentação" é uma resposta
+que se denuncia sozinha.
+</Callout>
+
+## Como os dois se cruzam
+
+<Comparativo
+  colunas={["", "Data centric", "Data driven"]}
+  linhas={[
+    ["Natureza", "Arquitetura e governança", "Comportamento de decisão"],
+    ["Pergunta que responde", "De quem é o dado e onde ele vive?", "O que decidiu esta escolha?"],
+    ["Se manifesta em", "Modelo canônico, catálogo, dono de domínio, contrato de dado", "Métrica acordada, critério prévio, experimento, decisão revertida por número"],
+    ["Falha típica", "Cada sistema com seu cadastro e sua definição de cliente", "Painel bonito, decisão igual à de antes"],
+    ["Dá para ter sem o outro?", "Sim, e é o caso mais comum em banco grande", "Dá, mas não escala além da planilha"]
+  ]}
+/>
+
+Centric é infraestrutura de confiança; driven é o uso dela. Um banco pode ter os
+dois desalinhados nas duas direções, e a resposta forte na sabatina é justamente
+saber dizer qual dos dois está faltando em um cenário dado.
+
+## O que precisa existir para um time ser data-driven
+
+<Passos itens={[
+  "Acesso: o analista vê o dado em minutos, com perfil e mascaramento adequados — não por chamado que demora mais que a janela da decisão.",
+  "Confiança: linhagem conhecida, monitoramento de atraso e volume, e aviso quando a carga falha. Um número errado sem aviso queima a credibilidade de todos os outros.",
+  "Métrica: uma definição única, documentada e com dono. Sem isso, cada área traz um 'cliente ativo' diferente e a reunião discute o número em vez da decisão.",
+  "Mandato: alguém com poder de agir no ritmo em que o dado chega. Análise sem decisor vira relatório arquivado."
+]} />
+
+Repare que três dos quatro são trabalho de engenharia de dados e governança. O
+quarto é organizacional, e é o que a maioria dos projetos de cultura de dados
+esquece.
+
+## Governança não é o freio, é a condição
+
+Sem dono por domínio, catálogo e definição única de métrica, o dado não vira
+ativo confiável: vira um monte de tabelas que ninguém garante. É a governança que
+permite dizer, com segurança, que aquele número é o número.
+
+Em banco existe uma camada a mais. Ser centric não é guardar tudo. Dado pessoal
+exige finalidade, base legal, prazo de retenção e controle de acesso. Acumular
+dado sem finalidade é passivo jurídico sob a LGPD, não é precaução. Mencionar
+isso na sabatina mostra que você entende o contexto regulatório em que o banco
+opera.
+
+## Como responder isso em voz alta
+
+Separe as duas palavras logo na primeira frase: uma é arquitetura, a outra é
+comportamento. Dê o exemplo do banco que é centric sem ser driven, porque é o
+caso real e mostra que você não decorou definição. Depois liste os quatro
+requisitos — acesso, confiança, métrica, mandato — e feche com um caso concreto
+de cobrança ou de limite, dizendo qual critério foi acordado antes do teste.

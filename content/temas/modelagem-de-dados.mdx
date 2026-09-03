@@ -1,0 +1,277 @@
+---
+slug: modelagem-de-dados
+titulo: "Modelagem de dados"
+resumo: "Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse."
+minutos: 35
+nivel: intermediario
+porQue: "Modelagem é onde a banca vê se você pensa antes de escrever pipeline. Perguntar o grão de um fato é o teste mais rápido para saber se a pessoa já modelou de verdade ou só consumiu tabela pronta."
+comoCai: "Modele o fato de transações de cartão: qual é o grão?"
+feynman: "Explique para o gerente de cartões, sem jargão, por que a tabela de análise dele repete o nome do estabelecimento em milhões de linhas e por que isso é proposital."
+preRequisitos: []
+errosComuns:
+  - "Começar pela lista de colunas em vez do grão. Sem declarar o grão, você não consegue decidir o que é medida, o que é dimensão e nem validar duplicidade depois."
+  - "Normalizar o modelo analítico até 3NF. Cada junção a mais custa leitura e shuffle; o modelo dimensional troca redundância controlada por velocidade e clareza."
+  - "Chamar de star um modelo com dimensão em vários níveis. Se a dimensão está quebrada em subtabelas, é snowflake, e você precisa justificar a escolha."
+  - "Usar SCD tipo 1 onde o negócio precisa de histórico. Sobrescrever o endereço do cliente reescreve o passado: a análise de risco por região do ano anterior muda sozinha."
+  - "Ligar o fato à chave natural do cliente numa dimensão SCD tipo 2. A chave tem que ser a substituta da versão vigente na data do evento, senão o histórico não fecha."
+  - "Adotar One Big Table por padrão. Ela é ótima para consulta e péssima para manter regra de negócio única; o custo aparece na terceira mudança de definição."
+preTeste:
+  - enunciado: "Você vai modelar o fato de transações de cartão. Qual declaração de grão é utilizável?"
+    alternativas:
+      - texto: "Uma linha por cliente por mês."
+        correta: false
+        explicacao: "É um agregado, não o fato transacional. Você perde a capacidade de analisar por estabelecimento, canal e horário."
+      - texto: "Uma linha por autorização de cartão."
+        correta: true
+        explicacao: "Grão no evento atômico. Qualquer agregação por cliente, mês ou estabelecimento é derivável dele; o contrário não."
+      - texto: "Uma linha por conta."
+        correta: false
+        explicacao: "Isso é dimensão, não fato. Conta não é evento mensurável."
+  - enunciado: "O cliente mudou de endereço. O time de risco precisa saber em qual região ele morava no momento de cada transação passada. Qual tipo de SCD?"
+    alternativas:
+      - texto: "Tipo 1: sobrescrever o endereço."
+        correta: false
+        explicacao: "Sobrescrever reescreve o passado; as transações antigas passariam a apontar para a região nova."
+      - texto: "Tipo 2: encerrar a versão antiga e inserir uma nova linha com nova chave substituta."
+        correta: true
+        explicacao: "É o único tipo que preserva o histórico completo e permite que o fato aponte para a versão vigente na data do evento."
+      - texto: "Tipo 3: guardar o endereço anterior numa coluna adicional."
+        correta: false
+        explicacao: "Tipo 3 guarda apenas um nível de histórico e não resolve várias mudanças ao longo do tempo."
+videos:
+  - id: Osgqqt-VOV0
+    titulo: "Aprenda Modelagem dimensional em MENOS de 15 MINUTOS!!!"
+    canal: "Victor Bertoldo"
+    duracao: 17
+    porQue: "Vai direto em fato, dimensão e grão sem rodeio. Assista com papel do lado e desenhe o star schema de transações de cartão em paralelo, porque é isso que a banca vai pedir."
+  - id: Tzsfod-nl4c
+    titulo: "O que é Slowly Changing Dimension nos Data Warehouses?"
+    canal: "Universo dos Dados"
+    duracao: 9
+    porQue: "Cobre o pedaço que mais derruba candidato: por que tipo 2 existe e o que ele custa. Foque em como as colunas de vigência e a chave substituta trabalham juntas."
+artigos:
+  - titulo: "Entenda o esquema em estrela e a importância para o Power BI"
+    url: "https://learn.microsoft.com/pt-br/power-bi/guidance/star-schema"
+    fonte: "Microsoft Learn"
+  - titulo: "Modelagem dimensional no Microsoft Fabric"
+    url: "https://learn.microsoft.com/pt-br/fabric/data-warehouse/dimensional-modeling-overview"
+    fonte: "Microsoft Learn"
+flashcards:
+  - frente: "O que é o grão de uma tabela fato?"
+    verso: "A definição, em uma frase, do que uma linha representa. Ex.: uma linha por autorização de cartão. Declarar o grão é o primeiro passo do projeto dimensional."
+  - frente: "Por que declarar o grão antes de escolher colunas?"
+    verso: "Porque o grão determina quais dimensões são aplicáveis, quais medidas são aditivas e como testar duplicidade. Escolher coluna primeiro produz fato com grão misto."
+  - frente: "Diferença entre fato e dimensão."
+    verso: "Fato guarda o evento mensurável e as chaves para as dimensões; dimensão guarda o contexto descritivo pelo qual se filtra e agrupa."
+  - frente: "O que é 3NF e a quem ela serve?"
+    verso: "Forma normal que elimina redundância e dependência transitiva. Serve ao OLTP, onde a escrita é intensa e a integridade por linha é o que importa."
+  - frente: "Por que o modelo dimensional não é normalizado?"
+    verso: "Porque em análise o custo é leitura e junção, não escrita. Desnormalizar a dimensão reduz joins, simplifica a consulta e acelera o filtro."
+  - frente: "Star contra snowflake."
+    verso: "Star mantém cada dimensão numa tabela só, mesmo com redundância. Snowflake normaliza a dimensão em níveis, poupando espaço e custando joins."
+  - frente: "O que é dimensão conformada?"
+    verso: "Dimensão compartilhada por vários fatos com a mesma definição e as mesmas chaves — cliente, tempo, agência. É o que permite comparar cartão com crédito no mesmo painel."
+  - frente: "SCD tipo 1, em uma frase."
+    verso: "Sobrescreve o valor antigo. Sem histórico. Certo para correção de erro de digitação, errado para mudança que o negócio precisa analisar no tempo."
+  - frente: "SCD tipo 2, em uma frase."
+    verso: "Encerra a linha vigente e insere uma nova versão com nova chave substituta, mantendo data de início, data de fim e flag de versão corrente."
+  - frente: "SCD tipo 3, em uma frase."
+    verso: "Guarda o valor anterior numa coluna paralela. Barato, mas só retém um nível de histórico; serve para comparar antes e depois de uma reclassificação pontual."
+  - frente: "Como o fato aponta para uma dimensão SCD tipo 2?"
+    verso: "Pela chave substituta da versão vigente na data do evento, resolvida por busca com faixa de vigência durante a carga do fato."
+  - frente: "Data Vault: hub, link e satellite."
+    verso: "Hub guarda a chave de negócio; link guarda o relacionamento entre hubs; satellite guarda os atributos descritivos com histórico. Modelo de integração, não de consumo."
+  - frente: "Quando Data Vault faz sentido?"
+    verso: "Muitas fontes heterogêneas, forte exigência de auditabilidade e rastreamento de origem, e regras de negócio que ainda mudam. Costuma alimentar um star schema na camada de consumo."
+  - frente: "O que é One Big Table e qual o trade-off?"
+    verso: "Fato já desnormalizado com os atributos das dimensões embutidos. Ganha em simplicidade de consulta e perde em manutenção da definição única e em custo de reprocessar histórico."
+drills:
+  - titulo: "Declare o grão, o fato e as dimensões"
+    instrucao: "Para cada requisito, diga em voz alta a frase do grão e liste o que é fato e o que é dimensão. Depois compare com a resposta."
+    itens:
+      - enunciado: "A área de cartões quer analisar gasto por bandeira, canal, estabelecimento e horário."
+        resposta: "Grão: uma linha por autorização de cartão. Fato: transações de cartão (medidas: valor, taxa de intercâmbio). Dimensões: cliente, conta, estabelecimento, bandeira, canal, data, hora."
+        explicacao: "Grão no evento atômico permite qualquer agregação posterior; o contrário nunca é recuperável."
+      - enunciado: "Risco quer o saldo devedor de cada conta no fim de cada dia."
+        resposta: "Grão: uma linha por conta por dia. Fato de snapshot periódico (medida: saldo, semiaditiva). Dimensões: conta, cliente, produto, data."
+        explicacao: "Saldo é semiaditivo: soma entre contas, não soma ao longo do tempo. Isso precisa ser dito na resposta."
+      - enunciado: "Operações quer acompanhar o ciclo de uma proposta de crédito, da entrada à liberação."
+        resposta: "Grão: uma linha por proposta, atualizada a cada etapa. Fato de snapshot acumulado (medidas: dias em cada etapa, valor solicitado e aprovado). Dimensões: cliente, produto, canal, datas de cada marco."
+        explicacao: "Snapshot acumulado é o padrão para processo com etapas e datas que se preenchem ao longo do tempo."
+      - enunciado: "Marketing quer saber quais clientes receberam a oferta de cartão, mesmo os que não converteram."
+        resposta: "Grão: uma linha por cliente por campanha por envio. Fato sem medida (factless). Dimensões: cliente, campanha, canal, data."
+        explicacao: "O fato registra a ocorrência do evento; contar linhas é a métrica."
+      - enunciado: "PIX quer volume transacionado por chave, tipo de chave e instituição de destino."
+        resposta: "Grão: uma linha por transação PIX. Fato de transações PIX (medida: valor). Dimensões: pagador, recebedor, tipo de chave, instituição, data e hora."
+        explicacao: "Nenhuma agregação no grão: tipo de chave e instituição são atributos de dimensão, não medidas."
+      - enunciado: "A diretoria quer comparar receita de cartão e receita de crédito no mesmo painel, por cliente e por mês."
+        resposta: "Dois fatos separados, com grãos próprios, ligados pelas mesmas dimensões conformadas de cliente e de data."
+        explicacao: "Fatos com grãos diferentes não se juntam na mesma tabela; o que os torna comparáveis é a dimensão conformada."
+perguntas:
+  - tipo: oral
+    enunciado: "Modele o fato de transações de cartão. Comece pelo grão."
+    respostaModelo: "O grão é uma linha por autorização de cartão. Escolho o evento atômico porque qualquer agregação por cliente, mês ou estabelecimento é derivável dele, e o caminho inverso não existe. As medidas são valor da transação, valor em moeda original e taxa de intercâmbio; valor é aditivo em todas as dimensões, o que facilita. As chaves de dimensão são cliente, conta, cartão, estabelecimento, bandeira, canal, data e hora, mais a moeda. Guardo o identificador da autorização como dimensão degenerada dentro do próprio fato, porque não faz sentido uma tabela só para ele. Cliente e conta eu trato como SCD tipo 2, então o fato aponta para a chave substituta da versão vigente na data da transação. Para validar o grão, testo unicidade pela chave de autorização mais a data: se duplicar, ou o grão está errado ou a ingestão não é idempotente."
+    rubrica:
+      - "Declarou o grão em uma frase antes de listar colunas"
+      - "Justificou o grão atômico pela derivabilidade das agregações"
+      - "Separou medidas de chaves de dimensão e comentou aditividade"
+      - "Citou dimensão degenerada para o id da autorização"
+      - "Ligou o fato à versão correta de uma dimensão SCD tipo 2"
+      - "Propôs um teste concreto para validar o grão"
+  - tipo: oral
+    enunciado: "O cliente mudou de endereço. Como você trata isso na dimensão cliente e por quê?"
+    respostaModelo: "Depende do que o negócio precisa enxergar. Se ninguém analisa endereço no tempo, tipo 1 resolve: sobrescrevo e pronto, é barato e a dimensão não cresce. Mas em banco isso raramente se sustenta, porque risco e prevenção a fraude analisam concentração por região, e sobrescrever reescreve o passado. Então uso tipo 2: encerro a linha vigente preenchendo a data de fim e a flag de corrente, e insiro uma nova linha com nova chave substituta, nova data de início e fim em aberto. O fato passa a apontar para a chave substituta da versão vigente na data do evento, resolvida por busca com faixa de vigência durante a carga. O custo é dimensão maior e carga mais complexa, e todo mundo que consulta precisa saber que existe mais de uma linha por cliente. Tipo 3 eu deixaria só para comparar antes e depois de uma reclassificação pontual."
+    rubrica:
+      - "Condicionou a escolha à necessidade do negócio, não a preferência técnica"
+      - "Descreveu a mecânica do tipo 2: encerra vigência, insere versão, nova chave substituta"
+      - "Explicou como o fato passa a apontar para a versão correta"
+      - "Nomeou o custo do tipo 2 e a limitação do tipo 3"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre star e snowflake é correta?"
+    alternativas:
+      - texto: "Snowflake é sempre melhor porque economiza armazenamento."
+        correta: false
+        explicacao: "A economia é marginal diante do custo dos joins extras em consulta analítica."
+      - texto: "Star mantém cada dimensão numa tabela única e desnormalizada; snowflake normaliza a dimensão em níveis, trocando espaço por joins."
+        correta: true
+        explicacao: "É a distinção exata, e o trade-off é esse."
+      - texto: "Star não admite mais de uma tabela fato."
+        correta: false
+        explicacao: "Um modelo dimensional costuma ter vários fatos ligados por dimensões conformadas."
+      - texto: "Snowflake é obrigatório quando existe hierarquia na dimensão."
+        correta: false
+        explicacao: "Hierarquia cabe perfeitamente numa dimensão desnormalizada, com uma coluna por nível."
+  - tipo: multipla
+    enunciado: "Quais situações justificam considerar Data Vault na camada de integração?"
+    alternativas:
+      - texto: "Muitas fontes heterogêneas que precisam ser integradas sem perder a origem de cada atributo."
+        correta: true
+        explicacao: "Separar hub, link e satellite preserva rastreabilidade por fonte."
+      - texto: "Exigência forte de auditabilidade e de reconstruir o estado do dado em qualquer data."
+        correta: true
+        explicacao: "O satellite versionado guarda o histórico completo dos atributos."
+      - texto: "Regras de negócio ainda instáveis, que você não quer congelar no modelo de integração."
+        correta: true
+        explicacao: "Data Vault adia a aplicação da regra para a camada de consumo."
+      - texto: "Necessidade de entregar consulta rápida e simples direto para o time de BI."
+        correta: false
+        explicacao: "Data Vault é ruim de consumir; o padrão é servir um star schema derivado dele."
+      - texto: "Um único sistema de origem, com esquema estável e poucos consumidores."
+        correta: false
+        explicacao: "Nesse caso o overhead do modelo não se paga."
+---
+
+## Em uma frase
+
+Modelagem de dados é decidir **o que uma linha representa** e como o contexto se
+liga a ela — normalizando quando a carga é transacional, dimensionalizando
+quando a carga é analítica.
+
+## 3NF serve ao OLTP
+
+Normalizar até a terceira forma normal elimina redundância e dependência
+transitiva: cada fato fica em um lugar só, e atualizar o nome de um
+estabelecimento muda uma linha. Isso é exatamente o que um core bancário
+precisa, onde a escrita é constante e a integridade por linha é o produto.
+
+O preço é junção. Uma consulta analítica que atravesse oito tabelas
+normalizadas paga oito joins, e num motor distribuído cada join é um candidato a
+shuffle.
+
+## Modelagem dimensional de Kimball
+
+### Comece pelo grão
+
+<Termo nome="grão">A frase que define o que uma linha da tabela fato representa. "Uma linha por autorização de cartão" é um grão; "dados de cartão" não é.</Termo>
+
+Declarar o grão primeiro não é formalidade. Ele determina quais dimensões são
+aplicáveis, quais medidas são aditivas e qual teste de unicidade prova que a
+carga está certa. Modelo que começa pela lista de colunas quase sempre produz
+**grão misto** — linhas de transação convivendo com linhas de agregado mensal — e
+o erro só aparece quando alguém soma tudo e o número dobra.
+
+Prefira o grão atômico. Do evento você deriva qualquer agregado; do agregado
+você não recupera o evento.
+
+### Fato e dimensão
+
+<Comparativo
+  colunas={["", "Tabela fato", "Tabela dimensão"]}
+  linhas={[
+    ["Guarda", "Evento mensurável e chaves de dimensão", "Contexto descritivo"],
+    ["Tamanho", "Cresce sem parar", "Pequena e relativamente estável"],
+    ["Exemplo", "Transação de cartão, transferência PIX", "Cliente, conta, estabelecimento, data"],
+    ["Uso na consulta", "Somar, contar, medir", "Filtrar e agrupar"]
+  ]}
+/>
+
+Três tipos de fato aparecem sempre em banco: **transacional** (uma linha por
+evento), **snapshot periódico** (saldo da conta no fim de cada dia) e **snapshot
+acumulado** (a proposta de crédito, atualizada a cada etapa). Saldo é medida
+semiaditiva: soma entre contas, não soma ao longo do tempo — dizer isso rende
+ponto.
+
+### Star, snowflake e dimensão conformada
+
+Star mantém cada dimensão numa tabela desnormalizada, com redundância assumida.
+Snowflake quebra a dimensão em níveis. A economia de espaço do snowflake é
+pequena e o custo em joins é real, então o padrão é star, com snowflake apenas
+onde a hierarquia é grande e volátil.
+
+**Dimensão conformada** é a mesma dimensão, com a mesma definição e as mesmas
+chaves, compartilhada por vários fatos. É o que permite pôr receita de cartão e
+receita de crédito lado a lado por cliente e por mês. Sem ela, cada área traz o
+seu "cliente" e o painel não fecha.
+
+## SCD: o que fazer quando a dimensão muda
+
+O cliente muda de endereço. Três respostas possíveis:
+
+<Comparativo
+  colunas={["Tipo", "O que faz", "Quando usar"]}
+  linhas={[
+    ["Tipo 1", "Sobrescreve o valor antigo, sem histórico", "Correção de erro de digitação, atributo que o negócio não analisa no tempo"],
+    ["Tipo 2", "Encerra a versão vigente e insere uma nova linha com nova chave substituta", "Atributo que o negócio precisa analisar historicamente: região, segmento, faixa de risco"],
+    ["Tipo 3", "Guarda o valor anterior numa coluna paralela", "Um único nível de histórico, típico de reclassificação pontual"]
+  ]}
+/>
+
+Como se implementa o tipo 2, na prática:
+
+<Passos itens={[
+  "A dimensão ganha chave substituta (surrogate), além da chave natural do cliente.",
+  "Ganha também data de início de vigência, data de fim e uma flag de versão corrente.",
+  "Na carga, comparam-se os atributos monitorados com a versão vigente; se algum mudou, a linha atual recebe data de fim e a flag cai.",
+  "Insere-se uma nova linha com nova chave substituta, data de início igual à data da mudança e fim em aberto.",
+  "Na carga do fato, a chave de dimensão é resolvida por busca com faixa de vigência: a versão que valia na data do evento."
+]} />
+
+<Callout tipo="atencao" titulo="O erro que anula o tipo 2">
+Ligar o fato pela chave natural do cliente. Se você fizer isso, toda transação
+histórica passa a enxergar os atributos atuais — que é exatamente o problema que
+o tipo 2 existia para resolver.
+</Callout>
+
+## Data Vault, em resumo
+
+Três construções: **hub** guarda a chave de negócio, **link** guarda o
+relacionamento entre hubs, **satellite** guarda os atributos descritivos com
+histórico e origem. O modelo é feito para integrar e auditar, não para
+consumir.
+
+Faz sentido quando há muitas fontes heterogêneas, exigência forte de
+rastreabilidade e regras de negócio ainda em movimento. O padrão é usar Data
+Vault na integração e derivar um star schema para o consumo. Num banco isso
+aparece quando cadastro, cartões, crédito e canais digitais têm noções
+diferentes de "cliente" e ninguém quer congelar uma delas cedo demais.
+
+## One Big Table no Lakehouse
+
+Com armazenamento colunar e poda de coluna, muita gente desiste do join e
+publica o fato já desnormalizado, com os atributos das dimensões embutidos. A
+consulta fica trivial e rápida.
+
+O trade-off é manutenção: quando a definição de um atributo muda, você reescreve
+histórico em vez de atualizar uma dimensão pequena; e a regra de negócio deixa
+de ter um lugar único onde mora. Use OBT como **camada de consumo** derivada de
+um modelo dimensional, não como substituta dele.

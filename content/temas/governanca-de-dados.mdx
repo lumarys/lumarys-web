@@ -1,0 +1,264 @@
+---
+slug: governanca-de-dados
+titulo: "Governança de dados"
+resumo: "Governança de dados é o conjunto de políticas, papéis, processos e padrões que fazem o dado ser confiável e usável. Quem responde pelo dado, onde ele está catalogado, de onde ele veio e quem pode vê-lo."
+minutos: 30
+nivel: intermediario
+porQue: "A banca usa governança para separar quem só constrói pipeline de quem entende que dado é ativo com dono. Em banco, cada resposta esbarra em LGPD, auditoria e regulador, e o entrevistador quer ver você citar papel e processo, não só ferramenta."
+comoCai: "Quem responde por um dado errado no relatório da diretoria?"
+feynman: "Explique para o diretor de crédito por que o número dele diverge do número do time de risco, e o que precisa existir na empresa para isso parar de acontecer."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Confundir governança com segurança da informação. Segurança protege o dado de quem não deve ver; governança define quem deve ver, para quê, por quanto tempo e quem responde pelo significado do dado."
+  - "Dizer que o dono do dado é o time de engenharia. Engenharia é custodiante: opera o pipeline e o armazenamento. O dono é da área de negócio que define a regra e responde pelo número."
+  - "Tratar catálogo como inventário técnico de tabelas. Sem dono, definição de negócio, classificação e linhagem, o catálogo vira lista de nomes e ninguém usa."
+  - "Achar que linhagem serve só para bonito no diagrama. Linhagem é o que responde 'o que quebra se eu mudar esta coluna' e 'de onde veio este número' numa auditoria."
+  - "Prometer governança centralizada num banco grande. Um comitê único vira gargalo; o padrão que escala é federado, com política central e execução no domínio."
+  - "Falar de LGPD só como consentimento. Consentimento é uma das bases legais; em banco a maior parte do tratamento se apoia em obrigação legal, execução de contrato ou legítimo interesse."
+preTeste:
+  - enunciado: "O relatório de inadimplência da diretoria veio com o saldo devedor errado. A causa foi uma regra de negócio mal interpretada na transformação. Quem responde pelo dado?"
+    alternativas:
+      - texto: "O engenheiro de dados que escreveu a transformação, porque foi ele quem errou o código."
+        correta: false
+        explicacao: "Ele é custodiante e responde pela execução correta da regra, mas não pela definição dela. A responsabilidade sobre o significado é do dono."
+      - texto: "O data owner da área de negócio, que define a regra e responde pelo número; o steward apura e o custodiante corrige o pipeline."
+        correta: true
+        explicacao: "Governança separa quem define (owner), quem cuida do dia a dia e da qualidade (steward) e quem opera a infraestrutura (custodian)."
+      - texto: "O time de segurança da informação, porque dado errado é incidente."
+        correta: false
+        explicacao: "Segurança trata confidencialidade, integridade e disponibilidade contra acesso indevido, não a correção semântica de uma regra de negócio."
+  - enunciado: "Qual pergunta a linhagem de dados responde de forma direta?"
+    alternativas:
+      - texto: "Quantos registros nulos existem na coluna de CPF."
+        correta: false
+        explicacao: "Isso é métrica de qualidade, medida por teste, não por linhagem."
+      - texto: "Quais relatórios e tabelas quebram se a coluna de origem mudar de tipo."
+        correta: true
+        explicacao: "Linhagem mapeia origem, transformações e destinos, e é o que permite análise de impacto antes da mudança."
+      - texto: "Se o usuário tem permissão para ler a tabela."
+        correta: false
+        explicacao: "Isso é política de acesso, registrada no catálogo mas resolvida pelo controle de permissões."
+videos:
+  - id: 2BNaO_KA-8o
+    titulo: "O que é governança de dados e como funciona?"
+    canal: "Neoway Labs Tech"
+    duracao: 19
+    porQue: "Conversa de time que já implantou, não aula de slide. Preste atenção em como eles descrevem o desenho de papéis e a resistência das áreas de negócio: é exatamente o que a banca quer ouvir você antecipar."
+  - id: HPY7-xPLsEw
+    titulo: "Aula 42 - Introdução à Ciência dos Dados (Data Science) - O Steward e o Owner"
+    canal: "LCDados"
+    duracao: 11
+    porQue: "Foca só na separação entre owner e steward, que é o ponto onde a maioria dos candidatos escorrega. Assista para conseguir enunciar a diferença em uma frase."
+artigos:
+  - titulo: "O que é governança de dados?"
+    url: "https://www.ibm.com/br-pt/topics/data-governance"
+    fonte: "IBM"
+  - titulo: "Data governance with Unity Catalog"
+    url: "https://docs.databricks.com/aws/en/data-governance/"
+    fonte: "Databricks"
+  - titulo: "LGPD | Privacidade e Proteção de Dados Pessoais"
+    url: "https://www.gov.br/mcti/pt-br/acesso-a-informacao/lei-geral-de-protecao-de-dados-pessoais-lgpd"
+    fonte: "gov.br"
+flashcards:
+  - frente: "Defina governança de dados em uma frase."
+    verso: "Conjunto de políticas, papéis, processos e padrões que garantem que o dado seja confiável, encontrável, protegido e usável, com responsabilidade nomeada."
+  - frente: "O que faz o data owner?"
+    verso: "Responde pelo dado perante o negócio: define a regra e o significado, aprova quem acessa e decide sobre retenção. Costuma ser gestor da área que gera o dado."
+  - frente: "O que faz o data steward?"
+    verso: "Opera a governança no dia a dia do domínio: mantém definição no catálogo, acompanha métricas de qualidade, apura divergência e aciona quem corrige."
+  - frente: "O que faz o data custodian?"
+    verso: "Cuida da infraestrutura e do pipeline: armazenamento, backup, execução do controle de acesso, disponibilidade. Em geral é o time de engenharia de dados ou de plataforma."
+  - frente: "Para que serve o catálogo de dados?"
+    verso: "É o mapa: quais dados existem, o que cada campo significa, quem é o dono, qual a classificação de sensibilidade e como pedir acesso. Sem ele, todo pedido vira garimpo."
+  - frente: "Cite dois usos práticos de linhagem."
+    verso: "Análise de impacto antes de mudar uma coluna ou uma fonte, e prova de origem numa auditoria ou num pedido do regulador sobre como um número foi calculado."
+  - frente: "Como se classifica dado por sensibilidade em banco?"
+    verso: "Em níveis, do público ao restrito, marcando o que é dado pessoal e o que é dado pessoal sensível pela LGPD. A classificação é o que dispara mascaramento, criptografia e regra de acesso."
+  - frente: "Diferença entre governança e segurança da informação."
+    verso: "Governança define quem deve acessar o quê, com qual finalidade e quem responde pelo dado. Segurança implementa e defende esse desenho contra acesso indevido."
+  - frente: "O que é base legal na LGPD?"
+    verso: "A justificativa jurídica que autoriza tratar um dado pessoal. Consentimento é só uma delas; em banco predominam obrigação legal, execução de contrato e legítimo interesse."
+  - frente: "O que é limitação de finalidade?"
+    verso: "Dado coletado para uma finalidade não pode ser reaproveitado livremente para outra. É o princípio que impede usar cadastro de conta para um modelo de marketing sem nova avaliação."
+  - frente: "O que é política de retenção?"
+    verso: "Regra que define por quanto tempo cada dado fica guardado e quando é descartado ou anonimizado. Guardar além do necessário é risco, não precaução."
+  - frente: "O que é governança federada?"
+    verso: "Política, padrão e glossário definidos centralmente; execução, propriedade e qualidade dentro de cada domínio de negócio. É a ponte conceitual para Data Mesh."
+  - frente: "Como se prova governança para um auditor?"
+    verso: "Catálogo com dono e classificação, linhagem rastreável, log de acesso, evidência de que a política de retenção roda e histórico das mudanças de regra."
+drills:
+  - titulo: "De quem é a responsabilidade?"
+    instrucao: "Para cada situação, diga qual papel responde em primeira instância: data owner, data steward ou data custodian. Responda em voz alta antes de conferir."
+    opcoes: ["Data owner", "Data steward", "Data custodian"]
+    itens:
+      - enunciado: "Definir que 'cliente ativo' é quem teve ao menos uma transação nos últimos 90 dias."
+        resposta: "Data owner"
+        explicacao: "Definição de regra de negócio é decisão do dono do domínio, não do time técnico."
+      - enunciado: "Perceber que a taxa de CPF nulo na tabela de cadastro subiu de 0,2% para 4% e abrir a apuração."
+        resposta: "Data steward"
+        explicacao: "Monitorar métrica de qualidade do domínio e disparar a apuração é rotina do steward."
+      - enunciado: "Restaurar a tabela de transações após uma escrita corrompida do job noturno."
+        resposta: "Data custodian"
+        explicacao: "Operação de armazenamento e recuperação é do custodiante, tipicamente engenharia de plataforma."
+      - enunciado: "Aprovar que o time de modelagem de fraude passe a ler a tabela de endereços do cliente."
+        resposta: "Data owner"
+        explicacao: "Concessão de acesso a dado do domínio é decisão do dono; o custodiante só executa."
+      - enunciado: "Manter a descrição de cada coluna da tabela de PIX atualizada no catálogo."
+        resposta: "Data steward"
+        explicacao: "Curadoria de metadado de negócio é trabalho contínuo do steward."
+      - enunciado: "Configurar o mascaramento da coluna de CPF para perfis sem autorização."
+        resposta: "Data custodian"
+        explicacao: "A regra vem da classificação e da política; a implementação técnica é do custodiante."
+perguntas:
+  - tipo: oral
+    enunciado: "O relatório de inadimplência que foi para a diretoria veio errado. O que você faz e como a governança evita que isso se repita?"
+    respostaModelo: "Primeiro eu contenho: aviso o consumidor do relatório, marco o número como suspeito e uso a linhagem para achar onde a divergência nasceu, comparando com a fonte no core. Depois separo o tipo de erro. Se foi regra de negócio mal definida, isso é do data owner da área, e a correção é acertar a definição no glossário e no catálogo. Se foi execução, é minha, como custodiante, e a correção é no pipeline mais um teste que pegue aquilo antes de publicar. Para não repetir, eu quero três coisas: dono nomeado para aquele indicador, teste de qualidade que rode antes da publicação e falhe o job, e o número publicado por uma única tabela certificada, não por cada área recalculando do seu jeito. Fecho registrando o incidente com causa raiz, porque em banco isso vira evidência para auditoria."
+    rubrica:
+      - "Separou contenção imediata de correção estrutural"
+      - "Usou linhagem para localizar a origem da divergência"
+      - "Atribuiu responsabilidade ao papel certo: owner define a regra, custodiante executa"
+      - "Propôs controle preventivo verificável, como teste que barra a publicação"
+      - "Citou fonte única certificada em vez de cálculo replicado por área"
+  - tipo: oral
+    enunciado: "Você vai desenhar governança de dados para o hub de dados de um banco com dezenas de domínios. Centralizada ou federada? Justifique."
+    respostaModelo: "Federada, com um núcleo central pequeno. O central publica o que precisa ser igual em todo lugar: glossário, padrão de nomenclatura, níveis de classificação de sensibilidade, política de retenção, regra de acesso e as métricas mínimas de qualidade. A execução fica no domínio, que tem o owner e o steward, conhece a regra e responde pelo dado que publica. Escolho federada porque comitê único vira gargalo: com dezenas de domínios, cada aprovação de acesso ou mudança de schema passaria por uma fila. O risco da federação é divergência, e eu trato isso com plataforma: catálogo único, linhagem automática, classificação obrigatória no momento do registro e verificação de conformidade rodando sozinha. Se algum domínio não tiver maturidade, ele entra num modelo tutelado até formar o papel de steward. Essa é a mesma ideia que sustenta Data Mesh, e vale dizer isso na resposta."
+    rubrica:
+      - "Escolheu federada e justificou pelo gargalo do modelo centralizado"
+      - "Nomeou o que fica no centro e o que fica no domínio"
+      - "Citou o risco da federação e um mecanismo concreto de mitigação"
+      - "Ligou governança federada a Data Mesh"
+  - tipo: unica
+    enunciado: "Qual afirmação distingue melhor governança de dados de segurança da informação?"
+    alternativas:
+      - texto: "Governança cuida de dado analítico e segurança cuida de dado transacional."
+        correta: false
+        explicacao: "A divisão não é por tipo de carga; as duas disciplinas atravessam OLTP e OLAP."
+      - texto: "Governança define quem deve acessar o quê, com qual finalidade e quem responde pelo dado; segurança implementa e protege esse desenho."
+        correta: true
+        explicacao: "Governança é a decisão e a responsabilidade; segurança é o controle técnico que a torna efetiva."
+      - texto: "São sinônimos: quem faz governança faz segurança."
+        correta: false
+        explicacao: "Os objetos são diferentes. Dá para ter dado perfeitamente protegido e completamente sem dono."
+      - texto: "Governança é obrigação da LGPD e segurança é opcional."
+        correta: false
+        explicacao: "A LGPD exige as duas coisas, inclusive medidas técnicas de proteção."
+  - tipo: multipla
+    enunciado: "Quais itens um catálogo de dados precisa carregar para ser útil em governança?"
+    alternativas:
+      - texto: "Dono responsável por cada conjunto de dados."
+        correta: true
+        explicacao: "Sem dono nomeado não existe a quem escalar dúvida ou erro."
+      - texto: "Definição de negócio de cada campo, não só o tipo técnico."
+        correta: true
+        explicacao: "É a definição que evita duas áreas calcularem 'cliente ativo' de formas diferentes."
+      - texto: "Classificação de sensibilidade do dado."
+        correta: true
+        explicacao: "A classificação é o que dispara mascaramento, criptografia e regra de acesso."
+      - texto: "Linhagem entre origem, transformações e consumo."
+        correta: true
+        explicacao: "É o que permite análise de impacto e prova de origem em auditoria."
+      - texto: "O plano de execução da última consulta feita na tabela."
+        correta: false
+        explicacao: "É informação de tuning, útil em performance, irrelevante para governança."
+---
+
+## Em uma frase
+
+Governança de dados é o conjunto de **políticas, papéis, processos e padrões**
+que faz o dado ser confiável, encontrável, protegido e usável — com alguém
+nomeado para responder por ele.
+
+## Os três papéis, e o que cada um responde
+
+A pergunta que abre quase toda arguição é "quem responde por um dado errado".
+Quem responde "o time de dados" perde o ponto. A separação clássica é esta:
+
+<Comparativo
+  colunas={["Papel", "Responde por", "Quem costuma ser no banco"]}
+  linhas={[
+    ["Data owner", "Significado e regra de negócio do dado, aprovação de acesso, decisão de retenção", "Gestor da área que gera o dado: cartões, crédito, cadastro"],
+    ["Data steward", "Curadoria no dia a dia: definição no catálogo, métricas de qualidade, apuração de divergência", "Analista sênior dentro do domínio de negócio"],
+    ["Data custodian", "Infraestrutura, pipeline, execução do controle de acesso, backup e disponibilidade", "Engenharia de dados e engenharia de plataforma"]
+  ]}
+/>
+
+A frase que resolve a pergunta: **o dono define, o steward cuida, o custodiante
+opera**. Se o erro foi de regra, é do owner. Se foi de execução, é do custodian.
+Quem descobre e coordena, quase sempre, é o steward.
+
+## Catálogo: o mapa
+
+<Termo nome="catálogo de dados">Inventário pesquisável de conjuntos de dados com dono, definição de negócio, classificação de sensibilidade, linhagem e forma de pedir acesso.</Termo>
+
+Sem catálogo, o custo de encontrar dado é maior que o de processá-lo. Alguém
+precisa da base de transações PIX, pergunta no chat, recebe três tabelas
+parecidas e escolhe a errada. Catálogo bom responde quatro coisas: **o que
+existe, o que significa, quem manda nisso e como eu peço acesso**. No stack de
+Databricks isso normalmente vive no Unity Catalog.
+
+## Linhagem: impacto e auditoria
+
+Linhagem é o rastro do dado, da origem até o relatório. Ela paga duas contas
+concretas:
+
+<Passos itens={[
+  "Impacto de mudança: antes de alterar o tipo de uma coluna do cadastro, você vê quais tabelas e quais painéis quebram.",
+  "Auditoria e regulador: o dado do relatório de risco veio de onde, passou por quais transformações, com qual versão da regra.",
+  "Investigação de incidente: número divergiu, você percorre o caminho de trás para frente até achar o ponto de virada."
+]} />
+
+<Callout tipo="dica" titulo="Linhagem em nível de coluna">
+Linhagem de tabela para tabela ajuda. Linhagem de coluna para coluna é a que
+resolve auditoria de verdade, porque mostra qual campo de origem alimentou qual
+campo do relatório.
+</Callout>
+
+## Classificação e política de acesso
+
+Classificar é marcar cada dado por sensibilidade: do público ao restrito,
+sinalizando dado pessoal e dado pessoal sensível. A classificação não é
+burocracia — é o gatilho técnico. É ela que decide se a coluna de CPF aparece
+mascarada, se a tabela exige criptografia adicional, se o acesso precisa de
+aprovação do owner.
+
+Política de acesso boa é por **papel e finalidade**, não por pessoa. "Analista
+de prevenção a fraude enxerga transação e device, não enxerga renda declarada" é
+política. "Fulano pediu e liberaram" é dívida.
+
+## Onde a LGPD entra
+
+Governança é o que torna a LGPD operável. Três amarrações diretas:
+
+- **Finalidade**: o dado foi coletado para quê. Reaproveitar cadastro de conta
+  corrente em um modelo de propensão exige avaliar se a finalidade cabe.
+- **Base legal**: a justificativa que autoriza o tratamento. Em banco, boa parte
+  se apoia em obrigação legal e execução de contrato, não em consentimento.
+- **Retenção**: por quanto tempo se guarda. Guardar dado pessoal sem finalidade
+  e sem prazo é exposição, não zelo.
+
+<Callout tipo="atencao" titulo="Não transforme isso no tema de segurança">
+Na sabatina, se a pergunta é de governança, fale de finalidade, base legal,
+retenção e responsabilidade. Criptografia, tokenização e IAM são a resposta do
+tema de segurança e privacidade — cite de passagem e volte.
+</Callout>
+
+## Governança federada, a ponte para Data Mesh
+
+Num banco com dezenas de domínios, comitê central único vira fila. O modelo que
+escala é **federado**: o centro publica glossário, padrões de nomenclatura,
+níveis de classificação, política de retenção e as métricas mínimas de
+qualidade; cada domínio tem seu owner e seu steward e responde pelo dado que
+publica.
+
+O preço da federação é divergência, e ela se controla por plataforma: catálogo
+único, linhagem automática, classificação obrigatória no registro e verificação
+de conformidade rodando sozinha. Esse é exatamente o pilar de governança
+federada computacional do Data Mesh — dizer isso conecta os dois temas na
+resposta.
+
+## Como responder isso em voz alta
+
+Defina em uma frase, nomeie os três papéis com quem é quem no banco, mostre
+catálogo e linhagem como os dois artefatos que provam governança, amarre em
+LGPD por finalidade, base legal e retenção, e feche com federado por causa da
+escala. Cerca de dois minutos.

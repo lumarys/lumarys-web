@@ -1,0 +1,323 @@
+---
+slug: mapreduce
+titulo: "MapReduce"
+resumo: "Map transforma cada registro em pares chave-valor, o shuffle agrupa tudo que tem a mesma chave e o reduce agrega. É simples de entender e caro de executar: entre cada estágio o resultado vai para o disco, e é aí que mora o gargalo."
+minutos: 30
+nivel: intermediario
+porQue: "É o exercício clássico de raciocínio distribuído: a banca pede o contador de palavras não para ver se você sabe contar, mas para ver se você identifica shuffle e escrita em disco como os pontos caros, e se sabe explicar por que Spark ganhou."
+comoCai: "Explique um contador de palavras e diga onde está o gargalo."
+feynman: "Explique para alguém sem formação técnica como cinquenta pessoas contariam, em paralelo, quantas transações cada agência do banco fez em um mês."
+preRequisitos: ["hadoop-arquitetura"]
+errosComuns:
+  - "Esquecer o shuffle. Map e reduce são as duas fases que todo mundo cita; o shuffle entre elas é onde o trabalho pesado acontece e é o que a banca quer ouvir."
+  - "Dizer que o combiner sempre pode ser usado. Ele só é seguro quando a agregação é associativa e comutativa: soma e máximo sim, média direta não."
+  - "Confundir combiner com reducer. O combiner roda no lado do map, sobre a saída parcial daquele mapper, e é opcional — o framework pode chamá-lo zero, uma ou várias vezes."
+  - "Achar que a lentidão do MapReduce é da CPU. O custo dominante é I/O: gravar a saída do map em disco, transferir pela rede no shuffle e gravar o resultado de cada job antes do próximo começar."
+  - "Explicar que Spark é rápido só porque usa memória. A outra metade é o DAG: o Spark planeja a cadeia inteira e evita materializar resultado intermediário entre estágios."
+  - "Ignorar a chave enviesada. Se uma chave concentra a maior parte dos registros, um reducer trabalha sozinho enquanto os outros terminam, e o job fica refém dele."
+preTeste:
+  - enunciado: "Em um job que soma o valor transacionado por agência, o que o shuffle faz?"
+    alternativas:
+      - texto: "Redistribui os pares pela rede de modo que todos os pares de uma mesma agência cheguem ao mesmo reducer."
+        correta: true
+        explicacao: "Agrupar por chave exige mover dado entre máquinas. É a etapa que consome rede e disco."
+      - texto: "Embaralha aleatoriamente os registros para distribuir a carga por igual."
+        correta: false
+        explicacao: "O nome engana. A redistribuição é determinística, pela função de partição aplicada à chave."
+      - texto: "Ordena o resultado final antes de gravar na saída."
+        correta: false
+        explicacao: "Há ordenação envolvida, mas o propósito do shuffle é agrupar por chave para o reduce, não formatar a saída."
+  - enunciado: "Quando o combiner é seguro de usar?"
+    alternativas:
+      - texto: "Quando a operação de agregação é associativa e comutativa."
+        correta: true
+        explicacao: "O framework pode chamar o combiner zero, uma ou várias vezes; só operações como soma, contagem e máximo mantêm o resultado correto."
+      - texto: "Sempre, porque ele só antecipa o trabalho do reducer."
+        correta: false
+        explicacao: "Média direta, por exemplo, dá resultado errado se aplicada parcialmente sem carregar contagem junto."
+      - texto: "Somente quando existe um único reducer no job."
+        correta: false
+        explicacao: "O número de reducers não tem relação com a segurança do combiner."
+videos:
+  - id: rISmbGoO-cM
+    titulo: "Entenda de uma vez por todas o que é MapReduce - O que é Hadoop? (Parte 3)"
+    canal: "Big Data Sem Mistério"
+    duracao: 13
+    porQue: "Percorre o fluxo completo com exemplo, que é o formato que você precisa reproduzir em voz alta. Preste atenção em onde ele mostra o dado saindo de uma máquina para outra: é ali que está o gargalo."
+  - id: mpCMUkf6WSQ
+    titulo: "02 - Hadoop - Introdução ao map-reduce"
+    canal: "CÓDIGO FLUENTE"
+    duracao: 12
+    porQue: "Segunda passada com outra didática, útil se o primeiro vídeo não fixou a separação entre as fases. Use para conferir se você consegue nomear o que entra e o que sai de cada etapa."
+artigos:
+  - titulo: "MapReduce Tutorial"
+    url: "https://hadoop.apache.org/docs/stable/hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html"
+    fonte: "Apache Hadoop"
+  - titulo: "What is MapReduce?"
+    url: "https://www.ibm.com/think/topics/mapreduce"
+    fonte: "IBM"
+  - titulo: "O que é Hadoop e para que ele é usado?"
+    url: "https://cloud.google.com/learn/what-is-hadoop?hl=pt-br"
+    fonte: "Google Cloud"
+flashcards:
+  - frente: "Quais são as três fases do MapReduce e o que cada uma faz?"
+    verso: "Map lê cada registro e emite pares chave-valor; shuffle redistribui os pares pela rede para que a mesma chave caia no mesmo reducer, ordenando e agrupando; reduce recebe uma chave com a lista de valores e agrega."
+  - frente: "O que entra e o que sai da função map?"
+    verso: "Entra um registro da divisão de entrada (por exemplo, uma linha do arquivo de transações). Sai zero, um ou vários pares chave-valor."
+  - frente: "O que entra e o que sai da função reduce?"
+    verso: "Entra uma chave e o iterador com todos os valores daquela chave. Sai o resultado agregado, normalmente um par por chave."
+  - frente: "O que o shuffle faz exatamente?"
+    verso: "Aplica a função de partição à chave para decidir o reducer de destino, transfere os dados pela rede, ordena e agrupa por chave. É determinístico, apesar do nome."
+  - frente: "O que é o combiner?"
+    verso: "Uma agregação parcial executada no lado do map, sobre a saída daquele mapper, antes do shuffle. Reduz o volume que trafega pela rede."
+  - frente: "Quando o combiner é seguro?"
+    verso: "Quando a operação é associativa e comutativa — soma, contagem, mínimo, máximo. O framework pode chamá-lo zero, uma ou várias vezes, então o resultado precisa ser o mesmo em qualquer caso."
+  - frente: "Por que média direta não pode usar combiner ingenuamente?"
+    verso: "Média de médias não é a média. Para funcionar, o combiner precisa emitir soma e contagem, e o reducer dividir no fim."
+  - frente: "Onde está o gargalo do MapReduce?"
+    verso: "No I/O entre estágios: a saída do map é gravada em disco local, transferida pela rede no shuffle, e o resultado de cada job vai para o HDFS antes do próximo job começar."
+  - frente: "Por que encadear jobs MapReduce é caro?"
+    verso: "Porque cada job materializa o resultado no HDFS, com replicação 3, e o job seguinte lê tudo de volta. Um pipeline de cinco etapas paga cinco vezes esse custo."
+  - frente: "Por que o Spark é mais rápido para o mesmo trabalho?"
+    verso: "Mantém o dado intermediário em memória quando cabe e monta um DAG da cadeia inteira, evitando materializar cada estágio. O shuffle continua existindo e continua caro."
+  - frente: "O que é o DAG do Spark e por que ele importa?"
+    verso: "O grafo acíclico das transformações, montado antes de executar. Ele permite juntar operações em um mesmo estágio e planejar a execução, em vez de encadear jobs independentes."
+  - frente: "O que é chave enviesada e como ela aparece no banco?"
+    verso: "Uma chave que concentra a maior parte dos registros. Ex.: agrupar por estabelecimento com um grande varejista dominando o volume, ou por canal com o app concentrando quase tudo. Um reducer vira o gargalo do job inteiro."
+  - frente: "Como o MapReduce lida com falha de uma tarefa?"
+    verso: "Reexecuta a tarefa em outro nó a partir da entrada dela. Isso é possível porque map e reduce são funções determinísticas sobre entrada imutável."
+drills:
+  - titulo: "Map, shuffle ou reduce?"
+    instrucao: "Para cada passo do processamento de um arquivo diário de transações, diga em que fase ele acontece."
+    opcoes: ["Map", "Shuffle", "Reduce"]
+    itens:
+      - enunciado: "Ler a linha da transação e emitir o par (agência 0421, 250.00)."
+        resposta: "Map"
+        explicacao: "Transformação registro a registro, sem enxergar o conjunto."
+      - enunciado: "Garantir que todos os pares da agência 0421 cheguem à mesma máquina."
+        resposta: "Shuffle"
+        explicacao: "Particionamento por chave e transferência pela rede."
+      - enunciado: "Somar a lista de valores da agência 0421 e emitir o total do mês."
+        resposta: "Reduce"
+        explicacao: "Agregação sobre todos os valores de uma chave."
+      - enunciado: "Ordenar os pares por chave antes de entregá-los ao reducer."
+        resposta: "Shuffle"
+        explicacao: "Ordenação e agrupamento fazem parte do shuffle, não do reduce."
+      - enunciado: "Descartar a linha de cabeçalho do arquivo sem emitir nada."
+        resposta: "Map"
+        explicacao: "Map pode emitir zero pares para um registro. É filtragem na origem."
+  - titulo: "Este combiner é seguro?"
+    instrucao: "Para cada agregação, diga se dá para usar combiner sem mudar o resultado."
+    opcoes: ["Seguro", "Inseguro"]
+    itens:
+      - enunciado: "Somar o valor transacionado por agência."
+        resposta: "Seguro"
+        explicacao: "Soma é associativa e comutativa: somar parciais e depois somar os parciais dá o mesmo total."
+      - enunciado: "Contar quantas transações cada agência fez."
+        resposta: "Seguro"
+        explicacao: "Contagem vira soma de contagens parciais."
+      - enunciado: "Calcular o ticket médio por agência emitindo médias parciais."
+        resposta: "Inseguro"
+        explicacao: "Média de médias não é a média. Para funcionar, o combiner tem que emitir soma e contagem, e o reducer dividir no fim."
+      - enunciado: "Encontrar o maior valor de transação por agência."
+        resposta: "Seguro"
+        explicacao: "Máximo é associativo e comutativo."
+      - enunciado: "Contar clientes distintos por agência com um contador simples."
+        resposta: "Inseguro"
+        explicacao: "Contagem distinta precisa do conjunto inteiro ou de uma estrutura própria; parciais somadas duplicam quem aparece em mais de um mapper."
+perguntas:
+  - tipo: oral
+    enunciado: "Explique como funciona um contador de palavras em MapReduce e diga onde está o gargalo."
+    respostaModelo: "O arquivo é dividido em pedaços e cada pedaço vai para um mapper. O mapper lê linha por linha e, para cada palavra, emite o par palavra e um. Nenhum mapper enxerga o arquivo inteiro, e é isso que permite o paralelismo. Em seguida vem o shuffle: o framework aplica uma função de partição à chave, transfere os pares pela rede e garante que todas as ocorrências da mesma palavra cheguem ao mesmo reducer, já ordenadas e agrupadas. O reducer recebe a palavra com a lista de uns e soma. O gargalo não é a CPU, é o I/O. A saída do map é gravada em disco local, todo esse volume atravessa a rede no shuffle e o resultado final é gravado no HDFS com replicação. Se eu encadeio jobs, pago isso a cada etapa. Duas mitigações: combiner, que soma localmente antes de enviar e derruba o tráfego, e cuidar de chave enviesada, porque uma palavra dominante deixa um reducer trabalhando sozinho."
+    rubrica:
+      - "Descreveu map, shuffle e reduce nomeando o que entra e o que sai de cada um"
+      - "Apontou I/O de disco e rede como gargalo, e não CPU"
+      - "Citou o combiner e explicou que ele reduz tráfego de rede"
+      - "Mencionou chave enviesada como causa de reducer lento"
+      - "Notou o custo de materializar resultado entre jobs encadeados"
+  - tipo: oral
+    enunciado: "Um job que soma o valor transacionado por estabelecimento roda em vinte minutos, mas dezoito deles são gastos por uma única tarefa que fica para trás. O que está acontecendo e o que você faria?"
+    respostaModelo: "A hipótese mais provável é chave enviesada. Somar por estabelecimento concentra volume em poucos grandes varejistas, então um reducer recebe uma fatia desproporcional e o job inteiro espera por ele. Eu confirmaria olhando o volume de registros por chave, comparando o maior grupo com a mediana, e conferindo nos contadores do job quanto cada reducer processou. Confirmado o desvio, tenho três saídas. A primeira é combiner, se a agregação for associativa, porque reduz muito o que trafega e o que o reducer processa. A segunda é salting: quebrar a chave quente em subchaves, agregar em dois passos e somar os parciais no fim. A terceira é revisar a função de partição, se o desvio for de distribuição e não de dado. Se o pipeline puder mudar de motor, eu levaria isso para Spark, onde consigo inspecionar o shuffle e ajustar particionamento com menos atrito, mas deixaria claro que o skew não some por trocar de ferramenta."
+    rubrica:
+      - "Nomeou chave enviesada como hipótese principal"
+      - "Disse como confirmaria, com uma verificação concreta"
+      - "Propôs combiner e explicou a condição de uso"
+      - "Propôs quebrar a chave quente ou revisar o particionamento"
+      - "Reconheceu que trocar de motor não elimina o skew"
+  - tipo: unica
+    enunciado: "Qual é a razão principal de o Spark ser mais rápido que o MapReduce para o mesmo pipeline de várias etapas?"
+    alternativas:
+      - texto: "Ele mantém dado intermediário em memória e planeja a cadeia inteira como um DAG, evitando materializar o resultado de cada etapa."
+        correta: true
+        explicacao: "As duas coisas juntas: menos I/O entre estágios e um plano único em vez de jobs encadeados."
+      - texto: "Ele elimina a fase de shuffle."
+        correta: false
+        explicacao: "O shuffle existe no Spark e continua sendo a operação mais cara."
+      - texto: "Ele usa mais CPUs por nó que o MapReduce."
+        correta: false
+        explicacao: "O paralelismo depende do cluster, não do motor."
+      - texto: "Ele grava o resultado sem replicação."
+        correta: false
+        explicacao: "A durabilidade da saída depende do armazenamento configurado, não do motor."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre o shuffle estão corretas?"
+    alternativas:
+      - texto: "Ele redistribui os pares pela rede segundo a função de partição aplicada à chave."
+        correta: true
+        explicacao: "É determinístico: a mesma chave sempre cai no mesmo reducer."
+      - texto: "Ele envolve gravação em disco local e leitura pela rede, sendo o ponto mais caro do job."
+        correta: true
+        explicacao: "Por isso reduzir o volume que entra no shuffle é a otimização de maior retorno."
+      - texto: "Uma chave que concentra muitos registros faz um reducer atrasar o job inteiro."
+        correta: true
+        explicacao: "É o skew: o job termina no ritmo da tarefa mais lenta."
+      - texto: "O shuffle desapareceu no Spark."
+        correta: false
+        explicacao: "Continua existindo e continua caro; o que o Spark evita é materializar todo estágio intermediário."
+      - texto: "O shuffle distribui os registros aleatoriamente para equilibrar a carga."
+        correta: false
+        explicacao: "O nome sugere isso, mas a distribuição segue a chave, não o acaso."
+---
+
+## Em uma frase
+
+MapReduce é um modelo de processamento em que **map transforma cada registro em
+pares chave-valor**, o **shuffle agrupa tudo que tem a mesma chave** e o
+**reduce agrega** cada grupo.
+
+## O paradigma
+
+A ideia central é restringir o que o programador pode fazer para que o framework
+consiga paralelizar e tolerar falha sozinho.
+
+<Passos itens={[
+  "Map: recebe um registro por vez e emite zero, um ou vários pares chave-valor. Nenhum mapper enxerga o conjunto inteiro — é isso que permite rodar centenas em paralelo.",
+  "Shuffle: o framework aplica uma função de partição à chave, transfere os pares pela rede, ordena e agrupa. Ao final, todos os valores de uma chave estão no mesmo reducer.",
+  "Reduce: recebe uma chave e o iterador com todos os valores dela, e produz o resultado agregado."
+]} />
+
+Como map e reduce são funções determinísticas sobre entrada imutável, o
+framework pode reexecutar qualquer tarefa que falhe em outro nó, sem coordenação
+complicada. Foi essa propriedade que tornou o processamento em hardware comum
+viável.
+
+## Passo a passo: total transacionado por agência
+
+Imagine o arquivo diário de transações do banco, dividido em três pedaços que
+vão para três mappers.
+
+**Entrada do mapper 1:**
+
+```
+2026-03-01;0421;PIX;250.00
+2026-03-01;0917;CARTAO;80.00
+2026-03-01;0421;CARTAO;120.00
+```
+
+**Saída do map** — chave é a agência, valor é o montante:
+
+```
+(0421, 250.00)
+(0917, 80.00)
+(0421, 120.00)
+```
+
+Os outros dois mappers fazem o mesmo com seus pedaços, ao mesmo tempo, em outras
+máquinas.
+
+**Shuffle.** O framework decide, pela função de partição, que a agência 0421 vai
+para o reducer A e a 0917 para o reducer B. Todos os pares de 0421 emitidos pelos
+três mappers atravessam a rede até o reducer A.
+
+**Entrada do reducer A:**
+
+```
+(0421, [250.00, 120.00, 940.00, 310.00, ...])
+```
+
+**Saída do reduce:**
+
+```
+(0421, 41820.00)
+```
+
+Repare que o volume que trafega no shuffle é proporcional ao número de pares
+emitidos pelo map — não ao número de agências. É esse detalhe que o combiner
+ataca.
+
+## O combiner
+
+O combiner é uma agregação parcial que roda **no lado do map**, sobre a saída
+daquele mapper, antes do shuffle.
+
+No exemplo acima, em vez de o mapper 1 mandar `(0421, 250.00)` e `(0421,
+120.00)` pela rede, o combiner soma localmente e manda `(0421, 370.00)`. Com
+milhões de transações e algumas milhares de agências, isso derruba o tráfego em
+ordens de grandeza — e derruba junto o trabalho do reducer.
+
+<Callout tipo="atencao" titulo="Combiner só serve para agregação associativa e comutativa">
+O framework pode chamar o combiner zero, uma ou várias vezes — é uma otimização,
+não uma garantia. Soma, contagem, mínimo e máximo funcionam. Média direta não:
+média de médias não é a média. Para calcular ticket médio, o combiner precisa
+emitir soma e contagem, e o reducer divide no fim.
+</Callout>
+
+## Onde está o gargalo
+
+A resposta que a banca espera não é "CPU". É **I/O**.
+
+<Comparativo
+  colunas={["Momento", "O que acontece", "Custo"]}
+  linhas={[
+    ["Saída do map", "Os pares são gravados no disco local do nó do mapper", "Escrita em disco proporcional ao volume emitido"],
+    ["Shuffle", "Os pares atravessam a rede até o reducer de destino, com ordenação e agrupamento", "Rede e disco — o ponto mais caro do job"],
+    ["Saída do reduce", "O resultado é gravado no HDFS, com replicação", "Escrita multiplicada pelo fator de replicação"],
+    ["Próximo job", "Lê tudo de volta do HDFS para começar", "Todo o custo acima novamente, por etapa da cadeia"]
+  ]}
+/>
+
+Duas consequências práticas:
+
+**Pipeline encadeado paga muitas vezes.** Um cálculo de cinco etapas vira cinco
+jobs, e cada um materializa o resultado no HDFS com replicação para o seguinte
+ler. O tempo é dominado por escrever e reler dado que só existe para ser
+consumido pelo passo seguinte.
+
+**Chave enviesada trava o job.** O job termina no ritmo da tarefa mais lenta. Se
+você agrupa por estabelecimento e um grande varejista concentra o volume, um
+reducer trabalha sozinho enquanto os outros já acabaram.
+
+<Callout tipo="dica" titulo="A otimização de maior retorno">
+Reduzir o volume que entra no shuffle. Filtrar cedo no map, projetar só as
+colunas necessárias e usar combiner quando a agregação permitir. Otimizar o
+reduce sem mexer no shuffle costuma render pouco.
+</Callout>
+
+## Por que Spark é mais rápido para o mesmo trabalho
+
+Duas razões, e a banca quer as duas.
+
+**Execução em memória.** O Spark mantém o dado intermediário em memória quando
+cabe, em vez de gravar em disco entre estágios. Em processamento iterativo, em
+que o mesmo conjunto é percorrido várias vezes, a diferença é grande.
+
+**DAG em vez de jobs encadeados.** O Spark monta o grafo acíclico de todas as
+transformações antes de executar. Com o plano na mão, ele funde operações em um
+mesmo estágio e só materializa quando precisa — tipicamente na fronteira de
+shuffle. O MapReduce não tem essa visão: cada job é independente e sempre grava
+o resultado.
+
+<Callout tipo="erro" titulo="O que não muda">
+O shuffle continua existindo no Spark e continua sendo a operação mais cara.
+Chave enviesada continua travando estágio. Trocar de motor melhora o custo entre
+etapas; não conserta uma distribuição ruim de chave.
+</Callout>
+
+## Como responder isso em voz alta
+
+Descreva as três fases nomeando o que entra e o que sai de cada uma. Faça o
+exemplo bancário com números pequenos — total por agência funciona melhor que
+contar palavras, porque mostra domínio. Diga que o gargalo é I/O, separando
+escrita em disco de tráfego de rede. Acrescente combiner e chave enviesada como
+os dois pontos de ataque. Feche com Spark, citando memória **e** DAG, e admita
+que o shuffle não desaparece.

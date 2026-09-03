@@ -1,0 +1,276 @@
+---
+slug: particionamento-de-dados
+titulo: "Particionamento de dados"
+resumo: "Particionar é dividir o dado por uma chave para que a consulta leia só o pedaço que interessa. Acertar a chave decide desempenho e custo; errar a cardinalidade produz milhões de arquivos pequenos ou uma partição quente que trava o cluster."
+minutos: 35
+nivel: intermediario
+porQue: "É onde a banca testa julgamento técnico com número. Todo mundo sabe dizer que particionamento acelera consulta; poucos sabem explicar cardinalidade, small files e hot partition, e menos ainda percebem que particionamento em banco relacional e em data lake são mecanismos diferentes com o mesmo nome."
+comoCai: "Como você particionaria a tabela de transações de cartão?"
+feynman: "Explique para um analista de negócio por que a consulta do relatório dele caiu de dez minutos para dez segundos sem que ninguém tenha comprado máquina nova."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Particionar por uma chave de altíssima cardinalidade, como CPF ou id da transação. Cada partição vira um arquivo minúsculo, e o custo de abrir milhões de arquivos supera qualquer ganho de leitura."
+  - "Particionar por uma chave que a consulta não filtra. Se ninguém escreve WHERE naquela coluna, não existe partition pruning e você só criou complexidade."
+  - "Ignorar a distribuição real dos valores. Particionar por agência ou por bandeira quando 60 por cento do volume está em um único valor cria hot partition: uma task carrega o job inteiro."
+  - "Confundir partição de tabela relacional com pasta no data lake. No relacional é uma estrutura interna do banco com índices e estatísticas; no lake é literalmente um diretório no caminho do arquivo."
+  - "Tratar bucketing como sinônimo de particionamento. Bucket distribui por hash em um número fixo de arquivos e serve para join e agregação por chave; partição fisicamente separa e serve para pruning."
+  - "Particionar tabela pequena. Abaixo de alguns gigabytes, particionar costuma piorar: você cria arquivos pequenos e sobrecarrega o metastore sem ganhar leitura."
+preTeste:
+  - enunciado: "Qual é o principal mecanismo pelo qual particionar acelera uma consulta?"
+    alternativas:
+      - texto: "Partition pruning: o motor descarta partições inteiras sem abrir os arquivos."
+        correta: true
+        explicacao: "É o ganho central. Filtrou pela coluna de partição, o motor lê só os diretórios ou segmentos correspondentes."
+      - texto: "Compactação: partições menores comprimem melhor."
+        correta: false
+        explicacao: "Compressão depende do formato e do conteúdo, não do número de partições."
+      - texto: "Indexação automática: cada partição ganha um índice."
+        correta: false
+        explicacao: "Particionar não cria índice. Em data lake nem existe índice no sentido relacional."
+  - enunciado: "Uma tabela de 400 GB de transações de cartão foi particionada por id_transacao. O que acontece?"
+    alternativas:
+      - texto: "Consultas ficam mais rápidas, porque a chave é única e o pruning é perfeito."
+        correta: false
+        explicacao: "Consulta por id único é rara. E a cardinalidade altíssima cria uma partição por linha."
+      - texto: "Explosão de small files: milhões de partições minúsculas, metastore sobrecarregado e leitura mais lenta."
+        correta: true
+        explicacao: "É o erro clássico de cardinalidade. O custo por arquivo passa a dominar o tempo de execução."
+      - texto: "Nada muda: o motor ignora partições com poucos registros."
+        correta: false
+        explicacao: "O motor não ignora; ele precisa listar e abrir cada uma delas."
+videos:
+  - id: lVlHv-rxh-E
+    titulo: "PARTICIONAMENTO DE DADOS | DBA ON BOARDING"
+    canal: "Iniciativa DBA"
+    duracao: 26
+    porQue: "Cobre o lado relacional com profundidade, que é a metade que costuma faltar em quem só viu Spark. Assista prestando atenção em como a partição interage com índice e estatística — isso não existe no lake."
+  - id: gj1a4Z8Evb4
+    titulo: "Particionamento no BigQuery - GCP #3"
+    canal: "Dados com Caio"
+    duracao: 7
+    porQue: "Mostra o lado analítico e o efeito direto no custo da consulta. Repare que aqui a métrica de sucesso é bytes varridos, não segundos."
+artigos:
+  - titulo: "Diretrizes de particionamento de dados"
+    url: "https://learn.microsoft.com/pt-br/azure/architecture/best-practices/data-partitioning"
+    fonte: "Microsoft Learn"
+  - titulo: "Introdução a tabelas particionadas no BigQuery"
+    url: "https://docs.cloud.google.com/bigquery/docs/partitioned-tables?hl=pt-br"
+    fonte: "Google Cloud"
+  - titulo: "When to partition tables on Databricks"
+    url: "https://docs.databricks.com/aws/en/tables/partitions"
+    fonte: "Databricks"
+flashcards:
+  - frente: "O que é partition pruning?"
+    verso: "O motor usa o filtro da consulta para descartar partições inteiras antes de ler qualquer arquivo. É o ganho principal do particionamento."
+  - frente: "Qual é a primeira pergunta ao escolher a chave de partição?"
+    verso: "Por qual coluna as consultas filtram? Sem filtro naquela coluna não há pruning, e o particionamento só adiciona complexidade."
+  - frente: "O que é cardinalidade no contexto de particionamento?"
+    verso: "O número de valores distintos da chave. Alta demais gera partições minúsculas; baixa demais gera partições gigantes que não podem ser podadas com precisão."
+  - frente: "O que é o problema dos small files?"
+    verso: "Muitos arquivos pequenos fazem o custo de listar, abrir e ler metadados dominar o tempo de execução. O motor gasta mais tempo com overhead do que lendo dado."
+  - frente: "Qual é uma referência prática de tamanho de partição?"
+    verso: "A documentação do Databricks recomenda pelo menos 1 GB por partição e desaconselha particionar tabelas com menos de 1 TB. É referência de plataforma, não lei universal."
+  - frente: "O que é hot partition?"
+    verso: "Partição que concentra volume ou tráfego muito acima das outras. Como cada partição vira uma unidade de trabalho, uma só task fica com a maior parte do job e o paralelismo se perde."
+  - frente: "Como mitigar hot partition?"
+    verso: "Trocar a chave, compor a chave com uma segunda coluna, aplicar hash ou salt no valor concentrado, ou usar bucketing em vez de partição para aquela dimensão."
+  - frente: "O que é bucketing ou clustering?"
+    verso: "Distribuir as linhas por hash da chave em um número fixo de arquivos, dentro da partição. Serve para join e agregação pela chave sem shuffle, e não sofre com cardinalidade alta."
+  - frente: "Partição e bucket resolvem o mesmo problema?"
+    verso: "Não. Partição separa fisicamente para permitir pruning por filtro. Bucket organiza dentro do arquivo para colocalizar chaves iguais e evitar shuffle."
+  - frente: "Qual é a diferença entre particionar em relacional e em data lake?"
+    verso: "No relacional é uma estrutura interna do banco, com índice, estatística e otimizador. No lake é um diretório no caminho do arquivo, e o pruning depende de o motor entender o padrão do caminho."
+  - frente: "Por que particionar por data é o padrão em banco?"
+    verso: "Porque quase toda consulta financeira tem recorte temporal, o volume por dia é razoavelmente estável e a expiração de dado antigo vira remoção de diretório."
+  - frente: "O que fazer quando a chave natural de consulta tem cardinalidade alta demais?"
+    verso: "Particionar por uma granularidade mais grossa e usar bucketing ou clustering pela chave fina. Data no diretório, cartão no bucket."
+drills:
+  - titulo: "Escolha a chave de partição"
+    instrucao: "Para cada tabela do banco, diga qual chave você usaria e por quê. Formule em voz alta antes de abrir a resposta; a justificativa vale mais que a chave."
+    itens:
+      - enunciado: "Transações de cartão, 8 bilhões de linhas, consultadas quase sempre por intervalo de datas e às vezes por cliente."
+        resposta: "Data da transação (dia), com bucketing por id do cartão"
+        explicacao: "Data dá pruning para o filtro dominante e volume diário estável. O cartão entra como bucket porque a cardinalidade é alta demais para virar diretório."
+      - enunciado: "Cadastro de clientes, 12 milhões de linhas, consultado por CPF pelo aplicativo."
+        resposta: "Não particionar"
+        explicacao: "Volume pequeno e acesso por chave única. Particionar aqui só cria arquivos pequenos; o que resolve é índice ou clustering pela chave."
+      - enunciado: "Eventos de PIX, alto volume, com consultas por dia e por instituição recebedora, sendo que três instituições concentram a maior parte."
+        resposta: "Data, e não instituição"
+        explicacao: "Particionar por instituição criaria hot partition nas três maiores. A instituição entra como coluna de clustering dentro da partição de data."
+      - enunciado: "Log de acesso ao internet banking, retido por 90 dias e depois descartado."
+        resposta: "Data (dia), possivelmente hora"
+        explicacao: "Expiração vira remoção de diretório inteiro, sem varrer a tabela. Hora só se o volume diário for grande a ponto de a partição diária ficar pesada."
+      - enunciado: "Tabela de câmbio com 40 mil linhas atualizada uma vez por dia."
+        resposta: "Não particionar"
+        explicacao: "Tabela pequena. Particionar produz dezenas de arquivos de poucos kilobytes e piora tudo."
+      - enunciado: "Propostas de crédito, consultadas por período e por produto, com cinco produtos de volume parecido."
+        resposta: "Data e produto, nessa ordem"
+        explicacao: "Baixa cardinalidade e distribuição equilibrada tornam o produto um segundo nível seguro, sem estourar a contagem de partições."
+  - titulo: "Partição, bucket ou nada?"
+    instrucao: "Classifique a técnica adequada para cada objetivo declarado."
+    opcoes: ["Partição", "Bucket", "Nenhum dos dois"]
+    itens:
+      - enunciado: "Fazer a consulta ler apenas os arquivos de março de 2026."
+        resposta: "Partição"
+        explicacao: "É pruning por filtro: exatamente o que a partição entrega."
+      - enunciado: "Evitar shuffle no join entre transações e cartões pela chave do cartão."
+        resposta: "Bucket"
+        explicacao: "Buckets colocalizam a mesma chave nos dois lados do join, dispensando a redistribuição."
+      - enunciado: "Acelerar a busca de um único CPF numa tabela de 12 milhões de linhas em banco relacional."
+        resposta: "Nenhum dos dois"
+        explicacao: "Isso é caso de índice. Particionar por CPF criaria milhões de partições."
+      - enunciado: "Descartar todo o dado com mais de 90 dias sem varrer a tabela."
+        resposta: "Partição"
+        explicacao: "Com partição por data, expirar é remover diretórios ou segmentos, operação de metadado."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você particionaria a tabela de transações de cartão do banco?"
+    respostaModelo: "Eu começaria olhando como a tabela é consultada, porque partição sem filtro correspondente não serve para nada. Em transação de cartão, o filtro dominante é temporal, então minha primeira escolha é particionar por data da transação, no grão de dia. Isso dá pruning em quase toda consulta, mantém volume diário razoavelmente estável e faz a expiração de dado antigo virar remoção de diretório. Eu usaria event time, a data em que a compra aconteceu, e não a data de carga, para o número não mudar em reprocessamento. Não particionaria por cartão nem por cliente: a cardinalidade é altíssima e viraria milhões de arquivos minúsculos. Se o join por cartão for frequente, resolvo com bucketing ou clustering pela chave do cartão dentro da partição de data. Antes de fechar, eu mediria o tamanho médio da partição: se o dia estiver pequeno demais, subo para mês; se estiver enorme, avalio dia mais hora ou um segundo nível de baixa cardinalidade."
+    rubrica:
+      - "Começou pelo padrão de consulta antes de propor a chave"
+      - "Escolheu data e justificou com pruning, estabilidade de volume e expiração"
+      - "Recusou explicitamente chave de alta cardinalidade e explicou o motivo (small files)"
+      - "Ofereceu bucketing ou clustering como resposta ao acesso por cartão"
+      - "Citou um critério mensurável de validação, como tamanho médio da partição"
+  - tipo: oral
+    enunciado: "Um job que lê a tabela de eventos de PIX ficou dez vezes mais lento depois que o time particionou por instituição recebedora. O que você investigaria?"
+    respostaModelo: "Duas hipóteses, e as duas são consequência da chave escolhida. A primeira é hot partition: no PIX o volume é muito concentrado em poucas instituições, então uma ou duas partições ficaram gigantes e as outras vazias. Como partição vira unidade de trabalho, uma task carrega o job inteiro e o paralelismo evapora. Eu confirmaria isso na Spark UI, olhando a distribuição de duração e de bytes lidos entre as tasks de um mesmo stage: se uma task destoa em ordem de grandeza, é essa. A segunda é o oposto, na cauda: centenas de instituições pequenas geram partições de poucos kilobytes, e o custo de listar e abrir arquivos passa a dominar. Eu confirmaria contando arquivos e olhando o tamanho médio. A correção que eu proporia é particionar por data, que distribui de forma previsível, e deixar a instituição como coluna de clustering ou bucket dentro da partição."
+    rubrica:
+      - "Nomeou hot partition e explicou por que ela destrói o paralelismo"
+      - "Nomeou small files na cauda de baixa frequência como segunda causa"
+      - "Disse como confirmaria cada hipótese com evidência (distribuição de tasks, contagem e tamanho de arquivos)"
+      - "Propôs correção concreta: data como partição, instituição como clustering ou bucket"
+  - tipo: unica
+    enunciado: "Qual afirmação descreve corretamente a diferença entre particionamento em banco relacional e em data lake?"
+    alternativas:
+      - texto: "São o mesmo mecanismo, apenas com nomes diferentes conforme o fornecedor."
+        correta: false
+        explicacao: "Compartilham a ideia de dividir por chave, mas a implementação e as consequências são distintas."
+      - texto: "No relacional a partição é uma estrutura interna gerenciada pelo banco, com índices e estatísticas; no lake é um diretório no caminho do arquivo, e o pruning depende do motor de leitura."
+        correta: true
+        explicacao: "Essa distinção explica por que small files é um problema de lake e não de relacional."
+      - texto: "No lake a partição é gerenciada pelo sistema operacional e no relacional pelo usuário."
+        correta: false
+        explicacao: "O sistema operacional não participa da decisão; quem interpreta o caminho é o motor de consulta."
+      - texto: "Particionamento em data lake não permite pruning."
+        correta: false
+        explicacao: "Permite, e é exatamente o objetivo: o motor lê só os diretórios que satisfazem o filtro."
+  - tipo: multipla
+    enunciado: "Quais sintomas indicam que a chave de partição foi mal escolhida?"
+    alternativas:
+      - texto: "Uma task de cada stage demora ordens de grandeza mais que as demais."
+        correta: true
+        explicacao: "Assinatura de hot partition e distribuição desigual."
+      - texto: "A tabela tem milhões de arquivos com poucos kilobytes cada."
+        correta: true
+        explicacao: "Assinatura de cardinalidade alta demais na chave."
+      - texto: "As consultas não filtram pela coluna de partição."
+        correta: true
+        explicacao: "Sem filtro correspondente não há pruning; o particionamento só adicionou custo."
+      - texto: "A tabela cresce todo dia."
+        correta: false
+        explicacao: "Crescimento é esperado e não diz nada sobre a qualidade da chave."
+      - texto: "O formato de arquivo é Parquet."
+        correta: false
+        explicacao: "Formato colunar é recomendado e não tem relação com o acerto da chave."
+---
+
+## Em uma frase
+
+Particionar é **dividir fisicamente o dado por uma chave** para que a consulta
+leia apenas o pedaço que interessa, em vez de varrer tudo.
+
+## Para que serve: partition pruning
+
+<Termo nome="partition pruning">Descarte de partições inteiras antes de abrir qualquer arquivo, com base no filtro da consulta.</Termo>
+
+Esse é o ganho central, e ele tem uma condição: a consulta precisa **filtrar pela
+coluna de partição**. Se o relatório do time de risco sempre traz
+`WHERE data_transacao BETWEEN ...`, particionar por data faz o motor ler dois
+diretórios em vez de dois mil. Se ninguém filtra por aquela coluna, você criou
+complexidade sem retorno.
+
+Há um segundo ganho, menos citado e muito valioso em banco: **expiração vira
+operação de metadado**. Descartar log com mais de 90 dias é remover diretórios,
+não varrer a tabela procurando linhas velhas.
+
+## Data ou chave de negócio?
+
+Data é o padrão em serviço financeiro por três motivos: quase toda consulta tem
+recorte temporal, o volume por dia é previsível, e o ciclo de vida do dado é
+temporal. Chave de negócio — produto, canal, segmento — só funciona quando a
+cardinalidade é baixa **e** a distribuição é equilibrada **e** as consultas
+filtram por ela.
+
+Na prática, o desenho comum é data como primeiro nível e, no máximo, uma segunda
+coluna de baixíssima cardinalidade.
+
+## Cardinalidade e small files
+
+<Callout tipo="erro" titulo="O erro que mais aparece em prova">
+Particionar por `id_transacao` ou por CPF. A chave é única ou quase, então cada
+partição fica com uma ou duas linhas. O resultado são milhões de arquivos de
+poucos kilobytes, um metastore sobrecarregado e uma consulta mais lenta do que
+sem particionamento nenhum.
+</Callout>
+
+O motor paga um custo fixo por arquivo: listar, abrir, ler o rodapé de metadados,
+agendar a task. Quando o arquivo tem 4 KB, esse custo fixo é praticamente todo o
+tempo de execução. A documentação do Databricks recomenda pelo menos 1 GB por
+partição e desaconselha particionar tabelas abaixo de 1 TB — número de plataforma,
+não lei universal, mas é a ordem de grandeza que você deve ter na cabeça.
+
+O extremo oposto também existe: cardinalidade baixa demais, como particionar seis
+anos de transação por ano, dá partições grandes que não podem ser podadas com
+precisão.
+
+## Hot partition
+
+Distribuição desigual é o problema mais difícil de enxergar. Particionar eventos
+de PIX por instituição recebedora parece razoável até você olhar os números: umas
+poucas instituições concentram a maior parte do volume. Como cada partição vira
+uma unidade de trabalho, uma task fica com quase todo o dado e as outras terminam
+em segundos. O job passa a demorar o tempo da maior task, e comprar mais nós não
+ajuda.
+
+Sintoma na Spark UI: dentro do mesmo stage, uma task destoa em ordem de grandeza
+em duração e em bytes lidos. Correções: trocar a chave, compor com uma segunda
+coluna, aplicar hash ou salt no valor concentrado, ou tirar aquela dimensão da
+partição e colocá-la em bucket.
+
+## Bucketing e clustering
+
+Bucketing distribui as linhas por **hash da chave** em um número fixo de arquivos,
+dentro da partição. Resolve um problema diferente: colocalizar a mesma chave dos
+dois lados de um join para evitar shuffle, e agrupar leituras por chave fina sem
+criar diretório para cada valor.
+
+<Comparativo
+  colunas={["Técnica", "Como divide", "Resolve", "Sofre com cardinalidade alta?"]}
+  linhas={[
+    ["Partição", "Diretórios ou segmentos por valor da chave", "Pruning por filtro e expiração barata", "Sim, gera small files"],
+    ["Bucket / clustering", "Hash da chave em N arquivos fixos", "Join e agregação por chave sem shuffle", "Não, N é fixo"]
+  ]}
+/>
+
+A combinação clássica em banco: **data no diretório, cartão no bucket**.
+
+## Mesmo nome, mecanismos diferentes
+
+<Callout tipo="atencao" titulo="Não misture os dois mundos na resposta">
+Em banco relacional, partição é estrutura interna: o otimizador conhece as
+partições, mantém estatísticas e ainda tem índices por cima. Em data lake,
+partição é literalmente um pedaço do caminho do arquivo, tipo
+`/transacoes/dt=2026-03-01/`, e o pruning depende de o motor entender esse padrão.
+Por isso small files é dor de lake e praticamente não existe no relacional.
+</Callout>
+
+## Como escolher a chave
+
+<Passos itens={[
+  "Levante o filtro dominante das consultas reais, não o imaginado.",
+  "Meça a cardinalidade e a distribuição dos valores candidatos.",
+  "Estime o tamanho médio da partição resultante e compare com a ordem de grandeza de 1 GB.",
+  "Se a chave natural tiver cardinalidade alta, use granularidade mais grossa na partição e bucket na chave fina.",
+  "Valide depois de implantar: distribuição de tasks, contagem e tamanho médio dos arquivos."
+]} />

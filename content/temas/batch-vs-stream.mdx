@@ -1,0 +1,274 @@
+---
+slug: batch-vs-stream
+titulo: "Processamento batch e stream"
+resumo: "Batch processa um lote fechado, com começo e fim; stream processa um fluxo que não acaba. A diferença real está em latência, custo e complexidade — e em event time versus processing time, que é onde a maioria das respostas desmonta."
+minutos: 35
+nivel: intermediario
+porQue: "É a pergunta de cenário mais frequente da sabatina: dado um caso do banco, batch ou stream? Quem responde 'stream porque é tempo real' entrega que nunca operou um pipeline; quem coloca latência exigida, custo e complexidade lado a lado mostra que já tomou essa decisão."
+comoCai: "Detecção de fraude em cartão: batch ou stream? Quais os trade-offs?"
+feynman: "Explique para o gerente de prevenção a fraude por que bloquear o cartão durante a compra custa muito mais caro que o relatório de fraude do dia seguinte."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Dizer que stream é sempre melhor porque é tempo real. Stream cobra cluster ligado 24 por 7, estado para manter, plantão e reprocessamento difícil. Se a decisão só é tomada no dia seguinte, você pagou por latência que ninguém consome."
+  - "Confundir micro-batch com stream evento a evento. Spark Structured Streaming agrupa a chegada em micro-lotes de segundos; Flink processa registro a registro. Isso muda o piso de latência que você pode prometer para o negócio."
+  - "Ignorar a diferença entre event time e processing time. Agregar pelo horário de chegada faz a mesma janela dar resultado diferente a cada execução, e em banco isso vira número de fechamento que não bate duas vezes."
+  - "Prometer exactly-once como se fosse uma flag. Ponta a ponta ela exige checkpoint, estado durável e destino idempotente ou transacional. Sem controlar o destino, o que você tem é at-least-once com deduplicação."
+  - "Esquecer o dado atrasado. Sem watermark o estado cresce sem limite; com watermark curto demais você descarta transação legítima que chegou fora de ordem."
+  - "Tratar batch como coisa antiga. Fechamento contábil, reporte regulatório e treino de modelo continuam em batch por bons motivos: lógica simples e resultado reproduzível."
+preTeste:
+  - enunciado: "Um pipeline agrega gasto por cartão em janelas de 5 minutos. Ele usa o horário em que o evento chegou ao Kafka. Qual é o risco?"
+    alternativas:
+      - texto: "Nenhum: o horário de chegada é sempre próximo o suficiente do horário da compra."
+        correta: false
+        explicacao: "Fila com atraso, retentativa de POS e reprocessamento quebram essa premissa. O horário de chegada depende da infraestrutura, não do fato."
+      - texto: "O resultado da mesma janela muda se o pipeline for reprocessado, porque a chegada não é reproduzível."
+        correta: true
+        explicacao: "Processing time é uma propriedade do sistema. Reprocessou, mudou. Event time é uma propriedade do fato e por isso é reproduzível."
+      - texto: "A janela fica pequena demais e o Spark não consegue agregar."
+        correta: false
+        explicacao: "Tamanho de janela é ajustável e não tem relação com qual relógio você usa."
+  - enunciado: "O que significa entregar at-least-once?"
+    alternativas:
+      - texto: "Cada evento é processado no máximo uma vez; em caso de falha, pode ser perdido."
+        correta: false
+        explicacao: "Essa é a definição de at-most-once."
+      - texto: "Cada evento é processado pelo menos uma vez; em caso de falha, pode ser processado de novo e duplicar."
+        correta: true
+        explicacao: "É a garantia mais comum na prática, e é por isso que o destino precisa ser idempotente ou deduplicar por chave."
+      - texto: "Cada evento é processado exatamente uma vez, sem perda e sem duplicidade."
+        correta: false
+        explicacao: "Essa é exactly-once, que custa checkpoint, estado durável e cooperação do destino."
+videos:
+  - id: BUXpoLkZO-0
+    titulo: "CCDD 202 - Pipeline de Dados - Batch vs Stream"
+    canal: "Ignorância Zero"
+    duracao: 7
+    porQue: "Fecha a diferença conceitual em poucos minutos e no vocabulário de pipeline. Assista anotando quais argumentos você usaria para defender batch, que é o lado que costuma ser esquecido na resposta."
+  - id: Rxjq74WlLGE
+    titulo: "Estudo de Caso 1 - Batch, Streaming ou Ambos?"
+    canal: "Data Science Academy"
+    duracao: 6
+    porQue: "Treina exatamente o formato da pergunta da banca: um cenário e uma escolha justificada. Pause antes da resposta e formule a sua em voz alta."
+artigos:
+  - titulo: "Processamento de dados em lote vs. streaming no Azure Databricks"
+    url: "https://learn.microsoft.com/pt-br/azure/databricks/data-engineering/batch-vs-streaming"
+    fonte: "Microsoft Learn"
+  - titulo: "Structured Streaming: APIs on DataFrames and Datasets (event time, watermark, exactly-once)"
+    url: "https://spark.apache.org/docs/latest/streaming/apis-on-dataframes-and-datasets.html"
+    fonte: "Apache Spark"
+  - titulo: "Marcas d'água e dados de chegada tardia no Structured Streaming"
+    url: "https://learn.microsoft.com/pt-br/azure/databricks/structured-streaming/watermarks"
+    fonte: "Microsoft Learn"
+flashcards:
+  - frente: "Qual é a diferença estrutural entre batch e stream?"
+    verso: "Batch opera sobre um conjunto fechado, com começo e fim conhecidos. Stream opera sobre um fluxo sem fim, em que você nunca viu todos os dados e precisa decidir com o que já chegou."
+  - frente: "O que é micro-batch?"
+    verso: "Agrupar a chegada contínua em lotes pequenos, de segundos, e rodar batch em cima. É como o Spark Structured Streaming funciona por padrão: latência de segundos com o modelo mental de batch."
+  - frente: "Event time é o quê?"
+    verso: "O momento em que o fato aconteceu: a hora da compra registrada pela maquininha. É propriedade do evento, não muda em reprocessamento."
+  - frente: "Processing time é o quê?"
+    verso: "O momento em que o motor viu o evento. É propriedade da infraestrutura: muda com fila, retentativa e reprocessamento."
+  - frente: "Por que a diferença entre os dois relógios importa?"
+    verso: "Porque agregação por processing time não é reproduzível. Reprocessou o histórico, os números da janela mudam — inaceitável em fechamento e em reporte regulatório."
+  - frente: "O que é watermark?"
+    verso: "O limite de atraso que o motor aceita. Ele diz 'não espero mais evento com event time anterior a X', permitindo fechar a janela, emitir o resultado e liberar o estado."
+  - frente: "Qual é o trade-off ao escolher o watermark?"
+    verso: "Watermark longo aumenta a completude e o custo de estado e latência. Watermark curto libera memória e resultado rápido, mas descarta evento legítimo que chegou tarde."
+  - frente: "O que é at-most-once?"
+    verso: "Processa no máximo uma vez: em falha, o evento pode ser perdido. Só serve onde perder um registro é barato, como telemetria de amostragem."
+  - frente: "O que é at-least-once?"
+    verso: "Processa pelo menos uma vez: em falha, reprocessa e pode duplicar. É o padrão prático, e exige destino idempotente ou deduplicação por chave do evento."
+  - frente: "Por que exactly-once é caro?"
+    verso: "Porque exige offset e estado salvos atomicamente com a escrita no destino: checkpoint, armazenamento de estado durável e destino transacional ou idempotente. Isso adiciona latência, custo e pontos de falha."
+  - frente: "Como se alcança efeito exactly-once na prática, no banco?"
+    verso: "At-least-once no transporte mais escrita idempotente no destino: chave natural do evento, upsert em tabela Delta ou deduplicação por id de transação dentro do watermark."
+  - frente: "Quando batch é a escolha certa?"
+    verso: "Quando o consumidor decide em horas ou dias, quando a lógica é pesada e precisa de todo o conjunto, quando o resultado precisa ser auditável e reproduzível: fechamento, reporte ao regulador, treino de modelo."
+drills:
+  - titulo: "Batch ou stream?"
+    instrucao: "Para cada caso do banco, decida a arquitetura e diga em uma frase qual é o requisito que manda na decisão. Responda antes de abrir."
+    opcoes: ["Batch", "Stream"]
+    itens:
+      - enunciado: "Aprovar ou negar uma autorização de cartão com base em score de fraude, com orçamento de 200 ms."
+        resposta: "Stream"
+        explicacao: "A decisão precisa sair enquanto a transação está aberta. Não existe versão batch disso."
+      - enunciado: "Relatório de operações suspeitas enviado ao regulador todo dia 5."
+        resposta: "Batch"
+        explicacao: "Prazo em dias, necessidade de reprodutibilidade e auditoria. Stream aqui só adiciona custo e risco."
+      - enunciado: "Alertar o cliente no app quando o saldo fica negativo."
+        resposta: "Stream"
+        explicacao: "Alerta com atraso de horas perde a função. É evento a evento, com estado por conta."
+      - enunciado: "Recalcular o limite de crédito de toda a base uma vez por mês, com um modelo que precisa dos 24 meses de histórico."
+        resposta: "Batch"
+        explicacao: "O cálculo depende do conjunto completo. Janela mensal e conjunto fechado é a definição de batch."
+      - enunciado: "Atualizar o extrato do app com o PIX que o cliente acabou de receber."
+        resposta: "Stream"
+        explicacao: "O cliente olha a tela em segundos. Latência é o requisito dominante."
+      - enunciado: "Carregar diariamente o cadastro de clientes vindo do core bancário para a zona bronze do lake."
+        resposta: "Batch"
+        explicacao: "Origem entrega arquivo diário e ninguém consome cadastro em segundos. Batch é mais simples e mais barato."
+  - titulo: "Que garantia de entrega esse desenho oferece?"
+    instrucao: "Classifique cada desenho pela garantia efetiva que ele dá ao consumidor final, não pela que o time gostaria de ter."
+    opcoes: ["at-most-once", "at-least-once", "exactly-once"]
+    itens:
+      - enunciado: "Consumidor commita o offset no Kafka assim que lê a mensagem e só depois grava no destino."
+        resposta: "at-most-once"
+        explicacao: "Se cair entre o commit e a gravação, a mensagem foi marcada como lida e nunca chega ao destino."
+      - enunciado: "Consumidor grava no destino e só depois commita o offset, sem chave de deduplicação."
+        resposta: "at-least-once"
+        explicacao: "Queda entre gravar e commitar faz o evento ser reprocessado. Sem chave, duplica no destino."
+      - enunciado: "Structured Streaming com checkpoint e escrita em tabela Delta usando MERGE pela chave da transação."
+        resposta: "exactly-once"
+        explicacao: "Checkpoint garante retomada consistente e o MERGE torna a escrita idempotente: reprocessar não duplica o efeito."
+      - enunciado: "Job que lê o tópico do zero toda vez e faz append em arquivo Parquet."
+        resposta: "at-least-once"
+        explicacao: "Nada impede que o mesmo evento entre de novo. Append sem chave é o desenho clássico de duplicidade silenciosa."
+perguntas:
+  - tipo: oral
+    enunciado: "Detecção de fraude em cartão: você faria em batch ou em stream? Quais os trade-offs?"
+    respostaModelo: "Depende de qual fraude. Para bloquear a autorização enquanto a compra acontece, só existe stream: o score precisa sair em algo como duzentos milissegundos, então eu leio o evento de autorização de um tópico, mantenho estado por cartão com as últimas transações e aplico o modelo em memória. O preço disso é cluster ligado o tempo todo, estado para operar, plantão e reprocessamento difícil quando a regra muda. Para investigação e para o reporte de operações suspeitas, eu faço batch: janela diária, todo o histórico disponível, lógica mais pesada e resultado reproduzível para auditoria. Na prática eu desenharia os dois em cima do mesmo evento: stream para a decisão em linha e batch para reprocessar, recalibrar o modelo e corrigir o que o stream errou. E eu usaria event time da autorização, não a hora de chegada, para que o número do dia não mude a cada reprocessamento."
+    rubrica:
+      - "Separou fraude em linha, que exige stream, de investigação e reporte, que cabe em batch"
+      - "Citou um número de latência para a decisão em linha e ligou a decisão a esse requisito"
+      - "Nomeou os custos do stream: cluster contínuo, estado, operação, reprocessamento"
+      - "Propôs a combinação das duas rotas sobre o mesmo evento em vez de escolher só uma"
+      - "Mencionou event time e por que ele importa para reprodutibilidade"
+  - tipo: oral
+    enunciado: "Seu pipeline de stream agrega PIX recebido por conta em janelas de 10 minutos. Uma agência ficou sem rede por meia hora e os eventos chegaram todos juntos depois. O que acontece e como você trata?"
+    respostaModelo: "Se eu estiver agregando por processing time, esses eventos entram todos na janela do momento em que chegaram e sujam o resultado: aparece um pico às onze horas de dinheiro que entrou às dez e meia. A correção é agregar por event time, o carimbo do PIX na origem, e declarar um watermark. O watermark é a minha promessa de até quanto tempo de atraso eu aceito. Com watermark de trinta minutos, esses eventos ainda caem na janela certa e o resultado é corrigido. O custo é segurar estado por mais tempo e demorar mais para fechar a janela. Se o atraso passar do watermark, o evento é descartado da agregação, e aí eu preciso de duas coisas: mandar o descartado para uma trilha separada, para não perder o registro, e ter um job batch de reconciliação que recalcula a janela com tudo que chegou. Watermark é escolha de negócio, não de infraestrutura: quem decide é quem convive com o número incompleto."
+    rubrica:
+      - "Identificou que o problema é agregação por processing time"
+      - "Propôs event time mais watermark como correção, explicando o que o watermark faz"
+      - "Explicou o trade-off do tamanho do watermark: completude contra latência e custo de estado"
+      - "Disse o que fazer com o evento que chega depois do watermark, sem simplesmente perdê-lo"
+      - "Tratou a escolha do watermark como decisão de negócio"
+  - tipo: unica
+    enunciado: "Por que exactly-once ponta a ponta é caro?"
+    alternativas:
+      - texto: "Porque exige uma licença específica do Kafka e do Spark."
+        correta: false
+        explicacao: "Não é questão de licença. É questão de coordenação entre offset, estado e destino."
+      - texto: "Porque exige que o avanço do offset, o estado e a escrita no destino sejam consistentes entre si, o que pede checkpoint, estado durável e destino transacional ou idempotente."
+        correta: true
+        explicacao: "É exatamente onde o custo aparece: latência, armazenamento de estado e acoplamento com o destino."
+      - texto: "Porque obriga o pipeline a rodar em uma única máquina, perdendo paralelismo."
+        correta: false
+        explicacao: "Exactly-once é alcançado em pipelines distribuídos; não exige serializar tudo em um nó."
+      - texto: "Porque só funciona com dados estruturados."
+        correta: false
+        explicacao: "A garantia é sobre entrega e efeito, não sobre o formato do dado."
+  - tipo: multipla
+    enunciado: "Quais sinais, juntos, indicam que um caso pede stream e não batch?"
+    alternativas:
+      - texto: "A decisão perde valor se sair depois de alguns segundos."
+        correta: true
+        explicacao: "Prazo de utilidade curto é o gatilho principal."
+      - texto: "O dado chega continuamente e não existe um lote natural de fechamento."
+        correta: true
+        explicacao: "Fluxo sem fronteira é a definição de stream."
+      - texto: "O consumidor é uma ação automática: bloquear, alertar, recusar."
+        correta: true
+        explicacao: "Quando um sistema age sozinho no momento do evento, não há janela para esperar o lote."
+      - texto: "O volume total do dia é grande."
+        correta: false
+        explicacao: "Volume por si só é argumento para paralelizar, não para streaming."
+      - texto: "O time quer usar Kafka em produção."
+        correta: false
+        explicacao: "Escolha de ferramenta não é requisito de negócio, e a banca costuma testar isso."
+---
+
+## Em uma frase
+
+Batch processa um **conjunto fechado**, com começo e fim conhecidos; stream
+processa um **fluxo sem fim**, em que você decide com o que já chegou e nunca
+viu tudo.
+
+## A diferença real não é velocidade
+
+Muita gente resume batch como "lento" e stream como "rápido". A diferença
+estrutural é outra: em batch você sabe onde o dado termina, em stream não. Isso
+muda tudo. Em batch dá para ordenar, agrupar e recalcular o conjunto inteiro. Em
+stream você precisa decidir quanto tempo espera antes de fechar uma conta que
+talvez ainda receba um registro atrasado.
+
+<Comparativo
+  colunas={["Aspecto", "Batch", "Stream"]}
+  linhas={[
+    ["Fronteira do dado", "Lote fechado: o arquivo do dia, a partição do mês", "Fluxo aberto: nunca acaba"],
+    ["Latência típica", "Minutos a horas", "Milissegundos a segundos"],
+    ["Custo", "Paga o cluster durante a janela de execução", "Paga cluster ligado o tempo todo, mais estado"],
+    ["Complexidade", "Baixa: rodou, terminou, dá para reexecutar", "Alta: estado, atraso, ordem, plantão"],
+    ["Reprocessar", "Simples: aponta para a partição e roda de novo", "Difícil: precisa reler o tópico e refazer o estado"],
+    ["Exemplo no banco", "Reporte regulatório mensal, recálculo de limite", "Score de fraude na autorização, alerta de saldo"]
+  ]}
+/>
+
+## Micro-batch: o meio de campo
+
+O Spark Structured Streaming, por padrão, não processa evento a evento. Ele
+agrupa a chegada em **micro-lotes** de alguns segundos e roda batch em cima. Você
+ganha o modelo mental de batch com latência de segundos, e paga com um piso de
+latência que não desce a milissegundos. Flink, por outro lado, processa registro
+a registro.
+
+Isso é uma resposta de sabatina, não trivialidade: se o negócio pede resposta em
+duzentos milissegundos, micro-batch não entrega.
+
+## Event time e processing time
+
+<Termo nome="event time">O momento em que o fato aconteceu: a hora da compra registrada pela maquininha.</Termo>
+<Termo nome="processing time">O momento em que o motor viu o evento.</Termo>
+
+Os dois relógios divergem sempre que há fila, retentativa, agência sem rede ou
+reprocessamento. A consequência prática é dura: **agregação por processing time
+não é reproduzível**. Rode o mesmo histórico duas vezes e os números da janela
+mudam, porque a chegada mudou. Em banco, isso significa um fechamento que não
+bate com o de ontem e uma conversa desagradável com a área de controles.
+
+Por isso a regra é agregar por event time. E aí aparece o problema seguinte: se o
+evento pode chegar atrasado, quando você fecha a janela?
+
+## Watermark e dado atrasado
+
+O **watermark** é o limite de atraso que você aceita. Declarar watermark de trinta
+minutos é dizer: "não espero mais evento com event time anterior a agora menos
+trinta". Com isso o motor fecha a janela, emite o resultado e libera o estado.
+
+<Callout tipo="atencao" titulo="O trade-off do watermark é de negócio">
+Watermark longo aumenta a completude e o custo de memória e de latência.
+Watermark curto libera estado e entrega rápido, mas descarta transação legítima
+que chegou tarde. Quem decide o número é quem convive com o resultado
+incompleto, não a infraestrutura.
+</Callout>
+
+Evento que chega depois do watermark não deve sumir. Mande para uma trilha
+separada e tenha um job batch de reconciliação que recalcula a janela com tudo.
+
+## Garantias de entrega
+
+<Passos itens={[
+  "at-most-once: commita o offset antes de processar. Em falha, perde o evento.",
+  "at-least-once: processa e depois commita. Em falha, reprocessa e duplica.",
+  "exactly-once: offset, estado e escrita no destino avançam de forma consistente."
+]} />
+
+Exactly-once é caro porque não é uma propriedade do transporte: é uma propriedade
+do conjunto transporte mais estado mais destino. Exige checkpoint, armazenamento
+de estado durável e um destino transacional ou idempotente. Cada uma dessas peças
+custa latência, dinheiro e um ponto a mais de falha.
+
+<Callout tipo="dica" titulo="O caminho barato para o mesmo efeito">
+Na prática, o desenho mais comum no banco é at-least-once no transporte com
+escrita idempotente no destino: `MERGE` em tabela Delta pela chave da transação.
+O efeito visível é exactly-once, sem o custo de coordenação distribuída.
+</Callout>
+
+## Como escolher
+
+Comece pelo prazo em que a decisão perde valor. Se o consumidor age em segundos
+— bloquear cartão, alertar saldo, atualizar extrato no app — é stream. Se o
+consumidor age em horas ou dias, e o resultado precisa ser auditável — reporte
+ao regulador, fechamento, treino de modelo — é batch.
+
+A resposta madura costuma ser as duas: stream para a decisão em linha e batch
+para reprocessar, recalibrar e corrigir o que o stream errou.

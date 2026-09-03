@@ -1,0 +1,265 @@
+---
+slug: lakehouse-delta-lake
+titulo: "Lakehouse e Delta Lake"
+resumo: "O Lakehouse resolve o dilema entre o data lake barato mas sem garantia e o data warehouse confiável mas caro e fechado. O Delta Lake é o formato de tabela que traz ACID, time travel e controle de schema para arquivos no object storage."
+minutos: 32
+nivel: intermediario
+porQue: "É o coração da stack que o banco usa. A banca costuma abrir com 'o que é lakehouse' e fechar com 'por que Delta e não Parquet puro', que é onde se vê quem já quebrou um pipeline com escrita parcial e quem só leu o release note."
+comoCai: "Por que usar Delta e não simplesmente Parquet no S3?"
+feynman: "Explique para um gerente de produto por que o relatório de ontem mudou de número hoje, e como o Delta Lake evita que isso volte a acontecer."
+preRequisitos: ["big-data", "zonas-data-lake"]
+errosComuns:
+  - "Dizer que Delta Lake é um formato de arquivo. Não é: o arquivo continua sendo Parquet. Delta é um formato de tabela, ou seja, Parquet mais um log transacional que diz quais arquivos formam a tabela agora."
+  - "Confundir Lakehouse com Databricks. Lakehouse é uma arquitetura; Databricks é uma plataforma que a implementa, e Iceberg e Hudi implementam a mesma ideia com outro formato."
+  - "Achar que time travel substitui backup. O histórico vive enquanto o VACUUM não remover os arquivos antigos e enquanto o log for retido; não é cópia independente nem sobrevive à exclusão da tabela."
+  - "Rodar VACUUM com retenção curta para economizar espaço. Isso apaga o histórico, quebra o time travel e pode derrubar leitores de longa duração que ainda apontam para arquivos antigos."
+  - "Usar Z-ORDER em coluna de alta cardinalidade única, como o id da transação, esperando ganho. Z-ORDER ajuda em colunas usadas em filtro, e o ganho vem do data skipping, não da ordenação em si."
+  - "Escrever com overwrite na trusted achando que é atômico no Parquet puro. Sem log transacional, um job que morre no meio deixa a tabela com parte dos arquivos novos e parte dos velhos."
+preTeste:
+  - enunciado: "Um job Spark escreve 400 arquivos Parquet no S3 e falha no arquivo 250. O que um leitor que consulta a tabela nesse instante enxerga?"
+    alternativas:
+      - texto: "Com Parquet puro, enxerga os 249 arquivos já gravados como se fossem dado válido."
+        correta: true
+        explicacao: "Sem log transacional, a tabela é 'o que estiver no diretório'. Escrita parcial vira resultado parcial silencioso."
+      - texto: "Nada, porque o Spark faz rollback automático dos arquivos gravados."
+        correta: false
+        explicacao: "O Spark limpa o diretório de saída em alguns committers, mas não há garantia de isolamento para quem lê durante a escrita."
+      - texto: "Um erro de leitura, porque o diretório está inconsistente."
+        correta: false
+        explicacao: "Justamente o oposto: a leitura funciona e devolve dado incompleto sem sinalizar nada."
+  - enunciado: "O que o transaction log do Delta Lake armazena?"
+    alternativas:
+      - texto: "A lista ordenada de commits que adicionam e removem arquivos, com estatísticas e metadados de schema."
+        correta: true
+        explicacao: "O log é a fonte da verdade: a tabela é o conjunto de arquivos que o log diz estarem ativos naquela versão."
+      - texto: "Uma cópia comprimida dos dados, para permitir o rollback."
+        correta: false
+        explicacao: "O log não guarda dado, guarda o registro das operações. Os dados seguem em Parquet."
+      - texto: "Os índices B-tree usados para acelerar as consultas."
+        correta: false
+        explicacao: "Delta não mantém índices B-tree; a aceleração vem de estatísticas por arquivo e data skipping."
+videos:
+  - id: fNtL_ynqHb4
+    titulo: "O que é Delta Lake e seus benefícios - Python - SQL - Spark - Databricks para análise de Dados"
+    canal: "Infinity Big Data | Edmilson Alves"
+    duracao: 12
+    porQue: "Cobre os recursos na ordem em que a banca costuma perguntar. Assista com a pergunta 'o que o Parquet puro não faria aqui' em mente para cada recurso mostrado."
+  - id: VboPKeLdECQ
+    titulo: "O que é Delta, Data Lake e Lakehouse??"
+    canal: "Rafael Arruda"
+    duracao: 4
+    porQue: "Curto e útil para separar os três termos, que é onde muita gente se enrola em voz alta. Bom para revisar na véspera."
+artigos:
+  - titulo: "Welcome to the Delta Lake documentation"
+    url: "https://docs.delta.io/latest/delta-intro.html"
+    fonte: "Delta Lake"
+  - titulo: "What is a Data Lakehouse?"
+    url: "https://www.databricks.com/glossary/data-lakehouse"
+    fonte: "Databricks"
+  - titulo: "What is Delta Lake in Databricks?"
+    url: "https://docs.databricks.com/aws/en/delta/"
+    fonte: "Databricks"
+flashcards:
+  - frente: "O que é um Lakehouse, em uma frase?"
+    verso: "Uma arquitetura que põe garantias de data warehouse (transação, schema, governança, performance) diretamente sobre arquivos abertos em object storage barato, sem precisar de dois sistemas."
+  - frente: "Que dilema o Lakehouse resolve?"
+    verso: "O lake é barato, aberto e aguenta qualquer formato, mas não garante consistência. O warehouse garante, mas é caro, fechado e não lida bem com dado não estruturado. O Lakehouse busca as duas metades boas."
+  - frente: "O que é um formato de tabela?"
+    verso: "Uma camada de metadados que diz quais arquivos compõem a tabela em cada versão, qual é o schema e quais são as estatísticas. Delta, Iceberg e Hudi são formatos de tabela; Parquet e ORC são formatos de arquivo."
+  - frente: "Delta Lake substitui o Parquet?"
+    verso: "Não. Os dados continuam em Parquet. O Delta acrescenta o diretório _delta_log com o histórico de commits, e é o log que define a tabela."
+  - frente: "Como o Delta consegue ACID sobre object storage?"
+    verso: "O commit é a gravação atômica de um arquivo de log novo, não a movimentação dos dados. Vários escritores usam concorrência otimista: cada um lê a versão atual, escreve os dados e tenta gravar o próximo número de versão; quem perde a corrida relê e tenta de novo."
+  - frente: "O que é time travel no Delta?"
+    verso: "Consultar a tabela em uma versão ou em um instante anterior, com VERSION AS OF ou TIMESTAMP AS OF. Serve para auditoria, para comparar antes e depois de uma carga e para reverter erro de pipeline."
+  - frente: "Diferença entre schema enforcement e schema evolution."
+    verso: "Enforcement recusa a gravação que não bate com o schema da tabela, protegendo o consumidor. Evolution permite acrescentar coluna nova de propósito, com mergeSchema, quando a mudança é intencional."
+  - frente: "Para que serve o MERGE no Delta?"
+    verso: "Fazer upsert em uma operação atômica: atualiza a linha que casa pela chave, insere a que não existe e opcionalmente apaga. É como se aplica CDC e como se atende exclusão por LGPD sem reescrever a tabela na mão."
+  - frente: "O que o OPTIMIZE faz e por que é necessário?"
+    verso: "Compacta muitos arquivos pequenos em arquivos maiores. Ingestão frequente gera o problema dos small files, que faz o Spark abrir milhares de arquivos e gastar mais em metadado do que em leitura."
+  - frente: "O que o Z-ORDER faz?"
+    verso: "Reorganiza fisicamente os dados para agrupar valores próximos das colunas escolhidas nos mesmos arquivos, o que melhora o data skipping. Vale para colunas usadas em filtro, não para qualquer coluna."
+  - frente: "O que o VACUUM faz e qual é o risco?"
+    verso: "Remove arquivos que não pertencem mais a nenhuma versão ativa, respeitando um período de retenção (padrão de sete dias). Baixar essa retenção economiza espaço, mas apaga o histórico e pode quebrar leitores de longa duração."
+  - frente: "Por que Parquet puro não basta para uma tabela transacional?"
+    verso: "Porque a tabela é apenas 'o que está no diretório': escrita parcial vira leitura parcial, não há isolamento entre leitor e escritor, não há histórico, não há enforcement de schema e não existe upsert atômico."
+  - frente: "Delta é a única opção de formato de tabela?"
+    verso: "Não. Apache Iceberg e Apache Hudi resolvem o mesmo problema com desenho diferente. Delta é o padrão no Databricks, que é a plataforma do banco."
+  - frente: "Como o Delta acelera consulta sem índice tradicional?"
+    verso: "O log guarda estatísticas por arquivo (mínimo, máximo, contagem de nulos por coluna). O motor usa isso para pular arquivos que não podem conter o filtro. É o data skipping, e é o que OPTIMIZE e Z-ORDER potencializam."
+drills:
+  - titulo: "Qual recurso do Delta resolve esse problema?"
+    instrucao: "Para cada situação real de pipeline bancário, diga qual recurso do Delta Lake você usaria. Responda em voz alta antes de conferir."
+    opcoes: ["Time travel", "MERGE", "Schema enforcement", "Schema evolution", "OPTIMIZE", "Z-ORDER", "VACUUM"]
+    itens:
+      - enunciado: "A carga de ontem entrou duplicada e o painel de crédito ficou errado. Você precisa comparar o antes e o depois."
+        resposta: "Time travel"
+        explicacao: "Consultar a versão anterior mostra exatamente o que a carga acrescentou, sem restaurar backup."
+      - enunciado: "Chegou o CDC do core de cadastro: linhas novas, alteradas e excluídas no mesmo lote."
+        resposta: "MERGE"
+        explicacao: "Upsert atômico com WHEN MATCHED e WHEN NOT MATCHED aplica os três casos em uma transação."
+      - enunciado: "Um produtor começou a mandar o campo valor como texto em vez de decimal e a tabela não pode aceitar isso."
+        resposta: "Schema enforcement"
+        explicacao: "A gravação é recusada e o consumidor fica protegido, em vez de descobrir o problema no relatório."
+      - enunciado: "O time de produto vai passar a enviar um campo novo, canal_originacao, e a mudança foi combinada."
+        resposta: "Schema evolution"
+        explicacao: "Evolução intencional, com mergeSchema, acrescenta a coluna sem reescrever o histórico."
+      - enunciado: "A ingestão de PIX a cada minuto criou 300 mil arquivos de poucos kilobytes e as consultas ficaram lentas."
+        resposta: "OPTIMIZE"
+        explicacao: "Compactação resolve o problema dos small files, que gasta mais tempo em metadado do que em leitura útil."
+      - enunciado: "As consultas do time de fraude quase sempre filtram por agência e por data, e ainda leem arquivo demais."
+        resposta: "Z-ORDER"
+        explicacao: "Agrupar valores próximos dessas colunas nos mesmos arquivos aumenta o data skipping."
+      - enunciado: "Depois de uma reescrita grande, sobrou o dobro de armazenamento em arquivos que nenhuma versão ativa referencia."
+        resposta: "VACUUM"
+        explicacao: "Remove os arquivos órfãos respeitando a retenção. Só reduza a retenção com consciência de que apaga histórico."
+perguntas:
+  - tipo: oral
+    enunciado: "O que é um Lakehouse e que problema ele resolve que o data lake e o data warehouse não resolviam sozinhos?"
+    respostaModelo: "O data lake é barato, aberto e aceita qualquer formato, mas não dá garantia nenhuma: a tabela é o que estiver no diretório, então escrita parcial vira número errado e ninguém sabe qual versão do dado leu. O data warehouse dá transação, schema e governança, mas cobra caro, prende o dado em formato proprietário e não lida bem com log e arquivo não estruturado. O Lakehouse junta as duas metades boas: os dados ficam em arquivo aberto no object storage, e por cima entra um formato de tabela, como o Delta Lake, que traz transação ACID, controle de schema, histórico de versões e estatísticas para performance. Na prática, no banco, isso significa manter uma cópia só do dado, servindo ao mesmo tempo o pipeline de engenharia, o painel de negócio e o modelo de fraude, com governança única no Unity Catalog."
+    rubrica:
+      - "Nomeou a limitação concreta do lake (sem garantia transacional) e a do warehouse (custo e formato fechado)"
+      - "Definiu Lakehouse como arquitetura, não como produto"
+      - "Citou o formato de tabela como a peça que fecha a lacuna"
+      - "Deu um benefício operacional concreto, como cópia única de dado servindo vários consumos"
+  - tipo: oral
+    enunciado: "Por que usar Delta Lake se os dados já estão em Parquet no S3? Convença alguém que acha que é complexidade desnecessária."
+    respostaModelo: "Porque com Parquet puro a tabela é só o conteúdo do diretório, e isso quebra em cinco pontos. Primeiro, atomicidade: se o job morre na metade, quem consultar naquele instante lê metade da carga sem receber erro nenhum. Segundo, isolamento: não existe garantia entre quem lê e quem escreve ao mesmo tempo. Terceiro, histórico: não dá para responder qual era o número ontem, nem reverter uma carga errada sem restaurar backup. Quarto, schema: nada impede um produtor de mudar o tipo de uma coluna e envenenar a tabela. Quinto, upsert: aplicar CDC ou apagar o dado de um titular por LGPD vira reescrita manual de partição. O Delta resolve isso com um log de commits ao lado dos mesmos arquivos Parquet, então o custo de adoção é baixo e o formato continua aberto. Eu abriria mão do Delta só em área descartável, tipo staging efêmero."
+    rubrica:
+      - "Explicou que o dado continua em Parquet e o Delta acrescenta o log"
+      - "Citou ao menos três falhas concretas do Parquet puro: escrita parcial, ausência de histórico, ausência de enforcement, ausência de upsert ou falta de isolamento"
+      - "Ligou pelo menos uma delas a um requisito bancário real, como CDC ou exclusão por LGPD"
+      - "Disse em que situação não usaria Delta, mostrando julgamento"
+  - tipo: unica
+    enunciado: "Um time roda VACUUM com retenção de zero hora logo depois de cada carga para economizar armazenamento. Qual é o principal risco?"
+    alternativas:
+      - texto: "Perde o time travel e pode derrubar leituras em andamento que ainda referenciam arquivos antigos."
+        correta: true
+        explicacao: "VACUUM agressivo remove arquivos que versões anteriores e leitores de longa duração ainda usam."
+      - texto: "Corrompe o transaction log e a tabela precisa ser recriada."
+        correta: false
+        explicacao: "O log não é corrompido; o que desaparece são os arquivos de dados das versões antigas."
+      - texto: "Impede novas gravações até o próximo OPTIMIZE."
+        correta: false
+        explicacao: "VACUUM não bloqueia gravação futura."
+      - texto: "Aumenta o número de arquivos pequenos na tabela."
+        correta: false
+        explicacao: "Isso é efeito de ingestão frequente, e o remédio é o OPTIMIZE."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre o transaction log do Delta Lake estão corretas?"
+    alternativas:
+      - texto: "Ele define quais arquivos compõem a tabela em cada versão."
+        correta: true
+        explicacao: "A tabela é o resultado de aplicar os commits do log, não a listagem do diretório."
+      - texto: "Ele viabiliza concorrência otimista entre escritores."
+        correta: true
+        explicacao: "Cada escritor tenta gravar o próximo número de versão; quem perde relê e tenta de novo."
+      - texto: "Ele guarda estatísticas por arquivo que alimentam o data skipping."
+        correta: true
+        explicacao: "Mínimo, máximo e contagem de nulos por coluna permitem pular arquivos irrelevantes."
+      - texto: "Ele armazena uma cópia dos dados para permitir rollback."
+        correta: false
+        explicacao: "O log registra operações e metadados; os dados continuam nos arquivos Parquet."
+      - texto: "Ele substitui a necessidade de particionar a tabela."
+        correta: false
+        explicacao: "Particionamento continua sendo decisão de modelagem física; o log não a elimina."
+---
+
+## Em uma frase
+
+Lakehouse é a arquitetura que traz **garantias de data warehouse para arquivos
+abertos em object storage**, e Delta Lake é o formato de tabela que entrega
+essas garantias com um log transacional ao lado dos arquivos Parquet.
+
+## O dilema que originou o Lakehouse
+
+Antes, você escolhia um lado. O **data lake** era barato, aberto e aceitava
+qualquer coisa: log de app, JSON de API, PDF de contrato. Em troca, não garantia
+nada. A tabela era literalmente o que estivesse no diretório, então um job que
+morria na metade deixava dado parcial que o leitor consumia sem nenhum aviso.
+
+O **data warehouse** garantia transação, schema e governança, mas cobrava caro
+por armazenamento acoplado a computação, prendia o dado em formato proprietário e
+não digeria bem dado não estruturado. O resultado prático em muitos bancos era
+manter os dois, copiar dado de um para o outro e passar o dia explicando por que
+os números divergem.
+
+O Lakehouse recusa a escolha: **um armazenamento só**, em formato aberto, com as
+garantias na camada de metadados.
+
+## O que é um formato de tabela
+
+Essa distinção derruba muito candidato:
+
+<Comparativo
+  colunas={["Camada", "Exemplos", "Do que trata"]}
+  linhas={[
+    ["Formato de arquivo", "Parquet, ORC, Avro, JSON", "Como os bytes de um arquivo são codificados"],
+    ["Formato de tabela", "Delta Lake, Apache Iceberg, Apache Hudi", "Quais arquivos formam a tabela agora, qual é o schema, qual é o histórico"]
+  ]}
+/>
+
+Delta Lake **não substitui** o Parquet. Os dados continuam em Parquet. O que o
+Delta acrescenta é o diretório `_delta_log`, com a sequência de commits que diz
+quais arquivos estão ativos em cada versão.
+
+## Como o Delta consegue ACID sobre object storage
+
+O truque é que **o commit não é mover dados, é gravar um arquivo de log**. O
+escritor grava os arquivos Parquet novos em silêncio, invisíveis para todo mundo,
+e só no fim registra no log que aqueles arquivos entraram e quais saíram. Essa
+última gravação é atômica: ou o número de versão novo existe, ou não existe.
+
+Com vários escritores, entra a
+<Termo nome="concorrência otimista">Cada escritor lê a versão atual, faz o
+trabalho e tenta registrar a próxima versão. Se outro chegou primeiro, ele relê
+o que mudou e tenta de novo.</Termo> Nada é bloqueado enquanto o trabalho está
+em andamento.
+
+Como o log também guarda estatísticas por arquivo (mínimo, máximo, nulos por
+coluna), o motor consegue **pular arquivos** que não podem conter o filtro. Isso
+é o data skipping, e é a base da performance.
+
+## Os recursos que a banca cobra
+
+<Passos itens={[
+  "Time travel: consultar a tabela em uma versão ou instante anterior, para auditar, comparar cargas e reverter erro.",
+  "Schema enforcement: recusar a gravação fora do contrato, para o problema estourar no pipeline e não no relatório.",
+  "Schema evolution: acrescentar coluna nova de propósito, quando a mudança é combinada.",
+  "MERGE: upsert atômico, que é como se aplica CDC do core e como se atende exclusão de titular por LGPD.",
+  "OPTIMIZE: compactar arquivos pequenos gerados por ingestão frequente.",
+  "Z-ORDER: agrupar valores próximos das colunas de filtro nos mesmos arquivos para ampliar o data skipping.",
+  "VACUUM: remover arquivos que nenhuma versão ativa referencia, respeitando a retenção."
+]} />
+
+<Callout tipo="erro" titulo="A armadilha do VACUUM">
+Reduzir a retenção do VACUUM para economizar armazenamento apaga o histórico
+que o time travel usa e pode derrubar leitores de longa duração que ainda
+apontam para arquivos antigos. Trate retenção de histórico como decisão de
+governança, junto com a política da zona, não como faxina de disco.
+</Callout>
+
+## Por que Parquet puro não basta
+
+Esta é a pergunta-chave do tema, e a resposta melhor é uma lista curta de
+falhas concretas:
+
+<Comparativo
+  colunas={["Necessidade", "Parquet puro", "Delta Lake"]}
+  linhas={[
+    ["Escrita atômica", "Job que morre no meio deixa dado parcial legível", "Commit atômico no log: a versão existe ou não existe"],
+    ["Isolamento leitor/escritor", "Nenhum: o leitor vê o diretório mudando", "Leitor fixa uma versão e a lê inteira"],
+    ["Histórico e auditoria", "Só com backup externo", "Time travel por versão ou timestamp"],
+    ["Contrato de schema", "Qualquer arquivo entra no diretório", "Enforcement na gravação, evolution quando intencional"],
+    ["Upsert e exclusão pontual", "Reescrita manual de partição", "MERGE e DELETE atômicos"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Como fechar em voz alta">
+Comece dizendo que os dados continuam em Parquet, para desarmar a ideia de que
+Delta é um formato concorrente. Depois liste três falhas do Parquet puro com
+exemplo bancário: escrita parcial no fechamento diário, CDC do cadastro e
+exclusão de titular por LGPD. Termine dizendo onde você não usaria Delta, que é
+staging descartável.
+</Callout>

@@ -1,0 +1,282 @@
+---
+slug: ingestao-e-cdc
+titulo: "Ingestão e CDC"
+resumo: "Como o dado entra no lake sem derrubar o sistema de origem: carga full contra incremental, marca d água e dado atrasado, CDC lendo o log de transações, MERGE no destino e os conceitos de Kafka que a banca cobra."
+minutos: 35
+nivel: intermediario
+porQue: "Ingestão é a fronteira entre o mundo transacional e o analítico, e é onde o banco tem mais medo: consulta mal feita no core afeta cliente pagando cartão. A banca usa este tema para ver se você pensa no impacto sobre a origem, não só no destino."
+comoCai: "Como você replicaria a tabela de contas do core bancário para o lake sem pesar no core?"
+feynman: "Explique para o dono do sistema de cadastro por que ler o log de transações incomoda menos o banco de dados dele do que rodar um SELECT por data de atualização a cada hora."
+preRequisitos:
+  - batch-vs-stream
+  - etl-vs-elt
+errosComuns:
+  - "Fazer carga full de tabela grande todo dia por comodidade. Custa janela, custa leitura na origem e ainda assim não conta o que aconteceu entre as fotos."
+  - "Usar data_atualizacao como marca d água sem tratar dado atrasado. Registro que chega depois com timestamp antigo fica para trás da marca e nunca é lido."
+  - "Achar que consulta incremental por timestamp captura tudo. Ela não vê DELETE e perde atualizações intermediárias entre duas leituras."
+  - "Confundir CDC com replicação de banco. CDC entrega um fluxo de eventos de mudança para quem quiser consumir; replicação mantém uma cópia idêntica e fecha a porta para transformação."
+  - "Esperar ordenação global no Kafka. A ordem é garantida por partição, então a chave que você escolhe é o que define se os eventos da mesma conta chegam em ordem."
+  - "Tratar entrega ao menos uma vez como se fosse exatamente uma vez. Sem idempotência ou chave de deduplicação no destino, uma reentrega vira lançamento duplicado."
+  - "Aplicar o fluxo de CDC no destino com INSERT. Sem MERGE, update vira linha nova e delete simplesmente não existe no lake."
+preTeste:
+  - enunciado: "Por que ler o log de transações captura mais do que consultar a tabela por data de atualização?"
+    alternativas:
+      - texto: "Porque o log é mais rápido de ler que a tabela."
+        correta: false
+        explicacao: "Velocidade é consequência, não o ponto. A consulta por timestamp pode até ser rápida com índice e ainda assim perder eventos."
+      - texto: "Porque o log registra toda mudança, inclusive DELETE e as atualizações intermediárias entre duas leituras."
+        correta: true
+        explicacao: "A consulta por timestamp só enxerga o estado atual da linha no momento em que você olhou. O que aconteceu no meio se perde, e linha apagada some sem deixar rastro."
+      - texto: "Porque o log é armazenado fora do banco de dados."
+        correta: false
+        explicacao: "O log de transações é parte do próprio banco. O que muda é o mecanismo de leitura, não o local."
+  - enunciado: "Num tópico Kafka com 12 partições, o que garante que todos os eventos da conta 4711 sejam processados em ordem?"
+    alternativas:
+      - texto: "Configurar o tópico com ordenação global."
+        correta: false
+        explicacao: "Kafka não oferece ordenação global entre partições. Só existe ordem dentro de uma partição."
+      - texto: "Usar o número da conta como chave da mensagem, para que todos os eventos dela caiam na mesma partição."
+        correta: true
+        explicacao: "A chave define a partição por hash. Mesma chave, mesma partição, ordem preservada."
+      - texto: "Usar um único consumer group com 12 consumidores."
+        correta: false
+        explicacao: "Isso distribui a leitura, mas não junta na mesma partição os eventos que foram espalhados na escrita."
+      - texto: "Aumentar o fator de replicação para 3."
+        correta: false
+        explicacao: "Replicação trata de durabilidade contra perda de broker, não de ordenação."
+videos:
+  - id: U8t1E_PNwJQ
+    titulo: "Integrações de Dados em Tempo Real com Change Data Capture"
+    canal: "Universo dos Dados"
+    duracao: 14
+    porQue: "Explica CDC como padrão de integração e não como produto, que é exatamente o recorte da sabatina. Preste atenção em como ele justifica o baixo impacto sobre o sistema de origem."
+  - id: qOqXz5Qv_-8
+    titulo: "Kafka (Plataforma de Mensageria e Streaming) // Dicionário do Programador"
+    canal: "Código Fonte TV"
+    duracao: 11
+    porQue: "Fecha o vocabulário de Kafka em pouco tempo: tópico, partição, produtor e consumidor. Use para conferir se você sabe explicar cada termo sem olhar."
+artigos:
+  - titulo: "Criação de tarefas para replicação contínua usando AWS DMS"
+    url: "https://docs.aws.amazon.com/pt_br/dms/latest/userguide/CHAP_Task.CDC.html"
+    fonte: "AWS"
+  - titulo: "Apache Kafka: conceitos e design"
+    url: "https://kafka.apache.org/documentation/#intro_concepts"
+    fonte: "Apache Kafka"
+  - titulo: "Upsert em tabelas Delta com MERGE"
+    url: "https://docs.databricks.com/aws/en/delta/merge"
+    fonte: "Databricks"
+  - titulo: "Change data capture"
+    url: "https://en.wikipedia.org/wiki/Change_data_capture"
+    fonte: "Wikipedia"
+flashcards:
+  - frente: "Carga full versus incremental"
+    verso: "Full copia a tabela inteira a cada execução: simples, cara e sem histórico de mudança. Incremental copia só o que mudou desde a última marca: barata, mas depende de um critério confiável de o que mudou."
+  - frente: "O que é watermark de ingestão?"
+    verso: "A marca do ponto até onde você já leu, geralmente um timestamp ou um identificador crescente. A próxima execução parte dali."
+  - frente: "Qual o risco do dado atrasado numa ingestão por watermark?"
+    verso: "Registro gravado depois com timestamp anterior à marca fica para trás e nunca é lido. Mitiga-se com janela de sobreposição, releitura de um período extra ou trocando timestamp de negócio por timestamp de commit."
+  - frente: "O que é CDC?"
+    verso: "Change Data Capture: capturar cada INSERT, UPDATE e DELETE ocorrido na origem e publicá-los como fluxo de eventos de mudança."
+  - frente: "Três motivos para ler o log de transações em vez de consultar por timestamp"
+    verso: "Captura DELETE; não perde atualizações intermediárias entre duas leituras; não gera carga de consulta no OLTP, porque lê o log e não as tabelas."
+  - frente: "Debezium, em uma frase"
+    verso: "Conector open source que lê o log de transações de bancos como PostgreSQL, MySQL, SQL Server e Oracle e publica os eventos de mudança, tipicamente em tópicos Kafka."
+  - frente: "AWS DMS, em uma frase"
+    verso: "Serviço gerenciado da AWS que faz carga inicial e replicação contínua por CDC de uma origem para destinos como S3, Redshift ou outro banco."
+  - frente: "Por que MERGE é a peça que fecha o CDC?"
+    verso: "Porque o fluxo de mudanças só vira tabela útil quando aplicado com upsert: update atualiza a linha existente, insert cria, delete marca ou remove. Com INSERT puro, o destino vira log e não estado."
+  - frente: "Tópico e partição no Kafka"
+    verso: "Tópico é o canal lógico, nomeado por assunto. Partição é a divisão física e ordenada desse canal; é o que permite paralelismo."
+  - frente: "Para que serve a chave da mensagem no Kafka?"
+    verso: "Ela determina a partição por hash. Mesma chave, mesma partição, ordem preservada entre os eventos daquela chave."
+  - frente: "Consumer group e offset"
+    verso: "Consumer group é um conjunto de consumidores que dividem as partições, cada partição para um consumidor do grupo. Offset é a posição da última mensagem lida, guardada por grupo e partição."
+  - frente: "Retenção e replicação no Kafka"
+    verso: "Retenção é por quanto tempo ou por qual tamanho a mensagem fica no tópico, mesmo depois de lida. Replicação é o número de cópias da partição entre brokers, para sobreviver à perda de um deles."
+  - frente: "As três garantias de entrega"
+    verso: "No máximo uma vez pode perder; ao menos uma vez pode duplicar; exatamente uma vez não perde nem duplica, mas custa mais e exige suporte fim a fim. Na prática, ao menos uma vez com destino idempotente é o arranjo mais comum."
+  - frente: "Kinesis contra Kafka, em uma frase"
+    verso: "Kinesis Data Streams é o serviço gerenciado da AWS com o mesmo modelo de shard, chave de partição e retenção configurável; troca controle e ecossistema por menos operação."
+drills:
+  - titulo: "Escolha a estratégia de ingestão"
+    instrucao: "Para cada tabela do banco, escolha a estratégia mais adequada. Justifique mentalmente antes de abrir a resposta."
+    opcoes: ["Full", "Incremental por watermark", "CDC"]
+    itens:
+      - enunciado: "Tabela de domínio com 400 códigos de tipo de transação, que muda uma vez por trimestre."
+        resposta: "Full"
+        explicacao: "Volume irrelevante. Complicar com CDC aqui é custo sem retorno."
+      - enunciado: "Tabela de contas do core, com 30 milhões de linhas, encerramentos e correções cadastrais retroativas."
+        resposta: "CDC"
+        explicacao: "Encerramento é DELETE ou mudança de status que consulta por timestamp captura mal, e a origem é sensível a carga."
+      - enunciado: "Log de eventos de clique do app, append-only, com identificador crescente e sem atualização."
+        resposta: "Incremental por watermark"
+        explicacao: "Tabela que só cresce e nunca é atualizada é o caso clássico onde a marca d água basta."
+      - enunciado: "Tabela de limites de cartão, atualizada muitas vezes ao dia e usada para decidir autorização."
+        resposta: "CDC"
+        explicacao: "As atualizações intermediárias importam para reconstruir o motivo de uma recusa, e a consulta periódica só veria o último valor."
+      - enunciado: "Extrato consolidado mensal fechado, gerado uma vez e nunca alterado."
+        resposta: "Incremental por watermark"
+        explicacao: "Partição por competência, lida uma vez. Não há mudança para capturar."
+  - titulo: "Kafka: qual conceito responde ao problema?"
+    instrucao: "Cada item descreve uma necessidade. Diga qual conceito de Kafka a atende."
+    itens:
+      - enunciado: "Garantir que os eventos da mesma conta cheguem em ordem ao consumidor."
+        resposta: "Chave da mensagem"
+        explicacao: "A chave define a partição, e a ordem existe dentro da partição."
+      - enunciado: "Dobrar a vazão de leitura sem que dois consumidores processem a mesma mensagem."
+        resposta: "Consumer group"
+        explicacao: "Adicione consumidores ao mesmo grupo, até o limite do número de partições."
+      - enunciado: "Sobreviver à perda de um broker sem perder mensagem confirmada."
+        resposta: "Replicação"
+        explicacao: "Fator de replicação maior que um mantém cópias da partição em outros brokers."
+      - enunciado: "Permitir que um consumidor novo reprocesse os últimos sete dias."
+        resposta: "Retenção"
+        explicacao: "A mensagem continua no tópico após ser lida, pelo tempo ou tamanho configurado; o consumidor volta o offset."
+      - enunciado: "Retomar exatamente de onde parou depois de uma reinicialização."
+        resposta: "Offset"
+        explicacao: "O offset comitado por grupo e partição marca a posição de retomada."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você replicaria a tabela de contas do core bancário para o lake sem pesar no core?"
+    respostaModelo: "Eu não consultaria o core em ciclo. Usaria CDC lendo o log de transações, com Debezium ou AWS DMS conforme o que já existe no banco, porque isso captura INSERT, UPDATE e DELETE sem gerar carga de consulta sobre as tabelas que atendem o cliente. O desenho seria carga inicial uma vez, em janela combinada com o time do core, e a partir daí só o fluxo de mudanças. Publicaria no Kafka usando o número da conta como chave, para preservar ordem por conta, e aplicaria no lake com MERGE numa tabela Delta, tratando delete como marcação lógica para não perder rastro exigido por auditoria. Combinaria com o dono do core o impacto de habilitar o log lógico, que não é zero, e monitoraria o atraso de replicação. Se o core for um sistema onde não dá para habilitar CDC, aí eu negociaria uma réplica de leitura e faria a extração dela, nunca da instância primária."
+    rubrica:
+      - "Escolheu CDC por log e justificou pelo baixo impacto no OLTP"
+      - "Citou Debezium ou AWS DMS como implementação concreta"
+      - "Descreveu carga inicial seguida de fluxo incremental"
+      - "Explicou a aplicação no destino com MERGE e o tratamento de delete"
+      - "Reconheceu que habilitar CDC tem custo na origem e propôs alternativa (réplica de leitura)"
+  - tipo: oral
+    enunciado: "Seu pipeline de PIX consome de um tópico Kafka com entrega ao menos uma vez. O time de negócio reclamou de transações duplicadas no relatório. Como você investiga e resolve?"
+    respostaModelo: "Primeiro eu confirmo se a duplicidade é de evento ou de linha. Se o mesmo identificador de transação aparece duas vezes com o mesmo conteúdo, é reentrega, o que é esperado nessa garantia. A correção não é mudar o Kafka, é tornar o destino idempotente: aplicar com MERGE pela chave da transação, ou deduplicar por chave e janela antes de gravar. Se o conteúdo difere, aí não é duplicata, é atualização, e o problema é o destino estar dando append em vez de upsert. Também checaria o momento do commit de offset: quem comita antes de gravar perde dado, quem comita depois pode reprocessar, e é por isso que o destino precisa aguentar reprocesso. Só consideraria exatamente uma vez se o custo de deduplicar fosse maior que o custo do processamento transacional fim a fim, o que raramente é o caso."
+    rubrica:
+      - "Distinguiu reentrega de atualização olhando o conteúdo do evento"
+      - "Apontou idempotência no destino (MERGE ou deduplicação por chave) como a correção"
+      - "Relacionou o momento do commit de offset a perda ou reprocessamento"
+      - "Tratou exatamente uma vez como trade-off de custo, não como bala de prata"
+  - tipo: unica
+    enunciado: "Qual é a principal limitação de uma ingestão incremental baseada na coluna data_atualizacao?"
+    alternativas:
+      - texto: "Ela exige que a tabela tenha chave primária."
+        correta: false
+        explicacao: "Chave primária ajuda no upsert, mas não é a limitação da estratégia de leitura."
+      - texto: "Ela não captura exclusões nem as atualizações intermediárias ocorridas entre duas leituras."
+        correta: true
+        explicacao: "A consulta vê o estado da linha no instante em que rodou. Linha apagada some, e mudanças no meio do intervalo são invisíveis."
+      - texto: "Ela só funciona em bancos relacionais."
+        correta: false
+        explicacao: "Qualquer origem com um campo de atualização confiável serve; o problema é o que o campo não conta."
+      - texto: "Ela sempre gera mais carga na origem do que uma carga full."
+        correta: false
+        explicacao: "Costuma gerar bem menos que a full. O problema é de completude, não de custo."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre Kafka estão corretas?"
+    alternativas:
+      - texto: "A ordenação é garantida dentro de uma partição, não entre partições do mesmo tópico."
+        correta: true
+        explicacao: "Por isso a escolha da chave é decisão de arquitetura, não detalhe."
+      - texto: "Dentro de um consumer group, cada partição é consumida por no máximo um consumidor."
+        correta: true
+        explicacao: "É o que evita processamento duplicado dentro do grupo e o que limita o paralelismo ao número de partições."
+      - texto: "A mensagem é apagada assim que um consumidor a lê."
+        correta: false
+        explicacao: "Kafka é log com retenção por tempo ou tamanho; a leitura não consome a mensagem."
+      - texto: "O fator de replicação define quantas cópias da partição existem em brokers diferentes."
+        correta: true
+        explicacao: "É o mecanismo de durabilidade contra perda de broker."
+      - texto: "Aumentar o número de consumidores acima do número de partições aumenta a vazão."
+        correta: false
+        explicacao: "Os consumidores excedentes ficam ociosos. O paralelismo teto é o número de partições."
+---
+
+## Em uma frase
+
+Ingestão é como o dado sai da origem e entra no lake; **CDC** é fazer isso lendo o
+log de transações do banco de origem, de modo a capturar toda mudança sem
+consultar as tabelas que atendem o cliente.
+
+## Full ou incremental
+
+**Carga full** copia a tabela inteira toda vez. É simples, é à prova de bug de
+watermark e é o que você faz numa tabela de domínio com 400 linhas. Em tabela de
+30 milhões de contas, vira leitura pesada na origem, janela longa e nenhuma
+informação sobre o que mudou.
+
+**Carga incremental** copia só o que mudou desde a última execução, guiada por
+uma <Termo nome="watermark">marca do ponto até onde você já leu — um timestamp ou um identificador crescente</Termo>.
+Barata, mas depende de o critério ser confiável.
+
+<Callout tipo="atencao" titulo="O risco do dado atrasado">
+Se a marca é `data_atualizacao` e um registro é gravado hoje com timestamp de
+ontem — reprocessamento no core, transação em contingência, fuso mal resolvido —
+ele nasce **atrás** da marca e nunca será lido. Mitigações: reler uma janela de
+sobreposição, usar timestamp de commit em vez de timestamp de negócio, ou trocar
+a estratégia por CDC.
+</Callout>
+
+## CDC: ler o log em vez de perguntar
+
+O banco de origem já escreve toda alteração num log de transações, porque precisa
+dele para durabilidade e recuperação. CDC consome esse log e publica cada
+INSERT, UPDATE e DELETE como um evento.
+
+Três motivos para preferir isso a consultar por timestamp:
+
+<Passos itens={[
+  "Captura DELETE — a consulta por timestamp não vê linha que sumiu",
+  "Não perde atualização intermediária — o log tem cada versão, a consulta só vê a última",
+  "Não pesa no OLTP — lê o log, não as tabelas que atendem autorização de cartão"
+]} />
+
+**Debezium** é o conector open source que lê o log de PostgreSQL, MySQL, SQL
+Server e Oracle e publica em Kafka. **AWS DMS** é o serviço gerenciado que faz
+carga inicial e replicação contínua para destinos como S3 e Redshift. Debezium dá
+mais controle sobre o formato do evento; DMS dá menos operação.
+
+<Callout tipo="erro" titulo="CDC não é de graça na origem">
+Habilitar log lógico ou aumentar retenção de log consome disco e alguma CPU no
+core. Diga isso na sabatina. Quem afirma que o impacto é zero entrega que nunca
+negociou com um DBA.
+</Callout>
+
+## MERGE: a peça que fecha o CDC
+
+Um fluxo de mudanças aplicado com `INSERT` transforma o destino num log, não numa
+tabela. Update vira linha nova; delete não existe.
+
+O que fecha o ciclo é **upsert**, o `MERGE`: casa pela chave de negócio, atualiza
+quando existe, insere quando não existe, e trata delete — em banco, quase sempre
+como marcação lógica, porque auditoria e LGPD exigem rastro do que foi removido e
+quando.
+
+## Kafka, o vocabulário que cai
+
+<Comparativo
+  colunas={["Conceito", "O que é", "Consequência prática"]}
+  linhas={[
+    ["Tópico", "Canal lógico nomeado por assunto", "Um tópico por evento de negócio: transacao-cartao, evento-pix"],
+    ["Partição", "Divisão ordenada do tópico", "Define o teto de paralelismo de consumo"],
+    ["Chave", "Valor que escolhe a partição por hash", "Número da conta como chave preserva a ordem dos eventos daquela conta"],
+    ["Consumer group", "Conjunto de consumidores que dividem as partições", "Cada partição vai para um consumidor do grupo; excedentes ficam ociosos"],
+    ["Offset", "Posição da última mensagem lida", "Guardado por grupo e partição; permite retomar e reprocessar"],
+    ["Retenção", "Tempo ou tamanho que a mensagem permanece", "Leitura não apaga; dá para voltar no tempo"],
+    ["Replicação", "Número de cópias da partição entre brokers", "Durabilidade contra perda de broker"]
+  ]}
+/>
+
+## Garantias de entrega
+
+**No máximo uma vez** pode perder. **Ao menos uma vez** pode duplicar.
+**Exatamente uma vez** não faz nem um nem outro, mas exige suporte fim a fim e
+custa em latência e complexidade.
+
+O arranjo mais comum em banco é *ao menos uma vez com destino idempotente*:
+aceita reentrega e resolve no `MERGE` pela chave da transação. É mais barato que
+garantir exatamente uma vez em toda a cadeia e dá o mesmo resultado no relatório.
+
+## Kinesis, em comparação curta
+
+Kinesis Data Streams é o equivalente gerenciado na AWS: shard no lugar de
+partição, chave de partição com o mesmo papel, retenção configurável. Troca o
+ecossistema e o controle fino do Kafka por menos operação. Se a stack já é AWS e
+o time é pequeno, é escolha defensável — e dizer isso com o critério explícito
+vale mais do que torcer por uma das duas.

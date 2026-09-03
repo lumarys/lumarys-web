@@ -1,0 +1,276 @@
+---
+slug: classificacao-tipos-dados
+titulo: "Classificação de tipos de dados"
+resumo: "Classificar dado não é exercício de vocabulário: é o que decide onde armazenar, como modelar, que conta você pode fazer e quem pode ver. Estruturado, semi e não estruturado; qualitativo e quantitativo; e a classificação por sensibilidade."
+minutos: 28
+nivel: fundamental
+porQue: "É pergunta de abertura fácil de responder mal. Quem lista os três tipos e para aí perde a repergunta, que é sempre 'e o que muda na prática?'. A resposta forte liga classificação a armazenamento, modelagem, cálculo permitido e controle de acesso."
+comoCai: "Como você armazenaria e consultaria um dado semiestruturado?"
+feynman: "Explique para um analista de negócio por que o sistema não deixa ele tirar a média do código da agência, mesmo o campo sendo numérico."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Chamar JSON e XML de dados não estruturados. Eles são semiestruturados: não têm tabela fixa, mas carregam a própria estrutura em tags e chaves, e é justamente isso que permite consultá-los."
+  - "Confundir tipo de dado do banco com natureza da variável. CPF é armazenado como texto ou número, mas é qualitativo nominal: somar, tirar média ou ordenar não produz informação."
+  - "Achar que dado não estruturado não pode ser analisado. Pode, depois de virar representação estruturada: transcrição de áudio, texto extraído de PDF, embedding de imagem."
+  - "Ignorar a classificação por sensibilidade. Em banco, saber que um campo é dado pessoal muda zona, criptografia, mascaramento e retenção; sem isso o desenho técnico está incompleto."
+  - "Tratar ordinal como quantitativo. Rating de crédito de A a E tem ordem, mas a distância entre A e B não é comparável à distância entre D e E, então média não significa nada."
+  - "Guardar tudo como texto para 'não dar problema'. Perde-se validação, compressão colunar, poda de partição e a chance de o motor pular arquivos pela estatística."
+preTeste:
+  - enunciado: "Como classificar o campo 'número da agência' de um cadastro bancário?"
+    alternativas:
+      - texto: "Qualitativo nominal, mesmo sendo composto por dígitos."
+        correta: true
+        explicacao: "O número identifica, não mede. Média, soma e diferença entre agências não têm significado."
+      - texto: "Quantitativo discreto, porque é um número inteiro."
+        correta: false
+        explicacao: "Ser inteiro é característica do armazenamento, não da variável. Contagem de agências é quantitativa; o código da agência não."
+      - texto: "Qualitativo ordinal, porque agências podem ser ordenadas por número."
+        correta: false
+        explicacao: "Ordenar é possível com qualquer coisa; ordinal exige que a ordem carregue significado, como em rating de risco."
+  - enunciado: "Uma API interna devolve o evento de autorização de cartão em JSON, com um array de parcelas dentro. Qual é a melhor descrição?"
+    alternativas:
+      - texto: "Semiestruturado: tem estrutura auto-descrita e hierárquica, mas não é tabela fixa."
+        correta: true
+        explicacao: "Chaves e aninhamento são a estrutura. É o caso típico de semiestruturado em ingestão bancária."
+      - texto: "Não estruturado, porque o schema pode mudar a qualquer momento."
+        correta: false
+        explicacao: "Schema instável não faz o dado ser não estruturado; ele continua auto-descrito e consultável."
+      - texto: "Estruturado, porque no fim vira tabela no lake."
+        correta: false
+        explicacao: "A classificação descreve o dado na origem, não o destino depois da transformação."
+videos:
+  - id: aV8WaxpeIgU
+    titulo: "Dados estruturados vs não estruturados & Dados relacionais vs não relacionais [Aula 08]"
+    canal: "Data & Analytics Forum"
+    duracao: 8
+    porQue: "Fecha a ponte entre tipo de dado e escolha de armazenamento, que é exatamente a repergunta que derruba quem só decorou a lista. Anote os exemplos e troque-os por equivalentes bancários."
+  - id: nfIz1L1hn9c
+    titulo: "VARIÁVEIS QUALITATIVAS E QUANTITATIVAS ✅ INTRODUÇÃO À ESTATÍSTICA #01"
+    canal: "Prof. MURAKAMI - MATEMÁTICA RAPIDOLA"
+    duracao: 13
+    porQue: "Cobre o eixo qualitativo e quantitativo, que engenheiro de dados costuma pular e a banca costuma cobrar. Assista pensando em que campo do cadastro cai em cada categoria."
+artigos:
+  - titulo: "Structured vs. Unstructured Data: What's the Difference?"
+    url: "https://www.ibm.com/think/topics/structured-vs-unstructured-data"
+    fonte: "IBM"
+  - titulo: "Entender modelos de dados (guia de escolha de armazenamento)"
+    url: "https://learn.microsoft.com/pt-br/azure/architecture/data-guide/technology-choices/understand-data-store-models"
+    fonte: "Microsoft Learn"
+flashcards:
+  - frente: "O que caracteriza dado estruturado?"
+    verso: "Schema fixo definido antes da escrita, em linhas e colunas tipadas. Exemplo bancário: tabela de lançamentos do core, cadastro relacional, saldo diário."
+  - frente: "O que caracteriza dado semiestruturado?"
+    verso: "Estrutura auto-descrita e hierárquica, sem tabela fixa: as chaves ou tags vêm junto com os valores. Exemplo: JSON de evento de autorização de cartão, XML de nota fiscal, log de aplicação em formato de chave e valor."
+  - frente: "O que caracteriza dado não estruturado?"
+    verso: "Não tem estrutura interna consultável por campo. Exemplo: áudio de call center, imagem de documento, contrato em PDF digitalizado, texto livre de reclamação."
+  - frente: "Qualitativo nominal: definição e exemplo bancário."
+    verso: "Categoria sem ordem natural. Exemplos: CPF, código da agência, bandeira do cartão, tipo de conta, UF."
+  - frente: "Qualitativo ordinal: definição e exemplo bancário."
+    verso: "Categoria com ordem, mas sem distância comparável entre os níveis. Exemplos: rating de risco de A a E, faixa de renda, nível de severidade de alerta de fraude."
+  - frente: "Quantitativo discreto: definição e exemplo bancário."
+    verso: "Contagem, em valores inteiros e enumeráveis. Exemplos: número de transações no mês, quantidade de parcelas, número de contestações abertas."
+  - frente: "Quantitativo contínuo: definição e exemplo bancário."
+    verso: "Medida que admite qualquer valor num intervalo. Exemplos: valor da transação, saldo, taxa de juros, tempo de resposta da autorização."
+  - frente: "Por que não faz sentido tirar a média de um CPF?"
+    verso: "Porque CPF é rótulo, não medida. A operação é aritmeticamente possível e semanticamente vazia. O tipo do banco de dados não protege contra isso; a classificação da variável, sim."
+  - frente: "Que estatística faz sentido para variável nominal?"
+    verso: "Contagem, frequência, moda e proporção. Nada de média, soma ou desvio padrão."
+  - frente: "Como a classificação muda a escolha de armazenamento?"
+    verso: "Estruturado pede tabela colunar (Parquet, Delta) ou relacional. Semiestruturado pede formato que aceite aninhamento e schema flexível na entrada, com achatamento na camada seguinte. Não estruturado pede object storage mais metadado catalogado à parte."
+  - frente: "Quais são as classes típicas de sensibilidade?"
+    verso: "Pública, interna, confidencial e restrita, atravessadas pela categoria de dado pessoal. A classe define zona, criptografia, mascaramento, quem acessa e por quanto tempo se guarda."
+  - frente: "O que a LGPD chama de dado pessoal sensível?"
+    verso: "Dado sobre origem racial ou étnica, convicção religiosa, opinião política, filiação sindical ou a organização religiosa, filosófica ou política, saúde, vida sexual, e dado genético ou biométrico ligado a uma pessoa natural."
+  - frente: "Qual é o custo de guardar tudo como texto?"
+    verso: "Perde validação na escrita, perde compressão colunar, perde poda de partição e perde o data skipping por estatística, porque o motor não consegue comparar faixas de valor."
+  - frente: "Como consultar dado semiestruturado sem pagar caro?"
+    verso: "Guarde cru na raw, declare o schema explícito na leitura, achate o que o negócio consulta e materialize em tabela colunar na trusted. Deixe cru só o que é realmente variável."
+drills:
+  - titulo: "Classifique os campos de um cadastro bancário"
+    instrucao: "Para cada campo, diga a natureza da variável. Depois, em voz alta, diga que estatística faz sentido para ele — é essa segunda parte que a banca cobra."
+    opcoes: ["Qualitativo nominal", "Qualitativo ordinal", "Quantitativo discreto", "Quantitativo contínuo"]
+    itens:
+      - enunciado: "CPF do titular"
+        resposta: "Qualitativo nominal"
+        explicacao: "Identificador puro. Só contagem e unicidade fazem sentido; é também dado pessoal, o que muda o tratamento."
+      - enunciado: "Código da agência"
+        resposta: "Qualitativo nominal"
+        explicacao: "Numérico na aparência, rótulo na natureza. Média de agência não significa nada."
+      - enunciado: "Rating interno de crédito, de A a E"
+        resposta: "Qualitativo ordinal"
+        explicacao: "Tem ordem, mas a distância entre níveis não é comparável; use mediana e frequência, não média."
+      - enunciado: "Saldo em conta corrente"
+        resposta: "Quantitativo contínuo"
+        explicacao: "Medida monetária: aceita soma, média, desvio padrão e faixas."
+      - enunciado: "Quantidade de transações no mês"
+        resposta: "Quantitativo discreto"
+        explicacao: "Contagem de eventos, sempre inteira."
+      - enunciado: "Faixa etária declarada (18-25, 26-35, 36-50)"
+        resposta: "Qualitativo ordinal"
+        explicacao: "A idade em si é contínua, mas depois de agrupada em faixas vira categoria ordenada."
+      - enunciado: "Bandeira do cartão"
+        resposta: "Qualitativo nominal"
+        explicacao: "Categoria sem ordem. Moda e proporção, nada mais."
+      - enunciado: "Tempo de resposta da autorização, em milissegundos"
+        resposta: "Quantitativo contínuo"
+        explicacao: "Medida em escala contínua; percentis são mais informativos que a média."
+  - titulo: "Estruturado, semi ou não estruturado?"
+    instrucao: "Classifique cada fonte e diga onde ela seria armazenada e como seria consultada."
+    opcoes: ["Estruturado", "Semiestruturado", "Não estruturado"]
+    itens:
+      - enunciado: "Tabela de lançamentos do core bancário replicada por CDC"
+        resposta: "Estruturado"
+        explicacao: "Schema fixo e tipado; destino natural é tabela Delta particionada por data."
+      - enunciado: "Evento de autorização de cartão em JSON, com array de parcelas"
+        resposta: "Semiestruturado"
+        explicacao: "Auto-descrito e aninhado. Grava cru na raw, achata o que se consulta e materializa colunar na trusted."
+      - enunciado: "XML de nota fiscal eletrônica recebida de fornecedor"
+        resposta: "Semiestruturado"
+        explicacao: "Estrutura em tags, validável por XSD. Leitura com rowTag e conversão para tabela."
+      - enunciado: "Gravação de áudio do atendimento no call center"
+        resposta: "Não estruturado"
+        explicacao: "Fica em object storage; só vira analisável depois de transcrição, que gera texto e depois campos."
+      - enunciado: "Imagem do documento de identidade enviado no onboarding"
+        resposta: "Não estruturado"
+        explicacao: "Object storage com metadado catalogado à parte, e classificação de sensibilidade alta."
+      - enunciado: "Log de aplicação em linhas de chave e valor"
+        resposta: "Semiestruturado"
+        explicacao: "Tem estrutura implícita e parseável, mas não é tabela fixa."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você armazenaria e consultaria um dado semiestruturado, como o JSON de eventos de autorização de cartão?"
+    respostaModelo: "Eu separaria em duas decisões. Na entrada, gravo o JSON cru na raw, sem tocar em nada, porque é a evidência do que o produtor mandou e é o que me permite reprocessar quando o schema mudar. Na leitura, eu declaro o schema explicitamente em vez de deixar o Spark inferir: inferência lê um pedaço do arquivo, custa tempo e, pior, muda o resultado quando a amostra muda. Na trusted, eu achato o que o negócio consulta de fato, usando explode para os arrays de parcela, e materializo em tabela Delta colunar particionada por data. O que é genuinamente variável eu mantenho num campo de mapa ou string, para não quebrar o contrato a cada campo novo. Assim o consumidor consulta tabela colunar barata, e eu ainda tenho o cru para voltar atrás. Guardar JSON cru na camada analítica é o erro que eu evitaria: custa mais para ler e não aproveita estatística nem poda de partição."
+    rubrica:
+      - "Separou armazenamento na raw do formato de consumo na trusted"
+      - "Disse que declara o schema em vez de inferir, com justificativa"
+      - "Citou achatamento ou explode de estrutura aninhada"
+      - "Justificou o formato colunar no consumo por custo de leitura ou data skipping"
+      - "Disse o que deixaria flexível e por quê"
+  - tipo: oral
+    enunciado: "Por que a classificação de um campo muda o que você pode fazer com ele? Dê exemplos de um cadastro bancário."
+    respostaModelo: "Porque o tipo do banco de dados só diz como o valor é guardado, e a classificação diz o que o valor significa. CPF e código de agência são armazenados como número ou texto, mas são qualitativos nominais: só contagem, frequência e unicidade fazem sentido; média de agência é uma conta válida e uma informação vazia. Rating de crédito de A a E é ordinal: tem ordem, mas a distância entre níveis não é comparável, então eu uso mediana e distribuição, não média. Saldo e valor de transação são contínuos, e aí soma, média e percentil valem. Isso não é preciosismo estatístico: erra-se em produção quando alguém agrega código de produto achando que é medida e o indicador sai errado. A classificação também decide armazenamento: nominal de baixa cardinalidade vira boa chave de partição, contínuo não. E, no banco, ainda tem o eixo de sensibilidade, que decide zona, mascaramento e retenção."
+    rubrica:
+      - "Distinguiu tipo de armazenamento da natureza da variável"
+      - "Deu exemplo de nominal e explicou que operação é inválida e por quê"
+      - "Explicou por que média de ordinal não serve"
+      - "Ligou a classificação a uma decisão técnica concreta, como partição ou modelagem"
+      - "Mencionou o eixo de sensibilidade além do eixo estatístico"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre dado não estruturado é correta?"
+    alternativas:
+      - texto: "Ele pode ser analisado, mas só depois de gerar uma representação estruturada, como transcrição, texto extraído ou embedding."
+        correta: true
+        explicacao: "O dado bruto permanece em object storage; a análise acontece sobre a representação derivada."
+      - texto: "É sinônimo de dado semiestruturado, já que nenhum dos dois tem tabela fixa."
+        correta: false
+        explicacao: "Semiestruturado carrega a própria estrutura em tags ou chaves e é consultável por campo."
+      - texto: "Não pode ser governado, porque não tem colunas para aplicar permissão."
+        correta: false
+        explicacao: "Governa-se por objeto e por metadado catalogado, com classificação de sensibilidade e controle de acesso."
+      - texto: "Deve ser convertido para CSV na ingestão para poder entrar no lake."
+        correta: false
+        explicacao: "Áudio, imagem e PDF entram como estão; conversão forçada destrói o original."
+  - tipo: multipla
+    enunciado: "Quais decisões técnicas dependem diretamente da classificação do dado?"
+    alternativas:
+      - texto: "Que estatística faz sentido calcular sobre o campo."
+        correta: true
+        explicacao: "Nominal aceita contagem e moda; contínuo aceita média, desvio e percentil."
+      - texto: "A escolha entre tabela colunar, formato aninhado e object storage."
+        correta: true
+        explicacao: "Estruturado, semi e não estruturado têm destinos naturalmente diferentes."
+      - texto: "A política de mascaramento, criptografia e retenção."
+        correta: true
+        explicacao: "É o eixo de sensibilidade, que em banco caminha junto com o eixo estatístico."
+      - texto: "A escolha da linguagem de programação do pipeline."
+        correta: false
+        explicacao: "Python ou Scala é decisão de time e ecossistema, não da natureza do dado."
+      - texto: "A região de nuvem em que o cluster roda."
+        correta: false
+        explicacao: "Depende de latência, custo e requisito de residência de dado, não da classificação estatística."
+---
+
+## Em uma frase
+
+Classificar dado é decidir, antes de escrever qualquer código, **onde ele vai
+morar, como será modelado, que conta pode ser feita com ele e quem pode vê-lo**.
+
+## Três eixos, não um
+
+Quase todo candidato conhece o primeiro eixo e para nele. A resposta completa
+usa três:
+
+<Comparativo
+  colunas={["Eixo", "Categorias", "Decide"]}
+  linhas={[
+    ["Estrutura", "Estruturado, semiestruturado, não estruturado", "Formato de armazenamento e estratégia de ingestão"],
+    ["Natureza da variável", "Qualitativo (nominal, ordinal) e quantitativo (discreto, contínuo)", "Que cálculo e que modelagem fazem sentido"],
+    ["Sensibilidade", "Pública, interna, confidencial, restrita; e dado pessoal", "Zona, criptografia, mascaramento, acesso e retenção"]
+  ]}
+/>
+
+## Eixo 1: estrutura
+
+<Comparativo
+  colunas={["Tipo", "O que define", "Exemplo no banco", "Onde armazenar"]}
+  linhas={[
+    ["Estruturado", "Schema fixo, definido antes da escrita", "Lançamentos do core, cadastro relacional, saldo diário", "Tabela Delta colunar ou relacional"],
+    ["Semiestruturado", "Estrutura auto-descrita e hierárquica, sem tabela fixa", "JSON de autorização de cartão, XML de nota fiscal, log de app", "Cru na raw; achatado e colunar na trusted"],
+    ["Não estruturado", "Sem estrutura interna consultável por campo", "Áudio de call center, imagem de documento, contrato em PDF", "Object storage, com metadado catalogado à parte"]
+  ]}
+/>
+
+<Callout tipo="erro" titulo="JSON não é dado não estruturado">
+É o deslize mais comum do tema. JSON e XML **carregam a própria estrutura**, em
+chaves e tags, e por isso podem ser consultados por campo. Não estruturado é o
+que não tem campo nenhum: o áudio, a imagem, o texto livre.
+</Callout>
+
+## Eixo 2: natureza da variável
+
+Aqui está a diferença entre o tipo do banco de dados e o significado do dado. O
+banco diz `INT`; a classificação diz se aquele inteiro **mede** ou **identifica**.
+
+<Comparativo
+  colunas={["Categoria", "Definição", "Exemplo bancário", "Estatística válida"]}
+  linhas={[
+    ["Nominal", "Categoria sem ordem", "CPF, código de agência, bandeira do cartão", "Contagem, frequência, moda"],
+    ["Ordinal", "Categoria com ordem, sem distância comparável", "Rating de A a E, faixa de renda", "Mediana, percentil, frequência"],
+    ["Discreto", "Contagem inteira", "Número de transações no mês, parcelas", "Soma, média, distribuição"],
+    ["Contínuo", "Medida em escala", "Valor da transação, saldo, taxa, latência", "Média, desvio, percentis"]
+  ]}
+/>
+
+Somar CPF é possível e inútil. Tirar média de código de agência devolve um
+número que não corresponde a agência nenhuma. O motor não vai te avisar: quem
+avisa é a classificação.
+
+## O que muda no projeto
+
+<Passos itens={[
+  "Armazenamento: colunar para estruturado, aninhado na entrada para semiestruturado, object storage para não estruturado.",
+  "Modelagem: nominal de baixa cardinalidade é boa dimensão e às vezes boa chave de partição; contínuo é fato, nunca chave.",
+  "Cálculo: definir a estatística válida antes de o indicador ir para o painel evita indicador errado com aparência de certo.",
+  "Contrato: declarar tipo e domínio na trusted é o que permite ao motor validar e ao consumidor confiar."
+]} />
+
+## Eixo 3: sensibilidade, a ponte para governança
+
+Em banco, o eixo que mais muda o desenho não é o estatístico. Um campo pode ser
+um inocente `varchar` e ainda assim exigir criptografia, mascaramento e prazo de
+expurgo, porque é **dado pessoal**.
+
+A LGPD ainda separa um subconjunto mais protegido, o
+<Termo nome="dado pessoal sensível">Dado sobre origem racial ou étnica, convicção
+religiosa, opinião política, filiação sindical ou a organização religiosa,
+filosófica ou política, saúde, vida sexual, além de dado genético ou
+biométrico ligado a uma pessoa natural.</Termo>
+Saber apontar isso num campo de cadastro é o que transforma a resposta de
+classificação em resposta de arquitetura.
+
+<Callout tipo="dica" titulo="Como fechar em voz alta">
+Não recite as listas. Diga os três eixos, dê um exemplo bancário por categoria e
+termine sempre com o que muda no projeto: onde grava, como modela, que conta
+vale, quem vê. Trinta segundos de "o que muda" valem mais que dois minutos de
+taxonomia.
+</Callout>

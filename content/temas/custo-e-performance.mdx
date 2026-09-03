@@ -1,0 +1,285 @@
+---
+slug: custo-e-performance
+titulo: "Custo e performance"
+resumo: "O que realmente gera fatura numa plataforma de dados, por que arquivo pequeno é caro, como particionamento e data skipping cortam varredura, e o método para investigar um custo que dobrou sem chutar."
+minutos: 35
+nivel: intermediario
+porQue: "Engenheiro júnior faz o pipeline rodar; sênior faz rodar barato e explica a conta. Em banco, com volume alto e plataforma paga por uso, a banca usa este tema para ver se você raciocina com número ou com palpite."
+comoCai: "A fatura do lake dobrou em um mês. Como você investiga?"
+feynman: "Explique para o gestor de tecnologia, em um minuto, por que juntar arquivos pequenos numa tabela pode reduzir a fatura sem trocar nada de infraestrutura."
+preRequisitos: []
+errosComuns:
+  - "Otimizar antes de medir. Sem Spark UI, plano de execução ou relatório de custo, você está adivinhando qual das quatro alavancas mexer."
+  - "Achar que o problema é sempre o cluster. Na maioria dos casos de lake, o gargalo é layout de arquivo e volume varrido, não falta de CPU."
+  - "Particionar por coluna de alta cardinalidade, como CPF ou id_transacao. Gera milhares de diretórios com arquivos minúsculos e piora tudo."
+  - "Confundir particionamento com Z-ORDER. Partição elimina diretórios inteiros na leitura; Z-ORDER organiza dentro dos arquivos para o data skipping funcionar."
+  - "Usar spot para tudo. Interrupção no driver mata o job; em janela crítica com SLA regulatório, a economia não paga o risco."
+  - "Rodar cluster interativo para carga agendada. Cluster de job sobe, executa e morre; cluster interativo ocioso cobra por estar de pé."
+  - "Guardar tudo para sempre na classe padrão de armazenamento. Sem política de ciclo de vida e sem VACUUM, você paga por versões que ninguém vai ler."
+preTeste:
+  - enunciado: "Uma tabela Delta de transações tem 400 mil arquivos de 2 MB. Qual é o efeito principal disso?"
+    alternativas:
+      - texto: "Nenhum: o Spark lê em paralelo, então mais arquivos é melhor."
+        correta: false
+        explicacao: "Cada arquivo custa uma tarefa e uma chamada ao storage. O overhead passa a dominar o tempo de processamento útil."
+      - texto: "O tempo se perde em metadados e em overhead por tarefa, e a consulta fica cara mesmo com pouco dado."
+        correta: true
+        explicacao: "É a síndrome dos small files: listagem, planejamento e abertura de arquivo passam a custar mais que ler os bytes."
+      - texto: "Só afeta o custo de armazenamento, não o de computação."
+        correta: false
+        explicacao: "O armazenamento é praticamente o mesmo; o que explode é computação e latência."
+  - enunciado: "No Athena, qual mudança tende a reduzir mais a fatura de uma consulta que filtra sempre por data?"
+    alternativas:
+      - texto: "Aumentar o tamanho do cluster"
+        correta: false
+        explicacao: "O Athena é serverless e a cobrança é por dado varrido, não por máquina."
+      - texto: "Particionar a tabela por data e usar formato colunar comprimido"
+        correta: true
+        explicacao: "Partição elimina diretórios inteiros e o formato colunar lê só as colunas pedidas. As duas coisas cortam bytes varridos."
+      - texto: "Converter a tabela para CSV para facilitar a leitura"
+        correta: false
+        explicacao: "CSV obriga a ler a linha inteira e não comprime bem. Aumenta o dado varrido."
+videos:
+  - id: iOtu_4-b1Eo
+    titulo: "Disk Partition | Como Otimizar seu LakeHouse | PySpark + Databricks"
+    canal: "Big Data Masters"
+    duracao: 26
+    porQue: "Mostra particionamento aplicado a tabela no Databricks, que é exatamente a stack da sua sabatina. Observe o critério de escolha da coluna de partição, porque é aí que a banca aperta."
+  - id: Gt5TrHu2P1Y
+    titulo: "[Databricks] - Análise de Custos"
+    canal: "DEX | Datasource Expert"
+    duracao: 9
+    porQue: "Curto e direto sobre de onde vem o gasto no Databricks. Use para conseguir separar, em voz alta, o custo da plataforma do custo das máquinas na nuvem."
+artigos:
+  - titulo: "Data skipping"
+    url: "https://docs.databricks.com/aws/en/delta/data-skipping"
+    fonte: "Databricks"
+  - titulo: "Control data file size"
+    url: "https://docs.databricks.com/aws/en/delta/tune-file-size"
+    fonte: "Databricks"
+  - titulo: "Top 10 Performance Tuning Tips for Amazon Athena"
+    url: "https://aws.amazon.com/blogs/big-data/top-10-performance-tuning-tips-for-amazon-athena/"
+    fonte: "AWS Big Data Blog"
+  - titulo: "Tuning Spark"
+    url: "https://spark.apache.org/docs/latest/tuning.html"
+    fonte: "Apache Spark"
+flashcards:
+  - frente: "Quais são os quatro geradores de custo numa plataforma de dados?"
+    verso: "Armazenamento (o que está guardado), computação (cluster e query), transferência (saída de dados e entre zonas) e varredura (bytes lidos por consulta em motor serverless)."
+  - frente: "Por que arquivo pequeno é caro?"
+    verso: "Cada arquivo vira uma tarefa e pelo menos uma chamada ao storage. Com muitos arquivos minúsculos, listagem, planejamento e abertura passam a custar mais que ler os bytes."
+  - frente: "Qual a faixa de tamanho de arquivo a mirar?"
+    verso: "Centenas de megabytes por arquivo, na casa de 128 MB a 1 GB. O Databricks faz autotuning do targetFileSize conforme o tamanho da tabela [verificar o valor padrão da sua runtime]."
+  - frente: "O que OPTIMIZE faz numa tabela Delta?"
+    verso: "Compacta arquivos pequenos em arquivos maiores, reescrevendo os dados. Reduz o overhead por tarefa nas leituras seguintes, ao custo de uma escrita agora."
+  - frente: "O que é Z-ORDER e o que ele resolve?"
+    verso: "Reorganiza fisicamente os dados para colocar valores próximos das colunas escolhidas nos mesmos arquivos, deixando as estatísticas de mín e máx mais apertadas e permitindo pular arquivos."
+  - frente: "Como funciona o data skipping?"
+    verso: "O formato guarda mín, máx e contagem por arquivo. Se o filtro não cabe na faixa daquele arquivo, o motor nem abre. Só funciona se os dados estiverem bem agrupados."
+  - frente: "Partição ou Z-ORDER: qual a diferença?"
+    verso: "Partição elimina diretórios inteiros na leitura e é boa para colunas de baixa cardinalidade, como data. Z-ORDER organiza dentro dos arquivos e serve para colunas de filtro de cardinalidade alta."
+  - frente: "Como escolher a coluna de partição?"
+    verso: "Baixa cardinalidade, usada nos filtros mais frequentes e que produza partições grandes o bastante. Data é o padrão em transação bancária; CPF nunca."
+  - frente: "Quando usar instância spot?"
+    verso: "Em workers de carga em lote tolerante a reexecução, com checkpoint e fora de janela crítica. Nunca no driver e nunca com SLA regulatório apertado."
+  - frente: "Cluster de job ou cluster interativo?"
+    verso: "Cluster de job sobe, executa e morre: paga só o que usou. Interativo é para exploração e cobra enquanto está de pé, mesmo ocioso."
+  - frente: "O que o autoscaling resolve e o que ele não resolve?"
+    verso: "Resolve carga variável ao longo da execução. Não resolve job mal escrito: escalar um shuffle ruim só distribui o desperdício por mais máquinas."
+  - frente: "O que é cache de resultado e onde ele ajuda?"
+    verso: "Reaproveitar o resultado de uma consulta idêntica sem reprocessar. Ajuda muito em dashboard com muitos usuários pedindo o mesmo recorte."
+  - frente: "O que é FinOps de dados, na prática?"
+    verso: "Tag em todo recurso, alocação de custo por time e produto, orçamento com alerta, e revisão periódica das tabelas e jobs mais caros."
+  - frente: "Qual a regra de ouro deste tema?"
+    verso: "Medir antes de otimizar. Sem Spark UI, plano de execução e relatório de custo, você não sabe qual das quatro alavancas está pesando."
+drills:
+  - titulo: "Sintoma, alavanca"
+    instrucao: "Cada linha é um sintoma real. Escolha a alavanca principal antes de abrir a resposta e diga em voz alta como você confirmaria a hipótese."
+    opcoes: ["Compactar arquivos", "Rever particionamento", "Z-ORDER e data skipping", "Redimensionar cluster", "Instância spot", "Cache de resultado", "Medir antes"]
+    itens:
+      - enunciado: "Uma tabela de extratos tem 300 mil arquivos de poucos megabytes; consultas simples levam minutos e o cluster fica ocioso."
+        resposta: "Compactar arquivos"
+        explicacao: "Cluster ocioso com job lento é a assinatura de overhead por tarefa. OPTIMIZE ou auto compaction resolvem."
+      - enunciado: "A tabela foi particionada por id_transacao e o storage tem milhões de diretórios com um arquivo cada."
+        resposta: "Rever particionamento"
+        explicacao: "Alta cardinalidade como chave de partição gera small files por construção. Reparticione por data e trate id como coluna de ordenação."
+      - enunciado: "As consultas filtram sempre por id_cliente, a tabela já é particionada por data e mesmo assim varre quase tudo."
+        resposta: "Z-ORDER e data skipping"
+        explicacao: "id_cliente tem cardinalidade alta demais para partição. Agrupar fisicamente por ele aperta as estatísticas e permite pular arquivos."
+      - enunciado: "O job de reprocessamento noturno de 6 anos de histórico roda com 4 workers e leva 9 horas, com todos os executores saturados."
+        resposta: "Redimensionar cluster"
+        explicacao: "Executores saturados e janela estourada é o caso legítimo de aumentar capacidade. Confirme na Spark UI antes."
+      - enunciado: "Um job de backfill em lote, sem SLA, roda no fim de semana e custa caro em máquina sob demanda."
+        resposta: "Instância spot"
+        explicacao: "Tolerante a reexecução, fora de janela crítica e com checkpoint: é o cenário desenhado para spot nos workers."
+      - enunciado: "Trezentos usuários abrem o mesmo painel de fraude toda manhã e cada abertura dispara a mesma consulta."
+        resposta: "Cache de resultado"
+        explicacao: "Consulta idêntica repetida é o caso perfeito de cache ou de uma tabela agregada materializada."
+      - enunciado: "A fatura dobrou no mês e o time já decidiu que a causa foi o novo pipeline de PIX."
+        resposta: "Medir antes"
+        explicacao: "Hipótese sem dado. Abra o custo por tag, por serviço e por dia antes de mexer em qualquer coisa."
+perguntas:
+  - tipo: oral
+    enunciado: "A fatura do lake dobrou em um mês. Como você investiga?"
+    respostaModelo: "Eu não chuto: começo abrindo a conta. Primeiro separo por serviço e por dia, para saber se a curva subiu de degrau, num dia específico, ou cresceu aos poucos. Degrau aponta para uma mudança de deploy; rampa aponta para crescimento de volume ou acúmulo de dado. Depois quebro por tag: time, produto, ambiente. Se não houver tag, essa vira a primeira ação estrutural, porque sem alocação a discussão fica opinativa. Aí olho as quatro categorias: armazenamento, computação, transferência e dado varrido. Em lake, o suspeito mais comum é varredura, então checo se alguma consulta perdeu partição ou se uma tabela virou small files depois de mudar a frequência de ingestão. Também verifico cluster interativo esquecido de pé e retenção sem VACUUM. Só depois de identificar os dois ou três maiores ofensores eu proponho mudança, com estimativa de economia. A regra que eu seguiria é medir antes de otimizar."
+    rubrica:
+      - "Propôs abrir o custo por serviço, por dia e por tag antes de agir"
+      - "Distinguiu salto de degrau de crescimento gradual e o que cada um sugere"
+      - "Citou as categorias de custo, incluindo dado varrido"
+      - "Levantou hipóteses concretas: partição perdida, small files, cluster ocioso, retenção"
+      - "Condicionou a ação a medição e estimativa de economia"
+  - tipo: oral
+    enunciado: "Um analista reclama que a consulta de extrato por cliente no Athena está lenta e cara. A tabela é Parquet, particionada por data. O que você faz?"
+    respostaModelo: "Primeiro eu confirmo o padrão de acesso, porque isso muda tudo: se ele filtra por cliente e não por data, a partição por data não ajuda em nada e a consulta varre o histórico inteiro. Confirmaria olhando os bytes varridos que o próprio Athena reporta, comparado ao tamanho da tabela. Se for isso, tenho três opções. A primeira é acrescentar filtro de data no padrão de consulta, que é a mais barata e às vezes resolve. A segunda é reorganizar o layout agrupando fisicamente por cliente, para o data skipping funcionar com as estatísticas de arquivo. A terceira é materializar uma tabela por cliente, otimizada para esse acesso, aceitando duplicar armazenamento e manter mais um pipeline. Eu recomendaria a segunda, porque não cria pipeline novo e ataca a causa. Só iria para a terceira se o acesso por cliente fosse crítico e frequente o bastante para pagar a manutenção."
+    rubrica:
+      - "Perguntou ou verificou o padrão de acesso real antes de propor solução"
+      - "Disse como confirmaria a hipótese, citando bytes varridos"
+      - "Apresentou mais de uma opção com o custo de cada uma"
+      - "Explicou por que partição por data não ajuda um filtro por cliente"
+      - "Deu uma recomendação clara e a condição para mudar de ideia"
+  - tipo: oral
+    enunciado: "Seu time quer usar instâncias spot em todos os clusters para cortar custo. Você concorda?"
+    respostaModelo: "Concordo em parte, e faria um recorte. Spot é excelente para workers de carga em lote tolerante a reexecução, com checkpoint, fora de janela crítica: backfill, reprocessamento de histórico, experimentação. Nesses casos o desconto frente a sob demanda é grande [verificar o percentual vigente] e a interrupção só custa retrabalho. Onde eu não usaria: no driver, porque perder o driver mata o job inteiro; e em qualquer pipeline com SLA regulatório ou com janela apertada de fechamento, porque a interrupção pode custar mais que a economia. Uma configuração intermediária que eu proporia é driver e um núcleo mínimo de workers sob demanda, e o excedente do autoscaling em spot. Antes disso, eu diria uma coisa impopular: se o job está mal escrito, spot só torna o desperdício mais barato. A economia maior costuma estar em layout de arquivo e em cluster ocioso, não no tipo de instância."
+    rubrica:
+      - "Aceitou spot com recorte explícito de onde ele cabe"
+      - "Excluiu o driver e cargas com SLA crítico, com justificativa"
+      - "Propôs configuração híbrida entre sob demanda e spot"
+      - "Apontou que otimizar o job vem antes de baratear a máquina"
+  - tipo: unica
+    enunciado: "Qual é a diferença correta entre particionamento e Z-ORDER numa tabela Delta?"
+    alternativas:
+      - texto: "Particionamento organiza dentro do arquivo; Z-ORDER cria diretórios no storage."
+        correta: false
+        explicacao: "Está invertido."
+      - texto: "Particionamento cria diretórios que podem ser eliminados inteiros na leitura; Z-ORDER agrupa valores próximos nos mesmos arquivos para o data skipping pular arquivos."
+        correta: true
+        explicacao: "Um atua na estrutura de diretórios, o outro no layout interno e nas estatísticas por arquivo."
+      - texto: "São sinônimos: Z-ORDER é o nome do particionamento no Databricks."
+        correta: false
+        explicacao: "São mecanismos distintos e frequentemente usados juntos."
+      - texto: "Z-ORDER substitui a necessidade de compactar arquivos."
+        correta: false
+        explicacao: "O comando reescreve arquivos, mas o objetivo é agrupamento; controle de tamanho é assunto de OPTIMIZE e auto compaction."
+  - tipo: multipla
+    enunciado: "Quais sinais indicam que o problema é layout de arquivo, e não falta de capacidade de cluster?"
+    alternativas:
+      - texto: "O número de tarefas é enorme e cada uma dura poucos milissegundos"
+        correta: true
+        explicacao: "Assinatura clássica de small files: overhead por tarefa dominando o tempo útil."
+      - texto: "Os executores ficam ociosos enquanto o job passa tempo listando e planejando"
+        correta: true
+        explicacao: "CPU parada com job lento aponta para metadados, não para falta de capacidade."
+      - texto: "A consulta filtra por data mas o volume varrido é próximo do tamanho total da tabela"
+        correta: true
+        explicacao: "Partição não está sendo aproveitada, ou o dado não está agrupado pela coluna de filtro."
+      - texto: "Todos os executores ficam com CPU saturada durante a maior parte da execução"
+        correta: false
+        explicacao: "Isso sim sugere falta de capacidade ou trabalho computacional pesado de verdade."
+      - texto: "O job estoura memória em um único executor durante um join"
+        correta: false
+        explicacao: "Sintoma de dado desbalanceado ou de estratégia de join errada, não de tamanho de arquivo."
+---
+
+## Em uma frase
+
+Custo em plataforma de dados é, quase sempre, **bytes desnecessários movidos e
+máquina ligada sem trabalho útil** — e as duas coisas se medem antes de se
+consertar.
+
+## De onde vem a fatura
+
+<Comparativo
+  colunas={["Categoria", "O que cobra", "Alavanca típica"]}
+  linhas={[
+    ["Armazenamento", "Volume guardado, por classe e por tempo", "Retenção, ciclo de vida, VACUUM de versões antigas"],
+    ["Computação", "Cluster de pé e query executada", "Sizing, autoscaling, cluster de job, spot"],
+    ["Transferência", "Dado saindo da região ou entre zonas", "Manter processamento perto do dado"],
+    ["Varredura", "Bytes lidos por consulta em motor serverless", "Partição, formato colunar, data skipping"]
+  ]}
+/>
+
+Em lake bancário, varredura e computação dominam. Armazenamento costuma ser o menor
+dos quatro — o que engana muita gente que começa apagando dado antigo e economiza
+pouco.
+
+## O problema dos arquivos pequenos
+
+Cada arquivo vira pelo menos uma tarefa e uma chamada ao object storage. Com 400 mil
+arquivos de 2 MB, o motor gasta mais tempo listando, planejando e abrindo arquivo do
+que lendo bytes. A CPU fica ociosa, o job demora e você paga por máquina parada.
+
+A mira é **centenas de megabytes por arquivo**, na casa de 128 MB a 1 GB. O
+Databricks faz autotuning do `targetFileSize` conforme o tamanho da tabela
+[verificar o valor padrão vigente na sua runtime].
+
+<Passos itens={[
+  "OPTIMIZE compacta arquivos pequenos em arquivos maiores, reescrevendo os dados",
+  "Auto compaction junta arquivos pequenos logo após a escrita, dentro da partição",
+  "Optimized writes ajusta o tamanho já na hora de gravar, evitando o problema na origem"
+]} />
+
+<Callout tipo="atencao" titulo="A causa mais comum de small files">
+Ingestão em micro-lotes frequentes sem compactação, e particionamento por coluna de
+alta cardinalidade. As duas coisas produzem arquivos minúsculos por construção.
+</Callout>
+
+## Particionamento como alavanca de custo
+
+Partição vira diretório no storage. Se a consulta filtra pela coluna de partição, o
+motor **elimina diretórios inteiros** sem abrir nada — é a economia mais barata que
+existe. No Athena, onde a cobrança é por dado varrido, isso aparece direto na fatura.
+
+Critério de escolha: **baixa cardinalidade**, presente nos filtros frequentes, e que
+produza partições grandes o bastante. Data de transação é o padrão em banco. CPF,
+id_transacao e timestamp cheio são erro clássico.
+
+## Z-ORDER e data skipping
+
+O formato de tabela guarda mín, máx e contagem por arquivo. Se o filtro não cabe na
+faixa do arquivo, o motor não abre — isso é
+<Termo nome="data skipping">pular arquivos com base nas estatísticas gravadas</Termo>.
+O truque é que isso só funciona quando os valores estão **agrupados**: se cada
+arquivo tem clientes de 1 a 10 milhões, nenhum arquivo é pulável.
+
+`ZORDER BY` reorganiza fisicamente os dados para colocar valores próximos das colunas
+escolhidas nos mesmos arquivos, apertando as estatísticas. Use para colunas de
+cardinalidade alta que aparecem nos filtros — id_cliente, número do cartão
+tokenizado. Partição e Z-ORDER são complementares, não alternativas.
+
+## Cluster, autoscaling e spot
+
+Cluster de **job** sobe, executa e morre: você paga o que usou. Cluster
+**interativo** cobra enquanto está de pé, inclusive ocioso — é a linha silenciosa da
+fatura. Autoscaling resolve carga variável dentro da execução, mas não conserta job
+mal escrito: escalar um shuffle ruim distribui o desperdício por mais máquinas.
+
+**Spot** cabe em workers de carga em lote tolerante a reexecução, com checkpoint,
+fora de janela crítica. Não cabe no driver, porque perder o driver mata o job, nem
+em pipeline com SLA regulatório.
+
+**Cache de resultado** ataca outro eixo: consulta idêntica repetida por muitos
+usuários no mesmo painel não precisa reprocessar.
+
+## FinOps de dados
+
+<Callout tipo="dica" titulo="Sem tag, não há conversa">
+Tag em bucket, cluster, job e warehouse é pré-requisito. Sem alocação por time e por
+produto, a discussão de custo vira opinião e ninguém assume dono.
+</Callout>
+
+Acrescente orçamento com alerta antes do estouro, revisão periódica das tabelas e
+jobs mais caros, e uma métrica de custo por produto de dado. Custo vira
+responsabilidade quando tem nome.
+
+## A regra de ouro
+
+Medir antes de otimizar. A Spark UI mostra número de tarefas, duração, shuffle e
+desbalanceamento. O plano de execução mostra se a partição está sendo aproveitada. O
+relatório de custo mostra qual serviço subiu. Chegar na sabatina dizendo **como você
+confirmaria a hipótese** vale mais do que acertar a hipótese de primeira.
+
+## Como responder isso em voz alta
+
+Divida em quatro categorias de custo, diga qual delas domina em lake, e só então
+proponha a alavanca. Sempre acompanhe a proposta de como você mediria o antes e o
+depois — é isso que separa quem otimiza de quem repete receita.

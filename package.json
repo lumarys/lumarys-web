@@ -1,0 +1,53 @@
+{
+  "name": "lumarys-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify:videos": "node scripts/verify-videos.mjs",
+    "verify:links": "node scripts/verify-links.mjs",
+    "content:lint": "node scripts/content-lint.mjs",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run content:lint",
+    "prebuild": "node scripts/gen-seo.mjs",
+    "bundle:api": "node scripts/bundle-lambda.mjs services/progress-api"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "next": "16.2.1",
+    "next-mdx-remote": "^5.0.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.716.0",
+    "@aws-sdk/client-dynamodb": "^3.716.0",
+    "@aws-sdk/lib-dynamodb": "^3.716.0",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/react": "^16.1.0",
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
+    "adm-zip": "^0.5.16",
+    "esbuild": "^0.24.2",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.1",
+    "jsdom": "^25.0.1",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^4",
+    "typescript": "^6",
+    "vitest": "^2.1.8"
+  }
+}

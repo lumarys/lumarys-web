@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: lint, tipos, testes e build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: lint
+        run: npm run lint
+
+      - name: typecheck
+        run: npm run typecheck
+
+      - name: testes
+        run: npm test
+
+      - name: conteúdo
+        run: npm run content:lint
+
+      - name: build
+        run: npm run build
+
+  conteudo-externo:
+    name: vídeos e links
+    runs-on: ubuntu-latest
+    # Depende de serviço de terceiro: falha aqui é sinal de conteúdo que saiu
+    # do ar, não de código quebrado, e por isso roda separado.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: vídeos ainda existem
+        run: npm run verify:videos
+
+      - name: artigos ainda respondem
+        run: npm run verify:links
+
+  seguranca:
+    name: segredos e dependências
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - run: npm ci
+
+      - name: auditoria de dependências
+        run: npm audit --audit-level=high

@@ -1,0 +1,261 @@
+---
+slug: formatos-e-tabelas
+titulo: "Formatos de arquivo e formatos de tabela"
+resumo: "CSV, JSON e Avro guardam por linha; Parquet e ORC guardam por coluna e é por isso que ganham em analytics. Delta, Iceberg e Hudi não substituem o Parquet: acrescentam ACID, time travel e evolução de schema sobre ele."
+minutos: 30
+nivel: intermediario
+porQue: "É a pergunta que mede se você entende o que acontece no disco. Quem só sabe que 'Parquet é mais rápido' não explica predicate pushdown; quem confunde formato de arquivo com formato de tabela erra a resposta sobre Delta e Iceberg inteira."
+comoCai: "Por que Parquet é mais rápido que CSV para a mesma consulta?"
+feynman: "Explique para o gerente de infraestrutura, sem falar em colunas e linhas, por que a mesma consulta sobre os mesmos dados custa dez vezes menos depois de trocar o formato do arquivo."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Dizer que Parquet é rápido 'porque é comprimido'. A compressão ajuda, mas o ganho principal vem de ler só as colunas pedidas e pular blocos inteiros pela estatística."
+  - "Tratar Delta, Iceberg e Hudi como formatos de arquivo. São formatos de tabela: uma camada de metadados sobre arquivos que continuam sendo Parquet na maioria dos casos."
+  - "Usar Parquet para stream de eventos com schema que muda toda semana. Formato colunar precisa de lote para render; Avro é feito para o caminho de escrita contínua."
+  - "Achar que time travel é backup. É leitura de versões anteriores enquanto os arquivos existirem; a retenção é configurada e o vacuum apaga o que passou dela."
+  - "Ignorar o problema de arquivo pequeno. Milhares de arquivos minúsculos matam a performance de leitura, e é por isso que compaction existe nos três formatos de tabela."
+  - "Escolher formato de tabela pelo hype. O critério real é o motor que você usa, o padrão do time e o tipo de escrita: upsert frequente, batch grande ou multiengine aberto."
+preTeste:
+  - enunciado: "Uma consulta soma o valor de transações de um mês, sobre uma tabela com 60 colunas. Por que Parquet vence CSV?"
+    alternativas:
+      - texto: "Porque Parquet ocupa menos espaço em disco."
+        correta: false
+        explicacao: "Ocupa mesmo, mas isso é consequência. Se o motor tivesse que ler todas as colunas, o ganho seria muito menor."
+      - texto: "Porque o motor lê só as colunas usadas e pula row groups pela estatística de mínimo e máximo."
+        correta: true
+        explicacao: "Column pruning mais predicate pushdown. Ler 3 de 60 colunas e ignorar blocos fora do filtro é onde está a ordem de grandeza."
+      - texto: "Porque Parquet é binário e CSV é texto."
+        correta: false
+        explicacao: "Ser binário elimina o custo de parsing, o que ajuda, mas não explica o salto de desempenho."
+  - enunciado: "O que Delta Lake acrescenta sobre uma pasta de arquivos Parquet?"
+    alternativas:
+      - texto: "Um algoritmo de compressão melhor."
+        correta: false
+        explicacao: "Delta escreve os mesmos arquivos Parquet; a compressão não muda."
+      - texto: "Um log de transações que dá ACID, versionamento, time travel e evolução de schema controlada."
+        correta: true
+        explicacao: "O log é a peça central: ele define qual conjunto de arquivos compõe a versão atual da tabela."
+      - texto: "A conversão automática do dado para formato de linha."
+        correta: false
+        explicacao: "Não existe essa conversão; o dado continua colunar."
+videos:
+  - id: 4H6jMNcnFo8
+    titulo: "Manipulando Arquivo Parquet e comparação com Json e Csv- Python - SQL - Apache Spark"
+    canal: "Infinity Big Data | Edmilson Alves"
+    duracao: 18
+    porQue: "Mostra a diferença medindo, não afirmando. Observe o tamanho no disco e o tempo de leitura de cada formato e guarde a ordem de grandeza para citar na resposta."
+  - id: SmtYFMiBaRQ
+    titulo: "Semana Delta Lake - Introdução"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 9
+    porQue: "Faz a ponte de formato de arquivo para formato de tabela. Preste atenção em como o log de transações é apresentado: é ele que você precisa saber descrever em voz alta."
+artigos:
+  - titulo: "Usar formatos de armazenamento colunares"
+    url: "https://docs.aws.amazon.com/pt_br/athena/latest/ug/columnar-storage.html"
+    fonte: "AWS"
+  - titulo: "Delta Lake vs. Parquet Comparison"
+    url: "https://delta.io/blog/delta-lake-vs-parquet-comparison/"
+    fonte: "Delta Lake"
+  - titulo: "Comparativo Técnico e Casos de Uso: Apache Iceberg, Delta Lake e Apache Hudi"
+    url: "https://blog.dsacademy.com.br/comparativo-tecnico-e-casos-de-uso-apache-iceberg-delta-lake-e-apache-hudi/"
+    fonte: "Data Science Academy"
+flashcards:
+  - frente: "Qual a diferença entre formato de arquivo e formato de tabela?"
+    verso: "Formato de arquivo define como os bytes de um arquivo são organizados (Parquet, Avro, CSV). Formato de tabela define como um conjunto de arquivos forma uma tabela com transações e versões (Delta, Iceberg, Hudi)."
+  - frente: "Por que colunar ganha em analytics?"
+    verso: "Porque a consulta analítica toca poucas colunas de muitas linhas. Guardando por coluna, o motor lê só o que foi pedido e comprime melhor, já que valores do mesmo tipo ficam juntos."
+  - frente: "O que é column pruning?"
+    verso: "Ler apenas as colunas presentes na consulta, ignorando o resto do arquivo. É o principal ganho do Parquet sobre CSV numa tabela larga."
+  - frente: "O que é predicate pushdown?"
+    verso: "Empurrar o filtro para a camada de leitura, que usa as estatísticas de mínimo e máximo por row group para pular blocos inteiros sem descomprimi-los."
+  - frente: "O que é um row group no Parquet?"
+    verso: "Bloco horizontal de linhas dentro do arquivo, subdividido por coluna, com estatísticas próprias. É a unidade que o predicate pushdown consegue pular."
+  - frente: "Quando Avro é a escolha certa?"
+    verso: "No caminho de escrita contínua: eventos em stream, tópicos de Kafka, integração entre serviços. É orientado a linha, tem schema embutido e evolui bem."
+  - frente: "Por que CSV e JSON são caros de ler em escala?"
+    verso: "São texto, exigem parsing linha a linha, não têm tipo forte nem estatística, e obrigam a ler o arquivo inteiro mesmo quando a consulta usa duas colunas."
+  - frente: "Parquet ou ORC: como decidir?"
+    verso: "Pelo ecossistema. Parquet é o padrão de fato em Spark, Databricks e Athena; ORC é forte em Hive e Trino sobre Hive. Tecnicamente são muito próximos."
+  - frente: "O que o log de transações do Delta faz?"
+    verso: "Registra, em ordem, quais arquivos entram e saem da tabela a cada operação. É ele que entrega atomicidade, isolamento por snapshot, versionamento e time travel."
+  - frente: "O que é time travel?"
+    verso: "Consultar a tabela como ela estava em uma versão ou instante anteriores, enquanto os arquivos daquela versão ainda existirem. Serve para auditoria e para desfazer carga errada."
+  - frente: "O que é compaction e por que importa?"
+    verso: "Reescrever muitos arquivos pequenos em poucos arquivos maiores. Sem isso, a leitura gasta mais tempo abrindo arquivo e lendo metadado do que lendo dado."
+  - frente: "Em que Hudi se diferencia dos outros dois?"
+    verso: "Nasceu para ingestão incremental e upsert de baixa latência, com o modo merge-on-read que grava alterações em log e as concilia na leitura."
+  - frente: "Em que Iceberg se diferencia dos outros dois?"
+    verso: "Foi desenhado para tabelas enormes e uso por muitos motores diferentes, com particionamento oculto e evolução de partição sem reescrever a tabela."
+  - frente: "Formato de tabela substitui o Parquet?"
+    verso: "Não. Delta e Iceberg escrevem Parquet por baixo; o que eles acrescentam é a camada de metadados que transforma a pasta de arquivos numa tabela transacional."
+drills:
+  - titulo: "Qual formato para cada cenário?"
+    instrucao: "Para cada situação do banco, escolha o formato e justifique em uma frase antes de conferir."
+    opcoes: ["CSV", "JSON", "Avro", "Parquet", "Delta ou Iceberg"]
+    itens:
+      - enunciado: "Eventos de autorização de cartão publicados continuamente num tópico, com schema que evolui a cada release."
+        resposta: "Avro"
+        explicacao: "Orientado a linha, schema embutido e evolução bem resolvida. Colunar precisa de lote para render."
+      - enunciado: "Tabela histórica de seis anos de transações consultada por agregações mensais."
+        resposta: "Parquet"
+        explicacao: "Leitura analítica de poucas colunas sobre muitas linhas: column pruning e predicate pushdown pagam."
+      - enunciado: "Tabela de transações que precisa receber MERGE diário de correções e permitir auditoria da versão anterior."
+        resposta: "Delta ou Iceberg"
+        explicacao: "MERGE atômico, versionamento e time travel só existem com formato de tabela por cima do Parquet."
+      - enunciado: "Arquivo enviado pelo regulador com cinco mil linhas para conferência manual."
+        resposta: "CSV"
+        explicacao: "Volume irrelevante e prioridade é interoperabilidade e leitura humana; complicar não paga."
+      - enunciado: "Resposta de uma API de enriquecimento cadastral com estrutura aninhada e campos opcionais."
+        resposta: "JSON"
+        explicacao: "É o formato de chegada natural; a decisão relevante é converter para colunar na camada seguinte."
+      - enunciado: "Tabela de mesma origem consumida por Spark, Trino e Athena de times diferentes, com particionamento que precisará mudar."
+        resposta: "Delta ou Iceberg"
+        explicacao: "Cenário multiengine com evolução de partição é onde Iceberg tipicamente se destaca."
+perguntas:
+  - tipo: oral
+    enunciado: "Por que Parquet é mais rápido que CSV para a mesma consulta?"
+    respostaModelo: "Por três motivos que se somam. O primeiro é o layout: Parquet guarda por coluna, então uma consulta que usa três de sessenta colunas lê só essas três; em CSV o motor lê a linha inteira para descartar o resto. O segundo é o predicate pushdown: o arquivo guarda estatística de mínimo e máximo por row group, então o filtro de data descarta blocos inteiros sem sequer descomprimi-los. O terceiro é a compressão: valores do mesmo tipo ficam vizinhos, o que permite codificação por dicionário e por repetição, reduzindo bytes lidos do disco ou do S3. Some a isso o fato de ser binário e tipado, sem custo de parsing de texto. Numa tabela larga isso costuma dar ordem de grandeza. O contraponto é que Parquet é ruim de escrever em pequenos incrementos e ilegível sem ferramenta, então no caminho de ingestão contínua eu ainda usaria Avro ou JSON e converteria depois."
+    rubrica:
+      - "Citou column pruning como causa principal"
+      - "Explicou predicate pushdown com a estatística por row group"
+      - "Mencionou compressão por coluna como efeito do layout"
+      - "Apontou o contexto em que Parquet não é a melhor escolha"
+  - tipo: oral
+    enunciado: "O time quer trocar as tabelas Parquet do data lake por Delta. Qual o ganho concreto e qual o custo?"
+    respostaModelo: "O ganho é transformar uma pasta de arquivos numa tabela de verdade. Com o log de transações eu passo a ter escrita atômica, então job que morre no meio não deixa a tabela meio escrita; passo a ter isolamento, então leitor e escritor concorrentes não brigam; e passo a ter MERGE, que é o que viabiliza aplicar CDC do core bancário sem reescrever a partição inteira. Ganho ainda time travel para auditar e para desfazer uma carga errada, e evolução de schema controlada em vez de silenciosa. O custo é real: metadado a manter, necessidade de rotina de compaction e de vacuum, retenção que precisa ser decidida por tabela, e um acoplamento maior com o ecossistema Spark e Databricks. Eu faria a migração começando pelas tabelas que recebem atualização, porque é nelas que o ganho aparece primeiro; tabela append-only e imutável pode continuar em Parquet puro sem prejuízo."
+    rubrica:
+      - "Nomeou o log de transações como origem dos ganhos"
+      - "Citou pelo menos três recursos concretos: atomicidade, MERGE, time travel, evolução de schema"
+      - "Listou custos operacionais reais, como compaction, vacuum e retenção"
+      - "Propôs critério de priorização em vez de migrar tudo"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre formatos de tabela é correta?"
+    alternativas:
+      - texto: "Delta, Iceberg e Hudi substituem o Parquet por um formato binário próprio."
+        correta: false
+        explicacao: "Os três escrevem arquivos de dados em formatos existentes, tipicamente Parquet."
+      - texto: "São camadas de metadados que descrevem quais arquivos formam a tabela em cada versão, trazendo ACID e time travel."
+        correta: true
+        explicacao: "É exatamente a definição: o metadado é que constitui a tabela transacional."
+      - texto: "Só funcionam em armazenamento local, não em armazenamento de objetos."
+        correta: false
+        explicacao: "Foram desenhados justamente para armazenamento de objetos, onde não existe rename atômico confiável."
+      - texto: "Eliminam a necessidade de particionar os dados."
+        correta: false
+        explicacao: "Melhoram a poda e o Iceberg oferece particionamento oculto, mas a estratégia de partição continua importando."
+  - tipo: multipla
+    enunciado: "Quais características são próprias de formatos colunares como Parquet e ORC?"
+    alternativas:
+      - texto: "Compressão escolhida por coluna, aproveitando valores do mesmo tipo vizinhos."
+        correta: true
+        explicacao: "Codificação por dicionário e por repetição rende muito mais quando os valores são homogêneos."
+      - texto: "Estatísticas por bloco que permitem pular dados sem descomprimir."
+        correta: true
+        explicacao: "É o que viabiliza o predicate pushdown."
+      - texto: "Leitura apenas das colunas referenciadas na consulta."
+        correta: true
+        explicacao: "Column pruning, o ganho dominante em tabelas largas."
+      - texto: "Schema embutido no arquivo."
+        correta: true
+        explicacao: "Parquet e ORC carregam o schema no rodapé do arquivo, o que dispensa inferência na leitura."
+      - texto: "Custo baixo para acrescentar uma única linha por vez."
+        correta: false
+        explicacao: "É o oposto: colunar precisa de lote; escrita incremental fina produz arquivo pequeno e ineficiente."
+---
+
+## Em uma frase
+
+Formato de **arquivo** decide como os bytes ficam organizados no disco; formato
+de **tabela** decide como um monte de arquivos vira uma tabela com transação,
+versão e schema.
+
+## Formatos de arquivo
+
+### Orientados a linha
+
+**CSV** é texto separado por delimitador, sem tipo forte e sem schema. Serve
+para troca com humano e com sistema legado. Em escala é caro: exige parsing,
+não tem estatística e obriga a ler a linha inteira mesmo quando a consulta usa
+duas colunas.
+
+**JSON** resolve estrutura aninhada e campos opcionais, que é como API entrega
+dado. Herda os mesmos custos do texto e ainda repete o nome do campo em cada
+registro.
+
+**Avro** é binário, orientado a linha e carrega o schema junto. É o formato do
+caminho de escrita: evento em stream, tópico de Kafka, integração entre
+serviços. Evolução de schema é bem resolvida por design.
+
+### Orientados a coluna
+
+**Parquet** e **ORC** guardam os valores agrupados por coluna, dentro de blocos
+horizontais chamados row groups, cada um com estatísticas próprias. Isso libera
+três ganhos que se somam:
+
+<Passos itens={[
+  "Column pruning: a consulta lê só as colunas que usa. Em tabela de 60 colunas usando 3, você lê 5% do arquivo.",
+  "Predicate pushdown: o filtro é avaliado contra o mínimo e o máximo de cada row group, e os blocos fora da faixa são pulados sem descompressão.",
+  "Compressão por coluna: valores do mesmo tipo vizinhos permitem codificação por dicionário e por repetição, reduzindo bytes lidos do S3."
+]} />
+
+<Callout tipo="dica" titulo="A frase que responde a pergunta-chave">
+"Parquet ganha porque lê menos: menos colunas, menos blocos e menos bytes por
+bloco." Depois desdobre cada um dos três.
+</Callout>
+
+<Comparativo
+  colunas={["Formato", "Orientação", "Schema", "Compressão", "Onde brilha", "Onde perde"]}
+  linhas={[
+    ["CSV", "Linha", "Nenhum", "Externa, do arquivo inteiro", "Troca simples, leitura humana", "Escala analítica, tipagem, nulos"],
+    ["JSON", "Linha", "Implícito", "Externa", "Estrutura aninhada, saída de API", "Volume repetido de chaves, parsing caro"],
+    ["Avro", "Linha", "Embutido, com evolução", "Por bloco", "Stream, escrita contínua, integração", "Consulta analítica por poucas colunas"],
+    ["Parquet", "Coluna", "Embutido no rodapé", "Por coluna, com dicionário", "Analytics em Spark, Databricks, Athena", "Escrita incremental fina, leitura humana"],
+    ["ORC", "Coluna", "Embutido", "Por coluna, com índices internos", "Ecossistema Hive e Trino sobre Hive", "Menos padrão fora desse ecossistema"]
+  ]}
+/>
+
+## Formatos de tabela
+
+Uma pasta com arquivos Parquet no S3 não é uma tabela: não tem transação, não
+tem versão, e um job que morre no meio deixa arquivo parcial que o próximo
+leitor vai contar. Formato de tabela resolve isso com uma camada de
+**metadados** que declara, a cada versão, quais arquivos compõem a tabela.
+
+<Termo nome="log de transações">Registro ordenado das operações sobre a tabela — quais arquivos entram e quais saem — que define o estado da tabela em cada versão.</Termo>
+
+O que os três acrescentam sobre o Parquet cru:
+
+- **ACID por tabela**: escrita atômica, leitura por snapshot consistente,
+  concorrência controlada.
+- **Time travel**: consultar a tabela como ela estava numa versão ou data
+  anterior, enquanto os arquivos daquela versão existirem.
+- **Evolução de schema**: acrescentar, renomear e alterar coluna de forma
+  controlada, em vez de descobrir a mudança no erro de leitura.
+- **MERGE / upsert e delete**: viabiliza aplicar CDC do core bancário e atender
+  pedido de exclusão sob LGPD sem reescrever a tabela inteira.
+- **Compaction**: juntar arquivos pequenos, que é o que mata performance em
+  ingestão frequente.
+
+<Comparativo
+  colunas={["Formato de tabela", "Origem e foco", "Ponto forte", "Considere quando"]}
+  linhas={[
+    ["Delta Lake", "Databricks; integração profunda com Spark", "Maturidade no ecossistema Spark e Databricks, MERGE e time travel diretos", "Sua plataforma é Databricks e o time já vive em Spark"],
+    ["Apache Iceberg", "Netflix; tabelas muito grandes e multiengine", "Particionamento oculto e evolução de partição sem reescrever a tabela; adoção ampla entre motores", "Vários motores leem a mesma tabela e o particionamento vai mudar"],
+    ["Apache Hudi", "Uber; ingestão incremental de baixa latência", "Upsert eficiente e modo merge-on-read para escrita frequente", "O caminho crítico é atualizar registros com frequência alta"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Não confunda as duas camadas">
+"Delta é melhor que Parquet" é uma frase errada. Delta **usa** Parquet. Se a
+banca perguntar isso, corrija com educação e explique as duas camadas — é um dos
+pontos em que dá para se destacar.
+</Callout>
+
+## O custo que vem junto
+
+Formato de tabela não é grátis. Você passa a operar metadado: rodar compaction
+para não acumular arquivo pequeno, definir retenção e rodar limpeza dos arquivos
+antigos, e decidir por quanto tempo o time travel precisa alcançar. Em banco
+essa decisão conversa direto com política de retenção e com pedido de exclusão
+sob LGPD — dado apagado da versão corrente ainda existe nas versões anteriores
+até a limpeza rodar.

@@ -1,0 +1,306 @@
+---
+slug: olap-oltp-etl
+titulo: "OLAP, OLTP e ETL"
+resumo: "OLTP registra a transação enquanto ela acontece; OLAP responde perguntas sobre o histórico. ETL é a ponte entre os dois. Por que separar, quais camadas existem no data warehouse e o que muda no modelo de dados."
+minutos: 35
+nivel: fundamental
+porQue: "É o tema que separa quem entende arquitetura de quem só escreve SQL. A banca usa a pergunta do relatório no banco transacional para ver se você raciocina sobre lock, contenção e modelo, ou se responde só 'porque é lento'."
+comoCai: "Por que não fazer o relatório direto no banco transacional?"
+feynman: "Explique para o gerente da agência por que o relatório de rentabilidade dele não sai do mesmo banco que autoriza o PIX dele."
+preRequisitos: ["big-data"]
+errosComuns:
+  - "Dizer que a diferença é só desempenho. Desempenho é consequência; a causa é propósito diferente, que leva a modelo diferente, carga diferente e garantia diferente."
+  - "Achar que OLAP significa obrigatoriamente cubo. Cubo foi a implementação dominante nos anos 2000; hoje OLAP é o tipo de carga, servida por warehouse colunar, lakehouse ou motor MPP."
+  - "Confundir normalizado com bom. Terceira forma normal serve para escrever com integridade; para ler agregado ela cobra dezenas de joins por consulta."
+  - "Tratar staging como se fosse camada de consumo. Staging é área de pouso, volátil, espelho da origem; quem consulta staging herda o modelo do sistema fonte e todos os defeitos dele."
+  - "Esquecer o grão da tabela fato. Sem definir a que corresponde uma linha, a soma duplica e ninguém descobre até o número chegar errado na diretoria."
+  - "Responder ETL como 'três scripts'. O que a banca quer ouvir é o processo: extração incremental, tratamento de qualidade, conformação de dimensão e carga idempotente."
+preTeste:
+  - enunciado: "O time de risco quer rodar, às 10h de um dia útil, um SELECT com seis joins e GROUP BY sobre a tabela de transações do core bancário. Qual é o principal risco técnico?"
+    alternativas:
+      - texto: "A consulta pode segurar recursos e bloqueios por tempo longo e degradar as transações em andamento."
+        correta: true
+        explicacao: "Consulta analítica varre muita linha e disputa CPU, memória, cache e bloqueios com a carga transacional. Em horário de pico isso vira latência de autorização."
+      - texto: "O banco relacional não consegue executar GROUP BY sobre milhões de linhas."
+        correta: false
+        explicacao: "Ele consegue. O problema não é capacidade, é o efeito colateral na carga que compartilha a mesma instância."
+      - texto: "O resultado sairia errado porque OLTP não guarda histórico."
+        correta: false
+        explicacao: "O OLTP guarda o estado atual e as transações recentes; o dado existe. O problema é o custo de lê-lo assim."
+  - enunciado: "O que define o grão de uma tabela fato?"
+    alternativas:
+      - texto: "O nível de detalhe que uma linha representa."
+        correta: true
+        explicacao: "Grão é a resposta para 'o que é uma linha desta tabela'. Uma transação de cartão? Um dia por conta? Tudo depende disso."
+      - texto: "A quantidade de dimensões ligadas à fato."
+        correta: false
+        explicacao: "O número de dimensões é consequência do grão escolhido, não a definição dele."
+      - texto: "O tamanho médio de cada registro em bytes."
+        correta: false
+        explicacao: "Isso é armazenamento físico, não modelagem."
+videos:
+  - id: bQcDamOGCHM
+    titulo: "OLTP vs OLAP | O que são? Quais as diferenças e características de cada um?"
+    canal: "Ítalo Mesquita"
+    duracao: 13
+    porQue: "Percorre as características lado a lado, que é exatamente o formato do comparativo que a banca espera ouvir. Assista anotando qual característica você conseguiria justificar sem olhar a tabela."
+  - id: yU2ikWgdEEs
+    titulo: "Arquitetura Clássica do Data Warehouse"
+    canal: "Inovação com dados em nuvem"
+    duracao: 8
+    porQue: "Fecha a parte que o primeiro vídeo não cobre: as camadas entre a origem e o relatório. Repare no papel de cada camada e por que staging não é lugar de consulta."
+artigos:
+  - titulo: "OLTP vs. OLAP: diferença entre sistemas de processamento de dados"
+    url: "https://aws.amazon.com/pt/compare/the-difference-between-olap-and-oltp/"
+    fonte: "AWS"
+  - titulo: "OLTP (Processamento de Transações Online)"
+    url: "https://learn.microsoft.com/pt-br/azure/architecture/data-guide/relational-data/online-transaction-processing"
+    fonte: "Microsoft Learn"
+  - titulo: "Processamento analítico online (OLAP)"
+    url: "https://learn.microsoft.com/pt-br/azure/architecture/data-guide/relational-data/online-analytical-processing"
+    fonte: "Microsoft Learn"
+  - titulo: "Data Warehouse: o que é, conceitos e fundamentos"
+    url: "https://cetax.com.br/o-que-e-data-warehouse/"
+    fonte: "Cetax"
+flashcards:
+  - frente: "Em uma frase, qual a diferença de propósito entre OLTP e OLAP?"
+    verso: "OLTP registra a transação no momento em que ela acontece, com integridade; OLAP responde perguntas sobre o conjunto histórico dessas transações."
+  - frente: "Por que o modelo do OLTP é normalizado e o do OLAP não?"
+    verso: "Normalizar evita redundância e facilita escrita consistente. Ler agregado sobre modelo normalizado exige muitos joins, então o OLAP desnormaliza em fato e dimensão para varrer menos e juntar menos."
+  - frente: "Cite três razões técnicas para não rodar relatório no OLTP."
+    verso: "Contenção de recursos com a carga transacional, bloqueios ou versões de leitura longas segurando o banco, e um modelo normalizado que torna a consulta cara e ilegível."
+  - frente: "O que é staging em um data warehouse?"
+    verso: "Área de pouso do dado extraído, no formato mais próximo possível da origem, volátil e sem regra de negócio. Serve para desacoplar a extração do resto do processo, não para consulta."
+  - frente: "O que é ODS e para que serve?"
+    verso: "Operational Data Store: base integrada de várias origens com dado atual ou quase atual, granular. Atende consulta operacional integrada, como visão do cliente no atendimento, sem servir de histórico analítico."
+  - frente: "O que é data mart?"
+    verso: "Recorte do warehouse voltado a um domínio ou área, já modelado para consumo. Ex.: data mart de cartões, com fato de transação e dimensões de cliente, produto, estabelecimento e tempo."
+  - frente: "O que é uma tabela fato?"
+    verso: "A tabela que guarda os eventos mensuráveis do negócio, com as métricas e as chaves para as dimensões. Ex.: uma linha por transação de cartão autorizada, com valor e MCC."
+  - frente: "O que é uma tabela dimensão?"
+    verso: "A tabela que descreve o contexto do evento e dá os filtros e agrupamentos: cliente, produto, agência, canal, tempo. Poucas linhas em relação à fato, muitos atributos."
+  - frente: "O que é o grão da fato e por que ele vem primeiro?"
+    verso: "É o que uma linha representa. Vem primeiro porque define quais dimensões cabem e quais métricas podem ser somadas; grão indefinido produz soma duplicada."
+  - frente: "Quais são as etapas do ETL e o que acontece em cada uma?"
+    verso: "Extract tira o dado da origem, preferencialmente incremental; Transform limpa, padroniza, deduplica, aplica regra e conforma dimensões; Load grava no destino, de forma idempotente e reprocessável."
+  - frente: "Por que a carga do ETL precisa ser idempotente?"
+    verso: "Porque job falha e é reexecutado. Se rodar duas vezes dobrar o valor, você descobre no fechamento. Idempotência costuma vir de sobrescrever partição ou de merge por chave."
+  - frente: "Dê um exemplo bancário de pergunta que é claramente OLAP."
+    verso: "Ticket médio de transação de cartão por segmento de cliente e por mês nos últimos 24 meses. Varre histórico, agrega e cruza dimensões."
+  - frente: "Dê um exemplo bancário de operação que é claramente OLTP."
+    verso: "Debitar a conta e creditar o beneficiário em um PIX: poucas linhas, escrita atômica, resposta em milissegundos."
+  - frente: "Por que uma réplica de leitura nem sempre resolve a necessidade analítica?"
+    verso: "Ela tira a contenção do primário, mas mantém o modelo normalizado, o motor orientado a linha e a ausência de histórico. Resolve o sintoma, não o modelo."
+drills:
+  - titulo: "OLTP ou OLAP?"
+    instrucao: "Classifique cada carga de trabalho pelo perfil dominante. Decida antes de abrir a resposta e diga em voz alta a justificativa."
+    opcoes: ["OLTP", "OLAP"]
+    itens:
+      - enunciado: "Autorizar uma compra no crédito e atualizar o limite disponível."
+        resposta: "OLTP"
+        explicacao: "Escrita curta, atômica, com resposta imediata. É a definição de transacional."
+      - enunciado: "Calcular a inadimplência por safra de originação nos últimos 36 meses."
+        resposta: "OLAP"
+        explicacao: "Agregação sobre histórico longo, cruzando várias dimensões. Não cabe no transacional."
+      - enunciado: "Consultar o saldo da conta no aplicativo."
+        resposta: "OLTP"
+        explicacao: "Leitura por chave, do estado atual, com latência baixa."
+      - enunciado: "Comparar volume de PIX por faixa de horário e por canal, mês a mês."
+        resposta: "OLAP"
+        explicacao: "Varredura, agrupamento e série temporal. Carga analítica clássica."
+      - enunciado: "Registrar a alteração de endereço no cadastro do cliente."
+        resposta: "OLTP"
+        explicacao: "Escrita pontual com integridade referencial."
+      - enunciado: "Levantar quantos clientes usaram os três canais no mesmo mês, nos últimos dois anos."
+        resposta: "OLAP"
+        explicacao: "Cruzamento de comportamento sobre histórico, com contagem distinta pesada."
+  - titulo: "Onde mora esse dado?"
+    instrucao: "Para cada situação, diga em que camada do data warehouse o dado deve estar: staging, ODS ou data mart."
+    opcoes: ["Staging", "ODS", "Data mart"]
+    itens:
+      - enunciado: "Cópia bruta do arquivo diário de transações de cartão recebido da bandeira, ainda sem tratamento."
+        resposta: "Staging"
+        explicacao: "Área de pouso, espelho da origem, volátil. Existe para desacoplar extração de transformação."
+      - enunciado: "Visão integrada e atual do cliente, montada de quatro sistemas, usada pelo atendimento durante a ligação."
+        resposta: "ODS"
+        explicacao: "Dado granular, integrado e quase em tempo real, para consumo operacional e não para histórico."
+      - enunciado: "Fato de transação de cartão com dimensões de cliente, produto, estabelecimento e tempo, consumida pelo BI de cartões."
+        resposta: "Data mart"
+        explicacao: "Recorte por domínio já modelado dimensionalmente para consulta analítica."
+      - enunciado: "Tabela temporária com o delta das últimas 24 horas do cadastro, apagada depois da carga."
+        resposta: "Staging"
+        explicacao: "Volátil, sem regra de negócio, insumo de transformação."
+perguntas:
+  - tipo: oral
+    enunciado: "O time de negócio pede um relatório diário de transações e propõe rodar a consulta direto no banco do core bancário, fora do horário de pico. O que você responde?"
+    respostaModelo: "Eu não faria, e a razão principal não é velocidade, é risco de contenção. Uma consulta analítica varre milhões de linhas e disputa CPU, memória e cache com a carga transacional; dependendo do nível de isolamento, ela ainda segura bloqueios ou força o banco a manter versões antigas de linha por muito tempo. Fora de pico o risco cai, mas o pico se desloca: fechamento, folha e feriado bagunçam essa janela. Tem também o modelo: o core é normalizado para escrever com integridade, então o relatório vira dez joins e ninguém consegue manter. O que eu proponho é extrair o dado para uma camada analítica, modelada em fato e dimensão, com carga incremental. Se a pressa for grande, uma réplica de leitura resolve a contenção como paliativo, mas não resolve o modelo nem o histórico, e eu deixaria isso claro."
+    rubrica:
+      - "Citou contenção de recursos e bloqueio, não apenas lentidão"
+      - "Explicou que o modelo normalizado encarece a consulta analítica"
+      - "Questionou a premissa de que existe janela segura fora de pico"
+      - "Propôs camada analítica com carga incremental como solução"
+      - "Ofereceu réplica de leitura como paliativo e disse a limitação dela"
+  - tipo: oral
+    enunciado: "Descreva como você montaria o fluxo de dados de transações de cartão desde o core até o relatório do time de risco."
+    respostaModelo: "Começo pela extração incremental do core, por data e hora de processamento ou por CDC, para não varrer a tabela inteira todo dia e não competir com a carga transacional. O dado cru cai em staging, espelho da origem, volátil, sem regra nenhuma. Da staging eu trato: padronizo tipo e fuso, deduplico por chave da transação, trato nulo e valor fora de faixa, e reconcilio o total do dia contra o controle da origem. Depois modelo dimensionalmente: uma fato de transação com grão de uma linha por transação autorizada, com valor e MCC como métricas, e dimensões de cliente, cartão, estabelecimento, canal e tempo. A carga é idempotente, por sobrescrita de partição de data, para o job poder ser reexecutado sem duplicar. Por cima disso publico o data mart de risco. E cuido de dado pessoal desde a staging, com mascaramento e controle de acesso, por causa da LGPD."
+    rubrica:
+      - "Defendeu extração incremental ou CDC em vez de carga total"
+      - "Separou staging de camada modelada e disse o papel de cada uma"
+      - "Nomeou tratamentos concretos de qualidade, incluindo reconciliação com a origem"
+      - "Definiu o grão da fato e citou fato e dimensão"
+      - "Falou em carga idempotente e reprocessamento"
+      - "Lembrou de dado pessoal e controle de acesso"
+  - tipo: unica
+    enunciado: "Qual afirmação descreve melhor a relação entre ETL e data warehouse?"
+    alternativas:
+      - texto: "ETL é o processo que move e adequa o dado das origens para o modelo do warehouse; o warehouse é o destino."
+        correta: true
+        explicacao: "ETL é processo, warehouse é repositório. Confundir os dois é erro comum na sabatina."
+      - texto: "ETL é um produto que se compra e instala junto com o warehouse."
+        correta: false
+        explicacao: "Existem ferramentas de ETL, mas ETL é o processo. Dá para fazer ETL com SQL, Spark ou serviço gerenciado."
+      - texto: "O warehouse executa o ETL internamente, sem necessidade de pipeline."
+        correta: false
+        explicacao: "Mesmo em ELT, alguém orquestra extração e transformação; o warehouse não sai buscando dado sozinho."
+      - texto: "ETL só existe quando a origem é um banco relacional."
+        correta: false
+        explicacao: "Arquivo, API, fila e log também são origens de ETL."
+  - tipo: multipla
+    enunciado: "Quais características são típicas de um sistema OLAP?"
+    alternativas:
+      - texto: "Modelo desnormalizado em fato e dimensão."
+        correta: true
+        explicacao: "Reduz join e favorece varredura agregada."
+      - texto: "Carga predominante de leitura, com escrita em lote."
+        correta: true
+        explicacao: "Grava em janelas de carga e lê o tempo todo, o oposto do transacional."
+      - texto: "Guarda histórico longo para análise de série temporal."
+        correta: true
+        explicacao: "É o que permite comparar safra, mês e tendência."
+      - texto: "Prioriza latência de milissegundos por transação individual."
+        correta: false
+        explicacao: "Isso é requisito de OLTP. Em OLAP a métrica é tempo de consulta agregada, em segundos ou minutos."
+      - texto: "Depende de bloqueio pessimista para garantir integridade a cada escrita."
+        correta: false
+        explicacao: "Estratégia de bloqueio é preocupação do transacional; o analítico carrega em lote."
+---
+
+## Em uma frase
+
+**OLTP** registra a transação no instante em que ela acontece; **OLAP** responde
+perguntas sobre o conjunto histórico dessas transações; **ETL** é o processo que
+leva o dado de um mundo para o outro.
+
+## Dois propósitos, portanto dois desenhos
+
+A diferença não começa no desempenho. Começa na pergunta que cada sistema
+existe para responder.
+
+O sistema transacional existe para que o PIX saia da sua conta e entre na conta
+do beneficiário sem sumir no meio. Isso exige atomicidade, integridade
+referencial e resposta em milissegundos. Para conseguir isso, o modelo é
+normalizado: cada informação em um lugar só, sem redundância, para que a escrita
+seja pequena e consistente.
+
+O sistema analítico existe para responder qual foi o ticket médio por segmento
+nos últimos 24 meses. Isso exige varrer muita linha, agregar e cruzar contexto.
+Para conseguir isso, o modelo é desnormalizado em fato e dimensão, e o
+armazenamento costuma ser colunar, porque a consulta lê poucas colunas de muitas
+linhas.
+
+<Comparativo
+  colunas={["Aspecto", "OLTP", "OLAP"]}
+  linhas={[
+    ["Propósito", "Registrar a operação do dia a dia", "Analisar o histórico para decidir"],
+    ["Unidade de trabalho", "Transação curta, poucas linhas", "Consulta longa, muitas linhas"],
+    ["Modelo", "Normalizado, terceira forma normal", "Dimensional: fato e dimensão"],
+    ["Carga", "Escrita intensa, leitura por chave", "Leitura intensa, escrita em lote"],
+    ["Histórico", "Estado atual e janela recente", "Anos de histórico preservado"],
+    ["Latência esperada", "Milissegundos", "Segundos a minutos"],
+    ["Concorrência", "Milhares de sessões curtas", "Dezenas de consultas pesadas"],
+    ["Exemplo no banco", "Autorizar compra no cartão", "Inadimplência por safra de originação"]
+  ]}
+/>
+
+## Por que não fazer o relatório direto no transacional
+
+Essa é a pergunta que a banca faz. Três motivos, em ordem de peso:
+
+**Contenção.** Uma consulta que varre milhões de linhas disputa CPU, memória,
+cache e I/O com as transações que estão acontecendo agora. O efeito aparece como
+latência na autorização de cartão, que é justamente o que não pode acontecer.
+
+**Bloqueio e versões.** Dependendo do nível de isolamento, a consulta longa
+segura bloqueios de leitura ou obriga o banco a manter versões antigas de linha
+enquanto ela roda. Isso incha o mecanismo de versionamento e atrasa quem escreve.
+
+**Modelo.** O core é normalizado. Perguntar "ticket médio por segmento e canal"
+ali vira uma consulta com dez joins, difícil de escrever, difícil de manter e
+cara de executar. E o histórico que a pergunta pede muitas vezes já foi expurgado
+do transacional.
+
+<Callout tipo="atencao" titulo="Réplica de leitura não é a resposta completa">
+Uma réplica tira a contenção do primário e é um bom paliativo. Mas ela replica o
+mesmo modelo normalizado, o mesmo motor orientado a linha e a mesma ausência de
+histórico. Dizer isso na sabatina mostra que você separou o sintoma da causa.
+</Callout>
+
+## O data warehouse e suas camadas
+
+Data warehouse é o repositório integrado, histórico e orientado a assunto que
+serve a carga analítica. Ele não é uma tabela grande: é um caminho com camadas,
+e cada camada existe para desacoplar um problema.
+
+<Passos itens={[
+  "Staging: área de pouso do dado extraído, o mais próximo possível da origem. Volátil, sem regra de negócio. Existe para que a extração não dependa da transformação.",
+  "ODS: base integrada de várias origens, granular e atual, para consumo operacional. Ex.: visão do cliente no atendimento. Não é lugar de histórico analítico.",
+  "Warehouse: o núcleo integrado, histórico, com dimensões conformadas — a mesma dimensão de cliente valendo para cartão, crédito e investimentos.",
+  "Data mart: recorte por domínio, já modelado para consumo. Ex.: data mart de cartões para o BI da área."
+]} />
+
+## Modelagem dimensional, o mínimo para a sabatina
+
+A <Termo nome="tabela fato">tabela que guarda os eventos mensuráveis do negócio,
+com métricas e chaves para as dimensões</Termo> registra o que aconteceu: uma
+transação de cartão, com valor, data e as chaves de cliente, produto e
+estabelecimento.
+
+A <Termo nome="tabela dimensão">tabela que descreve o contexto do evento e
+fornece filtros e agrupamentos</Termo> registra o contexto: quem é o cliente,
+qual o produto, qual a agência, qual o dia.
+
+E antes das duas vem o **grão**: a resposta para "o que é uma linha desta fato".
+Uma transação autorizada? Um dia por conta? Um mês por contrato? O grão define
+quais dimensões cabem e quais métricas podem ser somadas.
+
+<Callout tipo="erro" titulo="Grão indefinido dobra número">
+Se você mistura na mesma fato uma linha por transação e uma linha por
+consolidação diária, qualquer soma passa a contar duas vezes. O erro não aparece
+no build, aparece no comitê. Defina o grão antes de desenhar a tabela.
+</Callout>
+
+O aprofundamento de esquema estrela, floco de neve e dimensão que muda com o
+tempo vem no tema de modelagem de dados. Para a sabatina de fundamentos, saber
+definir fato, dimensão e grão com um exemplo bancário já cobre.
+
+## ETL como processo
+
+<Passos itens={[
+  "Extract: tira o dado da origem, de preferência incremental (por data de processamento ou por CDC), para não varrer tudo todo dia.",
+  "Transform: padroniza tipo e fuso, deduplica por chave, trata nulo e valor fora de faixa, aplica regra de negócio, conforma dimensões e reconcilia total contra a origem.",
+  "Load: grava no destino de forma idempotente — sobrescrita de partição ou merge por chave — para que reexecutar o job não duplique nada."
+]} />
+
+<Callout tipo="dica" titulo="Idempotência é o detalhe que impressiona">
+Job falha e é reexecutado. Se a sua carga soma em vez de substituir, a segunda
+execução dobra o valor. Falar em sobrescrita de partição ou merge por chave
+mostra que você já operou pipeline, não só desenhou um.
+</Callout>
+
+## Como responder isso em voz alta
+
+Comece separando propósito, não desempenho. Diga o que cada sistema existe para
+fazer, mostre que o propósito determina o modelo, e só então liste as
+consequências: contenção, bloqueio, join e histórico. Feche com o caminho
+staging, warehouse, data mart e um exemplo de cartão ou PIX. Cerca de noventa
+segundos, e a rubrica inteira está coberta.

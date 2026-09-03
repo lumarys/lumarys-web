@@ -1,0 +1,268 @@
+---
+slug: spark-rdd
+titulo: "Spark: RDD, transformações e ações"
+resumo: "RDD é a coleção distribuída, imutável e particionada que está na base do Spark. Transformações montam plano, ações executam; narrow encadeia, wide causa shuffle. É também API legada: hoje se escreve DataFrame, que passa pelo Catalyst."
+minutos: 35
+nivel: intermediario
+porQue: "A ementa oficial ainda apresenta o Spark pela API de RDD, então a pergunta vem nesse vocabulário. Quem só decora a definição de 2014 tropeça na pergunta seguinte, que é por que hoje ninguém escreve RDD. Dominar os dois lados é o que mostra atualização."
+comoCai: "Quando você ainda usaria RDD em vez de DataFrame?"
+feynman: "Explique para um colega de outra área o que significa dizer que um conjunto de dados é imutável e mesmo assim sobrevive à queda de uma máquina."
+preRequisitos: ["spark-introducao"]
+errosComuns:
+  - "Dizer que RDD é o mesmo que DataFrame com outro nome. DataFrame tem esquema e passa pelo otimizador Catalyst; RDD é opaco para o otimizador, que não sabe o que a sua função faz."
+  - "Achar que RDD é mutável. Toda transformação cria um novo RDD; a imutabilidade é o que torna a recomputação por lineage possível."
+  - "Confundir narrow com barato e wide com caro sem saber por quê. A diferença é a dependência: em narrow cada partição de saída depende de uma partição de entrada; em wide depende de várias, e por isso o dado precisa atravessar a rede."
+  - "Classificar reduceByKey como narrow porque 'reduz'. Toda operação por chave que precisa juntar chaves iguais é wide."
+  - "Achar que tolerância a falhas em Spark é replicação. É recomputação: com o lineage e a origem, o Spark refaz só as partições perdidas."
+  - "Recomendar RDD hoje sem justificativa. A resposta esperada é DataFrame e Spark SQL por padrão, com RDD reservado a controle fino e dado sem esquema."
+preTeste:
+  - enunciado: "O que significa dizer que um RDD é imutável?"
+    alternativas:
+      - texto: "Que o dado de origem não pode ser alterado enquanto o job roda."
+        correta: false
+        explicacao: "Imutabilidade é do RDD, não do arquivo de origem."
+      - texto: "Que qualquer transformação produz um novo RDD em vez de alterar o existente, o que permite recomputar partições perdidas."
+        correta: true
+        explicacao: "É essa propriedade que sustenta a tolerância a falhas por lineage."
+      - texto: "Que ele fica em cache e não pode ser removido da memória."
+        correta: false
+        explicacao: "Cache é opcional e pode ser descartado; nada a ver com imutabilidade."
+  - enunciado: "Qual conjunto de operações causa shuffle?"
+    alternativas:
+      - texto: "map, filter, union"
+        correta: false
+        explicacao: "As três são narrow: cada partição de saída vem de uma partição de entrada."
+      - texto: "groupByKey, reduceByKey, join, distinct"
+        correta: true
+        explicacao: "Todas exigem que registros com a mesma chave terminem na mesma partição, o que obriga a redistribuir pela rede."
+      - texto: "count, collect, take"
+        correta: false
+        explicacao: "São ações. Elas disparam a execução, mas quem causa shuffle é a transformação wide dentro do plano."
+videos:
+  - id: DQ5l3-lyGRw
+    titulo: "Apache Spark (PySpark) - Introdução ao RDD (Resilient Distributed Dataset) e Exercícios"
+    canal: "Rapha Science"
+    duracao: 25
+    porQue: "Trabalha o RDD com exercícios, que é o formato que fixa transformação contra ação. Faça os exercícios em vez de assistir passivamente: você precisa conseguir classificar operações sem pensar."
+  - id: kL4dq6UVmHk
+    titulo: "O que são Transformações: Narrow e Wide no Apache Spark?"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 5
+    porQue: "Vai direto no ponto que a banca cobra. Assista depois do primeiro e tente enunciar a regra com suas palavras antes que o vídeo enuncie."
+artigos:
+  - titulo: "RDD Programming Guide"
+    url: "https://spark.apache.org/docs/latest/rdd-programming-guide.html"
+    fonte: "Apache Spark"
+  - titulo: "Apache Spark: Introdução aos Internals"
+    url: "https://brains.dev/2023/spark-introducao-internals/"
+    fonte: "BRAINS"
+  - titulo: "What is a Resilient Distributed Dataset (RDD)?"
+    url: "https://www.databricks.com/glossary/what-is-rdd"
+    fonte: "Databricks"
+flashcards:
+  - frente: "O que é um RDD?"
+    verso: "Resilient Distributed Dataset: uma coleção de elementos distribuída pelas máquinas do cluster, imutável, dividida em partições e tolerante a falhas por recomputação."
+  - frente: "As quatro propriedades de um RDD."
+    verso: "Distribuído (espalhado pelo cluster), imutável (transformação cria outro), particionado (a partição é a unidade de paralelismo) e resiliente (recomputável pelo lineage)."
+  - frente: "Transformação e ação: qual a diferença?"
+    verso: "Transformação devolve outro RDD e é lazy: map, filter, flatMap, reduceByKey. Ação devolve valor ao driver ou escreve num destino e dispara execução: count, collect, take, saveAsTextFile."
+  - frente: "O que é uma dependência narrow?"
+    verso: "Cada partição de saída depende de no máximo uma partição de entrada. Dá para executar tudo dentro do executor, sem tráfego de rede: map, filter, flatMap, union."
+  - frente: "O que é uma dependência wide?"
+    verso: "Uma partição de saída depende de várias partições de entrada, porque registros com a mesma chave precisam se encontrar. Exige shuffle: groupByKey, reduceByKey, join, distinct, repartition."
+  - frente: "Por que wide é caro?"
+    verso: "Porque envolve serializar, escrever em disco local, transferir pela rede e reler. Além disso, corta o stage: o estágio anterior precisa terminar antes de o próximo começar."
+  - frente: "reduceByKey ou groupByKey?"
+    verso: "reduceByKey, quando aplicável. Ele agrega parcialmente antes do shuffle, então trafega menos dado. groupByKey manda tudo pela rede e é fonte clássica de estouro de memória."
+  - frente: "O que é lineage?"
+    verso: "O registro de como cada RDD foi derivado dos anteriores. É o plano de reconstrução: perdeu uma partição, o Spark refaz apenas ela a partir da origem."
+  - frente: "Como o Spark tolera falha de um executor?"
+    verso: "Recomputando. Com o lineage e a origem ainda disponível, ele reexecuta as tasks das partições perdidas em outro executor, sem refazer o job inteiro."
+  - frente: "Por que o RDD é considerado API legada?"
+    verso: "Porque é opaco ao otimizador: o Catalyst não enxerga dentro da sua função e não consegue reordenar filtros nem podar colunas. DataFrame e Spark SQL entregam o mesmo resultado com plano otimizado."
+  - frente: "O que o Catalyst faz que o RDD não permite?"
+    verso: "Empurrar filtro para a leitura, podar colunas, reordenar joins, escolher estratégia física e gerar código. Tudo isso depende de conhecer o esquema e a semântica da operação."
+  - frente: "Quando ainda faz sentido usar RDD?"
+    verso: "Controle fino sobre particionamento e sobre o comportamento de cada partição, dado sem esquema como texto livre ou binário, e código legado que já está em RDD e funciona."
+  - frente: "Dá para converter entre RDD e DataFrame?"
+    verso: "Sim: df.rdd desce para RDD e spark.createDataFrame sobe de volta. Descer é um recurso legítimo para um trecho específico, não um estilo de projeto."
+drills:
+  - titulo: "Narrow ou wide?"
+    instrucao: "Classifique cada operação pela dependência entre partições. Se for wide, diga em voz alta por que a mesma chave precisa se encontrar."
+    opcoes: ["Narrow", "Wide"]
+    itens:
+      - enunciado: "map"
+        resposta: "Narrow"
+        explicacao: "Cada registro é transformado no lugar; a partição de saída vem de uma partição de entrada."
+      - enunciado: "filter"
+        resposta: "Narrow"
+        explicacao: "Descarta registros dentro da própria partição, sem falar com ninguém."
+      - enunciado: "groupByKey"
+        resposta: "Wide"
+        explicacao: "Todos os registros de uma chave precisam terminar juntos, o que obriga a redistribuir pela rede."
+      - enunciado: "reduceByKey"
+        resposta: "Wide"
+        explicacao: "Também agrupa por chave. É mais barato que groupByKey porque agrega parcialmente antes do shuffle, mas continua wide."
+      - enunciado: "flatMap"
+        resposta: "Narrow"
+        explicacao: "Um registro vira zero ou mais registros, sempre dentro da mesma partição."
+      - enunciado: "join entre dois RDDs por chave"
+        resposta: "Wide"
+        explicacao: "As chaves iguais dos dois lados precisam se encontrar na mesma partição."
+      - enunciado: "union"
+        resposta: "Narrow"
+        explicacao: "Concatena as partições dos dois RDDs; nenhuma linha muda de lugar."
+      - enunciado: "distinct"
+        resposta: "Wide"
+        explicacao: "Para saber se um valor se repete é preciso reunir valores iguais na mesma partição."
+      - enunciado: "repartition"
+        resposta: "Wide"
+        explicacao: "Redistribui deliberadamente os dados entre partições. É shuffle por definição."
+perguntas:
+  - tipo: oral
+    enunciado: "Quando você ainda usaria RDD em vez de DataFrame?"
+    respostaModelo: "Por padrão eu não usaria: escrevo DataFrame ou Spark SQL, porque aí o Catalyst enxerga o esquema e a semântica da operação e consegue empurrar filtro para a leitura, podar coluna e escolher a estratégia de join. Com RDD, o otimizador não sabe o que a minha função faz e executa exatamente o que eu mandei. Ainda assim eu desço para RDD em três situações. Primeira, quando preciso de controle fino sobre partição, por exemplo aplicar uma lógica que trata a partição inteira como unidade ou implementar um particionador próprio. Segunda, quando o dado não tem esquema nenhum: arquivo binário, texto livre de contrato digitalizado, formato proprietário que eu preciso parsear antes de conseguir estruturar. Terceira, código legado que já está em RDD, funciona e não justifica reescrita. Fora isso, descer para RDD é abrir mão de otimização de graça, e é assim que se explica isso numa revisão de código."
+    rubrica:
+      - "Afirmou que o padrão hoje é DataFrame ou Spark SQL, não RDD"
+      - "Explicou o motivo pelo Catalyst e citou ao menos duas otimizações concretas que ele faz"
+      - "Deu ao menos duas situações legítimas para RDD, com exemplo, não apenas o rótulo 'controle fino'"
+      - "Tratou a escolha como trade-off, sem condenar nem defender a API por moda"
+  - tipo: oral
+    enunciado: "Explique narrow e wide, e o que isso tem a ver com o desempenho de um job que agrega gasto por cartão."
+    respostaModelo: "Narrow é quando cada partição de saída depende de no máximo uma partição de entrada: map, filter, flatMap. Dá para executar tudo dentro do executor, encadeando as operações sem tráfego de rede, e por isso o Spark junta essas etapas num mesmo stage. Wide é quando uma partição de saída depende de várias de entrada, porque registros com a mesma chave precisam se encontrar. Aí é shuffle: serializa, grava em disco local, transfere pela rede e relê. No job de gasto por cartão, o filtro de período e o cálculo de valor são narrow e saem de graça no mesmo stage. O agrupamento por cartão é wide e é ele que corta o job em dois stages e domina o tempo. O que eu faço para melhorar: filtrar o máximo possível antes do agrupamento, usar reduceByKey em vez de groupByKey para agregar antes de trafegar, e checar na Spark UI se há chave concentrada criando uma task muito mais longa que as outras."
+    rubrica:
+      - "Definiu narrow e wide pela dependência entre partições, não por 'caro e barato'"
+      - "Ligou wide a shuffle e shuffle à fronteira de stage"
+      - "Aplicou os conceitos ao cenário concreto, identificando qual etapa domina o tempo"
+      - "Citou pelo menos duas ações de melhoria, incluindo agregação parcial antes do shuffle"
+      - "Disse como verificaria a suspeita com evidência na Spark UI"
+  - tipo: unica
+    enunciado: "Como o Spark recupera uma partição perdida quando um executor cai?"
+    alternativas:
+      - texto: "Lê uma réplica da partição mantida em outro executor."
+        correta: false
+        explicacao: "Spark não replica partições de dado por padrão. Isso é comportamento do HDFS para blocos em disco."
+      - texto: "Recomputa a partição a partir do lineage, refazendo apenas as tasks necessárias."
+        correta: true
+        explicacao: "A imutabilidade e o registro de linhagem tornam a recomputação determinística e local."
+      - texto: "Reexecuta o job inteiro do começo."
+        correta: false
+        explicacao: "Seria desperdício; o lineage permite refazer só o que se perdeu."
+      - texto: "Restaura a partição de um checkpoint automático feito a cada transformação."
+        correta: false
+        explicacao: "Checkpoint existe, mas é explícito e não acontece a cada transformação."
+  - tipo: multipla
+    enunciado: "Quais afirmações sobre a relação entre RDD e DataFrame estão corretas?"
+    alternativas:
+      - texto: "DataFrame tem esquema e por isso o Catalyst consegue otimizar o plano."
+        correta: true
+        explicacao: "Conhecer coluna e tipo é o que habilita poda de coluna e pushdown de filtro."
+      - texto: "RDD continua sendo a base de execução: DataFrame é convertido em operações sobre RDD."
+        correta: true
+        explicacao: "O RDD não sumiu; ele deixou de ser a API que você escreve."
+      - texto: "Dá para converter de DataFrame para RDD e vice-versa dentro do mesmo job."
+        correta: true
+        explicacao: "df.rdd e spark.createDataFrame permitem descer e subir quando um trecho específico exige."
+      - texto: "RDD é mais rápido que DataFrame para operações relacionais comuns."
+        correta: false
+        explicacao: "Costuma ser mais lento, porque perde as otimizações do Catalyst."
+      - texto: "DataFrame não suporta dado semiestruturado."
+        correta: false
+        explicacao: "Suporta JSON e tipos aninhados; a limitação real é dado sem esquema nenhum."
+---
+
+## Em uma frase
+
+RDD é uma **coleção distribuída, imutável e particionada** de registros, capaz de
+se reconstruir sozinha depois de uma falha — e é a abstração de baixo nível sobre
+a qual o Spark inteiro foi construído.
+
+## As quatro propriedades
+
+<Passos itens={[
+  "Distribuído: os registros estão espalhados pelas máquinas do cluster.",
+  "Imutável: nenhuma transformação altera o RDD existente; cada uma cria outro.",
+  "Particionado: a partição é a unidade de paralelismo, e vira uma task.",
+  "Resiliente: perdeu uma partição, o Spark recomputa só ela a partir do lineage."
+]} />
+
+A imutabilidade não é purismo funcional. É o que torna a recomputação segura:
+como nada muda depois de criado, refazer uma partição produz exatamente o mesmo
+resultado.
+
+## Transformações e ações
+
+<Comparativo
+  colunas={["Tipo", "Devolve", "Executa?", "Exemplos"]}
+  linhas={[
+    ["Transformação", "Outro RDD", "Não: acrescenta ao plano", "map, filter, flatMap, reduceByKey, join"],
+    ["Ação", "Valor ao driver ou escrita no destino", "Sim: dispara o job", "count, collect, take, reduce, saveAsTextFile"]
+  ]}
+/>
+
+Você encadeia transformações à vontade e nada acontece. A ação é o gatilho.
+
+## Narrow e wide
+
+<Termo nome="dependência narrow">Cada partição de saída depende de no máximo uma partição de entrada.</Termo>
+<Termo nome="dependência wide">Uma partição de saída depende de várias partições de entrada, porque a mesma chave precisa se reunir num lugar só.</Termo>
+
+`map`, `filter`, `flatMap` e `union` são narrow: cada executor resolve o que tem em
+mãos e o Spark encadeia essas etapas dentro do mesmo stage, sem tráfego de rede.
+
+`groupByKey`, `reduceByKey`, `join`, `distinct` e `repartition` são wide. Para
+somar o gasto de um cartão, todas as transações daquele cartão precisam terminar
+na mesma partição, e não há como saber onde elas estão sem redistribuir. Isso é o
+**shuffle**: serializar, gravar em disco local, transferir pela rede, reler.
+
+<Callout tipo="dica" titulo="reduceByKey contra groupByKey">
+Os dois são wide, mas `reduceByKey` agrega parcialmente em cada executor antes de
+mandar pela rede. Em gasto por cartão, isso pode significar trafegar um valor por
+cartão por partição em vez de todas as transações. `groupByKey` é fonte clássica
+de estouro de memória em tabela grande.
+</Callout>
+
+## Lineage e tolerância a falhas
+
+O Spark guarda como cada RDD foi derivado do anterior. Esse registro é o
+**lineage**, e ele funciona como uma receita de reconstrução.
+
+Quando um executor cai, o Spark não recorre a réplica: ele **recomputa**. Olha o
+lineage, identifica quais partições se perderam, e reexecuta apenas as tasks
+daquelas partições em outro executor. Se o shuffle anterior ainda existir em
+disco, ele parte de lá; senão, refaz desde a leitura.
+
+<Callout tipo="atencao" titulo="Não confunda com replicação">
+Replicação de blocos é comportamento do HDFS, no armazenamento. Tolerância a
+falhas do Spark é no processamento e é por recomputação. Trocar as duas coisas é
+um erro que a banca reconhece na hora.
+</Callout>
+
+## RDD é API legada
+
+Essa é a parte que o material de curso costuma não dizer. O RDD é a API original,
+de 2014, e continua sendo a base de execução do Spark — mas **não é mais a API que
+se escreve**. Hoje o padrão é DataFrame e Spark SQL.
+
+O motivo é o **Catalyst**, o otimizador. Ele só consegue trabalhar se conhecer o
+esquema e a semântica da operação: aí empurra filtro para a leitura do arquivo,
+descarta colunas que ninguém pediu, reordena joins e escolhe a estratégia física.
+Com RDD, o conteúdo da sua função é opaco: o Spark executa literalmente o que você
+mandou, na ordem em que você mandou.
+
+<Callout tipo="atencao" titulo="Sobre a ementa oficial">
+O material oficial da ementa apresenta o Spark pela API de RDD [verificar: confirmar
+como a ementa do Itaú trata o assunto]. Isso não está errado — é a fundação, e a
+pergunta pode vir nesse vocabulário. O que muda é a recomendação prática: responda
+o conceito de RDD com segurança e acrescente, por conta própria, que na
+implementação você escreveria DataFrame. Esse acréscimo costuma valer ponto.
+</Callout>
+
+## Quando RDD ainda cabe
+
+Três situações defensáveis: **controle fino** sobre particionamento ou sobre a
+partição como unidade de processamento; **dado sem esquema**, como binário ou texto
+livre que você precisa parsear antes de estruturar; e **código legado** que já roda
+bem e não justifica reescrita.
+
+Fora isso, descer para RDD é abrir mão de otimização de graça.

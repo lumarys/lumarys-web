@@ -1,0 +1,188 @@
+import type { Trilha } from "../types";
+
+/**
+ * Trilha de Engenharia de Dados — ementa oficial do Hub de Dados e Analytics do
+ * Itaú (17 artigos), acrescida de Databricks e de um módulo "Além da ementa"
+ * com o que a sabatina costuma cobrar e a ementa não cobre.
+ */
+export const engenhariaDeDados: Trilha = {
+  slug: "engenharia-de-dados",
+  tipo: "carreira",
+  titulo: "Engenharia de Dados",
+  origem: "Itaú · Hub de Dados e Analytics",
+  objetivo:
+    "Passar na sabatina de ingresso na carreira de Engenharia de Dados e sair com a base que o trabalho exige depois dela.",
+  resumo:
+    "A ementa oficial da carreira de Engenharia de Dados do Itaú, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.",
+  formatoProva: "Sabatina oral com banca",
+  prazoSugeridoDias: 14,
+  status: "disponivel",
+  modulos: [
+    {
+      slug: "fundamentos",
+      titulo: "Fundamentos",
+      resumo: "O vocabulário que a banca assume que você domina antes de qualquer pergunta técnica.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["big-data", "olap-oltp-etl", "data-centric-data-driven"],
+    },
+    {
+      slug: "hadoop",
+      titulo: "Hadoop",
+      resumo: "De onde veio o processamento distribuído e por que ele saiu do centro do palco.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["hadoop-arquitetura", "mapreduce"],
+    },
+    {
+      slug: "processamento",
+      titulo: "Processamento de dados",
+      resumo: "As três decisões de pipeline que mais viram pergunta de cenário.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["batch-vs-stream", "etl-vs-elt", "particionamento-de-dados"],
+    },
+    {
+      slug: "spark",
+      titulo: "Spark",
+      resumo: "O motor por trás de quase todo pipeline moderno, incluindo o Databricks.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["spark-introducao", "spark-rdd"],
+    },
+    {
+      slug: "camada-de-dados",
+      titulo: "Camada de dados",
+      resumo: "Como um Data Lake se organiza para não virar um pântano.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["zonas-data-lake"],
+    },
+    {
+      slug: "databricks",
+      titulo: "Databricks",
+      resumo: "A plataforma que o banco usa hoje: Lakehouse, Delta e governança.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["lakehouse-delta-lake", "databricks-plataforma"],
+    },
+    {
+      slug: "tipos-de-dados",
+      titulo: "Tipos de dados",
+      resumo: "Como classificar dados e lidar com os formatos que chegam de fora.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["classificacao-tipos-dados", "xml", "json"],
+    },
+    {
+      slug: "qualidade",
+      titulo: "Qualidade de dados",
+      resumo: "Quem responde pelo dado errado e como provar que o dado está certo.",
+      status: "disponivel",
+      oficial: true,
+      temas: ["governanca-de-dados", "data-quality"],
+    },
+    {
+      slug: "alem-da-ementa",
+      titulo: "Além da ementa",
+      resumo:
+        "O que a ementa oficial não cobre e a sabatina cobra: SQL, modelagem, orquestração, LGPD e como estruturar a resposta.",
+      status: "disponivel",
+      oficial: false,
+      temas: [
+        "sql-para-dados",
+        "modelagem-de-dados",
+        "formatos-e-tabelas",
+        "spark-avancado",
+        "orquestracao",
+        "ingestao-e-cdc",
+        "arquiteturas-de-dados",
+        "aws-para-dados",
+        "seguranca-e-privacidade",
+        "dataops-e-observabilidade",
+        "custo-e-performance",
+        "como-responder-na-sabatina",
+      ],
+    },
+  ],
+  cronograma: [
+    {
+      dia: 1,
+      titulo: "Método e Fundamentos",
+      temas: ["big-data", "olap-oltp-etl", "data-centric-data-driven"],
+      nota: "Leia a página de método antes de começar. Vale 10 minutos e muda o resto.",
+    },
+    { dia: 2, titulo: "Hadoop", temas: ["hadoop-arquitetura", "mapreduce"], revisao: ["fundamentos"] },
+    {
+      dia: 3,
+      titulo: "Processamento de dados",
+      temas: ["batch-vs-stream", "etl-vs-elt", "particionamento-de-dados"],
+      revisao: ["fundamentos"],
+    },
+    { dia: 4, titulo: "Spark", temas: ["spark-introducao", "spark-rdd"], revisao: ["hadoop"] },
+    {
+      dia: 5,
+      titulo: "Data Lake e Databricks (1/2)",
+      temas: ["zonas-data-lake", "lakehouse-delta-lake"],
+      revisao: ["processamento"],
+    },
+    {
+      dia: 6,
+      titulo: "Databricks (2/2) e tipos de dados",
+      temas: ["databricks-plataforma", "classificacao-tipos-dados", "xml", "json"],
+      revisao: ["spark"],
+    },
+    {
+      dia: 7,
+      titulo: "Qualidade e revisão da semana",
+      temas: ["governanca-de-dados", "data-quality"],
+      revisao: ["fundamentos", "hadoop", "processamento", "spark"],
+      nota: "Primeiro simulado parcial: 8 perguntas dos módulos 1 a 4.",
+    },
+    {
+      dia: 8,
+      titulo: "SQL e modelagem",
+      temas: ["sql-para-dados", "modelagem-de-dados"],
+      revisao: ["camada-de-dados", "databricks"],
+    },
+    {
+      dia: 9,
+      titulo: "Formatos e Spark avançado",
+      temas: ["formatos-e-tabelas", "spark-avancado"],
+      revisao: ["tipos-de-dados", "qualidade"],
+    },
+    {
+      dia: 10,
+      titulo: "Orquestração, CDC e AWS",
+      temas: ["orquestracao", "ingestao-e-cdc", "aws-para-dados"],
+      revisao: ["spark"],
+    },
+    {
+      dia: 11,
+      titulo: "LGPD, arquiteturas e como responder",
+      temas: ["seguranca-e-privacidade", "arquiteturas-de-dados", "como-responder-na-sabatina"],
+      revisao: ["alem-da-ementa"],
+    },
+    {
+      dia: 12,
+      titulo: "DataOps, custo e simulado completo",
+      temas: ["dataops-e-observabilidade", "custo-e-performance"],
+      revisao: ["fundamentos", "processamento", "databricks"],
+      nota: "Simulado completo: 12 perguntas sorteadas entre os 30 temas.",
+    },
+    {
+      dia: 13,
+      titulo: "Segundo simulado e pontos fracos",
+      temas: [],
+      revisao: ["alem-da-ementa", "spark", "qualidade"],
+      nota: "Refaça o simulado e ataque só os módulos abaixo de 60% de prontidão.",
+    },
+    {
+      dia: 14,
+      titulo: "Revisão leve",
+      temas: [],
+      revisao: ["fundamentos", "spark", "databricks", "alem-da-ementa"],
+      nota: "Só cards vencidos e leitura do cheat-sheet. Não estude conteúdo novo na véspera.",
+    },
+  ],
+};

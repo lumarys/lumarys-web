@@ -1,0 +1,313 @@
+---
+slug: aws-para-dados
+titulo: "AWS para engenharia de dados"
+resumo: "Os serviços que aparecem num pipeline de dados na AWS e o critério para escolher entre eles: S3, Glue, Athena, EMR, Redshift, Lake Formation, Kinesis, Lambda, Step Functions e o IAM que amarra tudo."
+minutos: 35
+nivel: intermediario
+porQue: "A stack do time é AWS mais Databricks, então a banca vai testar se você sabe onde cada serviço encaixa e quanto ele custa. A pergunta de custo do Athena é quase certa, porque separa quem já pagou a conta de quem só leu a documentação."
+comoCai: "Uma consulta no Athena custou caro. O que você olha primeiro?"
+feynman: "Explique para um analista de negócio por que a mesma consulta no Athena pode custar dez vezes mais dependendo de como o arquivo foi gravado no S3."
+preRequisitos:
+  - big-data
+  - particionamento-de-dados
+errosComuns:
+  - "Achar que Athena cobra por tempo de consulta. A cobrança padrão é por volume de dados varridos, então otimizar é reduzir bytes lidos, não segundos gastos."
+  - "Criar partição no S3 e esquecer de registrar no catálogo. Sem MSCK REPAIR, ALTER TABLE ADD PARTITION, crawler ou partition projection, o Athena não enxerga a partição e continua varrendo tudo."
+  - "Escolher Redshift para consulta exploratória esporádica sobre o lake. Você paga cluster ligado o tempo todo para um uso que o Athena atenderia sob demanda."
+  - "Usar EMR por hábito onde Glue ou Databricks resolveriam. EMR entrega controle do cluster e da versão do Spark, e cobra isso em operação e tuning."
+  - "Tratar Lake Formation como sinônimo de bucket policy. Ele dá permissão fina por tabela, coluna e linha sobre o catálogo, coisa que política de S3 não expressa."
+  - "Anexar policy larga na role do job para destravar o deploy. Menor privilégio é requisito em banco, e a banca pergunta como você restringiria depois."
+  - "Guardar arquivo pequeno demais no S3. Milhares de arquivos de poucos KB destroem a performance do Athena e do Spark por sobrecarga de listagem e abertura."
+preTeste:
+  - enunciado: "Uma consulta no Athena varreu 2 TB para retornar um resumo de um único dia. Qual é a hipótese mais provável?"
+    alternativas:
+      - texto: "O cluster do Athena estava subdimensionado."
+        correta: false
+        explicacao: "Athena é serverless: não existe cluster seu para dimensionar."
+      - texto: "A tabela não está particionada por data, ou a consulta não filtrou pela coluna de partição."
+        correta: true
+        explicacao: "Sem poda de partição, o motor lê o prefixo inteiro. É a causa número um de conta alta."
+      - texto: "O resultado não foi armazenado em cache."
+        correta: false
+        explicacao: "Cache de resultado ajuda em repetição, mas não explica a primeira varredura de 2 TB."
+  - enunciado: "Qual é o papel do AWS Glue Data Catalog?"
+    alternativas:
+      - texto: "Armazenar fisicamente as tabelas do data lake."
+        correta: false
+        explicacao: "Os dados continuam no S3. O catálogo guarda metadados: schema, formato, localização e partições."
+      - texto: "Guardar os metadados das tabelas — schema, formato, local no S3 e partições — para que Athena, Spark e Redshift Spectrum leiam a mesma definição."
+        correta: true
+        explicacao: "É o metastore compartilhado; sem ele cada motor teria sua própria definição de tabela."
+      - texto: "Executar as transformações Spark do pipeline."
+        correta: false
+        explicacao: "Quem executa são os Glue jobs. O catálogo é só metadado."
+videos:
+  - id: npe9RcSTIzI
+    titulo: "Consulte dados com o AWS Athena - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 10
+    porQue: "Conteúdo do canal oficial da AWS em português, direto na peça que a pergunta-chave cobra. Observe como a tabela é definida sobre o S3 antes de qualquer consulta."
+  - id: HFFiAy2J2OQ
+    titulo: "Transforme e catalogue dados com o AWS Glue Parte 1 - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 8
+    porQue: "Mostra crawler e Data Catalog em funcionamento, que é o pedaço que costuma ficar abstrato. Repare em quem descobre o schema e onde ele fica guardado."
+artigos:
+  - titulo: "Otimizar a performance do Athena"
+    url: "https://docs.aws.amazon.com/pt_br/athena/latest/ug/performance-tuning.html"
+    fonte: "AWS"
+  - titulo: "Classes de armazenamento do Amazon S3"
+    url: "https://docs.aws.amazon.com/pt_br/AmazonS3/latest/userguide/storage-class-intro.html"
+    fonte: "AWS"
+  - titulo: "O que é o AWS Glue"
+    url: "https://docs.aws.amazon.com/pt_br/glue/latest/dg/what-is-glue.html"
+    fonte: "AWS"
+  - titulo: "AWS Lake Formation"
+    url: "https://aws.amazon.com/pt/lake-formation/"
+    fonte: "AWS"
+  - titulo: "Consultar dados externos com o Amazon Redshift Spectrum"
+    url: "https://docs.aws.amazon.com/pt_br/redshift/latest/dg/c-using-spectrum.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que o S3 é, no contexto de dados?"
+    verso: "Armazenamento de objetos que serve de camada de persistência do data lake. Barato, durável, desacoplado do processamento, com organização lógica por prefixo."
+  - frente: "Classes de armazenamento do S3 e para que servem"
+    verso: "Standard para dado quente; Intelligent-Tiering quando o padrão de acesso é imprevisível; Standard-IA e One Zone-IA para acesso raro; famílias Glacier para arquivamento, com custo de recuperação e latência crescentes."
+  - frente: "O que é lifecycle no S3?"
+    verso: "Regra que move ou expira objetos automaticamente conforme a idade. Exemplo bancário: extrato bruto vai para IA em 90 dias, Glacier em um ano e expira no prazo de retenção legal."
+  - frente: "Como o S3 organiza dados de um lake?"
+    verso: "Por prefixo, que funciona como pasta. O padrão útil é zona, domínio, tabela e partição, no formato coluna igual a valor, para que o motor faça poda de partição."
+  - frente: "Consistência no S3"
+    verso: "O S3 oferece consistência forte de leitura após escrita para operações de objeto, inclusive PUT de sobrescrita e DELETE. O que ainda exige cuidado é a visibilidade de partições no catálogo, que não é atualizada sozinha."
+  - frente: "Glue Data Catalog, crawler e job: qual é qual?"
+    verso: "Catalog guarda metadados de tabela. Crawler inspeciona o S3, infere schema e registra ou atualiza a tabela. Job é o Spark gerenciado que executa a transformação."
+  - frente: "Como o Athena cobra e como reduzir a conta?"
+    verso: "Por volume de dados varridos. Reduz-se com particionamento pela coluna filtrada, formato colunar como Parquet, compressão, projeção de colunas em vez de SELECT estrela e arquivos de tamanho adequado."
+  - frente: "Quando ainda usar EMR?"
+    verso: "Quando você precisa de controle do cluster e do ecossistema Hadoop: versão específica de Spark, bibliotecas customizadas, ajuste fino de instâncias, uso pesado de spot ou carga longa em que o custo por hora compensa."
+  - frente: "Redshift, em uma frase"
+    verso: "Data warehouse colunar e distribuído da AWS, para consulta analítica recorrente sobre dado modelado, com concorrência alta e desempenho previsível."
+  - frente: "Redshift Spectrum"
+    verso: "Permite ao Redshift consultar dados que continuam no S3, sem carregá-los, usando o mesmo catálogo. Junta tabela do warehouse com histórico no lake."
+  - frente: "Distribution key e sort key em uma frase cada"
+    verso: "Distribution key define como as linhas se espalham pelos nós, e uma boa escolha reduz redistribuição no JOIN. Sort key define a ordem física dos dados no bloco, e uma boa escolha permite pular blocos no filtro."
+  - frente: "Para que serve o Lake Formation?"
+    verso: "Permissão fina sobre o lake: concede acesso por banco, tabela, coluna, linha e tag, aplicada de forma consistente a Athena, Glue e Redshift Spectrum, em vez de depender só de política de S3."
+  - frente: "Papel do Lambda e do Step Functions num pipeline"
+    verso: "Lambda executa tarefa curta e orientada a evento, como validar arquivo que chegou ou disparar job. Step Functions orquestra os passos como máquina de estados, com retry e tratamento de erro declarativos."
+  - frente: "Role, policy e menor privilégio"
+    verso: "Role é a identidade que o job assume; policy é o documento que diz o que aquela identidade pode fazer em quais recursos. Menor privilégio é conceder só as ações e os prefixos necessários, e revisar quando o job muda."
+drills:
+  - titulo: "Escolha o serviço para o cenário"
+    instrucao: "Para cada necessidade, escolha o serviço principal. Prepare uma frase dizendo o que você descarta e por quê."
+    opcoes: ["S3", "Glue", "Athena", "EMR", "Redshift", "Lake Formation", "Kinesis", "Step Functions"]
+    itens:
+      - enunciado: "Analista quer investigar uma reclamação rodando SQL ad hoc sobre seis meses de arquivos Parquet no lake, poucas vezes por semana."
+        resposta: "Athena"
+        explicacao: "Uso esporádico e serverless. Manter cluster ligado para isso é desperdício."
+      - enunciado: "Painel de risco consultado por 200 usuários ao longo do dia, sobre modelo dimensional estável, com exigência de tempo de resposta previsível."
+        resposta: "Redshift"
+        explicacao: "Consulta recorrente e concorrente sobre dado modelado é o caso do warehouse."
+      - enunciado: "Descobrir automaticamente o schema de arquivos novos que o parceiro deposita no S3 e registrar a tabela para os demais motores."
+        resposta: "Glue"
+        explicacao: "Crawler mais Data Catalog. É exatamente essa a função."
+      - enunciado: "Capturar eventos de autorização de cartão em fluxo contínuo, com alta vazão, para alimentar o motor de fraude."
+        resposta: "Kinesis"
+        explicacao: "Streaming gerenciado com shards e chave de partição; alternativa ao Kafka dentro da AWS."
+      - enunciado: "Liberar a tabela de clientes para o time de marketing sem expor CPF e sem duplicar a tabela."
+        resposta: "Lake Formation"
+        explicacao: "Permissão em nível de coluna sobre o catálogo, aplicada de forma consistente aos motores de consulta."
+      - enunciado: "Rodar um job Spark de reprocessamento de dois anos que exige uma versão específica do Spark e uso agressivo de instâncias spot."
+        resposta: "EMR"
+        explicacao: "Controle de versão, de bibliotecas e de tipo de instância é o que justifica EMR sobre alternativas gerenciadas."
+      - enunciado: "Encadear validação de arquivo, disparo de job e notificação, tudo com serviços AWS e sem manter servidor de orquestração."
+        resposta: "Step Functions"
+        explicacao: "Máquina de estados serverless com retry declarativo; encaixa quando o fluxo é feito de serviços AWS."
+  - titulo: "Athena caro: o que você mexe primeiro?"
+    instrucao: "Ordene mentalmente por impacto sobre bytes varridos. Para cada ação, diga se ela reduz muito, pouco ou nada o custo."
+    opcoes: ["Reduz muito", "Reduz pouco", "Não reduz"]
+    itens:
+      - enunciado: "Particionar a tabela por data de referência e filtrar por essa coluna."
+        resposta: "Reduz muito"
+        explicacao: "Poda de partição corta o volume lido na ordem de grandeza da seletividade da janela."
+      - enunciado: "Converter os arquivos de CSV para Parquet comprimido."
+        resposta: "Reduz muito"
+        explicacao: "Formato colunar permite ler só as colunas usadas, e a compressão reduz os bytes de cada uma."
+      - enunciado: "Trocar SELECT estrela por lista explícita de colunas."
+        resposta: "Reduz muito"
+        explicacao: "Em Parquet, projetar colunas é o que ativa o ganho do formato colunar. Em CSV não muda quase nada."
+      - enunciado: "Adicionar LIMIT 100 ao final da consulta."
+        resposta: "Não reduz"
+        explicacao: "LIMIT corta o resultado, não a varredura, especialmente quando há agregação ou ordenação antes."
+      - enunciado: "Compactar milhares de arquivos pequenos em arquivos maiores."
+        resposta: "Reduz pouco"
+        explicacao: "Ganha muito em tempo e em sobrecarga de listagem, mas o volume varrido muda pouco. O ganho principal é performance."
+      - enunciado: "Executar a mesma consulta num horário de menor movimento."
+        resposta: "Não reduz"
+        explicacao: "A cobrança é por bytes varridos, não por horário nem por concorrência."
+perguntas:
+  - tipo: oral
+    enunciado: "Uma consulta no Athena custou caro. O que você olha primeiro?"
+    respostaModelo: "Olho quantos bytes ela varreu, porque a cobrança padrão do Athena é por volume de dados lidos, não por tempo. O histórico de execução dá esse número, e ele já indica se o problema é a consulta ou o dado. A primeira hipótese é ausência de poda de partição: ou a tabela não está particionada pela coluna filtrada, ou a partição existe no S3 mas não foi registrada no catálogo, e aí o motor lê o prefixo inteiro. A segunda é formato: CSV ou JSON obrigam a ler tudo, enquanto Parquet comprimido permite ler só as colunas necessárias, o que só funciona se a consulta projetar colunas em vez de usar SELECT estrela. Depois olho tamanho de arquivo, porque milhares de arquivos pequenos custam em latência. Se ainda assim o custo for alto e a consulta for recorrente e previsível, aí discuto materializar uma tabela agregada ou levar a carga para o Redshift, que é o trade-off entre pagar por varredura e pagar por cluster."
+    rubrica:
+      - "Disse que a cobrança é por dados varridos e que verificaria os bytes lidos"
+      - "Citou particionamento e poda de partição, incluindo partição não registrada no catálogo"
+      - "Citou formato colunar com compressão e projeção de colunas"
+      - "Ofereceu o trade-off entre Athena sob demanda e Redshift para carga recorrente"
+  - tipo: oral
+    enunciado: "Desenhe o pipeline na AWS para levar as transações de cartão do core até um painel de fraude, dizendo qual serviço faz o quê e como você trata segurança."
+    respostaModelo: "Eu partiria de CDC no core, com DMS ou Debezium, publicando os eventos em Kinesis ou Kafka para não consultar as tabelas transacionais. A camada de persistência é o S3, organizado por zona, domínio, tabela e partição por data, com lifecycle levando o bruto para classes mais baratas conforme envelhece. A transformação eu faria em Spark, no Databricks ou em Glue jobs, gravando tabelas Delta com MERGE, e registraria os metadados no Glue Data Catalog para que Athena e Redshift Spectrum leiam a mesma definição. A orquestração fica no Airflow ou em Step Functions, dependendo de quanto o fluxo sai do perímetro AWS. Para segurança, cada job assume uma role própria com policy restrita ao prefixo e às ações que ele usa, criptografia com KMS, e a permissão de leitura analítica passa por Lake Formation, que me deixa esconder CPF por coluna em vez de duplicar tabela mascarada. O painel consulta a camada gold, nunca a raw."
+    rubrica:
+      - "Descreveu a cadeia ingestão, armazenamento, transformação, catálogo e consumo com serviço nomeado em cada etapa"
+      - "Usou S3 com organização por prefixo e citou lifecycle ou classes de armazenamento"
+      - "Citou Glue Data Catalog como metastore compartilhado entre motores"
+      - "Tratou segurança com role por job, menor privilégio e permissão fina via Lake Formation"
+      - "Justificou a escolha de streaming ou CDC pelo impacto no core"
+  - tipo: unica
+    enunciado: "Qual é a diferença essencial entre Athena e Redshift?"
+    alternativas:
+      - texto: "Athena é serverless e cobra por dados varridos sobre arquivos no S3; Redshift é um warehouse com recursos provisionados, otimizado para consulta recorrente sobre dado modelado."
+        correta: true
+        explicacao: "É o eixo sob demanda contra capacidade dedicada, e é assim que a escolha se justifica."
+      - texto: "Athena só lê CSV e Redshift só lê Parquet."
+        correta: false
+        explicacao: "Ambos leem vários formatos; Athena inclusive tem melhor desempenho com Parquet."
+      - texto: "Athena não usa SQL, apenas API de consulta programática."
+        correta: false
+        explicacao: "Athena é justamente SQL sobre dados no S3."
+      - texto: "Redshift não consegue acessar dados que estejam no S3."
+        correta: false
+        explicacao: "O Redshift Spectrum existe exatamente para isso."
+  - tipo: multipla
+    enunciado: "Quais medidas reduzem o custo de uma consulta no Athena?"
+    alternativas:
+      - texto: "Particionar a tabela pela coluna usada no filtro e registrar as partições no catálogo."
+        correta: true
+        explicacao: "Poda de partição é o maior ganho isolado, e ela só ocorre se o catálogo conhecer a partição."
+      - texto: "Gravar os dados em Parquet com compressão."
+        correta: true
+        explicacao: "Reduz bytes lidos por coluna e permite ignorar colunas não usadas."
+      - texto: "Selecionar apenas as colunas necessárias em vez de SELECT estrela."
+        correta: true
+        explicacao: "É o que ativa o benefício do formato colunar."
+      - texto: "Adicionar LIMIT ao final da consulta."
+        correta: false
+        explicacao: "LIMIT reduz o resultado, não necessariamente a varredura."
+      - texto: "Executar a consulta fora do horário de pico."
+        correta: false
+        explicacao: "A cobrança é por dados varridos, independente do horário."
+---
+
+## Em uma frase
+
+Na AWS, um pipeline de dados é **S3 como camada de persistência, Glue como
+catálogo e motor de transformação, um motor de consulta escolhido pelo padrão de
+uso, e IAM amarrando quem pode o quê**.
+
+## S3: a base de tudo
+
+O S3 guarda objetos, não tabelas. Isso é a força — armazenamento barato e
+desacoplado do processamento — e a fonte dos problemas.
+
+- **Classes de armazenamento**: Standard para dado quente, Intelligent-Tiering
+  quando o padrão de acesso é imprevisível, Standard-IA e One Zone-IA para acesso
+  raro, e as famílias Glacier para arquivamento, com custo e latência de
+  recuperação crescentes.
+- **Lifecycle**: regra que move ou expira objeto por idade. Extrato bruto sai do
+  Standard em 90 dias, vai para Glacier em um ano e expira no fim do prazo legal
+  de retenção — que em banco é definido por norma, não por preferência
+  [verificar prazo aplicável ao seu caso].
+- **Organização por prefixo**: `zona/dominio/tabela/data_ref=2026-03-11/`. O
+  formato `coluna=valor` é o que permite ao motor fazer poda de partição.
+- **Consistência**: o S3 oferece leitura consistente após escrita para operações
+  de objeto. O que não se atualiza sozinho é o **catálogo**: partição nova no S3
+  continua invisível para o Athena até ser registrada.
+
+<Callout tipo="erro" titulo="Arquivo pequeno demais">
+Milhares de objetos de poucos KB derrubam o desempenho de Athena e Spark por
+sobrecarga de listagem e abertura. Compacte para a faixa de dezenas ou centenas
+de MB por arquivo.
+</Callout>
+
+## Glue: catálogo, crawler e jobs
+
+O **Data Catalog** é o metastore: schema, formato, localização no S3 e lista de
+partições. Athena, Spark e Redshift Spectrum leem a mesma definição a partir
+dele.
+
+O **crawler** inspeciona um caminho no S3, infere schema e registra ou atualiza a
+tabela. Útil na chegada de dado de terceiro; perigoso como fonte única de
+verdade de schema, porque inferência erra tipo.
+
+Os **jobs** são Spark gerenciado, para ETL sem manter cluster.
+
+## Athena: SQL sobre o S3
+
+Serverless: você não dimensiona nada, e a cobrança padrão é por **volume de dados
+varridos** [verificar preço por TB na região usada].
+
+Reduzir a conta é reduzir bytes lidos:
+
+<Passos itens={[
+  "Particionar pela coluna que você filtra, e registrar a partição no catálogo",
+  "Gravar em formato colunar (Parquet) com compressão",
+  "Projetar colunas: SELECT explícito em vez de SELECT estrela",
+  "Compactar arquivos pequenos para reduzir sobrecarga"
+]} />
+
+## EMR: quando ainda usar
+
+Quando você precisa de **controle**: versão específica de Spark, ecossistema
+Hadoop, bibliotecas nativas, ajuste fino de tipos de instância, uso agressivo de
+spot, carga longa em que o custo por hora compensa. Se nada disso é requisito,
+Glue ou Databricks entregam o mesmo Spark com menos operação.
+
+## Redshift
+
+Warehouse colunar e distribuído, para consulta recorrente e concorrente sobre
+dado modelado. **Spectrum** deixa o Redshift consultar dados que continuam no S3,
+permitindo juntar tabela do warehouse com histórico no lake.
+
+**Distribution key** define como as linhas se distribuem entre os nós, e a
+escolha certa evita redistribuir dados no JOIN. **Sort key** define a ordem
+física dos blocos, e a escolha certa permite pular blocos inteiros no filtro.
+
+## Athena, Redshift e EMR: quando cada um
+
+<Comparativo
+  colunas={["", "Athena", "Redshift", "EMR"]}
+  linhas={[
+    ["Modelo", "Serverless, sob demanda", "Cluster provisionado (ou serverless)", "Cluster que você configura"],
+    ["Cobrança típica", "Por dados varridos", "Por capacidade ligada", "Por hora de instância"],
+    ["Melhor para", "SQL ad hoc e esporádico sobre o lake", "Painel e consulta recorrente com concorrência alta", "Processamento pesado e customizado em Spark"],
+    ["Pior para", "Consulta repetitiva de alto volume, que fica cara por varredura", "Uso esporádico, que paga cluster ocioso", "Time pequeno, por causa do custo operacional"]
+  ]}
+/>
+
+## Lake Formation, Kinesis, Lambda e Step Functions
+
+**Lake Formation** concede permissão fina sobre o lake — por banco, tabela,
+coluna, linha e tag — aplicada de forma consistente aos motores de consulta.
+É o que permite liberar a tabela de clientes ao marketing **sem** a coluna de
+CPF, em vez de duplicar uma versão mascarada.
+
+**Kinesis Data Streams** é o streaming gerenciado: shard no lugar de partição,
+chave de partição com o mesmo papel do Kafka, retenção configurável.
+
+**Lambda** cobre tarefa curta orientada a evento: validar arquivo que chegou,
+disparar job, publicar métrica. **Step Functions** orquestra os passos como
+máquina de estados, com retry e tratamento de erro declarativos — alternativa ao
+Airflow quando o fluxo é todo de serviços AWS.
+
+## IAM para dados
+
+**Role** é a identidade que o job assume. **Policy** é o documento que diz quais
+ações são permitidas sobre quais recursos. **Menor privilégio** é conceder apenas
+o que aquele job usa: um prefixo específico do bucket, as ações de leitura e
+escrita necessárias, nada além.
+
+<Callout tipo="atencao" titulo="Resposta que vale ponto em banco">
+Uma role por job, escopo por prefixo, criptografia com KMS e permissão analítica
+por Lake Formation. Dizer isso sem ser perguntado mostra que você entende que em
+instituição financeira acesso é matéria regulatória, não conveniência.
+</Callout>
