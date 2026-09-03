@@ -2,6 +2,17 @@
 
 import { cardNovo, hojeISO, type EstadoCard } from "./srs";
 
+/** Preenchido por sync.ts quando a conta está ligada; sem conta, é um no-op. */
+let aoGravarTrilha: ((trilhaSlug: string) => void) | null = null;
+
+export function registrarSincronizador(fn: (trilhaSlug: string) => void): void {
+  aoGravarTrilha = fn;
+}
+
+function sincronizar(trilhaSlug: string): void {
+  aoGravarTrilha?.(trilhaSlug);
+}
+
 /**
  * Progresso do aluno. Nasce em localStorage (modo convidado) e é mesclado na
  * conta quando ele entra com o código por e-mail. Cada item carrega
@@ -110,6 +121,7 @@ export function garantirTrilha(p: Progresso, trilha: string): ProgressoTrilha {
 }
 
 export function concluirTema(trilha: string, tema: string, minutos: number): Progresso {
+  sincronizar(trilha);
   return atualizar((p) => {
     const agora = Date.now();
     const t = garantirTrilha(p, trilha);
@@ -138,6 +150,7 @@ export function registrarQuiz(
   total: number,
   tipo: "quiz" | "preTeste" = "quiz",
 ): Progresso {
+  sincronizar(trilha);
   return atualizar((p) => {
     const agora = Date.now();
     const t = garantirTrilha(p, trilha);
@@ -156,7 +169,14 @@ export function registrarQuiz(
   });
 }
 
-export function registrarSimulado(trilha: string, resultado: ResultadoSimulado): Progresso {
+export function registrarSimulado(
+  trilha: string,
+  resultado: Omit<ResultadoSimulado, "em">,
+): Progresso {
+  sincronizar(trilha);
+  // O carimbo de tempo nasce aqui: gerar `Date.now()` dentro do componente é
+  // efeito colateral em corpo de render, e o compilador do React barra.
+  const registro: ResultadoSimulado = { ...resultado, em: Date.now() };
   return atualizar((p) => {
     const t = garantirTrilha(p, trilha);
     return {
@@ -165,7 +185,7 @@ export function registrarSimulado(trilha: string, resultado: ResultadoSimulado):
         ...p.trilhas,
         [trilha]: {
           ...t,
-          simulados: [...t.simulados, resultado].slice(-20),
+          simulados: [...t.simulados, registro].slice(-20),
           atualizadoEm: Date.now(),
         },
       },
@@ -174,6 +194,7 @@ export function registrarSimulado(trilha: string, resultado: ResultadoSimulado):
 }
 
 export function definirPlano(trilha: string, dataProva: string, minutosPorDia: number): Progresso {
+  sincronizar(trilha);
   return atualizar((p) => {
     const t = garantirTrilha(p, trilha);
     return {
@@ -187,6 +208,8 @@ export function definirPlano(trilha: string, dataProva: string, minutosPorDia: n
 }
 
 export function salvarCard(card: EstadoCard): Progresso {
+  // Cards viajam junto do documento da trilha; marcamos todas as conhecidas.
+  for (const slug of Object.keys(ler().trilhas)) sincronizar(slug);
   return atualizar((p) => ({ ...p, cards: { ...p.cards, [card.id]: card } }));
 }
 

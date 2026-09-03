@@ -9,12 +9,10 @@ import {
   DynamoDBClient,
 } from "@aws-sdk/client-dynamodb";
 import {
-  DeleteCommand,
+  BatchWriteCommand,
   DynamoDBDocumentClient,
-  GetCommand,
   PutCommand,
   QueryCommand,
-  BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
 import {
   CognitoIdentityProviderClient,

@@ -1,33 +1,45 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-import { ler, type Progresso, progressoVazio } from "@/lib/storage";
+import {
+  assinarProgresso,
+  lerProgresso,
+  progressoDoServidor,
+  recarregarProgresso,
+} from "@/lib/store";
+import { registrarSincronizador, type Progresso } from "@/lib/storage";
+import { agendarEnvio } from "@/lib/sync";
 
 /**
- * Lê o progresso do dispositivo e reage a mudanças, inclusive vindas de outra
- * aba. Começa vazio na primeira renderização de propósito: o HTML é estático e
- * precisa bater com o servidor para não dar hydration mismatch; o valor real
- * entra no efeito.
+ * Progresso do dispositivo, reagindo a mudanças em qualquer aba.
+ *
+ * `pronto` distingue "ainda não hidratou" de "não há progresso": o HTML
+ * estático precisa bater com a primeira renderização no cliente, então o
+ * servidor sempre entrega vazio e a interface só mostra números depois.
  */
-export function useProgresso(): { progresso: Progresso; pronto: boolean; recarregar: () => void } {
-  const [progresso, setProgresso] = useState<Progresso>(progressoVazio);
-  const [pronto, setPronto] = useState(false);
+export function useProgresso(): {
+  progresso: Progresso;
+  pronto: boolean;
+  recarregar: () => void;
+} {
+  const progresso = useSyncExternalStore(
+    assinarProgresso,
+    lerProgresso,
+    progressoDoServidor,
+  );
 
-  const recarregar = useCallback(() => setProgresso(ler()), []);
+  const pronto = useSyncExternalStore(
+    assinarProgresso,
+    () => true,
+    () => false,
+  );
 
   useEffect(() => {
-    recarregar();
-    setPronto(true);
+    registrarSincronizador(agendarEnvio);
+  }, []);
 
-    const aoMudar = () => recarregar();
-    window.addEventListener("lumarys:progresso", aoMudar);
-    window.addEventListener("storage", aoMudar);
-    return () => {
-      window.removeEventListener("lumarys:progresso", aoMudar);
-      window.removeEventListener("storage", aoMudar);
-    };
-  }, [recarregar]);
+  const recarregar = useCallback(() => recarregarProgresso(), []);
 
   return { progresso, pronto, recarregar };
 }

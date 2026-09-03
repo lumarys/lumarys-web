@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
+import { IconeConta } from "@/components/ui/icons";
 import { PainelHoje, type DadosHoje } from "@/features/hoje/PainelHoje";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
 
@@ -37,9 +39,18 @@ export default function PaginaHoje() {
 
   return (
     <AppShell comRodape={false}>
-      <header className="px-5 pb-3 pt-5">
-        <Rotulo>Hoje</Rotulo>
-        <h1 className="font-display mt-1 text-[22px] font-semibold">{trilha.titulo}</h1>
+      <header className="flex items-start justify-between gap-3 px-5 pb-3 pt-5">
+        <div>
+          <Rotulo>Hoje</Rotulo>
+          <h1 className="font-display mt-1 text-[22px] font-semibold">{trilha.titulo}</h1>
+        </div>
+        <Link
+          href="/conta/"
+          aria-label="Minha conta"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--elevated)] text-[var(--text-2)] no-underline"
+        >
+          <IconeConta size={22} />
+        </Link>
       </header>
       <PainelHoje dados={dados} />
     </AppShell>
