@@ -10,7 +10,7 @@ export default function NaoEncontrada() {
   const trilhas = listarTrilhas();
 
   return (
-    <AppShell comAbas={false}>
+    <AppShell comAbas={false} comCabecalho>
       <div className="px-5 pb-8 pt-12">
         <Rotulo>Erro 404</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold">Esta página não existe</h1>

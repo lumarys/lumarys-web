@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PaginaContato() {
   return (
-    <AppShell>
+    <AppShell comCabecalho>
       <div className="px-5 pb-8 pt-5">
         <Rotulo>Contato</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold">Fale com a gente</h1>

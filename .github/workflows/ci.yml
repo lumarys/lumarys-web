@@ -41,6 +41,12 @@ jobs:
       - name: build
         run: npm run build
 
+      - name: navegador para os testes de tela
+        run: npx playwright install --with-deps chromium
+
+      - name: testes de tela (celular e desktop)
+        run: npm run test:e2e
+
   conteudo-externo:
     name: vídeos e links
     runs-on: ubuntu-latest
