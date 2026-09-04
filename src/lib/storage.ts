@@ -114,6 +114,36 @@ export function atualizar(fn: (p: Progresso) => Progresso): Progresso {
   return novo;
 }
 
+/* ------------------------------- leitura --------------------------------- */
+
+/**
+ * A trilha conta como iniciada assim que há qualquer resposta gravada. Antes,
+ * só tema concluído contava, e quem respondia pré-testes e voltava à trilha
+ * lia "você ainda não começou" — foi o que aconteceu no primeiro uso real.
+ */
+export function trilhaIniciada(t: ProgressoTrilha | undefined): boolean {
+  if (!t) return false;
+  return (
+    Object.keys(t.temasConcluidos).length > 0 ||
+    Object.keys(t.preTestes).length > 0 ||
+    Object.keys(t.quizzes).length > 0 ||
+    t.simulados.length > 0 ||
+    Boolean(t.dataProva)
+  );
+}
+
+export function contarRespostas(t: ProgressoTrilha | undefined): {
+  preTestes: number;
+  quizzes: number;
+  simulados: number;
+} {
+  return {
+    preTestes: Object.keys(t?.preTestes ?? {}).length,
+    quizzes: Object.keys(t?.quizzes ?? {}).length,
+    simulados: t?.simulados.length ?? 0,
+  };
+}
+
 /* ------------------------------- operações ------------------------------- */
 
 export function garantirTrilha(p: Progresso, trilha: string): ProgressoTrilha {
@@ -248,7 +278,8 @@ export function mesclar(local: Progresso, remoto: Progresso): Progresso {
   const cards: Record<string, EstadoCard> = { ...remoto.cards };
   for (const [id, l] of Object.entries(local.cards)) {
     const r = remoto.cards[id];
-    cards[id] = !r || l.caixa > r.caixa || (l.caixa === r.caixa && l.atualizadoEm > r.atualizadoEm) ? l : r;
+    cards[id] =
+      !r || l.caixa > r.caixa || (l.caixa === r.caixa && l.atualizadoEm > r.atualizadoEm) ? l : r;
   }
 
   const minutos: Record<string, number> = { ...remoto.minutosPorDia };

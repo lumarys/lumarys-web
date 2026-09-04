@@ -1,7 +1,15 @@
 "use client";
 
 import { tokenValido } from "./auth";
-import { gravar, ler, mesclar, progressoVazio, VERSAO, type Progresso, type ProgressoTrilha } from "./storage";
+import {
+  gravar,
+  ler,
+  mesclar,
+  progressoVazio,
+  VERSAO,
+  type Progresso,
+  type ProgressoTrilha,
+} from "./storage";
 import type { EstadoCard } from "./srs";
 
 /**
@@ -80,6 +88,37 @@ export async function entrarEMesclar(): Promise<Progresso> {
   gravar(final);
   await enviarTudo(final);
   return final;
+}
+
+/**
+ * Toda abertura do site com conta ligada: baixa, mescla, grava, e só manda de
+ * volta o que ficou diferente do servidor. Sem isto o que foi feito em outro
+ * aparelho só aparecia no login — o aluno que entrava no celular e no
+ * computador no mesmo dia nunca via os dois lados juntos.
+ */
+export async function sincronizarConta(): Promise<boolean> {
+  const remoto = await baixar();
+  if (!remoto) return false;
+
+  const final = mesclar(ler(), remoto);
+  gravar(final);
+
+  const trilhasDiferentes = Object.keys(final.trilhas).filter(
+    (slug) => JSON.stringify(final.trilhas[slug]) !== JSON.stringify(remoto.trilhas[slug]),
+  );
+  const globaisDiferentes =
+    JSON.stringify(final.cards) !== JSON.stringify(remoto.cards) ||
+    JSON.stringify(final.minutosPorDia) !== JSON.stringify(remoto.minutosPorDia) ||
+    JSON.stringify(final.streak) !== JSON.stringify(remoto.streak);
+
+  if (trilhasDiferentes.length > 0) {
+    await enviar(final, trilhasDiferentes);
+  } else if (globaisDiferentes) {
+    // Cards e contadores viajam junto de uma trilha qualquer.
+    const [primeira] = Object.keys(final.trilhas);
+    if (primeira) await enviar(final, [primeira]);
+  }
+  return true;
 }
 
 /** Marca uma trilha como pendente de envio; envia em lote depois da pausa. */

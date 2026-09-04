@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { SincronizarConta } from "@/features/progresso/SincronizarConta";
+
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { TabBar } from "./TabBar";
@@ -26,6 +28,7 @@ export function AppShell({
 }) {
   return (
     <div className="flex min-h-dvh flex-col">
+      <SincronizarConta />
       {comCabecalho ? <SiteHeader /> : null}
       <main
         id="conteudo"

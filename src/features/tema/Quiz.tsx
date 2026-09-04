@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 
 import { Card, RotuloAcento } from "@/components/ui/Card";
 import { IconeCheck, IconeFechar } from "@/components/ui/icons";
+import { useProgresso } from "@/features/progresso/useProgresso";
 import { registrarQuiz } from "@/lib/storage";
+import { formatarData } from "@/lib/utils";
 import { cx, embaralhar, sementeDeTexto } from "@/lib/utils";
 import type { Pergunta } from "@content/types";
 
@@ -25,19 +27,40 @@ export function Quiz({
   const [revelado, setRevelado] = useState(false);
   const [acertos, setAcertos] = useState(0);
   const [terminou, setTerminou] = useState(false);
+  const { progresso, pronto } = useProgresso();
+  const anterior = progresso.trilhas[trilhaSlug]?.quizzes[temaSlug];
+  const [refazendo, setRefazendo] = useState(false);
 
   const pergunta = perguntas[indice];
 
   // Mesma razão do pré-teste: a ordem de escrita vazava a resposta.
   const alternativas = useMemo(
-    () =>
-      pergunta
-        ? embaralhar(pergunta.alternativas, sementeDeTexto(pergunta.enunciado))
-        : [],
+    () => (pergunta ? embaralhar(pergunta.alternativas, sementeDeTexto(pergunta.enunciado)) : []),
     [pergunta],
   );
 
   if (!pergunta) return null;
+
+  if (pronto && anterior && !refazendo && !terminou) {
+    return (
+      <Card>
+        <RotuloAcento>Quiz concluído</RotuloAcento>
+        <p className="mt-2 text-[15px] leading-relaxed">
+          {anterior.acertos} de {anterior.total}, em {formatarData(anterior.atualizadoEm)}.
+          {anterior.acertos / Math.max(anterior.total, 1) >= 0.7
+            ? " Bom o bastante para seguir."
+            : " Abaixo de 70%: vale reler a explicação e refazer."}
+        </p>
+        <button
+          type="button"
+          onClick={() => setRefazendo(true)}
+          className="mt-3 min-h-11 text-[13px] text-[var(--muted)] underline underline-offset-4"
+        >
+          Refazer o quiz
+        </button>
+      </Card>
+    );
+  }
 
   const multipla = pergunta.tipo === "multipla";
 
@@ -85,9 +108,7 @@ export function Quiz({
         <RotuloAcento>
           Quiz · {indice + 1} de {perguntas.length}
         </RotuloAcento>
-        {multipla ? (
-          <span className="text-xs text-[var(--muted)]">mais de uma correta</span>
-        ) : null}
+        {multipla ? <span className="text-xs text-[var(--muted)]">mais de uma correta</span> : null}
       </div>
 
       <p className="mt-3 text-[15px] font-medium leading-snug">{pergunta.enunciado}</p>
@@ -103,8 +124,13 @@ export function Quiz({
               onClick={() => alternar(i)}
               className={cx(
                 "flex min-h-11 items-start gap-2 rounded-xl border px-3.5 py-3 text-left text-sm leading-relaxed",
-                revelado && alt.correta && "border-[var(--color-success)] bg-[var(--color-success)]/10",
-                revelado && !alt.correta && marcada && "border-[var(--color-danger)] bg-[var(--color-danger)]/10",
+                revelado &&
+                  alt.correta &&
+                  "border-[var(--color-success)] bg-[var(--color-success)]/10",
+                revelado &&
+                  !alt.correta &&
+                  marcada &&
+                  "border-[var(--color-danger)] bg-[var(--color-danger)]/10",
                 !revelado && marcada && "border-[var(--accent)] bg-[var(--accent)]/10",
                 !revelado && !marcada && "border-[var(--border)]",
                 revelado && !alt.correta && !marcada && "border-[var(--border)] opacity-60",

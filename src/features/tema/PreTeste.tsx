@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 
 import { Card, RotuloAcento } from "@/components/ui/Card";
 import { IconeCheck, IconeFechar } from "@/components/ui/icons";
+import { useProgresso } from "@/features/progresso/useProgresso";
 import { registrarQuiz } from "@/lib/storage";
+import { formatarData } from "@/lib/utils";
 import { cx, embaralhar, sementeDeTexto } from "@/lib/utils";
 import type { PreTeste as TipoPreTeste } from "@content/types";
 
@@ -34,6 +36,11 @@ export function PreTeste({
   // é onde a pessoa não sabe que não sabe. Contamos para avisar no fim.
   const [enganos, setEnganos] = useState(0);
   const [acertou, setAcertou] = useState(false);
+  // Resultado gravado numa visita anterior (neste ou em outro aparelho).
+  // Refazer é possível, mas a regra do método é errar antes de ler uma vez só.
+  const { progresso, pronto } = useProgresso();
+  const anterior = progresso.trilhas[trilhaSlug]?.preTestes[temaSlug];
+  const [refazendo, setRefazendo] = useState(false);
 
   const pergunta = perguntas[indice];
 
@@ -46,14 +53,30 @@ export function PreTeste({
    * imprevisível, mas estável entre renderizações.
    */
   const alternativas = useMemo(
-    () =>
-      pergunta
-        ? embaralhar(pergunta.alternativas, sementeDeTexto(pergunta.enunciado))
-        : [],
+    () => (pergunta ? embaralhar(pergunta.alternativas, sementeDeTexto(pergunta.enunciado)) : []),
     [pergunta],
   );
 
   if (!pergunta) return null;
+
+  if (pronto && anterior && !refazendo && !terminou) {
+    return (
+      <Card className="mt-5">
+        <RotuloAcento>Pré-teste concluído</RotuloAcento>
+        <p className="mt-2 text-[15px] leading-relaxed">
+          {anterior.acertos} de {anterior.total}, em {formatarData(anterior.atualizadoEm)}. Siga
+          para o conteúdo; o pré-teste serve para a primeira leitura.
+        </p>
+        <button
+          type="button"
+          onClick={() => setRefazendo(true)}
+          className="mt-3 min-h-11 text-[13px] text-[var(--muted)] underline underline-offset-4"
+        >
+          Refazer o pré-teste
+        </button>
+      </Card>
+    );
+  }
 
   function responder() {
     if (escolha === null) return;
@@ -90,8 +113,8 @@ export function PreTeste({
           <p className="mt-3 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3.5 py-3 text-[14px] leading-relaxed">
             <strong className="font-semibold">Preste atenção nisto:</strong> em{" "}
             {enganos === 1 ? "uma resposta" : `${enganos} respostas`} você marcou confiança alta e
-            errou. É o ponto mais perigoso numa sabatina, porque você não vai revisar o que acha
-            que já sabe. Leia essa parte do tema com calma.
+            errou. É o ponto mais perigoso numa sabatina, porque você não vai revisar o que acha que
+            já sabe. Leia essa parte do tema com calma.
           </p>
         ) : null}
       </Card>
@@ -121,8 +144,13 @@ export function PreTeste({
               onClick={() => setEscolha(i)}
               className={cx(
                 "flex min-h-11 items-start gap-2 rounded-xl border px-3.5 py-3 text-left text-sm leading-relaxed transition-colors",
-                revelar && alt.correta && "border-[var(--color-success)] bg-[var(--color-success)]/10",
-                revelar && !alt.correta && selecionada && "border-[var(--color-danger)] bg-[var(--color-danger)]/10",
+                revelar &&
+                  alt.correta &&
+                  "border-[var(--color-success)] bg-[var(--color-success)]/10",
+                revelar &&
+                  !alt.correta &&
+                  selecionada &&
+                  "border-[var(--color-danger)] bg-[var(--color-danger)]/10",
                 !revelar && selecionada && "border-[var(--accent)] bg-[var(--accent)]/10",
                 !revelar && !selecionada && "border-[var(--border)]",
                 revelar && !alt.correta && !selecionada && "border-[var(--border)] opacity-60",

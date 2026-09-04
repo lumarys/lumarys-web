@@ -52,3 +52,8 @@ export function embaralhar<T>(itens: T[], semente = Date.now()): T[] {
   }
   return saida;
 }
+
+/** "4 de set." — só para texto renderizado no cliente, depois de hidratar. */
+export function formatarData(ms: number): string {
+  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(new Date(ms));
+}
