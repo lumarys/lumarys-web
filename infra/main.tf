@@ -10,8 +10,9 @@ terraform {
 
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = ">= 5.101.0"
+      source = "hashicorp/aws"
+      # Fixo no major: um provider 7.x não pode entrar sozinho num apply.
+      version = "~> 6.63"
     }
   }
 
