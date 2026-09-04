@@ -18,9 +18,12 @@
     "verify:links": "node scripts/verify-links.mjs",
     "content:lint": "node scripts/content-lint.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run content:lint",
-    "prebuild": "node scripts/gen-seo.mjs",
+    "prebuild": "npm run generate",
     "bundle:api": "node scripts/bundle-lambda.mjs services/progress-api",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "generate": "node scripts/gen-seo.mjs",
+    "predev": "npm run generate",
+    "pretypecheck": "npm run generate"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",

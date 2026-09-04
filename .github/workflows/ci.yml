@@ -94,5 +94,19 @@ jobs:
 
       - run: npm ci
 
+      # O endpoint de auditoria do npm cai com alguma frequência, e uma falha
+      # de rede não pode ser lida como vulnerabilidade. Tentamos três vezes e
+      # só reprovamos quando o npm realmente encontra algo.
       - name: auditoria de dependências
-        run: npm audit --audit-level=high
+        run: |
+          for tentativa in 1 2 3; do
+            saida=$(npm audit --audit-level=high 2>&1) && { echo "$saida"; exit 0; }
+            if echo "$saida" | grep -q "audit endpoint returned an error\|network timeout"; then
+              echo "tentativa $tentativa: registro do npm indisponível, repetindo em 20s"
+              sleep 20
+              continue
+            fi
+            echo "$saida"
+            exit 1
+          done
+          echo "::warning::não foi possível consultar o registro do npm em 3 tentativas"
