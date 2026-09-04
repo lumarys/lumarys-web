@@ -6,11 +6,12 @@ import { Rotulo } from "@/components/ui/Card";
 import { IconeConta } from "@/components/ui/icons";
 import { PainelHoje, type DadosHoje } from "@/features/hoje/PainelHoje";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Hoje",
   description: "Sua próxima ação de estudo, a sequência de dias e a prontidão por módulo.",
-  alternates: { canonical: "/hoje/" },
+  alternates: alternativas("/hoje/"),
   robots: { index: false, follow: true },
 };
 

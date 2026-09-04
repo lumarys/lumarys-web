@@ -4,11 +4,12 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
 import { Conta } from "@/features/conta/Conta";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Minha conta",
   description: "Salve seu progresso para continuar de onde parou em qualquer aparelho.",
-  alternates: { canonical: "/conta/" },
+  alternates: alternativas("/conta/"),
   robots: { index: false, follow: true },
 };
 

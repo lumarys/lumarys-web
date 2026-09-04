@@ -4,11 +4,12 @@ import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
 import { EMPRESA } from "@/lib/company";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Termos de uso",
   description: "As regras de uso da plataforma Lumarys, operada pela Cernyn.",
-  alternates: { canonical: "/termos/" },
+  alternates: alternativas("/termos/"),
 };
 
 const ATUALIZADO = "3 de setembro de 2026";

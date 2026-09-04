@@ -55,6 +55,19 @@ export function jsonLdOrganizacao() {
   };
 }
 
+/**
+ * `alternates` completo de uma rota: canônica, hreflang pt-BR (único idioma,
+ * declarado mesmo assim, com x-default apontando para a mesma URL) e, nos
+ * temas, o link para a versão Markdown que o gen-seo escreve ao lado do HTML.
+ */
+export function alternativas(url: string, opcoes: { markdown?: boolean } = {}) {
+  return {
+    canonical: url,
+    languages: { "pt-BR": url, "x-default": url },
+    ...(opcoes.markdown ? { types: { "text/markdown": `${url}index.md` } } : {}),
+  };
+}
+
 export function jsonLdBreadcrumb(itens: { nome: string; url: string }[]) {
   return {
     "@context": "https://schema.org",

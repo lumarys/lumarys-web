@@ -5,12 +5,13 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
 import { ContatoLink } from "@/components/layout/ContatoLink";
 import { EMPRESA } from "@/lib/company";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Política de privacidade",
   description:
     "Quais dados a Lumarys trata, para quê, por quanto tempo e como exercer seus direitos sob a LGPD.",
-  alternates: { canonical: "/privacidade/" },
+  alternates: alternativas("/privacidade/"),
 };
 
 const ATUALIZADO = "3 de setembro de 2026";
