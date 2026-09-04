@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Card, RotuloAcento } from "@/components/ui/Card";
 import { IconeCheck, IconeFechar } from "@/components/ui/icons";
 import { registrarQuiz } from "@/lib/storage";
-import { cx } from "@/lib/utils";
+import { cx, embaralhar, sementeDeTexto } from "@/lib/utils";
 import type { Pergunta } from "@content/types";
 
 type Objetiva = Extract<Pergunta, { tipo: "unica" | "multipla" }>;
@@ -27,6 +27,16 @@ export function Quiz({
   const [terminou, setTerminou] = useState(false);
 
   const pergunta = perguntas[indice];
+
+  // Mesma razão do pré-teste: a ordem de escrita vazava a resposta.
+  const alternativas = useMemo(
+    () =>
+      pergunta
+        ? embaralhar(pergunta.alternativas, sementeDeTexto(pergunta.enunciado))
+        : [],
+    [pergunta],
+  );
+
   if (!pergunta) return null;
 
   const multipla = pergunta.tipo === "multipla";
@@ -36,10 +46,7 @@ export function Quiz({
   }
 
   function conferir() {
-    if (!pergunta) return;
-    const corretas = pergunta.alternativas
-      .map((a, i) => (a.correta ? i : -1))
-      .filter((i) => i >= 0);
+    const corretas = alternativas.map((a, i) => (a.correta ? i : -1)).filter((i) => i >= 0);
     const certo =
       marcadas.length === corretas.length && corretas.every((i) => marcadas.includes(i));
     if (certo) setAcertos((a) => a + 1);
@@ -86,7 +93,7 @@ export function Quiz({
       <p className="mt-3 text-[15px] font-medium leading-snug">{pergunta.enunciado}</p>
 
       <div className="mt-3 flex flex-col gap-2">
-        {pergunta.alternativas.map((alt, i) => {
+        {alternativas.map((alt, i) => {
           const marcada = marcadas.includes(i);
           return (
             <button
