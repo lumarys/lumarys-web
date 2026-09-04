@@ -31,6 +31,24 @@ variable "github_repo_alternativo" {
   default     = ""
 }
 
+variable "github_org_id" {
+  description = <<-TXT
+    ID numérico da organização no GitHub, usado no formato imutável do `sub`
+    do OIDC. Obtenha com: gh api /orgs/<org> --jq .id
+  TXT
+  type        = string
+  default     = ""
+}
+
+variable "github_repo_id" {
+  description = <<-TXT
+    ID numérico do repositório no GitHub, usado no formato imutável do `sub`.
+    Obtenha com: gh api /repos/<org>/<repo> --jq .id
+  TXT
+  type        = string
+  default     = ""
+}
+
 variable "email_operacional" {
   description = <<-TXT
     E-mail da Cernyn que recebe relatórios DMARC, avisos de bounce do SES e
