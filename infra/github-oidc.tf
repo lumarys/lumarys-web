@@ -89,10 +89,10 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = aws_cloudfront_distribution.site.arn
       },
       {
-        Sid      = "PublicarCodigoDaApi"
+        Sid      = "PublicarCodigoDasLambdas"
         Effect   = "Allow"
         Action   = ["lambda:UpdateFunctionCode", "lambda:GetFunction"]
-        Resource = aws_lambda_function.api.arn
+        Resource = [aws_lambda_function.api.arn, aws_lambda_function.pre_signup.arn]
       },
     ]
   })

@@ -46,7 +46,7 @@ describe("login sem senha", () => {
     vi.unstubAllEnvs();
   });
 
-  it("e-mail novo: cria a conta e o código vem do SignUp, não de um desafio falso", async () => {
+  it("e-mail novo sem auto-confirmação: o código vem do SignUp, não de um desafio falso", async () => {
     const chamadas = respostas([{ UserConfirmed: false, Session: "s-cadastro" }]);
     const { pedirCodigo } = await import("@/lib/auth");
 
@@ -56,6 +56,18 @@ describe("login sem senha", () => {
     expect(chamadas.map((c) => c.alvo)).toEqual(["SignUp"]);
     expect(chamadas[0]?.corpo).toMatchObject({ Username: "nova@exemplo.com" });
     expect(chamadas[0]?.corpo).not.toHaveProperty("Password");
+  });
+
+  it("e-mail novo com pré-cadastro que auto-confirma: sem e-mail de confirmação, direto ao desafio", async () => {
+    const chamadas = respostas([{ UserConfirmed: true, UserSub: "u1" }, { Session: "s-login" }]);
+    const { pedirCodigo, digitosDoCodigo } = await import("@/lib/auth");
+
+    const desafio = await pedirCodigo("nova@exemplo.com");
+
+    expect(desafio).toEqual({ tipo: "login", sessao: "s-login" });
+    expect(chamadas.map((c) => c.alvo)).toEqual(["SignUp", "InitiateAuth"]);
+    expect(digitosDoCodigo(desafio)).toBe(8);
+    expect(digitosDoCodigo({ tipo: "cadastro" })).toBe(6);
   });
 
   it("e-mail conhecido: SignUp recusa e o código vem do desafio EMAIL_OTP", async () => {

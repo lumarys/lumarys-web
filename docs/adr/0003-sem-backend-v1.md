@@ -12,7 +12,7 @@ maior ponto de desistência que existe.
 ## Decisão
 
 Estudar não exige conta. O progresso nasce em `localStorage`. Quem quiser
-continuar em outro aparelho entra com um código de seis dígitos enviado por
+continuar em outro aparelho entra com um código de oito dígitos enviado por
 e-mail (Cognito, sem senha), e o progresso local é **mesclado** na conta.
 
 ## Por quê
@@ -34,3 +34,9 @@ e-mail (Cognito, sem senha), e o progresso local é **mesclado** na conta.
   na interface no momento em que faz diferença.
 - A API só aceita operar na partição do `sub` do token, nunca em um usuário
   vindo do corpo da requisição.
+- Um e-mail só para entrar. O Cognito tem dois canais (confirmação de cadastro
+  com 6 dígitos e login por EMAIL_OTP com 8), e o primeiro teste real recebeu
+  um de cada, com textos diferentes. Um gatilho de pré-cadastro confirma a
+  conta no SignUp, e toda entrada passa pelo desafio EMAIL_OTP com o mesmo
+  template. A conta passa a existir antes da prova de posse do e-mail; o que
+  protege é o código, que só chega a quem tem a caixa. Decidido em 04/09/2026.
