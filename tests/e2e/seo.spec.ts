@@ -116,3 +116,20 @@ test("robots.txt libera os crawlers de IA e aponta o sitemap", async ({ request 
   }
   expect(texto).toContain("Sitemap: https://lumarys.com.br/sitemap.xml");
 });
+
+test("manifesto, favicon e ícones de app existem", async ({ page, request }) => {
+  await page.goto("/");
+  const manifesto = await meta(page, 'link[rel="manifest"]', "href");
+  expect(manifesto).toBeTruthy();
+  const resposta = await request.get(manifesto!);
+  expect(resposta.status()).toBe(200);
+  const dados = (await resposta.json()) as { icons: { src: string; purpose?: string }[] };
+  expect(dados.icons.some((i) => i.purpose === "maskable")).toBe(true);
+  for (const icone of dados.icons) {
+    expect((await request.get(icone.src)).status(), icone.src).toBe(200);
+  }
+  expect((await request.get("/favicon.ico")).status()).toBe(200);
+  const apple = await meta(page, 'link[rel="apple-touch-icon"]', "href");
+  expect(apple).toBeTruthy();
+  expect((await request.get(apple!)).status()).toBe(200);
+});
