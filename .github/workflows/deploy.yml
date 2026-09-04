@@ -114,8 +114,10 @@ jobs:
 
       - run: npm ci
 
-      - name: empacotar a API de progresso
-        run: node scripts/bundle-lambda.mjs services/progress-api
+      - name: empacotar a API de progresso e o gatilho de pré-cadastro
+        run: |
+          node scripts/bundle-lambda.mjs services/progress-api
+          node scripts/bundle-lambda.mjs services/pre-signup
 
       - name: credenciais da AWS
         uses: aws-actions/configure-aws-credentials@v4
@@ -128,4 +130,13 @@ jobs:
           aws lambda update-function-code \
             --function-name ${{ vars.LAMBDA_PROGRESSO }} \
             --zip-file fileb://services/progress-api/dist/lambda.zip \
+            --no-cli-pager
+
+      # Só existe depois do apply que cria a função; até lá, pula.
+      - name: publicar código do gatilho de pré-cadastro
+        if: vars.LAMBDA_PRE_SIGNUP != ''
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ vars.LAMBDA_PRE_SIGNUP }} \
+            --zip-file fileb://services/pre-signup/dist/lambda.zip \
             --no-cli-pager

@@ -8,13 +8,18 @@
  * o Cognito manda o código e devolve uma sessão; RespondToAuthChallenge com o
  * código fecha o login.
  *
- * Fluxo para quem nunca entrou: SignUp sem senha cria a conta e manda o código
- * de confirmação; ConfirmSignUp devolve uma sessão que o InitiateAuth aceita
- * para entrar na hora, sem um segundo e-mail. É indispensável passar por aqui:
- * InitiateAuth para um e-mail que não existe no pool devolve um desafio de
- * mentira (proteção contra enumeração) e nenhum e-mail sai — a tela ficaria
- * esperando um código que nunca chega. Foi o que aconteceu no primeiro teste
- * real, em 04/09/2026.
+ * Fluxo para quem nunca entrou: SignUp sem senha cria a conta. O gatilho de
+ * pré-cadastro (services/pre-signup) já confirma o usuário, então o SignUp não
+ * manda e-mail e a entrada segue pelo mesmo desafio EMAIL_OTP de sempre: um
+ * e-mail só, sempre igual, com código de 8 dígitos. É indispensável criar a
+ * conta antes: InitiateAuth para um e-mail que não existe no pool devolve um
+ * desafio de mentira (proteção contra enumeração) e nenhum e-mail sai — a tela
+ * ficaria esperando um código que nunca chega. Foi o que aconteceu no primeiro
+ * teste real, em 04/09/2026.
+ *
+ * Caminho de reserva, para o caso de o gatilho não estar aplicado: SignUp
+ * manda o código de confirmação (6 dígitos) e ConfirmSignUp devolve uma sessão
+ * que o InitiateAuth aceita para entrar sem um segundo e-mail.
  *
  * Onde os tokens ficam: access e id em memória (somem ao fechar a aba), refresh
  * em localStorage. Guardar o refresh é o que permite continuar logado; ele vale
@@ -91,12 +96,18 @@ export class ErroAuth extends Error {
 }
 
 /**
- * Onde o código deve ser conferido. "cadastro" é primeira entrada (o código
- * veio do SignUp); "login" é conta existente (o código veio do desafio
- * EMAIL_OTP). A sessão do cadastro é opcional: sem ela, a confirmação vale,
- * mas o login exige um segundo código.
+ * Onde o código deve ser conferido. "login" é o desafio EMAIL_OTP (8 dígitos),
+ * o caminho normal para conta nova e antiga. "cadastro" é a confirmação de
+ * SignUp (6 dígitos), só usada quando o pool não auto-confirma. A sessão do
+ * cadastro é opcional: sem ela, a confirmação vale, mas o login exige um
+ * segundo código.
  */
 export type Desafio = { tipo: "cadastro"; sessao?: string } | { tipo: "login"; sessao: string };
+
+/** Quantos dígitos o código tem em cada caminho; o Cognito fixa os dois. */
+export function digitosDoCodigo(desafio: Desafio | null): number {
+  return desafio?.tipo === "cadastro" ? 6 : 8;
+}
 
 function normalizar(email: string): string {
   return email.trim().toLowerCase();
@@ -106,19 +117,22 @@ function normalizar(email: string): string {
 export async function pedirCodigo(email: string): Promise<Desafio> {
   const usuario = normalizar(email);
 
-  // Primeiro tenta criar. Conta nova recebe o código de confirmação e uma
-  // sessão que permite entrar sem segundo e-mail. Conta que já existe cai no
-  // UsernameExistsException e segue para o login normal.
+  // Primeiro tenta criar. Com o gatilho de pré-cadastro, a conta nasce
+  // confirmada e segue para o desafio de login. Sem ele, recebe o código de
+  // confirmação e uma sessão que permite entrar sem segundo e-mail. Conta que
+  // já existe cai no UsernameExistsException e segue para o login normal.
   try {
     const cadastro = await chamar("SignUp", {
       ClientId: CLIENT_ID,
       Username: usuario,
       UserAttributes: [{ Name: "email", Value: usuario }],
     });
-    return {
-      tipo: "cadastro",
-      sessao: typeof cadastro.Session === "string" ? cadastro.Session : undefined,
-    };
+    if (cadastro.UserConfirmed !== true) {
+      return {
+        tipo: "cadastro",
+        sessao: typeof cadastro.Session === "string" ? cadastro.Session : undefined,
+      };
+    }
   } catch (e) {
     if (!(e instanceof ErroAuth) || e.codigo !== "UsernameExistsException") throw e;
   }
