@@ -55,13 +55,24 @@ jobs:
             --exclude "*.html" --exclude "*.txt" --exclude "*.xml" --exclude "*.md" --exclude "*.json" \
             --no-cli-pager
 
-      - name: html e metadados (revalidar sempre)
+      # Texto sai com charset explícito. O S3 adivinha "text/html" e
+      # "text/plain" sem charset, e o navegador pode decodificar como
+      # windows-1252: acento vira lixo. Um sync por tipo, porque --content-type
+      # vale para o comando inteiro.
+      - name: html e metadados (revalidar sempre, charset explícito)
         run: |
-          aws s3 sync out/ s3://${{ vars.SITE_BUCKET }}/ \
-            --cache-control "public, max-age=0, s-maxage=300, must-revalidate" \
-            --exclude "*" \
-            --include "*.html" --include "*.txt" --include "*.xml" --include "*.md" --include "*.json" \
-            --no-cli-pager
+          sync_tipo() {
+            aws s3 sync out/ s3://${{ vars.SITE_BUCKET }}/ \
+              --cache-control "public, max-age=0, s-maxage=300, must-revalidate" \
+              --content-type "$2" \
+              --exclude "*" --include "$1" \
+              --no-cli-pager
+          }
+          sync_tipo "*.html" "text/html; charset=utf-8"
+          sync_tipo "*.txt"  "text/plain; charset=utf-8"
+          sync_tipo "*.md"   "text/markdown; charset=utf-8"
+          sync_tipo "*.xml"  "application/xml; charset=utf-8"
+          sync_tipo "*.json" "application/json; charset=utf-8"
 
       - name: invalidar cache
         run: |

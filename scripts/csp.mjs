@@ -74,11 +74,23 @@ for (const arquivo of htmls(RAIZ)) {
   const politica = [...FIXAS, scriptSrc].join("; ");
   const meta = `<meta http-equiv="Content-Security-Policy" content="${politica}">`;
 
-  if (!html.includes("<head>")) {
-    console.error(`sem <head>: ${arquivo}`);
+  // A meta entra DEPOIS do charset, nunca antes. O navegador só procura a
+  // declaração de codificação nos primeiros 1024 bytes; uma política com
+  // dezenas de hashes na frente empurra o charset para fora dessa janela e
+  // os acentos viram lixo. Foi exatamente o que aconteceu na primeira versão.
+  const charset = /<meta charset=["']?utf-8["']?\s*\/?>/i.exec(html);
+  if (!charset) {
+    console.error(`sem <meta charset="utf-8"> no início do <head>: ${arquivo}`);
     process.exit(1);
   }
-  html = html.replace("<head>", `<head>${meta}`);
+  const corte = charset.index + charset[0].length;
+  html = html.slice(0, corte) + meta + html.slice(corte);
+
+  const posicao = Buffer.byteLength(html.slice(0, charset.index), "utf8");
+  if (posicao > 1024) {
+    console.error(`charset em byte ${posicao} (limite 1024): ${arquivo}`);
+    process.exit(1);
+  }
   writeFileSync(arquivo, html, "utf8");
 
   paginas++;
