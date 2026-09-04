@@ -12,8 +12,22 @@ resource "aws_cognito_user_pool" "alunos" {
   username_attributes      = ["email"]
   auto_verified_attributes = ["email"]
 
+  # O Cognito recusa a criação do pool se PASSWORD não estiver na lista, mesmo
+  # quando o produto é sem senha. Na prática isso não abre porta: o cliente web
+  # só oferece o fluxo de código, ninguém cadastra senha, e um usuário sem
+  # senha não consegue autenticar por PASSWORD. A política abaixo existe para o
+  # caso de alguém criar uma senha por via administrativa.
   sign_in_policy {
-    allowed_first_auth_factors = ["EMAIL_OTP"]
+    allowed_first_auth_factors = ["EMAIL_OTP", "PASSWORD"]
+  }
+
+  password_policy {
+    minimum_length                   = 14
+    require_lowercase                = true
+    require_uppercase                = true
+    require_numbers                  = true
+    require_symbols                  = true
+    temporary_password_validity_days = 1
   }
 
   # Não revela se um e-mail já tem conta: fecha a enumeração de usuários.
