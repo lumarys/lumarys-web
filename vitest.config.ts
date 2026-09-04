@@ -12,6 +12,10 @@ export default defineConfig({
     // jsdom porque o módulo de progresso conversa com window.localStorage.
     environment: "jsdom",
     include: ["tests/unit/**/*.test.ts"],
+    // Fuso fixo. "Hoje" é uma data local, e o CI roda em UTC: sem fixar, o
+    // teste que prova o comportamento noturno passa na máquina do Brasil e
+    // falha no runner — foi exatamente o que aconteceu.
+    env: { TZ: "America/Sao_Paulo" },
   },
   resolve: {
     alias: {

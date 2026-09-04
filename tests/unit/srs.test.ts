@@ -14,9 +14,14 @@ import {
 const AGORA = new Date("2026-09-03T10:00:00-03:00");
 
 describe("datas", () => {
+  it("roda com o fuso fixado, senão o teste abaixo não significa nada", () => {
+    expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe("America/Sao_Paulo");
+  });
+
   it("usa o fuso local, não UTC", () => {
-    // Às 21h de Brasília já é o dia seguinte em UTC. Se o cálculo escorregar
-    // para UTC, o aluno perde a sequência de dias por estudar à noite.
+    // Às 21h30 de Brasília já é o dia seguinte em UTC. Se o cálculo escorregar
+    // para UTC, quem estuda à noite perde a sequência de dias e recebe a fila
+    // de cards do dia errado.
     const noite = new Date("2026-09-03T21:30:00-03:00");
     expect(hojeISO(noite)).toBe("2026-09-03");
   });

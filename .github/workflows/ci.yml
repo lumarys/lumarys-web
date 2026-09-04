@@ -76,10 +76,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      # A ação oficial do gitleaks exige licença paga para organizações. O
+      # binário é livre e faz o mesmo trabalho, então rodamos ele direto.
       - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSAO=8.29.0
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSAO}/gitleaks_${VERSAO}_linux_x64.tar.gz" \
+            | tar -xz -C /tmp gitleaks
+          /tmp/gitleaks detect --source . --redact --no-banner --exit-code 1
 
       - uses: actions/setup-node@v4
         with:
