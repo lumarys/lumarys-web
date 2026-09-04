@@ -6,7 +6,14 @@ import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { IconeAlerta, IconeCheck, IconeConta } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
 import { useSessao } from "./useSessao";
-import { authConfigurada, confirmarCodigo, ErroAuth, pedirCodigo, sair } from "@/lib/auth";
+import {
+  authConfigurada,
+  confirmarCodigo,
+  ErroAuth,
+  pedirCodigo,
+  sair,
+  type Desafio,
+} from "@/lib/auth";
 import { entrarEMesclar, excluirConta, exportar, syncConfigurado } from "@/lib/sync";
 import { cx } from "@/lib/utils";
 
@@ -22,7 +29,7 @@ export function Conta() {
   const [emailDigitado, setEmailDigitado] = useState("");
   const email = etapaLocal === null && sessao.logado ? (sessao.email ?? "") : emailDigitado;
   const [codigo, setCodigo] = useState("");
-  const [desafio, setDesafio] = useState("");
+  const [desafio, setDesafio] = useState<Desafio | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -52,7 +59,15 @@ export function Conta() {
     setErro(null);
     setOcupado(true);
     try {
-      await confirmarCodigo(email, codigo, desafio);
+      if (!desafio) throw new ErroAuth("SemDesafio", "Peça o código de novo.");
+      const proximo = await confirmarCodigo(email, codigo, desafio);
+      if (proximo) {
+        // Cadastro confirmado, mas o login precisa de um código próprio.
+        setDesafio(proximo);
+        setCodigo("");
+        setAviso("Cadastro confirmado. Mandei o código de acesso; digite o novo.");
+        return;
+      }
       await entrarEMesclar();
       recarregar();
       sessao.atualizar();
@@ -191,8 +206,8 @@ export function Conta() {
           {etapa === "deslogado" ? (
             <>
               <p className="mt-2 text-[15px] leading-relaxed">
-                Sem senha: você recebe um código de seis dígitos por e-mail. O que já estudou aqui
-                é juntado à conta, nada se perde.
+                Sem senha: você recebe um código de seis dígitos por e-mail. Na primeira vez, o
+                mesmo código cria a conta. O que já estudou aqui é juntado a ela, nada se perde.
               </p>
               <label className="mt-4 block">
                 <span className="text-[13px] font-semibold">Seu e-mail</span>
