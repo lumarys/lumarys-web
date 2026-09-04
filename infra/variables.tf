@@ -64,7 +64,10 @@ variable "orcamento_mensal_usd" {
 }
 
 variable "retencao_logs_dias" {
-  description = "Retenção dos logs da Lambda."
+  description = <<-TXT
+    Retenção dos logs da Lambda. 14 dias cobre qualquer investigação real de um
+    serviço deste tamanho; mais que isso é armazenamento pago sem uso.
+  TXT
   type        = number
-  default     = 30
+  default     = 14
 }

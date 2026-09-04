@@ -41,8 +41,10 @@ jobs:
       - name: build
         run: npm run build
 
-      - name: navegador para os testes de tela
-        run: npx playwright install --with-deps chromium
+      # O perfil iPhone 15 usa WebKit (é o motor do Safari), então chromium
+      # sozinho não cobre metade do público. Os dois entram.
+      - name: navegadores para os testes de tela
+        run: npx playwright install --with-deps chromium webkit
 
       - name: testes de tela (celular e desktop)
         run: npm run test:e2e
@@ -76,10 +78,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      # A ação oficial do gitleaks exige licença paga para organizações. O
+      # binário é livre e faz o mesmo trabalho, então rodamos ele direto.
       - name: gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSAO=8.29.0
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSAO}/gitleaks_${VERSAO}_linux_x64.tar.gz" \
+            | tar -xz -C /tmp gitleaks
+          /tmp/gitleaks detect --source . --redact --no-banner --exit-code 1
 
       - uses: actions/setup-node@v4
         with:
@@ -88,5 +94,19 @@ jobs:
 
       - run: npm ci
 
+      # O endpoint de auditoria do npm cai com alguma frequência, e uma falha
+      # de rede não pode ser lida como vulnerabilidade. Tentamos três vezes e
+      # só reprovamos quando o npm realmente encontra algo.
       - name: auditoria de dependências
-        run: npm audit --audit-level=high
+        run: |
+          for tentativa in 1 2 3; do
+            saida=$(npm audit --audit-level=high 2>&1) && { echo "$saida"; exit 0; }
+            if echo "$saida" | grep -q "audit endpoint returned an error\|network timeout"; then
+              echo "tentativa $tentativa: registro do npm indisponível, repetindo em 20s"
+              sleep 20
+              continue
+            fi
+            echo "$saida"
+            exit 1
+          done
+          echo "::warning::não foi possível consultar o registro do npm em 3 tentativas"
