@@ -29,7 +29,7 @@ export function VideoEmbed({ video }: { video: Video }) {
           <button
             type="button"
             onClick={() => setTocando(true)}
-            aria-label={`Assistir: ${video.titulo}`}
+            aria-label={`Assistir: ${video.titulo}. ${video.canal}, ${video.duracao} min`}
             className="group absolute inset-0 size-full cursor-pointer border-0 p-0"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
