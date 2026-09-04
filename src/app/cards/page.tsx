@@ -4,11 +4,12 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
 import { FilaCards, type CardConteudo } from "@/features/cards/FilaCards";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Cards",
   description: "Revisão espaçada dos cards que vencem hoje, intercalados entre módulos.",
-  alternates: { canonical: "/cards/" },
+  alternates: alternativas("/cards/"),
   robots: { index: false, follow: true },
 };
 

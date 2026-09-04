@@ -10,12 +10,13 @@ import { PromptIA } from "@/features/simulado/PromptIA";
 import { SimuladoComEscopo } from "@/features/simulado/SimuladoComEscopo";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
 import type { PerguntaSimulado } from "@/features/simulado/Simulado";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Simulado",
   description:
     "Sabatina simulada: perguntas orais no formato da banca, resposta-modelo e autoavaliação por rubrica.",
-  alternates: { canonical: "/simulado/" },
+  alternates: alternativas("/simulado/"),
   robots: { index: false, follow: true },
 };
 

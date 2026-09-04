@@ -53,6 +53,18 @@ jobs:
             --delete \
             --cache-control "public, max-age=31536000, immutable" \
             --exclude "*.html" --exclude "*.txt" --exclude "*.xml" --exclude "*.md" --exclude "*.json" \
+            --exclude "*opengraph-image.png" \
+            --no-cli-pager
+
+      # A imagem de compartilhamento muda a cada build (o hash vai na query,
+      # que o cache do CloudFront ignora), então não pode ser imutável por um
+      # ano como os assets com hash no nome.
+      - name: imagens de compartilhamento (cache curto)
+        run: |
+          aws s3 sync out/ s3://${{ vars.SITE_BUCKET }}/ \
+            --cache-control "public, max-age=86400, s-maxage=86400" \
+            --content-type "image/png" \
+            --exclude "*" --include "*opengraph-image.png" \
             --no-cli-pager
 
       # Texto sai com charset explícito. O S3 adivinha "text/html" e

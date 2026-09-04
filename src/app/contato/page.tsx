@@ -4,11 +4,12 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo } from "@/components/ui/Card";
 import { ContatoLink } from "@/components/layout/ContatoLink";
 import { EMPRESA } from "@/lib/company";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Contato",
   description: "Como falar com a equipe responsável pela Lumarys.",
-  alternates: { canonical: "/contato/" },
+  alternates: alternativas("/contato/"),
 };
 
 export default function PaginaContato() {

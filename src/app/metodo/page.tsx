@@ -3,13 +3,13 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo } from "@/components/ui/Card";
-import { JsonLd, jsonLdBreadcrumb } from "@/lib/seo";
+import { JsonLd, jsonLdBreadcrumb, alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "O método",
   description:
     "Os nove princípios de Ultraaprendizado aplicados à Lumarys: metaaprendizado, foco, direcionamento, drills, recuperação, feedback, retenção, intuição e experimentação.",
-  alternates: { canonical: "/metodo/" },
+  alternates: alternativas("/metodo/"),
 };
 
 const PRINCIPIOS = [

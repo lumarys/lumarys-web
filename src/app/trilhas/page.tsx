@@ -6,12 +6,13 @@ import { Card, Rotulo } from "@/components/ui/Card";
 import { contarTemas, listarTrilhas, minutosDaTrilha } from "@/lib/content";
 import { formatarMinutos } from "@/lib/utils";
 import { trilhasEmBreve } from "@content/trilhas";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Trilhas",
   description:
     "Todas as trilhas da Lumarys: carreiras e certificações, cada uma montada a partir da ementa oficial.",
-  alternates: { canonical: "/trilhas/" },
+  alternates: alternativas("/trilhas/"),
 };
 
 export default function PaginaTrilhas() {

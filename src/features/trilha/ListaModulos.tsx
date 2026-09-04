@@ -48,7 +48,7 @@ export function ListaModulos({
         const atual = proximoTema && modulo.temas.some((t) => t.slug === proximoTema.slug);
 
         return (
-          <li key={modulo.slug}>
+          <li key={modulo.slug} id={modulo.slug} className="scroll-mt-4">
             <details
               open={Boolean(atual)}
               className={cx(
@@ -74,13 +74,17 @@ export function ListaModulos({
                     <span
                       className={cx(
                         "text-sm",
-                        atual ? "font-semibold text-[var(--text)]" : "font-medium text-[var(--text-2)]",
+                        atual
+                          ? "font-semibold text-[var(--text)]"
+                          : "font-medium text-[var(--text-2)]",
                       )}
                     >
                       {modulo.titulo}
                     </span>
                     {!modulo.oficial ? (
-                      <span className="text-[11px] text-[var(--muted)]">além da ementa oficial</span>
+                      <span className="text-[11px] text-[var(--muted)]">
+                        além da ementa oficial
+                      </span>
                     ) : null}
                   </span>
                 </span>
