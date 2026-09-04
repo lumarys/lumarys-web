@@ -36,3 +36,30 @@ test("responder revela a explicação de cada alternativa", async ({ page }) => 
   await expect(page.getByText(/Os Vs andam juntos/i)).toBeVisible();
   await expect(page.getByText(/Volume sozinho não define/i)).toBeVisible();
 });
+
+test("o resultado fica gravado: reabrir o tema mostra o pré-teste concluído, e a trilha conta como iniciada", async ({
+  page,
+}) => {
+  await page.goto(TEMA);
+  await page.getByRole("button", { name: /não necessariamente/i }).click();
+  await page.getByRole("radio", { name: "média" }).click();
+  await page.getByRole("button", { name: /^responder$/i }).click();
+  await page.getByRole("button", { name: /próxima pergunta/i }).click();
+  await page.getByRole("button", { name: /veracidade e valor/i }).click();
+  await page.getByRole("radio", { name: "alta" }).click();
+  await page.getByRole("button", { name: /^responder$/i }).click();
+  await page.getByRole("button", { name: /ir para o conteúdo/i }).click();
+  await expect(page.getByText("Pré-teste concluído")).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByText("Pré-teste concluído")).toBeVisible();
+  await expect(page.getByText(/2 de 2, em/)).toBeVisible();
+  await expect(page.getByText(/^Pré-teste · 1 de/)).toHaveCount(0);
+
+  await page.getByRole("button", { name: /refazer o pré-teste/i }).click();
+  await expect(page.getByText(/^Pré-teste · 1 de/)).toBeVisible();
+
+  await page.goto("/trilhas/engenharia-de-dados/");
+  await expect(page.getByText(/você ainda não começou/i)).toHaveCount(0);
+  await expect(page.getByText(/1 pré-teste/)).toBeVisible();
+});

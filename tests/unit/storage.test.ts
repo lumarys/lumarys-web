@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { mesclar, progressoVazio, trilhaVazia, type Progresso } from "@/lib/storage";
+import {
+  contarRespostas,
+  mesclar,
+  progressoVazio,
+  trilhaIniciada,
+  trilhaVazia,
+  type Progresso,
+} from "@/lib/storage";
 import { cardNovo } from "@/lib/srs";
 
 /**
@@ -46,7 +53,10 @@ describe("mesclar", () => {
     const avancado = { ...cardNovo("spark", 0), caixa: 3, atualizadoEm: 10 };
     const atrasado = { ...cardNovo("spark", 0), caixa: 1, atualizadoEm: 999 };
 
-    const fim = mesclar(comTrilha({}, { "spark#0": avancado }), comTrilha({}, { "spark#0": atrasado }));
+    const fim = mesclar(
+      comTrilha({}, { "spark#0": avancado }),
+      comTrilha({}, { "spark#0": atrasado }),
+    );
     expect(fim.cards["spark#0"]!.caixa).toBe(3);
   });
 
@@ -70,5 +80,25 @@ describe("mesclar", () => {
     const remoto = progressoVazio();
 
     expect(mesclar(local, remoto).trilhas.ed).toBeDefined();
+  });
+});
+
+describe("trilha iniciada", () => {
+  it("sem nada gravado, não começou", () => {
+    expect(trilhaIniciada(undefined)).toBe(false);
+    expect(trilhaIniciada(trilhaVazia(1))).toBe(false);
+  });
+
+  it("pré-teste respondido já conta como início, mesmo sem tema concluído", () => {
+    const t = {
+      ...trilhaVazia(1),
+      preTestes: { "big-data": { acertos: 1, total: 2, atualizadoEm: 5 } },
+    };
+    expect(trilhaIniciada(t)).toBe(true);
+    expect(contarRespostas(t)).toEqual({ preTestes: 1, quizzes: 0, simulados: 0 });
+  });
+
+  it("plano definido também conta", () => {
+    expect(trilhaIniciada({ ...trilhaVazia(1), dataProva: "2026-09-18" })).toBe(true);
   });
 });
