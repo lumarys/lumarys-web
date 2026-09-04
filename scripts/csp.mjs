@@ -37,7 +37,9 @@ const FIXAS = [
   "frame-src https://www.youtube-nocookie.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
-  "upgrade-insecure-requests",
+  // Sem upgrade-insecure-requests: o HSTS com preload já força HTTPS no site,
+  // e o WebKit aplica a diretiva até em 127.0.0.1 — o que quebrava todos os
+  // testes do perfil iPhone contra o servidor local, que é HTTP.
 ];
 
 function* htmls(dir) {
