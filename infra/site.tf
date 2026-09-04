@@ -120,26 +120,18 @@ resource "aws_cloudfront_function" "roteamento" {
 
 resource "aws_cloudfront_response_headers_policy" "seguranca" {
   name    = "${local.nome}-seguranca"
-  comment = "CSP sem unsafe-inline, HSTS com preload e o resto do básico"
+  comment = "HSTS com preload, frame-ancestors e o básico; a CSP de scripts vem na página"
 
+  # A Content-Security-Policy completa NÃO fica aqui. O Next.js hidrata a
+  # página com scripts inline cujo conteúdo muda por página e por build; uma
+  # política fixa no CDN teria bloqueado a hidratação — e bloqueou, no primeiro
+  # dia em produção. Cada página carrega a própria política numa <meta>, com o
+  # hash dos seus scripts (scripts/csp.mjs). Aqui fica só o que a <meta> não
+  # consegue expressar: frame-ancestors.
   security_headers_config {
     content_security_policy {
-      override = true
-      content_security_policy = join("; ", [
-        "default-src 'self'",
-        "base-uri 'self'",
-        "form-action 'self'",
-        "frame-ancestors 'none'",
-        "object-src 'none'",
-        "script-src 'self'",
-        "style-src 'self' 'unsafe-inline'",
-        "font-src 'self' data:",
-        "img-src 'self' data: https://i.ytimg.com",
-        "media-src 'self' blob:",
-        "connect-src 'self' https://${local.api} https://cognito-idp.${var.aws_region}.amazonaws.com",
-        "frame-src https://www.youtube-nocookie.com",
-        "upgrade-insecure-requests",
-      ])
+      override                = true
+      content_security_policy = "frame-ancestors 'none'"
     }
 
     strict_transport_security {

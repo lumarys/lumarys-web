@@ -23,7 +23,8 @@
     "test:e2e": "playwright test",
     "generate": "node scripts/gen-seo.mjs",
     "predev": "npm run generate",
-    "pretypecheck": "npm run generate"
+    "pretypecheck": "npm run generate",
+    "postbuild": "node scripts/csp.mjs"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
