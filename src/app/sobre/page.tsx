@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function PaginaSobre() {
   return (
-    <AppShell>
+    <AppShell comCabecalho>
       <div className="px-5 pb-8 pt-5">
         <Rotulo>Sobre</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold leading-[1.15]">

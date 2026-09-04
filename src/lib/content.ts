@@ -122,3 +122,28 @@ export function contarTemas(trilha: Trilha): number {
 export function minutosDaTrilha(trilha: Trilha): number {
   return temasDaTrilha(trilha).reduce((acc, t) => acc + t.minutos, 0);
 }
+
+export type EstatisticasTrilha = {
+  temas: number;
+  minutos: number;
+  flashcards: number;
+  perguntasOrais: number;
+  videos: number;
+  modulos: number;
+};
+
+/** Números reais do conteúdo publicado, contados no build. Nada estimado. */
+export function estatisticasDaTrilha(trilha: Trilha): EstatisticasTrilha {
+  const temas = temasDaTrilha(trilha);
+  return {
+    temas: temas.length,
+    minutos: temas.reduce((a, t) => a + t.minutos, 0),
+    flashcards: temas.reduce((a, t) => a + t.flashcards.length, 0),
+    perguntasOrais: temas.reduce(
+      (a, t) => a + t.perguntas.filter((p) => p.tipo === "oral").length,
+      0,
+    ),
+    videos: temas.reduce((a, t) => a + t.videos.length, 0),
+    modulos: trilha.modulos.filter((m) => temasDoModulo(m).length > 0).length,
+  };
+}

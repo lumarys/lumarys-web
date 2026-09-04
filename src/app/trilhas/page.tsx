@@ -18,7 +18,7 @@ export default function PaginaTrilhas() {
   const trilhas = listarTrilhas();
 
   return (
-    <AppShell>
+    <AppShell comCabecalho>
       <div className="px-5 pb-8 pt-5">
         <h1 className="font-display text-[26px] font-bold">Trilhas</h1>
         <p className="mt-2 text-sm leading-relaxed text-[var(--text-2)]">

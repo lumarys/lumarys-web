@@ -54,48 +54,58 @@
     --elevated: #f2eee5;
     --border: #e2dcd0;
     --accent: #c98a12;
-    --accent-ink: #ffffff;
+    /* Tinta ESCURA sobre o âmbar nos dois temas. Branco sobre #c98a12 dá
+       cerca de 3:1, abaixo do mínimo de 4.5:1 para texto de botão — o teste
+       de contraste pegou isso. */
+    --accent-ink: #1a1204;
     --text: #14181f;
     --text-2: #46505f;
     --muted: #5a5750;
   }
 }
 
-* {
-  box-sizing: border-box;
-}
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
 
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans);
-  font-size: 16px;
-  line-height: 1.55;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
+  html,
+  body {
+    max-width: 100%;
+  }
 
-a {
-  color: var(--accent);
-}
-a:hover {
-  color: var(--color-accent-strong);
-}
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
+  a {
+    color: var(--accent);
+  }
+  a:hover {
+    color: var(--color-accent-strong);
+  }
 
-::selection {
-  background: var(--accent);
-  color: var(--accent-ink);
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
 }
 
 .font-display {

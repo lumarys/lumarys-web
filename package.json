@@ -19,7 +19,8 @@
     "content:lint": "node scripts/content-lint.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run content:lint",
     "prebuild": "node scripts/gen-seo.mjs",
-    "bundle:api": "node scripts/bundle-lambda.mjs services/progress-api"
+    "bundle:api": "node scripts/bundle-lambda.mjs services/progress-api",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
@@ -33,6 +34,7 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.716.0",
     "@aws-sdk/client-dynamodb": "^3.716.0",
     "@aws-sdk/lib-dynamodb": "^3.716.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/react": "^16.1.0",
     "@types/aws-lambda": "^8.10.147",
