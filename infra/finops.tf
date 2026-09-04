@@ -82,6 +82,13 @@ resource "aws_ce_anomaly_monitor" "lumarys" {
       MatchOptions = ["EQUALS"]
     }
   })
+
+  # A AWS devolve a especificação com chaves nulas a mais e o Terraform lê
+  # isso como mudança, recriando o monitor a cada apply. Ignorar depois de
+  # criado é o único jeito de manter o plan limpo.
+  lifecycle {
+    ignore_changes = [monitor_specification]
+  }
 }
 
 resource "aws_ce_anomaly_subscription" "lumarys" {
