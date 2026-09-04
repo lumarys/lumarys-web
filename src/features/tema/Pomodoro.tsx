@@ -43,7 +43,7 @@ export function Pomodoro() {
     <button
       type="button"
       onClick={() => setRodando((r) => !r)}
-      aria-label={rodando ? "Pausar o cronômetro" : "Iniciar o cronômetro de foco"}
+      aria-label={`${minutos}:${segundos}, ${rodando ? "pausar" : "iniciar"} o cronômetro de foco`}
       className={cx(
         "inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3",
         rodando
