@@ -117,7 +117,11 @@ export type PerguntaOral = Extract<Pergunta, { tipo: "oral" }>;
 export type PreTeste = z.infer<typeof preTesteSchema>;
 
 export type Tema = TemaFrontmatter & {
-  /** Corpo MDX cru; compilado na página do tema. */
+  /**
+   * Corpo MDX cru. Serve ao llms-full.txt e à versão Markdown de cada tema; a
+   * PÁGINA não usa isto — ela renderiza o módulo compilado no build
+   * (content/temas/corpos.generated.ts).
+   */
   corpo: string;
 };
 

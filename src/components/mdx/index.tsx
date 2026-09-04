@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 import { cx } from "@/lib/utils";
 
@@ -101,4 +101,12 @@ export function Termo({ nome, children }: { nome: string; children: ReactNode })
   );
 }
 
-export const componentesMdx = { Callout, Comparativo, Passos, Termo };
+/**
+ * Allowlist do MDX. O tipo é frouxo de propósito: o MDX chama estes
+ * componentes com props que só ele conhece, e o content-lint é quem garante
+ * que nenhum outro componente entre num tema.
+ */
+export const componentesMdx = { Callout, Comparativo, Passos, Termo } as unknown as Record<
+  string,
+  ComponentType<Record<string, unknown>>
+>;

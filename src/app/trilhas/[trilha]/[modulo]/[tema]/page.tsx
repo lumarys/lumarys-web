@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MDXRemote } from "next-mdx-remote/rsc";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { IconeVoltar } from "@/components/ui/icons";
 import { componentesMdx } from "@/components/mdx";
+import { corpos } from "@content/temas/corpos.generated";
 import { ConcluirTema } from "@/features/tema/ConcluirTema";
 import { Drill } from "@/features/tema/Drill";
 import { Flashcards } from "@/features/tema/Flashcards";
@@ -110,7 +110,8 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
         ) : null}
 
         <section className="prose-lumarys mt-6">
-          <MDXRemote source={tema.corpo} components={componentesMdx} />
+          {/* Compilado no build pelo @next/mdx; nada de MDX em tempo de execução. */}
+          <CorpoDoTema slug={tema.slug} />
         </section>
 
         {videosExtras.length > 0 ? (
@@ -270,4 +271,12 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
       />
     </AppShell>
   );
+}
+
+/** Carrega o corpo já compilado do tema. */
+async function CorpoDoTema({ slug }: { slug: string }) {
+  const carregar = corpos[slug];
+  if (!carregar) return null;
+  const { default: Corpo } = await carregar();
+  return <Corpo components={componentesMdx} />;
 }
