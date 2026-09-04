@@ -76,9 +76,9 @@ resource "aws_cognito_user_pool" "alunos" {
     TXT
   }
 
-  user_pool_add_ons {
-    advanced_security_mode = "AUDIT"
-  }
+  # Threat Protection do Cognito exige o tier PLUS, que é pago. No ESSENTIALS
+  # a defesa contra tentativa em massa fica no rate limit do WAF (card de
+  # débito no board) e no próprio limite de tentativas do código de e-mail.
 
   deletion_protection = "ACTIVE"
 

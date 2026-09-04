@@ -7,3 +7,9 @@ email_operacional = "pinus@cernyn.com"
 # Enquanto a organização "lumarys" não existir no GitHub, autorize também o
 # repositório pessoal. Apague esta linha depois de transferir o repositório.
 # github_repo_alternativo = "vieiradiego/lumarys-web"
+
+# IDs numéricos do GitHub, para o formato imutável do sub no OIDC.
+#   gh api /orgs/lumarys --jq .id
+#   gh api /repos/lumarys/lumarys-web --jq .id
+github_org_id  = "324698412"
+github_repo_id = "1356563613"

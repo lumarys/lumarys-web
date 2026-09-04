@@ -8,9 +8,27 @@ data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
+# O GitHub passou a emitir o `sub` no formato IMUTÁVEL, com os IDs numéricos da
+# organização e do repositório em vez dos nomes:
+#
+#   repo:<org>@<orgId>/<repo>@<repoId>:environment:production
+#
+# É mais seguro que o formato antigo, porque renomear a org ou o repositório não
+# transfere a confiança para quem ficar com o nome livre. Aceitamos os dois
+# porque repositórios criados antes da mudança ainda usam o formato por nome.
+#
+# Descubra os IDs com:
+#   gh api /repos/<org>/<repo> --jq '"\(.owner.id) \(.id)"'
 locals {
   subs_permitidos = compact([
     "repo:${var.github_repo}:environment:production",
+    var.github_org_id != "" && var.github_repo_id != "" ? format(
+      "repo:%s@%s/%s@%s:environment:production",
+      split("/", var.github_repo)[0],
+      var.github_org_id,
+      split("/", var.github_repo)[1],
+      var.github_repo_id,
+    ) : "",
     var.github_repo_alternativo != "" ? "repo:${var.github_repo_alternativo}:environment:production" : "",
   ])
 }
