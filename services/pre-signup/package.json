@@ -1,0 +1,9 @@
+{
+  "name": "@lumarys/pre-signup",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bundle": "node ../../scripts/bundle-lambda.mjs services/pre-signup"
+  }
+}

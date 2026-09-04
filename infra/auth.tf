@@ -1,4 +1,4 @@
-# Conta do aluno: login sem senha, por código de seis dígitos no e-mail.
+# Conta do aluno: login sem senha, por código de oito dígitos no e-mail.
 #
 # Sem senha por decisão de segurança: não existe senha para vazar, reusar ou
 # ser adivinhada, e some o suporte de "esqueci minha senha". O tier Essentials
@@ -60,20 +60,24 @@ resource "aws_cognito_user_pool" "alunos" {
     source_arn            = aws_sesv2_email_identity.lumarys.arn
   }
 
+  # Um e-mail só para entrar. O gatilho de pré-cadastro confirma a conta no
+  # SignUp, então o único e-mail que o aluno vê é o do desafio EMAIL_OTP, cujo
+  # template é o de "MFA por e-mail" (é assim que o Cognito chama). O template
+  # de verificação fica com o mesmo texto, de reserva: só sairia se o gatilho
+  # fosse removido.
+  email_mfa_configuration {
+    subject = local.email_codigo_assunto
+    message = local.email_codigo_html
+  }
+
   verification_message_template {
     default_email_option = "CONFIRM_WITH_CODE"
-    email_subject        = "Seu código de acesso à Lumarys"
-    email_message        = <<-TXT
-      Seu código de acesso é {####}.
+    email_subject        = local.email_codigo_assunto
+    email_message        = local.email_codigo_html
+  }
 
-      Ele vale por poucos minutos e serve para uma entrada só.
-
-      A Lumarys nunca pede senha, e nunca pede este código por telefone ou
-      mensagem. Se não foi você que pediu, ignore este e-mail.
-
-      Este endereço não recebe respostas. Precisa falar com a gente?
-      ${var.email_operacional}
-    TXT
+  lambda_config {
+    pre_sign_up = aws_lambda_function.pre_signup.arn
   }
 
   # Threat Protection do Cognito exige o tier PLUS, que é pago. No ESSENTIALS
@@ -204,4 +208,48 @@ resource "aws_sesv2_configuration_set_event_destination" "retorno" {
       topic_arn = aws_sns_topic.ses_retorno.arn
     }
   }
+}
+
+# ── E-mail do código ──────────────────────────────────────────────────────────
+#
+# HTML simples, de tabela, como todo e-mail transacional que precisa abrir bem
+# no Gmail do celular: cartão claro, código grande e copiável, aviso
+# anti-phishing e o canal de contato. O {####} é onde o Cognito põe o código.
+
+locals {
+  email_codigo_assunto = "Seu código de acesso à Lumarys"
+
+  email_codigo_html = <<-HTML
+    <!doctype html>
+    <html lang="pt-BR">
+    <body style="margin:0;padding:0;background:#FAF8F3;font-family:Inter,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;color:#14181F;">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FAF8F3;">
+        <tr><td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:480px;background:#FFFFFF;border:1px solid #E4DFD2;border-radius:16px;">
+            <tr><td style="padding:28px 28px 8px 28px;">
+              <span style="display:inline-block;width:12px;height:12px;border-radius:12px;background:#F5B83D;vertical-align:middle;"></span>
+              <span style="font-size:18px;font-weight:600;letter-spacing:-0.01em;vertical-align:middle;padding-left:8px;">lumarys</span>
+            </td></tr>
+            <tr><td style="padding:8px 28px 0 28px;font-size:16px;line-height:24px;">
+              Use este código para entrar na Lumarys:
+            </td></tr>
+            <tr><td style="padding:20px 28px;">
+              <div style="background:#0B1220;color:#F4F1EA;border-radius:12px;padding:20px;text-align:center;font-size:32px;font-weight:700;letter-spacing:8px;font-family:'SF Mono',Menlo,Consolas,monospace;">{####}</div>
+            </td></tr>
+            <tr><td style="padding:0 28px;font-size:14px;line-height:22px;color:#5E5A50;">
+              Ele vale por poucos minutos e serve para uma entrada só. Se você não pediu este código, ignore este e-mail: sem ele ninguém entra na sua conta.
+            </td></tr>
+            <tr><td style="padding:16px 28px 0 28px;font-size:14px;line-height:22px;color:#5E5A50;">
+              A Lumarys nunca pede senha, e nunca pede este código por telefone ou mensagem.
+            </td></tr>
+            <tr><td style="padding:24px 28px 28px 28px;font-size:12px;line-height:18px;color:#8F8B80;border-top:1px solid #E4DFD2;">
+              Este endereço não recebe respostas. Precisa falar com a gente? ${var.email_operacional}<br>
+              Lumarys é uma marca da Cernyn · lumarys.com.br
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
+  HTML
 }

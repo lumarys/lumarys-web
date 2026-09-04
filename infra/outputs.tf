@@ -37,3 +37,8 @@ output "lambda_progresso" {
   value       = aws_lambda_function.api.function_name
   description = "Função que o CI atualiza."
 }
+
+output "lambda_pre_signup" {
+  value       = aws_lambda_function.pre_signup.function_name
+  description = "Nome da Lambda de pré-cadastro; o CI publica o código nela."
+}

@@ -9,6 +9,7 @@ import { useSessao } from "./useSessao";
 import {
   authConfigurada,
   confirmarCodigo,
+  digitosDoCodigo,
   ErroAuth,
   pedirCodigo,
   sair,
@@ -30,6 +31,7 @@ export function Conta() {
   const email = etapaLocal === null && sessao.logado ? (sessao.email ?? "") : emailDigitado;
   const [codigo, setCodigo] = useState("");
   const [desafio, setDesafio] = useState<Desafio | null>(null);
+  const digitos = digitosDoCodigo(desafio);
   const [erro, setErro] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -206,7 +208,7 @@ export function Conta() {
           {etapa === "deslogado" ? (
             <>
               <p className="mt-2 text-[15px] leading-relaxed">
-                Sem senha: você recebe um código de seis dígitos por e-mail. Na primeira vez, o
+                Sem senha: você recebe um código por e-mail e entra com ele. Na primeira vez, o
                 mesmo código cria a conta. O que já estudou aqui é juntado a ela, nada se perde.
               </p>
               <label className="mt-4 block">
@@ -236,21 +238,21 @@ export function Conta() {
                 Mandei um código para <strong>{email}</strong>. Ele vale por poucos minutos.
               </p>
               <label className="mt-4 block">
-                <span className="text-[13px] font-semibold">Código de seis dígitos</span>
+                <span className="text-[13px] font-semibold">Código de {digitos} dígitos</span>
                 <input
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"
-                  maxLength={6}
+                  maxLength={digitos}
                   value={codigo}
                   onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ""))}
-                  placeholder="000000"
+                  placeholder={"0".repeat(digitos)}
                   className="font-display mt-1.5 min-h-13 w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-3.5 text-center text-2xl font-bold tracking-[0.3em] text-[var(--text)]"
                 />
               </label>
               <button
                 type="button"
-                disabled={ocupado || codigo.length < 6}
+                disabled={ocupado || codigo.length < digitos}
                 onClick={validarCodigo}
                 className="mt-3 min-h-13 w-full rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)] disabled:opacity-40"
               >
