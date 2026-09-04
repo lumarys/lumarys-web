@@ -19,6 +19,20 @@ export function plural(n: number, singular: string, plural_: string): string {
   return `${n} ${n === 1 ? singular : plural_}`;
 }
 
+/**
+ * Semente estável a partir de um texto (FNV-1a). Serve para embaralhar sempre
+ * do mesmo jeito a mesma pergunta: a ordem deixa de ser previsível sem ficar
+ * pulando a cada renderização.
+ */
+export function sementeDeTexto(texto: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < texto.length; i++) {
+    h ^= texto.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
 /** Fisher-Yates com semente, para simulados reproduzíveis dentro do mesmo dia. */
 export function embaralhar<T>(itens: T[], semente = Date.now()): T[] {
   const saida = [...itens];
