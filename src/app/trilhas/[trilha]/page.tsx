@@ -3,11 +3,18 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Rotulo } from "@/components/ui/Card";
 import { ListaModulos } from "@/features/trilha/ListaModulos";
 import { ResumoProgresso } from "@/features/trilha/ResumoProgresso";
-import { contarTemas, listarTrilhas, minutosDaTrilha, obterTrilha, temasDoModulo } from "@/lib/content";
-import { JsonLd, SITE, jsonLdBreadcrumb } from "@/lib/seo";
+import {
+  contarTemas,
+  listarTrilhas,
+  minutosDaTrilha,
+  obterTrilha,
+  temasDoModulo,
+} from "@/lib/content";
+import { alternativas, JsonLd, SITE } from "@/lib/seo";
 import { formatarMinutos } from "@/lib/utils";
 
 type Params = { trilha: string };
@@ -23,8 +30,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: trilha.titulo,
     description: trilha.resumo,
-    alternates: { canonical: `/trilhas/${slug}/` },
-    openGraph: { type: "website", url: `/trilhas/${slug}/`, title: trilha.titulo, description: trilha.resumo },
+    alternates: alternativas(`/trilhas/${slug}/`),
+    openGraph: {
+      type: "website",
+      url: `/trilhas/${slug}/`,
+      title: trilha.titulo,
+      description: trilha.resumo,
+    },
   };
 }
 
@@ -44,8 +56,15 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
 
   return (
     <AppShell>
-      <div className="px-5 pb-8 pt-5">
-        <Rotulo>{trilha.origem}</Rotulo>
+      <div className="px-5 pb-8 pt-3">
+        <Breadcrumbs
+          itens={[
+            { nome: "Início", url: "/" },
+            { nome: "Trilhas", url: "/trilhas/" },
+            { nome: trilha.titulo, url: `/trilhas/${trilha.slug}/` },
+          ]}
+        />
+        <Rotulo className="mt-1">{trilha.origem}</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold leading-[1.15]">
           {trilha.titulo}
         </h1>
@@ -98,13 +117,6 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
         </div>
       </div>
 
-      <JsonLd
-        dados={jsonLdBreadcrumb([
-          { nome: "Início", url: "/" },
-          { nome: "Trilhas", url: "/trilhas/" },
-          { nome: trilha.titulo, url: `/trilhas/${trilha.slug}/` },
-        ])}
-      />
       <JsonLd
         dados={{
           "@context": "https://schema.org",

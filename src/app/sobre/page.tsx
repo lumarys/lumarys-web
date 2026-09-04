@@ -5,12 +5,13 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo } from "@/components/ui/Card";
 import { ContatoLink } from "@/components/layout/ContatoLink";
 import { EMPRESA } from "@/lib/company";
+import { alternativas } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Sobre a Lumarys",
   description:
     "A Lumarys é uma marca da Cernyn. Trilhas de estudo montadas a partir de ementas oficiais, com método e fontes citadas.",
-  alternates: { canonical: "/sobre/" },
+  alternates: alternativas("/sobre/"),
 };
 
 export default function PaginaSobre() {

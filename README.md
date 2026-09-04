@@ -63,6 +63,15 @@ scripts/          verificação de conteúdo, geração de SEO, empacotamento
 docs/             arquitetura, guia de conteúdo e decisões (ADR)
 ```
 
+## Planejamento
+
+O plano aprovado está em [docs/PLANO.md](docs/PLANO.md); os cards do board
+citam as seções dele (§2.1, §11…). O que está feito, em curso ou na fila vive
+no [board do Notion](https://app.notion.com/p/5644ebef4018487db090e3c0e26c89b2),
+que o agente de desenvolvimento lê segundo o
+[protocolo da fila](https://app.notion.com/p/3d031d9588a681c3ad05fb6c40c40db9):
+puxa o primeiro card, nunca escolhe, e cita o card no commit (`LUM-73`).
+
 ## Escrever conteúdo
 
 Leia [docs/CONTENT-GUIDE.md](docs/CONTENT-GUIDE.md) e copie

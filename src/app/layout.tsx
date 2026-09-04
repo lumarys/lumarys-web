@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 
-import { JsonLd, SITE, jsonLdOrganizacao } from "@/lib/seo";
+import { JsonLd, SITE, alternativas, jsonLdOrganizacao } from "@/lib/seo";
 import "@/styles/globals.css";
 
 const inter = Inter({
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Cernyn", url: "https://cernyn.com/" }],
   creator: "Cernyn",
   publisher: "Cernyn",
-  alternates: { canonical: "/" },
+  alternates: alternativas("/"),
   openGraph: {
     type: "website",
     locale: SITE.locale,

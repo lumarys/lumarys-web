@@ -52,7 +52,8 @@ Nenhum vídeo entra por memória. O processo é:
 
 1. Procure com busca na web restrita ao YouTube, em português.
 2. Rode `node scripts/video-info.mjs <id> [<id>...]` na raiz do projeto.
-3. Use exatamente o canal e a duração que o script imprimir.
+3. Use exatamente o canal, a duração e a data de publicação (`publicadoEm`)
+   que o script imprimir. A data alimenta o `VideoObject` do JSON-LD.
 4. `INDISPONIVEL` significa que o vídeo não entra. Procure outro.
 
 O campo `porQue` do vídeo diz **por que aquele vídeo** e o que observar nele —

@@ -3,8 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
-import { IconeVoltar } from "@/components/ui/icons";
 import { componentesMdx } from "@/components/mdx";
 import { corpos } from "@content/temas/corpos.generated";
 import { ConcluirTema } from "@/features/tema/ConcluirTema";
@@ -14,8 +14,13 @@ import { Pomodoro } from "@/features/tema/Pomodoro";
 import { PreTeste } from "@/features/tema/PreTeste";
 import { Quiz } from "@/features/tema/Quiz";
 import { VideoEmbed } from "@/features/tema/VideoEmbed";
-import { localizarTema, sequenciaDaTrilha, todasAsRotasDeTema, vizinhosDoTema } from "@/lib/content";
-import { JsonLd, SITE, jsonLdBreadcrumb } from "@/lib/seo";
+import {
+  localizarTema,
+  sequenciaDaTrilha,
+  todasAsRotasDeTema,
+  vizinhosDoTema,
+} from "@/lib/content";
+import { JsonLd, SITE, alternativas } from "@/lib/seo";
 import { formatarMinutos } from "@/lib/utils";
 
 type Params = { trilha: string; modulo: string; tema: string };
@@ -24,20 +29,17 @@ export function generateStaticParams(): Params[] {
   return todasAsRotasDeTema();
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { trilha, modulo, tema } = await params;
   const local = localizarTema(trilha, tema);
   if (!local) return {};
 
   const url = `/trilhas/${trilha}/${modulo}/${tema}/`;
   return {
-    title: `${local.tema.titulo} | ${local.trilha.titulo}`,
+    // Fora do template do site: o título do tema já carrega a trilha.
+    title: { absolute: `${local.tema.titulo} | ${local.trilha.titulo} · ${SITE.nome}` },
     description: local.tema.resumo,
-    alternates: { canonical: url },
+    alternates: alternativas(url, { markdown: true }),
     openGraph: {
       type: "article",
       url,
@@ -71,13 +73,16 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
     <AppShell>
       <article className="px-5 pb-8 pt-4">
         <div className="flex items-center justify-between gap-3">
-          <Link
-            href={`/trilhas/${trilha.slug}/`}
-            className="inline-flex min-h-11 items-center gap-2 pr-2 text-xs text-[var(--muted)] no-underline"
-          >
-            <IconeVoltar size={20} />
-            <span className="truncate">{modulo.titulo}</span>
-          </Link>
+          <Breadcrumbs
+            className="min-w-0"
+            itens={[
+              { nome: "Início", url: "/" },
+              { nome: "Trilhas", url: "/trilhas/" },
+              { nome: trilha.titulo, url: `/trilhas/${trilha.slug}/` },
+              { nome: modulo.titulo, url: `/trilhas/${trilha.slug}/#${modulo.slug}` },
+              { nome: tema.titulo, url: `/trilhas/${trilha.slug}/${modulo.slug}/${tema.slug}/` },
+            ]}
+          />
           <Pomodoro />
         </div>
 
@@ -225,17 +230,6 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
       </article>
 
       <JsonLd
-        dados={jsonLdBreadcrumb([
-          { nome: "Início", url: "/" },
-          { nome: "Trilhas", url: "/trilhas/" },
-          { nome: trilha.titulo, url: `/trilhas/${trilha.slug}/` },
-          {
-            nome: tema.titulo,
-            url: `/trilhas/${trilha.slug}/${modulo.slug}/${tema.slug}/`,
-          },
-        ])}
-      />
-      <JsonLd
         dados={{
           "@context": "https://schema.org",
           "@type": "LearningResource",
@@ -245,13 +239,17 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
           educationalLevel: tema.nivel,
           timeRequired: `PT${tema.minutos}M`,
           learningResourceType: "lesson",
-          isPartOf: { "@type": "Course", name: trilha.titulo, url: `${SITE.url}/trilhas/${trilha.slug}/` },
+          isPartOf: {
+            "@type": "Course",
+            name: trilha.titulo,
+            url: `${SITE.url}/trilhas/${trilha.slug}/`,
+          },
           publisher: { "@id": `${SITE.url}/#organizacao` },
           video: tema.videos.map((v) => ({
             "@type": "VideoObject",
             name: v.titulo,
             description: v.porQue,
-            uploadDate: undefined,
+            uploadDate: v.publicadoEm,
             thumbnailUrl: `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`,
             embedUrl: `https://www.youtube-nocookie.com/embed/${v.id}`,
             duration: `PT${v.duracao}M`,

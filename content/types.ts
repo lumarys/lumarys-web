@@ -23,6 +23,12 @@ export const videoSchema = z.object({
   duracao: z.number().int().positive().max(240),
   /** Por que este vídeo foi escolhido — aparece abaixo do player. */
   porQue: z.string().min(10),
+  /**
+   * Data de publicação no YouTube (AAAA-MM-DD), impressa por
+   * scripts/video-info.mjs. O VideoObject do JSON-LD exige uploadDate; sem ele
+   * o Rich Results Test aponta erro no tema inteiro.
+   */
+  publicadoEm: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "publicadoEm no formato AAAA-MM-DD"),
   idioma: z.literal("pt-BR").default("pt-BR"),
 });
 
