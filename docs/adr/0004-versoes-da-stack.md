@@ -40,10 +40,12 @@ segundos), e o build do Next também passa. Mas o `typescript-eslint` recusa:
 ganhar velocidade de typecheck. **Desbloqueia quando** o typescript-eslint
 anunciar suporte ao TS 7.
 
-**next-mdx-remote 6.** Quebra a renderização de todos os temas com
-`TypeError: Cannot read properties of undefined (reading 'map')` durante o
-prerender. **Desbloqueia quando** houver um caminho de migração verificado
-para a API nova, ou quando trocarmos por `@next/mdx`.
+**next-mdx-remote — removido.** A versão 5 tem aviso de segurança alto
+(execução de código arbitrário ao renderizar MDX não confiável no servidor) e a
+versão 6, que corrige, deixa de avaliar as props dos componentes: as tabelas
+comparativas dos temas chegavam sem dados. Em vez de escolher entre um aviso
+aberto e conteúdo quebrado, tiramos a compilação de MDX do tempo de execução.
+Ver ADR 0005.
 
 ## Consequências
 

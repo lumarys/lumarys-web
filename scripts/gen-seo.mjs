@@ -160,3 +160,30 @@ for (const trilha of trilhas) {
 console.log(
   `gen-seo: llms.txt e llms-full.txt (${temas.size} temas, ${trilhas.length} trilha(s)), ${markdowns} markdown(s).`,
 );
+
+/* ------------- mapa estático dos temas, para o @next/mdx --------------- */
+// O roteamento é dinâmico, mas o conjunto de temas é fechado no build. Um mapa
+// com imports literais é o que permite o empacotador enxergar cada .mdx.
+const entradas = [...temas.keys()]
+  .sort()
+  .map((slug) => `  "${slug}": () => import("./${slug}.mdx"),`)
+  .join("\n");
+
+writeFileSync(
+  join(RAIZ, "content", "temas", "corpos.generated.ts"),
+  [
+    "// GERADO por scripts/gen-seo.mjs. Não edite à mão.",
+    "// Mapa de slug para o módulo MDX do tema, compilado no build.",
+    "import type { ComponentType } from \"react\";",
+    "",
+    "type Componentes = Record<string, ComponentType<Record<string, unknown>>>;",
+    "type ModuloTema = { default: ComponentType<{ components?: Componentes }> };",
+    "",
+    "export const corpos: Record<string, () => Promise<ModuloTema>> = {",
+    entradas,
+    "};",
+    "",
+  ].join("\n"),
+  "utf8",
+);
+console.log(`gen-seo: mapa com ${temas.size} corpo(s) MDX.`);

@@ -41,8 +41,10 @@ jobs:
       - name: build
         run: npm run build
 
-      - name: navegador para os testes de tela
-        run: npx playwright install --with-deps chromium
+      # O perfil iPhone 15 usa WebKit (é o motor do Safari), então chromium
+      # sozinho não cobre metade do público. Os dois entram.
+      - name: navegadores para os testes de tela
+        run: npx playwright install --with-deps chromium webkit
 
       - name: testes de tela (celular e desktop)
         run: npm run test:e2e
