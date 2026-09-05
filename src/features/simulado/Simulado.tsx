@@ -7,6 +7,7 @@ import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { BarraProgresso } from "@/components/ui/ProgressRing";
 import { IconeFechar } from "@/components/ui/icons";
 import { Gravador } from "./Gravador";
+import { calcularResultado, paraProgresso } from "@/lib/simulado";
 import { registrarSimulado } from "@/lib/storage";
 import { cx, embaralhar } from "@/lib/utils";
 
@@ -21,8 +22,6 @@ export type PerguntaSimulado = {
   respostaModelo: string;
   rubrica: string[];
 };
-
-const NOTA_MAXIMA = 5;
 
 /**
  * Sabatina simulada: uma pergunta por vez, resposta em voz alta, resposta-modelo
@@ -43,6 +42,8 @@ export function Simulado({
   quantidadePadrao?: number;
 }) {
   const [modulo, setModulo] = useState<string>(moduloInicial ?? "todos");
+  const [gravando, setGravando] = useState(false);
+  const [confirmandoSaida, setConfirmandoSaida] = useState(false);
   const [iniciado, setIniciado] = useState(false);
   // Semente fixa por montagem: o mesmo simulado não reembaralha a cada render.
   const [semente] = useState(() => Math.floor(Math.random() * 2 ** 31));
@@ -116,46 +117,47 @@ export function Simulado({
   const pergunta = selecionadas[indice];
 
   if (terminou || !pergunta) {
-    const porModulo = new Map<string, { titulo: string; nota: number; maximo: number }>();
-    for (const p of selecionadas) {
-      const atual = porModulo.get(p.moduloSlug) ?? { titulo: p.moduloTitulo, nota: 0, maximo: 0 };
-      atual.nota += notas[p.id] ?? 0;
-      atual.maximo += NOTA_MAXIMA;
-      porModulo.set(p.moduloSlug, atual);
-    }
-    const somaNota = [...porModulo.values()].reduce((a, m) => a + m.nota, 0);
-    const somaMax = [...porModulo.values()].reduce((a, m) => a + m.maximo, 0);
+    const resultado = calcularResultado(selecionadas, notas);
 
     return (
       <div className="flex flex-col gap-3.5 px-5">
         <Card destaque>
           <RotuloAcento>Resultado</RotuloAcento>
           <p className="font-display mt-2 text-3xl font-bold">
-            {somaNota}
-            <span className="text-lg text-[var(--text-2)]">/{somaMax}</span>
+            {resultado.nota}
+            <span className="text-lg text-[var(--text-2)]">/{resultado.maximo}</span>
           </p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-2)]">
-            Autoavaliação por rubrica. O número importa menos que os critérios que você não
-            cumpriu.
+            {resultado.puladas > 0
+              ? `Sobre as ${resultado.avaliadas} que você respondeu; ${resultado.puladas} ficaram para outro dia.`
+              : "Autoavaliação por rubrica. O número importa menos que os critérios que você não cumpriu."}
           </p>
         </Card>
 
         <Card>
           <Rotulo className="mb-2.5">Por módulo</Rotulo>
           <div className="flex flex-col gap-2">
-            {[...porModulo.entries()].map(([slug, m]) => {
+            {resultado.porModulo.map((m) => {
               const pct = m.maximo ? Math.round((m.nota / m.maximo) * 100) : 0;
               return (
-                <div key={slug} className="flex items-center gap-2.5">
+                <div key={m.slug} className="flex items-center gap-2.5">
                   <span className="w-28 shrink-0 truncate text-xs text-[var(--text-2)]">
                     {m.titulo}
                   </span>
                   <BarraProgresso
                     valor={pct}
-                    cor={pct >= 70 ? "var(--color-success)" : pct >= 40 ? "var(--accent)" : "var(--color-danger)"}
+                    cor={
+                      pct >= 70
+                        ? "var(--color-success)"
+                        : pct >= 40
+                          ? "var(--accent)"
+                          : "var(--color-danger)"
+                    }
                     className="flex-1"
                   />
-                  <span className="w-8 shrink-0 text-right text-xs text-[var(--text-2)]">{pct}%</span>
+                  <span className="w-8 shrink-0 text-right text-xs text-[var(--text-2)]">
+                    {pct}%
+                  </span>
                 </div>
               );
             })}
@@ -166,7 +168,7 @@ export function Simulado({
           <Rotulo className="mb-2">Temas a revisar</Rotulo>
           <ul className="flex list-none flex-col gap-1.5 p-0">
             {selecionadas
-              .filter((p) => (notas[p.id] ?? 0) < 4)
+              .filter((p) => notas[p.id] !== undefined && (notas[p.id] ?? 0) < 4)
               .map((p) => (
                 <li key={p.id}>
                   <Link href={p.href} className="text-sm no-underline">
@@ -174,7 +176,7 @@ export function Simulado({
                   </Link>
                 </li>
               ))}
-            {selecionadas.every((p) => (notas[p.id] ?? 0) >= 4) ? (
+            {selecionadas.every((p) => notas[p.id] === undefined || (notas[p.id] ?? 0) >= 4) ? (
               <li className="text-sm text-[var(--text-2)]">
                 Nada abaixo de 4. Refaça em outro dia com escopo maior.
               </li>
@@ -192,21 +194,33 @@ export function Simulado({
     );
   }
 
+  /** Grava o que foi avaliado até aqui. Sem nenhuma nota, não há o que gravar. */
+  function registrar(atuais: Record<string, number>) {
+    const resultado = calcularResultado(selecionadas, atuais);
+    if (resultado.avaliadas === 0) return;
+    registrarSimulado(trilhaSlug, { porModulo: paraProgresso(resultado) });
+  }
+
+  /**
+   * Encerrar no meio registra o que já foi avaliado, em vez de mostrar uma nota
+   * de mentira: antes, o placar aparecia e a prontidão não mexia.
+   */
+  function encerrar() {
+    if (calcularResultado(selecionadas, notas).avaliadas === 0) {
+      setConfirmandoSaida(true);
+      return;
+    }
+    registrar(notas);
+    setTerminou(true);
+  }
+
   function avaliar(nota: number) {
     if (!pergunta) return;
     const atualizadas = { ...notas, [pergunta.id]: nota };
     setNotas(atualizadas);
 
     if (indice + 1 >= selecionadas.length) {
-      const porModulo: Record<string, { nota: number; maximo: number }> = {};
-      for (const p of selecionadas) {
-        const atual = porModulo[p.moduloSlug] ?? { nota: 0, maximo: 0 };
-        porModulo[p.moduloSlug] = {
-          nota: atual.nota + (atualizadas[p.id] ?? 0),
-          maximo: atual.maximo + NOTA_MAXIMA,
-        };
-      }
-      registrarSimulado(trilhaSlug, { porModulo });
+      registrar(atualizadas);
       setTerminou(true);
       return;
     }
@@ -219,7 +233,7 @@ export function Simulado({
       <div className="flex items-center justify-between gap-3">
         <button
           type="button"
-          onClick={() => setTerminou(true)}
+          onClick={encerrar}
           className="inline-flex min-h-11 items-center gap-2 pr-2 text-xs text-[var(--muted)]"
         >
           <IconeFechar size={20} /> Encerrar
@@ -254,7 +268,36 @@ export function Simulado({
         </p>
       </div>
 
-      <Gravador key={pergunta.id} />
+      {confirmandoSaida ? (
+        <Card className="border-[var(--accent)]/40">
+          <p className="text-[15px] leading-relaxed">
+            Você ainda não avaliou nenhuma resposta. Sair agora não registra nada.
+          </p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmandoSaida(false)}
+              className="min-h-12 flex-1 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--accent-ink)]"
+            >
+              Continuar respondendo
+            </button>
+            <Link
+              href={`/trilhas/${trilhaSlug}/`}
+              className="flex min-h-12 flex-1 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold no-underline"
+            >
+              Sair mesmo assim
+            </Link>
+          </div>
+        </Card>
+      ) : null}
+
+      <Gravador key={pergunta.id} aoMudarEstado={setGravando} />
+
+      {gravando ? (
+        <p className="text-center text-xs text-[var(--muted)]">
+          A gravação fica só nesta pergunta: ao avançar, ela é descartada.
+        </p>
+      ) : null}
 
       {!revelado ? (
         <button
@@ -324,7 +367,9 @@ function BotaoEscopo({
       onClick={onClick}
       className={cx(
         "min-h-11 rounded-full px-4 text-sm font-semibold",
-        ativo ? "bg-[var(--accent)] text-[var(--accent-ink)]" : "bg-[var(--elevated)] text-[var(--text-2)]",
+        ativo
+          ? "bg-[var(--accent)] text-[var(--accent-ink)]"
+          : "bg-[var(--elevated)] text-[var(--text-2)]",
       )}
     >
       {children}
