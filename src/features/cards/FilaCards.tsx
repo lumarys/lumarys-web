@@ -29,8 +29,21 @@ export function FilaCards({ conteudo }: { conteudo: Record<string, CardConteudo>
   const [virado, setVirado] = useState(false);
   const [placar, setPlacar] = useState({ acertos: 0, erros: 0 });
 
+  // Estreia de card só de tema concluído, em qualquer trilha.
+  const concluidos = useMemo(
+    () =>
+      pronto ? Object.values(progresso.trilhas).flatMap((t) => Object.keys(t.temasConcluidos)) : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [pronto],
+  );
+
   const fila = useMemo(
-    () => (pronto ? filaDoDia(Object.values(progresso.cards)).filter((c) => conteudo[c.id]) : []),
+    () =>
+      pronto
+        ? filaDoDia(Object.values(progresso.cards), new Date(), 40, {
+            temasElegiveis: concluidos,
+          }).filter((c) => conteudo[c.id])
+        : [],
     // A fila é congelada na abertura de propósito: recalcular a cada revisão
     // faria o card recém-avaliado sumir do meio da sessão.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,14 +61,17 @@ export function FilaCards({ conteudo }: { conteudo: Record<string, CardConteudo>
   }
 
   const total = Object.keys(progresso.cards).length;
+  const aguardandoTema = total > 0 && concluidos.length === 0;
 
-  if (total === 0) {
+  if (total === 0 || aguardandoTema) {
     return (
       <div className="px-5">
         <Card>
-          <RotuloAcento>Nenhum card ainda</RotuloAcento>
+          <RotuloAcento>{aguardandoTema ? "Ainda não é hora" : "Nenhum card ainda"}</RotuloAcento>
           <p className="mt-2 text-[15px] leading-relaxed">
-            Os cards nascem quando você abre um tema. Comece por um e volte aqui amanhã.
+            {aguardandoTema
+              ? "Seus cards entram na revisão quando você conclui o tema deles. Termine um tema e eles aparecem aqui."
+              : "Os cards nascem quando você abre um tema. Comece por um e volte aqui amanhã."}
           </p>
           <Link
             href="/hoje/"
@@ -91,7 +107,10 @@ export function FilaCards({ conteudo }: { conteudo: Record<string, CardConteudo>
                 <div key={d.data} className="flex flex-1 flex-col items-center gap-1">
                   <div
                     className="w-full rounded-t bg-[var(--accent)]"
-                    style={{ height: `${Math.max(4, (d.total / maximo) * 56)}px`, opacity: d.total ? 1 : 0.25 }}
+                    style={{
+                      height: `${Math.max(4, (d.total / maximo) * 56)}px`,
+                      opacity: d.total ? 1 : 0.25,
+                    }}
                   />
                   <span className="text-[10px] text-[var(--muted)]">{d.data.slice(8)}</span>
                 </div>

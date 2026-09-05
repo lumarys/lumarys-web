@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CAIXA_MAXIMA,
   cardNovo,
+  estaNovo,
   estaVencido,
   filaDoDia,
   hojeISO,
@@ -12,6 +13,11 @@ import {
 } from "@/lib/srs";
 
 const AGORA = new Date("2026-09-03T10:00:00-03:00");
+
+/** Card já revisado ao menos uma vez, que é o que pode vencer. */
+function revisado(tema: string, indice: number, vencimento = "2026-09-01", caixa = 1) {
+  return { ...cardNovo(tema, indice, AGORA), caixa, vencimento };
+}
 
 describe("datas", () => {
   it("roda com o fuso fixado, senão o teste abaixo não significa nada", () => {
@@ -73,18 +79,49 @@ describe("revisão", () => {
 
 describe("fila do dia", () => {
   it("só traz o que venceu", () => {
-    const vencido = { ...cardNovo("a", 0, AGORA), vencimento: "2026-09-01" };
-    const futuro = { ...cardNovo("b", 0, AGORA), vencimento: "2026-09-30" };
+    const vencido = revisado("a", 0);
+    const futuro = revisado("b", 0, "2026-09-30");
 
     expect(estaVencido(vencido, AGORA)).toBe(true);
     expect(estaVencido(futuro, AGORA)).toBe(false);
     expect(filaDoDia([vencido, futuro], AGORA).map((c) => c.id)).toEqual(["a#0"]);
   });
 
+  it("card recém-semeado não conta como atrasado", () => {
+    // Abrir a página de um tema cria o baralho inteiro. Antes desta regra,
+    // abrir dois temas sem estudar nada já anunciava "12 cards vencidos".
+    const novos = [0, 1, 2].map((i) => cardNovo("spark", i, AGORA));
+
+    expect(novos.every((c) => estaNovo(c))).toBe(true);
+    expect(novos.some((c) => estaVencido(c, AGORA))).toBe(false);
+    expect(filaDoDia(novos, AGORA)).toHaveLength(0);
+  });
+
+  it("estreia cards novos só de tema concluído, e poucos por dia", () => {
+    const cards = [
+      ...Array.from({ length: 14 }, (_, i) => cardNovo("spark", i, AGORA)),
+      ...Array.from({ length: 14 }, (_, i) => cardNovo("hadoop", i, AGORA)),
+    ];
+
+    expect(filaDoDia(cards, AGORA, 40, { temasElegiveis: [] })).toHaveLength(0);
+
+    const fila = filaDoDia(cards, AGORA, 40, { temasElegiveis: ["spark"] });
+    expect(fila).toHaveLength(10);
+    expect(fila.every((c) => c.temaSlug === "spark")).toBe(true);
+  });
+
+  it("revisão atrasada vem antes de qualquer estreia", () => {
+    const cards = [...[0, 1].map((i) => cardNovo("spark", i, AGORA)), revisado("hadoop", 0)];
+
+    const fila = filaDoDia(cards, AGORA, 40, { temasElegiveis: ["spark"] });
+    expect(fila[0]?.id).toBe("hadoop#0");
+    expect(fila).toHaveLength(3);
+  });
+
   it("intercala temas em vez de agrupar por assunto", () => {
     const cards = [
-      ...[0, 1, 2].map((i) => cardNovo("spark", i, AGORA)),
-      ...[0, 1, 2].map((i) => cardNovo("hadoop", i, AGORA)),
+      ...[0, 1, 2].map((i) => revisado("spark", i)),
+      ...[0, 1, 2].map((i) => revisado("hadoop", i)),
     ];
 
     const temas = filaDoDia(cards, AGORA).map((c) => c.temaSlug);
@@ -96,13 +133,13 @@ describe("fila do dia", () => {
   });
 
   it("respeita o limite da sessão", () => {
-    const cards = Array.from({ length: 100 }, (_, i) => cardNovo(`tema-${i % 5}`, i, AGORA));
+    const cards = Array.from({ length: 100 }, (_, i) => revisado(`tema-${i % 5}`, i));
     expect(filaDoDia(cards, AGORA, 12)).toHaveLength(12);
   });
 
   it("prioriza a caixa mais baixa dentro do mesmo tema", () => {
-    const facil = { ...cardNovo("spark", 0, AGORA), caixa: 3 };
-    const dificil = { ...cardNovo("spark", 1, AGORA), caixa: 1 };
+    const facil = revisado("spark", 0, "2026-09-01", 3);
+    const dificil = revisado("spark", 1);
 
     expect(filaDoDia([facil, dificil], AGORA)[0]?.id).toBe("spark#1");
   });
@@ -111,9 +148,11 @@ describe("fila do dia", () => {
 describe("previsão", () => {
   it("conta quantos cards vencem em cada dia", () => {
     const cards = [
-      { ...cardNovo("a", 0, AGORA), vencimento: "2026-09-03" },
-      { ...cardNovo("a", 1, AGORA), vencimento: "2026-09-03" },
-      { ...cardNovo("a", 2, AGORA), vencimento: "2026-09-05" },
+      revisado("a", 0, "2026-09-03"),
+      revisado("a", 1, "2026-09-03"),
+      revisado("a", 2, "2026-09-05"),
+      // Card novo não tem revisão marcada e não pode inflar a previsão.
+      cardNovo("a", 3, AGORA),
     ];
 
     const dias = previsao(cards, 3, AGORA);

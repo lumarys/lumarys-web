@@ -61,24 +61,31 @@ export function revisar(card: EstadoCard, acertou: boolean, agora: Date = new Da
   };
 }
 
-export function estaVencido(card: EstadoCard, agora: Date = new Date()): boolean {
-  return card.vencimento <= hojeISO(agora);
+/**
+ * Card semeado e nunca revisado. Abrir a página de um tema já cria o baralho
+ * inteiro, então "nunca revisado" não pode significar "atrasado": antes desta
+ * regra, abrir dois temas sem estudar nada enchia a tela Hoje de "12 cards
+ * vencidos" de conteúdo que a pessoa nem tinha lido.
+ */
+export function estaNovo(card: EstadoCard): boolean {
+  return card.caixa === 0;
 }
 
-/**
- * Fila do dia com intercalação: em vez de todos os cards de Spark seguidos,
- * alterna entre temas. Misturar assuntos rende mais que blocos, e é o
- * princípio de intercalação do Ultraaprendizado aplicado à revisão.
- */
-export function filaDoDia(
-  cards: EstadoCard[],
-  agora: Date = new Date(),
-  limite = 40,
-): EstadoCard[] {
-  const vencidos = cards.filter((c) => estaVencido(c, agora));
+export function estaVencido(card: EstadoCard, agora: Date = new Date()): boolean {
+  return !estaNovo(card) && card.vencimento <= hojeISO(agora);
+}
 
+/** Quantos cards nunca revisados podem estrear num mesmo dia. */
+export const NOVOS_POR_DIA = 10;
+
+/**
+ * Intercala os cards entre temas, do mais frágil para o mais firme. Misturar
+ * assuntos rende mais que estudar em blocos, e é o princípio de intercalação
+ * do Ultraaprendizado aplicado à revisão.
+ */
+function intercalar(cards: EstadoCard[], limite: number): EstadoCard[] {
   const porTema = new Map<string, EstadoCard[]>();
-  for (const card of vencidos) {
+  for (const card of cards) {
     const lista = porTema.get(card.temaSlug) ?? [];
     lista.push(card);
     porTema.set(card.temaSlug, lista);
@@ -104,11 +111,44 @@ export function filaDoDia(
   return fila;
 }
 
+/**
+ * Fila do dia: primeiro a revisão atrasada, depois algumas estreias.
+ *
+ * Card novo só entra se o tema dele já foi concluído, e no máximo
+ * `novosPorDia`. Sem `temasElegiveis` nenhuma estreia acontece — é explícito
+ * de propósito, para que esquecer o argumento nunca ressuscite a fila falsa
+ * de cards de temas que ninguém abriu.
+ */
+export function filaDoDia(
+  cards: EstadoCard[],
+  agora: Date = new Date(),
+  limite = 40,
+  opcoes: { temasElegiveis?: Iterable<string>; novosPorDia?: number } = {},
+): EstadoCard[] {
+  const elegiveis = new Set(opcoes.temasElegiveis ?? []);
+  const fila = intercalar(
+    cards.filter((c) => estaVencido(c, agora)),
+    limite,
+  );
+
+  const espaco = Math.min(opcoes.novosPorDia ?? NOVOS_POR_DIA, limite - fila.length);
+  if (espaco > 0 && elegiveis.size > 0) {
+    fila.push(
+      ...intercalar(
+        cards.filter((c) => estaNovo(c) && elegiveis.has(c.temaSlug)),
+        espaco,
+      ),
+    );
+  }
+  return fila;
+}
+
 /** Quantos cards vencem em cada um dos próximos dias, para o gráfico do plano. */
 export function previsao(cards: EstadoCard[], dias = 14, agora: Date = new Date()) {
   const base = hojeISO(agora);
   return Array.from({ length: dias }, (_, i) => {
     const data = somarDias(base, i);
-    return { data, total: cards.filter((c) => c.vencimento === data).length };
+    // Card novo não tem revisão marcada: a data dele é só o dia em que nasceu.
+    return { data, total: cards.filter((c) => !estaNovo(c) && c.vencimento === data).length };
   });
 }

@@ -11,7 +11,13 @@ import { filaDoDia } from "@/lib/srs";
 import { hojeISO } from "@/lib/srs";
 import { diasAte } from "@/lib/utils";
 
-export type TemaHoje = { slug: string; titulo: string; minutos: number; modulo: string; moduloTitulo: string };
+export type TemaHoje = {
+  slug: string;
+  titulo: string;
+  minutos: number;
+  modulo: string;
+  moduloTitulo: string;
+};
 
 export type DadosHoje = {
   trilhaSlug: string;
@@ -34,7 +40,15 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
 
   const trilha = progresso.trilhas[dados.trilhaSlug];
   const concluidos = trilha?.temasConcluidos ?? {};
-  const vencidos = filaDoDia(Object.values(progresso.cards));
+  // Só os cards desta trilha, e estreia só de tema já concluído: o painel fala
+  // de uma trilha só, e card de tema não estudado não é revisão atrasada.
+  const temasDaTrilha = new Set(dados.temas.map((t) => t.slug));
+  const vencidos = filaDoDia(
+    Object.values(progresso.cards).filter((c) => temasDaTrilha.has(c.temaSlug)),
+    new Date(),
+    40,
+    { temasElegiveis: Object.keys(concluidos) },
+  );
   const proximoTema = dados.temas.find((t) => !concluidos[t.slug]);
   const { geral, porModulo, pontoFraco } = prontidaoDaTrilha(
     dados.modulos,
@@ -53,7 +67,11 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
   return (
     <div className="flex flex-col gap-3.5 px-5 pb-8">
       <div className="grid grid-cols-3 gap-2.5">
-        <Metrica rotulo="Sequência" valor={`${progresso.streak.atual}`} sufixo={progresso.streak.atual === 1 ? "dia" : "dias"} />
+        <Metrica
+          rotulo="Sequência"
+          valor={`${progresso.streak.atual}`}
+          sufixo={progresso.streak.atual === 1 ? "dia" : "dias"}
+        />
         <Metrica rotulo="Meta de hoje" valor={`${minutosHoje}`} sufixo={`/${meta} min`} />
         <Metrica
           rotulo={dias !== null ? "Prova em" : "Temas feitos"}
@@ -112,13 +130,22 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
           {porModulo
             .filter((m) => m.temasTotal > 0)
             .map((m) => {
-              const titulo = dados.modulos.find((x) => x.slug === m.moduloSlug)?.titulo ?? m.moduloSlug;
+              const titulo =
+                dados.modulos.find((x) => x.slug === m.moduloSlug)?.titulo ?? m.moduloSlug;
               return (
                 <div key={m.moduloSlug} className="flex items-center gap-2.5">
-                  <span className="w-28 shrink-0 truncate text-xs text-[var(--text-2)]">{titulo}</span>
+                  <span className="w-28 shrink-0 truncate text-xs text-[var(--text-2)]">
+                    {titulo}
+                  </span>
                   <BarraProgresso
                     valor={m.score}
-                    cor={m.score >= 60 ? "var(--color-success)" : m.score >= 25 ? "var(--accent)" : "var(--color-danger)"}
+                    cor={
+                      m.score >= 60
+                        ? "var(--color-success)"
+                        : m.score >= 25
+                          ? "var(--accent)"
+                          : "var(--color-danger)"
+                    }
                     className="flex-1"
                   />
                   <span className="w-7 shrink-0 text-right text-xs text-[var(--text-2)]">
@@ -134,8 +161,7 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
           </p>
         ) : (
           <p className="mt-3 text-xs text-[var(--muted)]">
-            A prontidão sobe com quiz, cards e simulado — não só com temas marcados como
-            concluídos.
+            A prontidão sobe com quiz, cards e simulado — não só com temas marcados como concluídos.
           </p>
         )}
       </Card>

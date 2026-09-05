@@ -31,6 +31,25 @@ describe("prontidão do módulo", () => {
     expect(p.score).toBe(Math.round(PESOS.cobertura * 100));
   });
 
+  it("abrir o tema não mexe na prontidão: card nunca revisado fica fora da conta", () => {
+    // O baralho nasce ao abrir a página do tema. Se esses cards entrassem no
+    // denominador, só abrir o tema derrubaria a prontidão.
+    const semCards = prontidaoDoModulo(MODULO, progressoVazio(), undefined);
+    const comNovos: Progresso = {
+      ...progressoVazio(),
+      cards: Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => {
+          const card = cardNovo("spark-introducao", i);
+          return [card.id, card];
+        }),
+      ),
+    };
+
+    const p = prontidaoDoModulo(MODULO, comNovos, undefined);
+    expect(p.cards).toBe(0);
+    expect(p.score).toBe(semCards.score);
+  });
+
   it("simulado é o sinal de maior peso", () => {
     const progresso: Progresso = {
       ...progressoVazio(),

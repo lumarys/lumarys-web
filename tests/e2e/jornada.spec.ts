@@ -39,7 +39,26 @@ test("2. onboarding gera o plano de 14 dias", async () => {
   await expect(page.locator("details[open]").first()).toContainText(/Fundamentos/);
 });
 
-test("3. Hoje aponta o primeiro tema como próxima ação", async () => {
+test("3. abrir temas sem estudar não inventa cards vencidos", async () => {
+  // O baralho nasce ao abrir a página do tema. Antes desta regra, abrir dois
+  // temas sem responder nada já anunciava "12 cards vencidos" na tela Hoje e
+  // roubava a próxima ação para revisar conteúdo que ninguém tinha lido.
+  for (const rota of ["fundamentos/olap-oltp-etl", "hadoop/mapreduce"]) {
+    await page.goto(`${TRILHA}${rota}/`);
+    // Esperar o baralho aparecer garante que a semeadura rodou: é justamente
+    // ela que criava os cards falsamente vencidos.
+    await expect(page.getByText(/^Card 1 de \d+/)).toBeVisible();
+  }
+
+  await page.goto("/hoje/");
+  await expect(page.getByText(/cards vencidos/i)).toHaveCount(0);
+  await expect(page.getByText("Próxima ação")).toBeVisible();
+
+  await page.goto("/cards/");
+  await expect(page.getByText(/ainda não é hora/i)).toBeVisible();
+});
+
+test("4. Hoje aponta o primeiro tema como próxima ação", async () => {
   await page.goto("/hoje/");
   await expect(page.getByText(/prova em/i)).toBeVisible();
   await expect(page.getByText("Próxima ação")).toBeVisible();
@@ -48,7 +67,7 @@ test("3. Hoje aponta o primeiro tema como próxima ação", async () => {
   await expect(page).toHaveURL(new RegExp("fundamentos/big-data/$"));
 });
 
-test("4. pré-teste: responde as duas perguntas e libera o conteúdo", async () => {
+test("5. pré-teste: responde as duas perguntas e libera o conteúdo", async () => {
   await page.goto(TEMA);
   await page.getByRole("button", { name: /não necessariamente/i }).click();
   await page.getByRole("radio", { name: "média" }).click();
@@ -64,34 +83,49 @@ test("4. pré-teste: responde as duas perguntas e libera o conteúdo", async () 
   await expect(page.getByText(/2 de 2/)).toBeVisible();
 });
 
-test("5. o vídeo é uma fachada até o toque", async () => {
+test("6. o vídeo é uma fachada até o toque", async () => {
   await expect(page.getByRole("button", { name: /^assistir:/i }).first()).toBeVisible();
   await expect(page.locator("iframe")).toHaveCount(0);
 });
 
-test("6. flashcards: vira e avalia o baralho inteiro", async () => {
+test("7. flashcards: vira e avalia o baralho inteiro", async () => {
   const card = page.locator("button[aria-expanded]").first();
   for (let i = 0; i < 14; i++) {
-    if (await page.getByText("Baralho concluído").isVisible().catch(() => false)) break;
+    if (
+      await page
+        .getByText("Baralho concluído")
+        .isVisible()
+        .catch(() => false)
+    )
+      break;
     await card.click();
     await page.getByRole("button", { name: /^sabia$/i }).click();
   }
   await expect(page.getByText("Baralho concluído")).toBeVisible();
 });
 
-test("7. drill: classifica os cenários e confere", async () => {
+test("8. drill: classifica os cenários e confere", async () => {
   const opcoes = page.getByRole("button", { name: "Distribuído" });
   const total = await opcoes.count();
   expect(total).toBeGreaterThanOrEqual(3);
   for (let i = 0; i < total; i++) await opcoes.nth(i).click();
-  await page.getByRole("button", { name: /^conferir$/i }).first().click();
+  await page
+    .getByRole("button", { name: /^conferir$/i })
+    .first()
+    .click();
   await expect(page.getByRole("button", { name: /refazer/i })).toBeVisible();
 });
 
-test("8. quiz: responde até o resultado", async () => {
+test("9. quiz: responde até o resultado", async () => {
   await page.getByText(/^Quiz · 1 de/).waitFor();
   for (let i = 0; i < 6; i++) {
-    if (await page.getByText("Quiz concluído").isVisible().catch(() => false)) break;
+    if (
+      await page
+        .getByText("Quiz concluído")
+        .isVisible()
+        .catch(() => false)
+    )
+      break;
     const quiz = page.locator("section", { has: page.getByText(/^Quiz · \d de/) });
     await quiz.getByRole("button").first().click();
     await quiz.getByRole("button", { name: /conferir/i }).click();
@@ -100,18 +134,20 @@ test("8. quiz: responde até o resultado", async () => {
   await expect(page.getByText("Quiz concluído")).toBeVisible();
 });
 
-test("9. concluir o tema muda o botão e oferece o próximo", async () => {
+test("10. concluir o tema muda o botão e oferece o próximo", async () => {
   await page.getByRole("button", { name: /concluir tema/i }).click();
   await expect(page.getByText("Tema concluído")).toBeVisible();
   await expect(page.getByRole("link", { name: /próximo/i })).toContainText(/OLAP/i);
 });
 
-test("10. o progresso reflete em Hoje e na trilha", async () => {
+test("11. o progresso reflete em Hoje e na trilha", async () => {
   await page.goto("/hoje/");
   await expect(page.getByText("O que é Big Data")).toHaveCount(0);
   await expect(page.getByText(/OLAP/i).first()).toBeVisible();
   // A métrica renderiza "1" colado ao sufixo: <p>1<span>dia</span></p>.
-  await expect(page.getByText("Sequência").locator("xpath=following-sibling::p")).toContainText(/^1\s*dia$/);
+  await expect(page.getByText("Sequência").locator("xpath=following-sibling::p")).toContainText(
+    /^1\s*dia$/,
+  );
 
   await page.goto(TRILHA);
   await expect(page.getByText("1/30")).toBeVisible();
@@ -119,19 +155,25 @@ test("10. o progresso reflete em Hoje e na trilha", async () => {
   await expect(page.getByText("1/3").first()).toBeVisible(); // Fundamentos
 });
 
-test("11. cards: todos avaliados hoje, fila em dia com previsão", async () => {
+test("12. cards: todos avaliados hoje, fila em dia com previsão", async () => {
   await page.goto("/cards/");
   await expect(page.getByText(/fila em dia/i)).toBeVisible();
   await expect(page.getByText(/próximos 7 dias/i)).toBeVisible();
 });
 
-test("12. simulado oral do módulo até o placar", async () => {
+test("13. simulado oral do módulo até o placar", async () => {
   await page.goto("/simulado/?modulo=fundamentos");
   await expect(page.getByRole("button", { name: "Fundamentos" })).toBeVisible();
   await page.getByRole("button", { name: /começar simulado/i }).click();
 
   for (let i = 0; i < 10; i++) {
-    if (await page.getByText("Resultado", { exact: true }).isVisible().catch(() => false)) break;
+    if (
+      await page
+        .getByText("Resultado", { exact: true })
+        .isVisible()
+        .catch(() => false)
+    )
+      break;
     await expect(page.getByText(/entrevistador · fundamentos/i)).toBeVisible();
     await page.getByRole("button", { name: /já respondi/i }).click();
     await expect(page.getByText("Resposta-modelo")).toBeVisible();
@@ -143,7 +185,7 @@ test("12. simulado oral do módulo até o placar", async () => {
   await expect(page.getByText("Por módulo")).toBeVisible();
 });
 
-test("13. a prontidão sobe depois do simulado", async () => {
+test("14. a prontidão sobe depois do simulado", async () => {
   await page.goto("/hoje/");
   const geral = page.locator("text=/^\\d+%$/").first();
   await expect(geral).toBeVisible();
@@ -151,7 +193,7 @@ test("13. a prontidão sobe depois do simulado", async () => {
   expect(valor).toBeGreaterThan(0);
 });
 
-test("14. conta em modo convidado resume o aparelho e exporta os dados", async () => {
+test("15. conta em modo convidado resume o aparelho e exporta os dados", async () => {
   await page.goto("/conta/");
   await expect(page.getByText(/1 tema concluído/)).toBeVisible();
 

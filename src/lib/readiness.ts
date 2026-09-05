@@ -1,4 +1,4 @@
-import { CAIXA_MAXIMA, type EstadoCard } from "./srs";
+import { CAIXA_MAXIMA, estaNovo, type EstadoCard } from "./srs";
 import type { Progresso, ProgressoTrilha } from "./storage";
 
 /**
@@ -54,8 +54,10 @@ export function prontidaoDoModulo(
       : (quizzes.reduce((acc, q) => acc + q!.acertos / Math.max(q!.total, 1), 0) / quizzes.length) *
         (quizzes.length / total);
 
-  const cardsDoModulo = Object.values(progresso.cards).filter((c: EstadoCard) =>
-    modulo.temas.includes(c.temaSlug),
+  // Cards nunca revisados ficam de fora: eles nascem ao abrir o tema, e contá-los
+  // faria a prontidão cair só por ter aberto a página.
+  const cardsDoModulo = Object.values(progresso.cards).filter(
+    (c: EstadoCard) => modulo.temas.includes(c.temaSlug) && !estaNovo(c),
   );
   const cards =
     cardsDoModulo.length === 0
