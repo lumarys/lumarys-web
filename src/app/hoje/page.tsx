@@ -31,6 +31,7 @@ export default function PaginaHoje() {
         moduloTitulo: m.titulo,
       })),
     ),
+    prazoDias: trilha.prazoSugeridoDias,
     modulos: trilha.modulos.map((m) => ({
       slug: m.slug,
       titulo: m.titulo,

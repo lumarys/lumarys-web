@@ -61,7 +61,7 @@ test("3. abrir temas sem estudar não inventa cards vencidos", async () => {
 
 test("4. Hoje aponta o primeiro tema como próxima ação", async () => {
   await page.goto("/hoje/");
-  await expect(page.getByText(/prova em/i)).toBeVisible();
+  await expect(page.getByText(/dia \d+\/14 · faltam \d+/i)).toBeVisible();
   await expect(page.getByText("Próxima ação")).toBeVisible();
   await expect(page.getByText("O que é Big Data")).toBeVisible();
   await page.getByRole("link", { name: /começar/i }).click();
@@ -144,6 +144,13 @@ test("10. concluir o tema muda o botão e oferece o próximo", async () => {
 test("11. o progresso reflete em Hoje e na trilha", async () => {
   await page.goto("/hoje/");
   await expect(page.getByText("O que é Big Data")).toHaveCount(0);
+  // A prontidão passa a explicar de onde veio o número.
+  await page
+    .getByRole("group")
+    .filter({ hasText: /como chegamos a/i })
+    .click();
+  await expect(page.getByText(/^Simulado \(35%\)$/)).toBeVisible();
+  await expect(page.getByText(/o que mais sobe agora é/i)).toBeVisible();
   await expect(page.getByText(/OLAP/i).first()).toBeVisible();
   // A métrica renderiza "1" colado ao sufixo: <p>1<span>dia</span></p>.
   await expect(page.getByText("Sequência").locator("xpath=following-sibling::p")).toContainText(
