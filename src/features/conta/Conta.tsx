@@ -17,6 +17,7 @@ import {
 } from "@/lib/auth";
 import { entrarEMesclar, excluirConta, exportar, syncConfigurado } from "@/lib/sync";
 import { cx } from "@/lib/utils";
+import { estaNovo } from "@/lib/srs";
 
 type Etapa = "deslogado" | "codigo" | "logado";
 
@@ -40,7 +41,9 @@ export function Conta() {
     (acc, t) => acc + Object.keys(t.temasConcluidos).length,
     0,
   );
-  const totalCards = Object.keys(progresso.cards).length;
+  // "Em revisão" é o que já foi estudado ao menos uma vez; o resto ainda não
+  // entrou na fila (ver estaNovo em lib/srs).
+  const totalCards = Object.values(progresso.cards).filter((c) => !estaNovo(c)).length;
 
   const disponivel = authConfigurada && syncConfigurado;
 
