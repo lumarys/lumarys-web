@@ -35,9 +35,12 @@ resource "aws_cognito_user_pool" "alunos" {
     allow_admin_create_user_only = false
   }
 
+  # Recuperação por administrador, não por e-mail. Duas razões: não existe senha
+  # para recuperar num pool sem senha, e o Cognito recusa configurar o e-mail
+  # como fator de código quando o mesmo e-mail é o canal de recuperação.
   account_recovery_setting {
     recovery_mechanism {
-      name     = "verified_email"
+      name     = "admin_only"
       priority = 1
     }
   }
@@ -62,9 +65,17 @@ resource "aws_cognito_user_pool" "alunos" {
 
   # Um e-mail só para entrar. O gatilho de pré-cadastro confirma a conta no
   # SignUp, então o único e-mail que o aluno vê é o do desafio EMAIL_OTP, cujo
-  # template é o de "MFA por e-mail" (é assim que o Cognito chama). O template
-  # de verificação fica com o mesmo texto, de reserva: só sairia se o gatilho
-  # fosse removido.
+  # template é o de "MFA por e-mail" (é assim que o Cognito chama, e a própria
+  # documentação diz que ele vale para "MFA and sign-in with email OTPs"). O
+  # template de verificação fica com o mesmo texto, de reserva: só sairia se o
+  # gatilho fosse removido.
+  #
+  # MFA fica OPCIONAL, nunca obrigatória: o Cognito recusa EMAIL_OTP como
+  # primeiro fator em pool com MFA obrigatória, e recusa configurar o template
+  # com MFA desligada. Opcional não pede segundo fator de ninguém — só quem
+  # registra um fator preferido é desafiado, e o app nunca registra.
+  mfa_configuration = "OPTIONAL"
+
   email_mfa_configuration {
     subject = local.email_codigo_assunto
     message = local.email_codigo_html
