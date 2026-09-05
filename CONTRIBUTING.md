@@ -33,6 +33,36 @@ horizontal em 360 px de largura.
 
 Comentário explica **por que**, não o que o código faz.
 
+### Seis regras que mantêm o código normalizado
+
+1. **Decisão em `src/lib`, com teste; componente só desenha.** Se um `.tsx`
+   está escolhendo o que mostrar por uma regra de negócio, essa regra vira
+   função pura testável. É assim que `srs`, `readiness`, `storage`, `simulado`,
+   `plano` e `proximaAcao` existem.
+2. **Um primitivo por padrão de interface, em `src/components/ui`.** Botão,
+   cartão, anel, diálogo, estado vazio, faixa de aviso. Página não monta o seu
+   próprio: se você está escrevendo `rounded-xl bg-[var(--accent)]` num
+   `.tsx` de rota, o primitivo está faltando ou não foi importado.
+3. **Campo novo de progresso é opcional e aditivo.** Nada de subir `VERSAO`
+   sem quebra real, e `mesclar` precisa tolerar a ausência do campo — quem
+   estuda em dois aparelhos tem versões diferentes ao mesmo tempo. Todo campo
+   novo entra com caso em `tests/unit/storage.test.ts`.
+4. **Um arquivo de teste de tela por superfície.** `home`, `casca`, `tema-*`,
+   `simulado`, `cards`. `jornada.spec.ts` é o fio condutor de ponta a ponta e
+   não vira depósito de caso isolado.
+5. **Tempo é argumento, não ambiente.** Função pura recebe `agora`; teste de
+   tela fixa o relógio. Sequência, vencimento e saudação dependem do dia, e o
+   CI roda em outro fuso.
+6. **Um commit por card, citando `LUM-nn`; o pacote inteiro vai ao ar de uma
+   vez.** Cada commit deixa a `main` verde sozinho, e o `push` acontece quando
+   o pacote fecha — é o que torna cada deploy uma melhoria que a pessoa
+   percebe, em vez de sete deploys de meia mudança.
+
+O trabalho é organizado em **pacotes por superfície** no
+[board](https://app.notion.com/p/5644ebef4018487db090e3c0e26c89b2): cada
+pacote toca um conjunto de arquivos uma vez só, constrói as fundações que os
+próximos consomem, e fecha com verificação no site real.
+
 ## Infra
 
 `terraform plan` no PR, na descrição. Apply é humano. Mudança que toque em DNS
