@@ -10,7 +10,7 @@ import { cx } from "@/lib/utils";
  * navegador, não vai para a conta e é descartado ao trocar de pergunta. Sem
  * permissão de microfone, o bloco vira só um cronômetro.
  */
-export function Gravador() {
+export function Gravador({ aoMudarEstado }: { aoMudarEstado?: (gravando: boolean) => void } = {}) {
   const [estado, setEstado] = useState<"parado" | "gravando" | "pronto" | "negado">("parado");
   const [segundos, setSegundos] = useState(0);
   const [audio, setAudio] = useState<string | null>(null);
@@ -30,6 +30,10 @@ export function Gravador() {
       if (audio) URL.revokeObjectURL(audio);
     };
   }, [audio]);
+
+  useEffect(() => {
+    aoMudarEstado?.(estado === "gravando");
+  }, [estado, aoMudarEstado]);
 
   useEffect(() => {
     if (estado !== "gravando") return;
