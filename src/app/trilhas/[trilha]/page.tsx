@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { BotaoLink } from "@/components/ui/Botao";
 import { Rotulo } from "@/components/ui/Card";
 import { ListaModulos } from "@/features/trilha/ListaModulos";
 import { ResumoProgresso } from "@/features/trilha/ResumoProgresso";
@@ -12,6 +12,7 @@ import {
   listarTrilhas,
   minutosDaTrilha,
   obterTrilha,
+  sequenciaDaTrilha,
   temasDoModulo,
 } from "@/lib/content";
 import { alternativas, JsonLd, SITE } from "@/lib/seo";
@@ -53,6 +54,12 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
     temas: temasDoModulo(m).map((t) => ({ slug: t.slug, titulo: t.titulo, minutos: t.minutos })),
   }));
   const total = contarTemas(trilha);
+  const sequencia = sequenciaDaTrilha(trilha).map(({ modulo, tema }) => ({
+    slug: tema.slug,
+    titulo: tema.titulo,
+    modulo: modulo.slug,
+    minutos: tema.minutos,
+  }));
 
   return (
     <AppShell>
@@ -84,11 +91,13 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
               titulo: m.titulo,
               temas: m.temas.map((t) => t.slug),
             }))}
+            temas={sequencia}
             totalTemas={total}
+            prazoDias={trilha.prazoSugeridoDias}
           />
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="mt-4 grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
           <Bloco titulo="O quê" texto="A ementa oficial da carreira, mais o que ela não cobre." />
           <Bloco titulo="Por quê" texto="A sabatina cobra raciocínio e trade-off, não definição." />
           <Bloco titulo="Como" texto="Recall antes do vídeo, cards espaçados e simulado oral." />
@@ -97,23 +106,30 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
         <p className="mt-4 text-sm leading-relaxed text-[var(--text-2)]">{trilha.objetivo}</p>
 
         <div className="mt-5 flex gap-2">
-          <Link
+          <BotaoLink
             href={`/trilhas/${trilha.slug}/plano/`}
-            className="flex min-h-12 flex-1 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold no-underline"
+            variante="secundario"
+            className="flex-1"
           >
             Plano de {trilha.prazoSugeridoDias} dias
-          </Link>
-          <Link
+          </BotaoLink>
+          <BotaoLink
             href={`/simulado/?trilha=${trilha.slug}`}
-            className="flex min-h-12 flex-1 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold no-underline"
+            variante="secundario"
+            className="flex-1"
           >
             Simulado
-          </Link>
+          </BotaoLink>
         </div>
 
         <div className="mt-6">
           <Rotulo className="mb-2">Módulos</Rotulo>
-          <ListaModulos trilhaSlug={trilha.slug} modulos={modulos} />
+          <ListaModulos
+            trilhaSlug={trilha.slug}
+            modulos={modulos}
+            cronograma={trilha.cronograma.map((d) => ({ dia: d.dia, temas: d.temas }))}
+            prazoDias={trilha.prazoSugeridoDias}
+          />
         </div>
       </div>
 

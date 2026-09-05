@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { IconeCheck } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
+import { estadoDoPlano } from "@/lib/plano";
 import { prontidaoDaTrilha } from "@/lib/readiness";
 import { cx } from "@/lib/utils";
 
@@ -22,9 +23,14 @@ export type ModuloResumo = {
 export function ListaModulos({
   trilhaSlug,
   modulos,
+  cronograma,
+  prazoDias,
 }: {
   trilhaSlug: string;
   modulos: ModuloResumo[];
+  /** Cronograma da trilha: qual dia pede quais temas. */
+  cronograma: { dia: number; temas: string[] }[];
+  prazoDias: number;
 }) {
   const { progresso, pronto } = useProgresso();
   const trilha = progresso.trilhas[trilhaSlug];
@@ -38,6 +44,29 @@ export function ListaModulos({
     .flatMap((m) => m.temas.map((t) => ({ modulo: m.slug, ...t })))
     .find((t) => !trilha?.temasConcluidos[t.slug]);
 
+  // Módulo que o plano pede hoje. É diferente de "onde você parou": dá para
+  // estar atrasado e o selo mostra para onde o cronograma aponta.
+  const estado = estadoDoPlano(trilha?.dataProva, prazoDias);
+  const temasDeHoje =
+    estado.situacao === "em-curso"
+      ? (cronograma.find((d) => d.dia === estado.dia)?.temas ?? [])
+      : [];
+
+  if (!pronto) {
+    // Altura fixa: sem isto a lista renderiza "N temas" e troca para "0/6" ao
+    // hidratar, empurrando a página inteira para baixo.
+    return (
+      <ul className="flex list-none flex-col gap-2 p-0">
+        {modulos.map((m) => (
+          <li
+            key={m.slug}
+            className="h-16 animate-pulse rounded-2xl border border-[var(--border)]"
+          />
+        ))}
+      </ul>
+    );
+  }
+
   return (
     <ul className="flex list-none flex-col gap-2 p-0">
       {modulos.map((modulo) => {
@@ -46,6 +75,7 @@ export function ListaModulos({
         const total = modulo.temas.length;
         const completo = pronto && total > 0 && concluidos === total;
         const atual = proximoTema && modulo.temas.some((t) => t.slug === proximoTema.slug);
+        const doDia = modulo.temas.some((t) => temasDeHoje.includes(t.slug));
 
         return (
           <li key={modulo.slug} id={modulo.slug} className="scroll-mt-4">
@@ -58,6 +88,11 @@ export function ListaModulos({
             >
               <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">
                 <span className="flex items-center gap-2.5">
+                  {doDia ? (
+                    <span className="shrink-0 rounded-full bg-[var(--accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--accent-ink)]">
+                      hoje
+                    </span>
+                  ) : null}
                   <span
                     className={cx(
                       "flex size-6 shrink-0 items-center justify-center rounded-full",

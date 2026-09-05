@@ -154,6 +154,9 @@ test("11. o progresso reflete em Hoje e na trilha", async () => {
   await expect(page.getByText("1/30")).toBeVisible();
   await expect(page.getByText(/prontidão \d+%/i)).toBeVisible();
   await expect(page.getByText("1/3").first()).toBeVisible(); // Fundamentos
+  // O próximo tema vira botão, em vez de só abrir um acordeão sozinho.
+  await expect(page.getByRole("link", { name: /^(continuar|próximo):/i })).toBeVisible();
+  await expect(page.getByText(/dia \d+ de 14/i)).toBeVisible();
 });
 
 test("12. cards: todos avaliados hoje, fila em dia com previsão", async () => {
