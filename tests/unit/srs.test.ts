@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   CAIXA_MAXIMA,
+  CAIXA_PRONTO,
   cardNovo,
   estaNovo,
   estaVencido,
@@ -54,8 +55,17 @@ describe("revisão", () => {
     expect(card.vencimento).toBe("2026-09-10");
 
     card = revisar(card, true, AGORA);
-    expect(card.caixa).toBe(CAIXA_MAXIMA);
+    expect(card.caixa).toBe(CAIXA_PRONTO);
     expect(card.vencimento).toBe("2026-09-15");
+
+    // Da quarta caixa em diante é manutenção: 30 e 90 dias, para não esquecer
+    // depois da prova. A prontidão continua olhando só até a quarta.
+    card = revisar(card, true, AGORA);
+    expect(card.vencimento).toBe("2026-10-03");
+
+    card = revisar(card, true, AGORA);
+    expect(card.caixa).toBe(CAIXA_MAXIMA);
+    expect(card.vencimento).toBe("2026-12-02");
   });
 
   it("não passa da última caixa", () => {

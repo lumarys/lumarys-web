@@ -1,4 +1,4 @@
-import { CAIXA_MAXIMA, estaNovo, type EstadoCard } from "./srs";
+import { CAIXA_PRONTO, estaNovo, type EstadoCard } from "./srs";
 import type { Progresso, ProgressoTrilha } from "./storage";
 
 /**
@@ -62,7 +62,7 @@ export function prontidaoDoModulo(
   const cards =
     cardsDoModulo.length === 0
       ? 0
-      : cardsDoModulo.reduce((acc, c) => acc + Math.min(c.caixa, CAIXA_MAXIMA) / CAIXA_MAXIMA, 0) /
+      : cardsDoModulo.reduce((acc, c) => acc + Math.min(c.caixa, CAIXA_PRONTO) / CAIXA_PRONTO, 0) /
         cardsDoModulo.length;
 
   const ultimo = trilha.simulados.at(-1)?.porModulo[modulo.slug];

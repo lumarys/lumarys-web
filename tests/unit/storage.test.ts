@@ -102,3 +102,30 @@ describe("trilha iniciada", () => {
     expect(trilhaIniciada({ ...trilhaVazia(1), dataProva: "2026-09-18" })).toBe(true);
   });
 });
+
+describe("preferências do plano na mesclagem", () => {
+  it("a edição mais recente vence, venha de que aparelho vier", () => {
+    // Editar o plano no celular não pode ser desfeito ao abrir o computador.
+    const antigo = comTrilha({ dataProva: "2026-09-19", minutosPorDia: 30, atualizadoEm: 10 });
+    const novo = comTrilha({ dataProva: "2026-09-26", minutosPorDia: 60, atualizadoEm: 99 });
+
+    expect(mesclar(antigo, novo).trilhas.ed).toMatchObject({
+      dataProva: "2026-09-26",
+      minutosPorDia: 60,
+    });
+    expect(mesclar(novo, antigo).trilhas.ed).toMatchObject({
+      dataProva: "2026-09-26",
+      minutosPorDia: 60,
+    });
+  });
+
+  it("quem tem plano preenche quem não tem", () => {
+    const semPlano = comTrilha({ atualizadoEm: 99 });
+    const comPlano = comTrilha({ dataProva: "2026-09-19", modo: "manutencao", atualizadoEm: 10 });
+
+    expect(mesclar(semPlano, comPlano).trilhas.ed).toMatchObject({
+      dataProva: "2026-09-19",
+      modo: "manutencao",
+    });
+  });
+});

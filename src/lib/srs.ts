@@ -5,14 +5,27 @@
  * vezes antes da prova.
  */
 
-export const INTERVALOS_DIAS = [1, 3, 7, 12] as const;
+/**
+ * Quatro caixas curtas para chegar à prova, e duas longas para não esquecer
+ * depois dela. Os 12 dias fecham o ciclo do prazo de 14; 30 e 90 são o modo
+ * manutenção, que é o que a marca promete ao dizer "ao longo da carreira".
+ */
+export const INTERVALOS_DIAS = [1, 3, 7, 12, 30, 90] as const;
 export const CAIXA_MAXIMA = INTERVALOS_DIAS.length;
+
+/**
+ * Caixa a partir da qual o card conta como sabido para a prova. Fica em 4 de
+ * propósito: prontidão mede estar pronto para a sabatina, não retenção de um
+ * ano. Sem esta separação, acrescentar as caixas de manutenção derrubaria a
+ * prontidão de quem já estudou.
+ */
+export const CAIXA_PRONTO = 4;
 
 export type EstadoCard = {
   /** `${temaSlug}#${indice}` */
   id: string;
   temaSlug: string;
-  /** 0 = nunca revisado; 1 a 4 = caixa de Leitner. */
+  /** 0 = nunca revisado; 1 a 6 = caixa de Leitner (5 e 6 são manutenção). */
   caixa: number;
   /** Data (YYYY-MM-DD) da próxima revisão. */
   vencimento: string;

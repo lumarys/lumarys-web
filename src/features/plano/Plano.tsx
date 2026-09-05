@@ -6,9 +6,16 @@ import Link from "next/link";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { IconeCheck } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
-import { definirPlano } from "@/lib/storage";
+import { estadoDoPlano, ritmoDoPlano } from "@/lib/plano";
+import { definirModo, definirPlano } from "@/lib/storage";
 import { hojeISO, somarDias } from "@/lib/srs";
-import { cx, diasAte } from "@/lib/utils";
+import { cx } from "@/lib/utils";
+
+function formatarDiaMes(dataISO: string): string {
+  if (!dataISO) return "";
+  const [, mes, dia] = dataISO.split("-");
+  return `${dia}/${mes}`;
+}
 
 export type DiaVisual = {
   dia: number;
@@ -26,35 +33,60 @@ export function Plano({
   trilhaSlug,
   prazoSugerido,
   dias,
+  totalTemas,
 }: {
   trilhaSlug: string;
   prazoSugerido: number;
   dias: DiaVisual[];
+  totalTemas: number;
 }) {
   const { progresso, pronto } = useProgresso();
   const trilha = progresso.trilhas[trilhaSlug];
+  const [editando, setEditando] = useState(false);
   const [dataProva, setDataProva] = useState("");
-  const [minutos, setMinutos] = useState(30);
+  const [minutos, setMinutos] = useState<number | null>(null);
+  const [confirmado, setConfirmado] = useState(false);
 
   if (!pronto) {
     return <div className="mx-5 h-48 animate-pulse rounded-2xl border border-[var(--border)]" />;
   }
 
-  if (!trilha?.dataProva) {
-    const sugestao = somarDias(hojeISO(), prazoSugerido);
+  const estado = estadoDoPlano(trilha?.dataProva, dias.length);
+  const emManutencao = trilha?.modo === "manutencao";
+  const meta = trilha?.minutosPorDia ?? 30;
+  const concluidos = trilha?.temasConcluidos ?? {};
+  const diaAtual = estado.dia;
+
+  function gerar(data: string, min: number) {
+    definirPlano(trilhaSlug, data, min);
+    setEditando(false);
+    setConfirmado(true);
+  }
+
+  /* ----------------------------- formulário ----------------------------- */
+
+  if (estado.situacao === "sem-plano" || editando) {
+    // Editar parte do que já existe: errar a data e não ter como corrigir era
+    // o defeito mais simples e mais irritante desta tela.
+    const sugestao = trilha?.dataProva ?? somarDias(hojeISO(), prazoSugerido);
+    const dataEscolhida = dataProva || sugestao;
+    const minEscolhido = minutos ?? meta;
+
     return (
       <div className="flex flex-col gap-3.5 px-5">
         <Card destaque>
-          <RotuloAcento>Montar o plano</RotuloAcento>
+          <RotuloAcento>{editando ? "Ajustar o plano" : "Montar o plano"}</RotuloAcento>
           <p className="mt-2 text-[15px] leading-relaxed">
-            Duas respostas e eu distribuo os {dias.length} dias de estudo até a sua prova.
+            {editando
+              ? "Mude a data ou o tempo por dia. O cronograma se reorganiza sozinho."
+              : `Duas respostas e eu distribuo os ${dias.length} dias de estudo até a sua prova.`}
           </p>
 
           <label className="mt-4 block">
             <span className="text-[13px] font-semibold">Quando é a prova?</span>
             <input
               type="date"
-              value={dataProva || sugestao}
+              value={dataEscolhida}
               min={hojeISO()}
               onChange={(e) => setDataProva(e.target.value)}
               className="mt-1.5 min-h-12 w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-3.5 text-[15px] text-[var(--text)]"
@@ -71,7 +103,7 @@ export function Plano({
                   onClick={() => setMinutos(m)}
                   className={cx(
                     "min-h-12 flex-1 rounded-xl text-sm font-semibold",
-                    minutos === m
+                    minEscolhido === m
                       ? "bg-[var(--accent)] text-[var(--accent-ink)]"
                       : "bg-[var(--elevated)] text-[var(--text-2)]",
                   )}
@@ -84,42 +116,129 @@ export function Plano({
 
           <button
             type="button"
-            onClick={() => definirPlano(trilhaSlug, dataProva || sugestao, minutos)}
+            onClick={() => gerar(dataEscolhida, minEscolhido)}
             className="mt-4 min-h-13 w-full rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)]"
           >
-            Gerar plano
+            {editando ? "Salvar plano" : "Gerar plano"}
           </button>
+
+          {editando ? (
+            <button
+              type="button"
+              onClick={() => setEditando(false)}
+              className="mt-2 min-h-11 w-full text-[13px] text-[var(--muted)]"
+            >
+              Cancelar
+            </button>
+          ) : null}
         </Card>
       </div>
     );
   }
 
-  const faltam = diasAte(trilha.dataProva);
-  const diaAtual = Math.max(1, dias.length - faltam + 1);
-  const concluidos = trilha.temasConcluidos ?? {};
+  /* --------------------------- cartão de estado -------------------------- */
+
+  const minutosHoje = progresso.minutosPorDia[hojeISO()] ?? 0;
+  const pedeHoje = dias[diaAtual - 1]?.temas.reduce((a, t) => a + t.minutos, 0) ?? 0;
+  const ritmo = ritmoDoPlano(estado, Object.keys(concluidos).length, totalTemas);
 
   return (
     <div className="flex flex-col gap-3.5 px-5">
+      {confirmado ? (
+        <p className="rounded-xl border border-[var(--color-success)]/40 bg-[var(--color-success)]/10 px-3.5 py-3 text-sm text-[var(--color-success)]">
+          Plano salvo. A tela Hoje já está seguindo ele.
+        </p>
+      ) : null}
+
       <Card destaque>
         <div className="flex items-baseline justify-between gap-3">
-          <div>
-            <RotuloAcento>Seu plano</RotuloAcento>
-            <p className="mt-1 text-[15px] font-semibold">
-              {faltam > 0
-                ? `Faltam ${faltam} ${faltam === 1 ? "dia" : "dias"}`
-                : faltam === 0
-                  ? "A prova é hoje"
-                  : "A data da prova já passou"}
-            </p>
-          </div>
-          <p className="text-xs text-[var(--muted)]">{trilha.minutosPorDia ?? 30} min/dia</p>
+          <RotuloAcento>{emManutencao ? "Manutenção" : "Seu plano"}</RotuloAcento>
+          <button
+            type="button"
+            onClick={() => setEditando(true)}
+            className="min-h-11 text-xs text-[var(--accent)] underline underline-offset-4"
+          >
+            Editar
+          </button>
         </div>
-        {faltam > 0 && faltam < dias.length ? (
-          <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
-            O plano tem {dias.length} dias e faltam {faltam}. Priorize os dias marcados como
-            essenciais e deixe os complementares para depois da prova.
-          </p>
-        ) : null}
+
+        {estado.situacao === "vencido" && !emManutencao ? (
+          <>
+            <p className="mt-1 text-[15px] font-semibold">
+              A prova foi há {Math.abs(estado.faltam)}{" "}
+              {Math.abs(estado.faltam) === 1 ? "dia" : "dias"}
+            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+              Ou você tem uma prova nova pela frente, ou o objetivo agora é não esquecer o que
+              estudou. As duas coisas têm plano.
+            </p>
+            <div className="mt-3 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => definirModo(trilhaSlug, "manutencao")}
+                className="min-h-12 rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--accent-ink)]"
+              >
+                Manter na memória
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditando(true)}
+                className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
+              >
+                Marcar uma nova prova
+              </button>
+            </div>
+          </>
+        ) : emManutencao ? (
+          <>
+            <p className="mt-1 text-[15px] font-semibold">Cuidando do que você já sabe</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+              Sem cronograma novo. Os cards que você acertou voltam em 30 e em 90 dias, que é o
+              intervalo que sustenta memória de longo prazo.
+            </p>
+            <Link
+              href="/cards/"
+              className="mt-3 flex min-h-12 items-center justify-center rounded-xl bg-[var(--accent)] text-sm font-semibold text-[var(--accent-ink)] no-underline"
+            >
+              Ver a revisão de hoje
+            </Link>
+          </>
+        ) : estado.situacao === "prova-hoje" ? (
+          <>
+            <p className="mt-1 text-[15px] font-semibold">A prova é hoje</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+              Só cards vencidos e leitura do que você já escreveu. Conteúdo novo na véspera não
+              entra.
+            </p>
+          </>
+        ) : estado.situacao === "aguardando" ? (
+          <>
+            <p className="mt-1 text-[15px] font-semibold">Faltam {estado.faltam} dias</p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+              O cronograma de {estado.total} dias começa em {formatarDiaMes(estado.comecaEm ?? "")}.
+              Até lá, estude na ordem que quiser: o plano existe para a reta final.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="mt-1 text-[15px] font-semibold">
+              Dia {estado.dia} de {estado.total} · faltam {estado.faltam}{" "}
+              {estado.faltam === 1 ? "dia" : "dias"}
+            </p>
+            <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+              {ritmo.atraso > 0
+                ? `Atrasado ${ritmo.atraso} ${ritmo.atraso === 1 ? "tema" : "temas"}: o cronograma esperava ${ritmo.esperado} a esta altura.`
+                : "No ritmo do plano."}{" "}
+              Hoje pede {pedeHoje || meta} min e você fez {minutosHoje} de {meta}.
+            </p>
+            <a
+              href={`#dia-${estado.dia}`}
+              className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-[var(--accent)] no-underline"
+            >
+              Ir para o dia de hoje
+            </a>
+          </>
+        )}
       </Card>
 
       <Rotulo>Cronograma</Rotulo>
@@ -130,7 +249,7 @@ export function Plano({
           const todosFeitos = dia.temas.length > 0 && dia.temas.every((t) => concluidos[t.slug]);
 
           return (
-            <li key={dia.dia}>
+            <li key={dia.dia} id={`dia-${dia.dia}`} className="scroll-mt-4">
               <details
                 open={hoje}
                 className={cx(
@@ -176,10 +295,18 @@ export function Plano({
                       href={tema.href}
                       className="flex min-h-11 items-center justify-between gap-3 border-t border-[var(--border)] py-2 text-sm no-underline"
                     >
-                      <span className={cx(concluidos[tema.slug] ? "text-[var(--muted)] line-through" : "text-[var(--text)]")}>
+                      <span
+                        className={cx(
+                          concluidos[tema.slug]
+                            ? "text-[var(--muted)] line-through"
+                            : "text-[var(--text)]",
+                        )}
+                      >
                         {tema.titulo}
                       </span>
-                      <span className="shrink-0 text-xs text-[var(--muted)]">{tema.minutos} min</span>
+                      <span className="shrink-0 text-xs text-[var(--muted)]">
+                        {tema.minutos} min
+                      </span>
                     </Link>
                   ))}
                   {dia.revisao.length > 0 ? (
