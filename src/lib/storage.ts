@@ -47,6 +47,11 @@ export type ProgressoTrilha = {
   ultimoTema?: string;
   /** YYYY-MM-DD da prova, definido no onboarding. */
   dataProva?: string;
+  /**
+   * "prova" é o padrão. "manutencao" é depois da prova: o objetivo deixa de
+   * ser cobrir a trilha e passa a ser não esquecer o que já foi estudado.
+   */
+  modo?: "prova" | "manutencao";
   minutosPorDia?: number;
   atualizadoEm: number;
 };
@@ -231,8 +236,22 @@ export function definirPlano(trilha: string, dataProva: string, minutosPorDia: n
       ...p,
       trilhas: {
         ...p.trilhas,
-        [trilha]: { ...t, dataProva, minutosPorDia, atualizadoEm: Date.now() },
+        // Marcar uma data nova tira a trilha do modo manutenção: voltou a
+        // existir uma prova para a qual se preparar.
+        [trilha]: { ...t, dataProva, minutosPorDia, modo: "prova", atualizadoEm: Date.now() },
       },
+    };
+  });
+}
+
+/** Depois da prova: o plano sai do cronograma e vira manutenção da memória. */
+export function definirModo(trilha: string, modo: "prova" | "manutencao"): Progresso {
+  sincronizar(trilha);
+  return atualizar((p) => {
+    const t = garantirTrilha(p, trilha);
+    return {
+      ...p,
+      trilhas: { ...p.trilhas, [trilha]: { ...t, modo, atualizadoEm: Date.now() } },
     };
   });
 }
@@ -326,15 +345,22 @@ function mesclarTrilha(l: ProgressoTrilha, r: ProgressoTrilha): ProgressoTrilha 
     .sort((a, b) => a.em - b.em)
     .slice(-20);
 
+  const recente = l.atualizadoEm >= r.atualizadoEm ? l : r;
+  const antigo = recente === l ? r : l;
+
   return {
     iniciadaEm: Math.min(l.iniciadaEm, r.iniciadaEm),
     temasConcluidos: { ...r.temasConcluidos, ...l.temasConcluidos },
     quizzes: juntarQuizzes(l.quizzes, r.quizzes),
     preTestes: juntarQuizzes(l.preTestes, r.preTestes),
     simulados,
-    ultimoTema: l.atualizadoEm >= r.atualizadoEm ? l.ultimoTema : r.ultimoTema,
-    dataProva: l.dataProva ?? r.dataProva,
-    minutosPorDia: l.minutosPorDia ?? r.minutosPorDia,
+    // Preferência do aluno (data da prova, meta diária, modo) segue o lado mais
+    // recente: agora que dá para editar o plano, "o local sempre vence" faria a
+    // edição feita no celular ser desfeita ao abrir o computador.
+    ultimoTema: recente.ultimoTema ?? antigo.ultimoTema,
+    dataProva: recente.dataProva ?? antigo.dataProva,
+    minutosPorDia: recente.minutosPorDia ?? antigo.minutosPorDia,
+    modo: recente.modo ?? antigo.modo,
     atualizadoEm: Math.max(l.atualizadoEm, r.atualizadoEm),
   };
 }

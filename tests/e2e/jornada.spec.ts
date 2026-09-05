@@ -32,8 +32,9 @@ test("2. onboarding gera o plano de 14 dias", async () => {
   await page.getByRole("button", { name: "45" }).click();
   await page.getByRole("button", { name: /gerar plano/i }).click();
 
-  await expect(page.getByText(/faltam \d+ dias/i)).toBeVisible();
-  await expect(page.getByText("45 min/dia")).toBeVisible();
+  await expect(page.getByText(/dia 1 de 14/i)).toBeVisible();
+  await expect(page.getByText(/você fez 0 de 45/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: /ir para o dia de hoje/i })).toBeVisible();
   // 14 dias no cronograma, o primeiro aberto.
   await expect(page.locator("details")).toHaveCount(14);
   await expect(page.locator("details[open]").first()).toContainText(/Fundamentos/);
@@ -201,4 +202,30 @@ test("15. conta em modo convidado resume o aparelho e exporta os dados", async (
   await page.getByRole("button", { name: /exportar meus dados/i }).click();
   const arquivo = await download;
   expect(arquivo.suggestedFilename()).toBe("lumarys-meus-dados.json");
+});
+
+test("16. o plano pode ser editado e a data vencida tem saída", async () => {
+  await page.goto(`${TRILHA}plano/`);
+  await page.getByRole("button", { name: /^editar$/i }).click();
+  await page.getByRole("button", { name: "60" }).click();
+  await page.getByRole("button", { name: /salvar plano/i }).click();
+
+  await expect(page.getByText(/plano salvo/i)).toBeVisible();
+  await expect(page.getByText("60 min", { exact: false }).first()).toBeVisible();
+
+  // Data no passado deixava a tela sem nenhum caminho: nenhum dia marcado como
+  // hoje, todos os acordeões fechados e nada para clicar.
+  await page.getByRole("button", { name: /^editar$/i }).click();
+  await page.evaluate(() => {
+    const chave = "lumarys.progresso.v1";
+    const p = JSON.parse(window.localStorage.getItem(chave)!);
+    p.trilhas["engenharia-de-dados"].dataProva = "2026-01-10";
+    window.localStorage.setItem(chave, JSON.stringify(p));
+  });
+  await page.reload();
+
+  await expect(page.getByText(/a prova foi há/i)).toBeVisible();
+  await page.getByRole("button", { name: /manter na memória/i }).click();
+  await expect(page.getByText(/cuidando do que você já sabe/i)).toBeVisible();
+  await expect(page.getByRole("link", { name: /ver a revisão de hoje/i })).toBeVisible();
 });

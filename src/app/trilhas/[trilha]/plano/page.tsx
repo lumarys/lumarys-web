@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
 import { Plano, type DiaVisual } from "@/features/plano/Plano";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
-import { listarTrilhas, obterTema, obterTrilha } from "@/lib/content";
+import { contarTemas, listarTrilhas, obterTema, obterTrilha } from "@/lib/content";
 import { alternativas } from "@/lib/seo";
 
 type Params = { trilha: string };
@@ -70,7 +70,12 @@ export default async function PaginaPlano({ params }: { params: Promise<Params> 
           Plano de {trilha.prazoSugeridoDias} dias
         </h1>
       </header>
-      <Plano trilhaSlug={trilha.slug} prazoSugerido={trilha.prazoSugeridoDias} dias={dias} />
+      <Plano
+        trilhaSlug={trilha.slug}
+        prazoSugerido={trilha.prazoSugeridoDias}
+        dias={dias}
+        totalTemas={contarTemas(trilha)}
+      />
     </AppShell>
   );
 }
