@@ -91,7 +91,13 @@ export function prontidaoDaTrilha(
   modulos: EntradaModulo[],
   progresso: Progresso,
   trilhaSlug: string,
-): { geral: number; porModulo: ProntidaoModulo[]; pontoFraco?: ProntidaoModulo } {
+): {
+  geral: number;
+  porModulo: ProntidaoModulo[];
+  pontoFraco?: ProntidaoModulo;
+  /** Os quatro sinais agregados na trilha inteira, para a tela explicar o número. */
+  componentes: { cobertura: number; quiz: number; cards: number; simulado: number };
+} {
   const trilha = progresso.trilhas[trilhaSlug];
   const porModulo = modulos.map((m) => prontidaoDoModulo(m, progresso, trilha));
   const comTemas = porModulo.filter((p) => p.temasTotal > 0);
@@ -109,7 +115,22 @@ export function prontidaoDaTrilha(
   const iniciados = comTemas.filter((p) => p.temasConcluidos > 0 || p.cards > 0);
   const pontoFraco = iniciados.slice().sort((a, b) => a.score - b.score)[0];
 
-  return { geral, porModulo, pontoFraco };
+  const media = (campo: "cobertura" | "quiz" | "cards" | "simulado") =>
+    pesoTotal === 0
+      ? 0
+      : Math.round(comTemas.reduce((acc, p) => acc + p[campo] * p.temasTotal, 0) / pesoTotal);
+
+  return {
+    geral,
+    porModulo,
+    pontoFraco,
+    componentes: {
+      cobertura: media("cobertura"),
+      quiz: media("quiz"),
+      cards: media("cards"),
+      simulado: media("simulado"),
+    },
+  };
 }
 
 export function rotuloProntidao(score: number): string {
