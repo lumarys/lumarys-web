@@ -77,3 +77,33 @@ test("a explicação escrita fica guardada e os pré-requisitos aparecem", async
   await page.reload();
   await expect(page.getByRole("textbox", { name: /sua explicação/i })).toHaveValue(/em memória/);
 });
+
+test("conforto de leitura: tamanho da letra persiste e o modo foco esconde a casca", async ({
+  page,
+}) => {
+  await page.goto(TEMA);
+
+  const paragrafo = page.locator("#ler p").first();
+  const antes = await paragrafo.evaluate((el) => getComputedStyle(el).fontSize);
+
+  await page.getByRole("button", { name: /conforto de leitura/i }).click();
+  await page.getByRole("button", { name: /aumentar a letra/i }).click();
+  await expect
+    .poll(() => paragrafo.evaluate((el) => getComputedStyle(el).fontSize))
+    .not.toBe(antes);
+
+  // Modo foco tira sumário e abas do caminho.
+  await page.getByRole("button", { name: /modo sem distração/i }).click();
+  await expect(page.getByRole("navigation", { name: /seções do tema/i })).toBeHidden();
+
+  // A preferência de tamanho sobrevive ao recarregar.
+  await page.reload();
+  await expect
+    .poll(() =>
+      page
+        .locator("#ler p")
+        .first()
+        .evaluate((el) => getComputedStyle(el).fontSize),
+    )
+    .not.toBe(antes);
+});

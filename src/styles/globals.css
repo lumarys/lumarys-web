@@ -153,7 +153,8 @@
 }
 
 .prose-lumarys p {
-  font-size: 15px;
+  /* A escala é ajustável pelo leitor (ver ConfortoLeitura); 1 é o padrão. */
+  font-size: calc(15px * var(--escala-leitura, 1));
   line-height: 1.65;
   margin: 0 0 14px;
 }
@@ -250,4 +251,10 @@
   background: var(--elevated);
   font-weight: 600;
   white-space: nowrap;
+}
+
+/* Modo sem distração: some tudo que não é o texto do tema. A pessoa pediu para
+   ler, então some a casca — sumário, abas e o botão de voltar ao topo. */
+[data-foco="1"] [data-casca] {
+  display: none !important;
 }
