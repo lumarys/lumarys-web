@@ -57,6 +57,8 @@ export type ProgressoTrilha = {
   preTestes: Record<string, ResultadoQuiz>;
   /** slug do tema -> último drill conferido */
   drills?: Record<string, ResultadoQuiz>;
+  /** slug do tema -> explicação que o aluno escreveu com as próprias palavras */
+  feynman?: Record<string, string>;
   simulados: ResultadoSimulado[];
   ultimoTema?: string;
   /** YYYY-MM-DD da prova, definido no onboarding. */
@@ -282,6 +284,28 @@ export function definirPlano(trilha: string, dataProva: string, minutosPorDia: n
   });
 }
 
+/**
+ * Guarda a explicação que o aluno escreveu para si mesmo. Fica no aparelho
+ * como o resto do progresso: é rascunho de estudo, não conteúdo publicado.
+ */
+export function salvarFeynman(trilha: string, tema: string, texto: string): Progresso {
+  sincronizar(trilha);
+  return atualizar((p) => {
+    const t = garantirTrilha(p, trilha);
+    return {
+      ...p,
+      trilhas: {
+        ...p.trilhas,
+        [trilha]: {
+          ...t,
+          feynman: { ...(t.feynman ?? {}), [tema]: texto },
+          atualizadoEm: Date.now(),
+        },
+      },
+    };
+  });
+}
+
 /** Depois da prova: o plano sai do cronograma e vira manutenção da memória. */
 export function definirModo(trilha: string, modo: "prova" | "manutencao"): Progresso {
   sincronizar(trilha);
@@ -392,6 +416,8 @@ function mesclarTrilha(l: ProgressoTrilha, r: ProgressoTrilha): ProgressoTrilha 
     quizzes: juntarQuizzes(l.quizzes, r.quizzes),
     preTestes: juntarQuizzes(l.preTestes, r.preTestes),
     drills: juntarQuizzes(l.drills ?? {}, r.drills ?? {}),
+    // Texto escrito: vence o lado mais recente, campo a campo.
+    feynman: { ...(antigo.feynman ?? {}), ...(recente.feynman ?? {}) },
     simulados,
     // Preferência do aluno (data da prova, meta diária, modo) segue o lado mais
     // recente: agora que dá para editar o plano, "o local sempre vence" faria a

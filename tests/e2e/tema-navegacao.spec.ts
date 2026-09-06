@@ -61,3 +61,19 @@ test("voltar ao topo aparece só depois de rolar", async ({ page }) => {
   // O próprio botão some quando a página volta para a primeira tela.
   await expect(botao).toHaveCount(0);
 });
+
+test("a explicação escrita fica guardada e os pré-requisitos aparecem", async ({ page }) => {
+  // spark-rdd declara spark-introducao como pré-requisito no conteúdo.
+  await page.goto("/trilhas/engenharia-de-dados/spark/spark-rdd/");
+
+  const antes = page.getByRole("navigation", { name: /pré-requisitos/i });
+  await expect(antes).toBeVisible();
+  await expect(antes.getByRole("link", { name: /spark: introdução/i })).toBeVisible();
+
+  const campo = page.getByRole("textbox", { name: /sua explicação/i });
+  await campo.fill("Spark é rápido porque mantém o dado em memória entre as etapas.");
+  await expect(page.getByText(/guardado neste aparelho/i)).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole("textbox", { name: /sua explicação/i })).toHaveValue(/em memória/);
+});
