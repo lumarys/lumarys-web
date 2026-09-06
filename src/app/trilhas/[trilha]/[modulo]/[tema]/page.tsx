@@ -11,6 +11,8 @@ import { componentesMdx } from "@/components/mdx";
 import { corpos } from "@content/temas/corpos.generated";
 import { ConcluirTema } from "@/features/tema/ConcluirTema";
 import { Drill } from "@/features/tema/Drill";
+import { Feynman } from "@/features/tema/Feynman";
+import { PreRequisitos } from "@/features/tema/PreRequisitos";
 import { Flashcards } from "@/features/tema/Flashcards";
 import { Pomodoro } from "@/features/tema/Pomodoro";
 import { PreTeste } from "@/features/tema/PreTeste";
@@ -72,6 +74,12 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
   const proximoModulo = moduloDe(proximo?.slug);
   const anteriorModulo = moduloDe(anterior?.slug);
 
+  // Pré-requisitos existem no conteúdo desde sempre e nenhuma tela lia.
+  const preRequisitos = tema.preRequisitos.flatMap((slug) => {
+    const alvo = localizarTema(trilhaSlug, slug);
+    return alvo ? [{ slug, titulo: alvo.tema.titulo, modulo: alvo.modulo.slug }] : [];
+  });
+
   // Chips do sumário: só as etapas que este tema realmente tem.
   const secoes = [
     tema.preTeste.length > 0 ? { id: "preteste", rotulo: "Pré-teste" } : null,
@@ -120,6 +128,10 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
         </header>
 
         <SumarioTema secoes={secoes} />
+
+        {preRequisitos.length > 0 ? (
+          <PreRequisitos trilhaSlug={trilha.slug} temas={preRequisitos} />
+        ) : null}
 
         <Card destaque className="mt-5">
           <RotuloAcento>Por que cai</RotuloAcento>
@@ -193,14 +205,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
           </section>
         ) : null}
 
-        <Card id="explicar" className="mt-6 scroll-mt-16">
-          <RotuloAcento>Explique para um gerente</RotuloAcento>
-          <p className="mt-1.5 text-[15px] leading-relaxed text-[var(--text-2)]">{tema.feynman}</p>
-          <p className="mt-3 rounded-xl border border-dashed border-[var(--border)] px-3.5 py-3 text-sm text-[var(--muted)]">
-            Responda em voz alta antes de seguir. Se travar numa palavra técnica, é sinal de que
-            ainda não entendeu essa parte.
-          </p>
-        </Card>
+        <Feynman trilhaSlug={trilha.slug} temaSlug={tema.slug} pergunta={tema.feynman} />
 
         {orais.length > 0 ? (
           <Recolhivel
