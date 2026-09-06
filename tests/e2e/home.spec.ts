@@ -51,10 +51,14 @@ test("quem já estuda encontra o caminho de volta na home", async ({ page }) => 
   await expect(page.getByRole("link", { name: /continuar: mapreduce/i })).toBeVisible();
 });
 
-test("a home cabe numa rolagem razoável no celular", async ({ page }, info) => {
+test("a home não volta a crescer sem limite", async ({ page }, info) => {
   test.skip(info.project.name !== "pixel-7", "medida de altura só faz sentido em 390 px");
 
+  // Teto de regressão, não meta de design: a página cresceu de propósito ao
+  // ganhar a prévia do produto e as perguntas frequentes, que é justamente o
+  // que faltava para alguém decidir. O que precisa caber acima da dobra está
+  // coberto pelo primeiro teste deste arquivo.
   await page.goto("/");
   const altura = await page.evaluate(() => document.documentElement.scrollHeight);
-  expect(altura).toBeLessThan(6_000);
+  expect(altura).toBeLessThan(7_000);
 });

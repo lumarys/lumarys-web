@@ -68,6 +68,29 @@ export function alternativas(url: string, opcoes: { markdown?: boolean } = {}) {
   };
 }
 
+export function jsonLdFaq(perguntas: { pergunta: string; resposta: string }[]) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: perguntas.map((p) => ({
+      "@type": "Question",
+      name: p.pergunta,
+      acceptedAnswer: { "@type": "Answer", text: p.resposta },
+    })),
+  };
+}
+
+/** Autoria nomeada: sinal de confiança que o site inteiro não tinha. */
+export function jsonLdPessoa() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Diego Vieira",
+    url: `${SITE.url}/sobre/`,
+    worksFor: { "@id": "https://cernyn.com/#organizacao" },
+  };
+}
+
 export function jsonLdBreadcrumb(itens: { nome: string; url: string }[]) {
   return {
     "@context": "https://schema.org",
