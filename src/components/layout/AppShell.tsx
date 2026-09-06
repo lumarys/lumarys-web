@@ -7,29 +7,29 @@ import { SiteHeader } from "./SiteHeader";
 import { TabBar } from "./TabBar";
 
 /**
- * Casca do app: conteúdo rolável, rodapé legal no fim da página e barra de
- * navegação fixa embaixo. Largura máxima de leitura em telas grandes, mas o
- * alvo primário é 390px.
+ * Casca do app: cabeçalho em toda página, conteúdo rolável, rodapé legal no fim
+ * e a barra de abas apenas nas telas que dependem do progresso do aluno.
+ *
+ * A regra mora aqui e em `lib/rotas`, não em cada página. Antes cada rota
+ * escolhia: a home ficava sem abas, a trilha ficava sem cabeçalho — o clique
+ * principal do site jogava o visitante numa página sem marca e sem menu — e as
+ * páginas públicas ofereciam abas de telas vazias. Largura máxima de leitura em
+ * telas grandes, mas o alvo primário é 390px.
  */
 export function AppShell({
   children,
   comRodape = true,
-  comAbas = true,
-  comCabecalho = false,
   largura = "leitura",
 }: {
   children: ReactNode;
   comRodape?: boolean;
-  comAbas?: boolean;
-  /** Páginas públicas ganham cabeçalho; telas de app usam só a barra inferior. */
-  comCabecalho?: boolean;
   /** "leitura" para texto corrido, "site" para páginas de apresentação. */
   largura?: "leitura" | "site";
 }) {
   return (
     <div className="flex min-h-dvh flex-col">
       <SincronizarConta />
-      {comCabecalho ? <SiteHeader /> : null}
+      <SiteHeader />
       <main
         id="conteudo"
         className={largura === "site" ? "w-full flex-1" : "mx-auto w-full max-w-3xl flex-1"}
@@ -37,7 +37,7 @@ export function AppShell({
         {children}
       </main>
       {comRodape ? <SiteFooter /> : null}
-      {comAbas ? <TabBar /> : null}
+      <TabBar />
     </div>
   );
 }

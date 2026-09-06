@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function PaginaContato() {
   return (
-    <AppShell comCabecalho>
+    <AppShell>
       <div className="px-5 pb-8 pt-5">
         <Rotulo>Contato</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold">Fale com a gente</h1>
@@ -31,10 +31,7 @@ export default function PaginaContato() {
             <br />
             CNPJ {EMPRESA.cnpj}
           </p>
-          <ContatoLink
-            rotulo="Abrir e-mail"
-            className="mt-3.5 flex min-h-12 w-full items-center justify-center rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)]"
-          />
+          <ContatoLink rotulo="Abrir e-mail" className="mt-3.5 w-full" />
           <p className="mt-2.5 text-xs text-[var(--muted)]">
             O endereço é montado no clique, para não ser colhido por robôs de spam.
           </p>
