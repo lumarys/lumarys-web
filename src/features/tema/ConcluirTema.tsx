@@ -44,7 +44,9 @@ export function ConcluirTema({
         </button>
       )}
 
-      {proximo ? (
+      {/* O próximo tema só aparece depois de concluir: antes, ele competia com o
+          próprio botão de concluir e a barra de navegação no fim da página. */}
+      {concluido && proximo ? (
         <Link
           href={`/trilhas/${trilhaSlug}/${proximo.modulo}/${proximo.slug}/`}
           className="flex min-h-13 items-center justify-between gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-[15px] font-semibold no-underline"

@@ -6,14 +6,18 @@ export function Card({
   className,
   destaque = false,
   as: Tag = "div",
+  id,
 }: {
   children: ReactNode;
   className?: string;
   destaque?: boolean;
   as?: "div" | "section" | "article" | "li";
+  /** Âncora, para o sumário do tema poder saltar até aqui. */
+  id?: string;
 }) {
   return (
     <Tag
+      id={id}
       className={cx(
         "rounded-2xl border bg-[var(--surface)] p-4",
         destaque ? "border-[var(--accent)]/40" : "border-[var(--border)]",
@@ -27,7 +31,12 @@ export function Card({
 
 export function Rotulo({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <p className={cx("text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]", className)}>
+    <p
+      className={cx(
+        "text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]",
+        className,
+      )}
+    >
       {children}
     </p>
   );

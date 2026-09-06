@@ -59,9 +59,12 @@ test("tema: breadcrumbs visíveis levam à trilha", async ({ page }) => {
   await page.goto(TEMA);
   const nav = page.getByRole("navigation", { name: "Você está em" });
   await expect(nav).toBeVisible();
-  await expect(nav.getByRole("link", { name: "Trilhas" })).toBeVisible();
-  await nav.getByRole("link", { name: "Engenharia de Dados" }).click();
-  await expect(page).toHaveURL(new RegExp(`${TRILHA}$`));
+
+  // Em 390 px sobra só o último passo, que é o módulo: três migalhas truncadas
+  // dividiam a linha com o Pomodoro e quebravam em duas alturas de toque. O que
+  // não pode faltar em nenhuma largura é o caminho de volta para a trilha.
+  await nav.getByRole("link").last().click();
+  await expect(page).toHaveURL(new RegExp(TRILHA.replace(/\//g, "\\/")));
 });
 
 test("tema: JSON-LD com breadcrumb, recurso de aprendizagem, vídeos datados e FAQ", async ({
