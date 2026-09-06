@@ -66,6 +66,13 @@ export function PreTeste({
         <p className="mt-2 text-[15px] leading-relaxed">
           {anterior.acertos} de {anterior.total}, em {formatarData(anterior.atualizadoEm)}. Siga
           para o conteúdo; o pré-teste serve para a primeira leitura.
+          {anterior.enganos ? (
+            <>
+              {" "}
+              Naquele dia você marcou confiança alta e errou{" "}
+              {anterior.enganos === 1 ? "uma vez" : `${anterior.enganos} vezes`}.
+            </>
+          ) : null}
         </p>
         <button
           type="button"
@@ -89,7 +96,7 @@ export function PreTeste({
 
   function avancar() {
     if (indice + 1 >= perguntas.length) {
-      registrarQuiz(trilhaSlug, temaSlug, acertos, perguntas.length, "preTeste");
+      registrarQuiz(trilhaSlug, temaSlug, acertos, perguntas.length, "preTeste", { enganos });
       setTerminou(true);
       return;
     }

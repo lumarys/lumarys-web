@@ -4,6 +4,7 @@ import {
   CHAVE,
   contarRespostas,
   marcarVisita,
+  registrarQuiz,
   mesclar,
   progressoVazio,
   trilhaIniciada,
@@ -97,7 +98,7 @@ describe("trilha iniciada", () => {
       preTestes: { "big-data": { acertos: 1, total: 2, atualizadoEm: 5 } },
     };
     expect(trilhaIniciada(t)).toBe(true);
-    expect(contarRespostas(t)).toEqual({ preTestes: 1, quizzes: 0, simulados: 0 });
+    expect(contarRespostas(t)).toEqual({ preTestes: 1, quizzes: 0, simulados: 0, drills: 0 });
   });
 
   it("plano definido também conta", () => {
@@ -150,5 +151,43 @@ describe("marcar visita", () => {
     const depois = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
 
     expect(depois.atualizadoEm).toBe(antes.atualizadoEm);
+  });
+});
+
+describe("sinais do tema que antes eram descartados", () => {
+  it("guarda os enganos de confiança alta do pré-teste", () => {
+    window.localStorage.clear();
+    registrarQuiz("ed", "big-data", 1, 3, "preTeste", { enganos: 2 });
+
+    const p = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
+    expect(p.trilhas.ed?.preTestes["big-data"]).toMatchObject({ acertos: 1, enganos: 2 });
+  });
+
+  it("guarda quais perguntas do quiz foram erradas", () => {
+    window.localStorage.clear();
+    registrarQuiz("ed", "spark-rdd", 2, 4, "quiz", { erradas: [1, 3] });
+
+    const p = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
+    expect(p.trilhas.ed?.quizzes["spark-rdd"]?.erradas).toEqual([1, 3]);
+  });
+
+  it("guarda o drill num campo próprio, sem se misturar ao quiz", () => {
+    window.localStorage.clear();
+    registrarQuiz("ed", "etl-vs-elt", 4, 5, "drill");
+
+    const p = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
+    expect(p.trilhas.ed?.drills?.["etl-vs-elt"]).toMatchObject({ acertos: 4, total: 5 });
+    expect(p.trilhas.ed?.quizzes["etl-vs-elt"]).toBeUndefined();
+    expect(contarRespostas(p.trilhas.ed).drills).toBe(1);
+  });
+
+  it("mesclagem mantém o melhor drill e tolera o lado sem o campo", () => {
+    const antigo = comTrilha({
+      drills: { "etl-vs-elt": { acertos: 2, total: 5, atualizadoEm: 1 } },
+    });
+    const semCampo = comTrilha({ temasConcluidos: { "big-data": 9 } });
+
+    expect(mesclar(antigo, semCampo).trilhas.ed?.drills?.["etl-vs-elt"]?.acertos).toBe(2);
+    expect(mesclar(semCampo, antigo).trilhas.ed?.drills?.["etl-vs-elt"]?.acertos).toBe(2);
   });
 });

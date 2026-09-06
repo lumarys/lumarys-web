@@ -183,7 +183,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
 
         {tema.drills.map((drill, i) => (
           <section key={i} id={i === 0 ? "drill" : undefined} className="mt-6 scroll-mt-16">
-            <Drill drill={drill} />
+            <Drill drill={drill} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
           </section>
         ))}
 

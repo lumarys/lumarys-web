@@ -27,6 +27,18 @@ export type ResultadoQuiz = {
   acertos: number;
   total: number;
   atualizadoEm: number;
+  /**
+   * Índices das perguntas erradas, para o resultado poder dizer o que revisar
+   * em vez de só mostrar a nota. Opcional: resultados gravados antes disto não
+   * têm o campo.
+   */
+  erradas?: number[];
+  /**
+   * Só no pré-teste: quantas vezes a pessoa marcou confiança alta e errou. É o
+   * sinal mais valioso do método — onde ela não sabe que não sabe — e era
+   * calculado, mostrado uma vez e jogado fora.
+   */
+  enganos?: number;
 };
 
 export type ResultadoSimulado = {
@@ -43,6 +55,8 @@ export type ProgressoTrilha = {
   quizzes: Record<string, ResultadoQuiz>;
   /** slug do tema -> último pré-teste (acertos antes de estudar) */
   preTestes: Record<string, ResultadoQuiz>;
+  /** slug do tema -> último drill conferido */
+  drills?: Record<string, ResultadoQuiz>;
   simulados: ResultadoSimulado[];
   ultimoTema?: string;
   /** YYYY-MM-DD da prova, definido no onboarding. */
@@ -132,6 +146,7 @@ export function trilhaIniciada(t: ProgressoTrilha | undefined): boolean {
     Object.keys(t.temasConcluidos).length > 0 ||
     Object.keys(t.preTestes).length > 0 ||
     Object.keys(t.quizzes).length > 0 ||
+    Object.keys(t.drills ?? {}).length > 0 ||
     t.simulados.length > 0 ||
     Boolean(t.dataProva)
   );
@@ -141,11 +156,13 @@ export function contarRespostas(t: ProgressoTrilha | undefined): {
   preTestes: number;
   quizzes: number;
   simulados: number;
+  drills: number;
 } {
   return {
     preTestes: Object.keys(t?.preTestes ?? {}).length,
     quizzes: Object.keys(t?.quizzes ?? {}).length,
     simulados: t?.simulados.length ?? 0,
+    drills: Object.keys(t?.drills ?? {}).length,
   };
 }
 
@@ -203,20 +220,21 @@ export function registrarQuiz(
   tema: string,
   acertos: number,
   total: number,
-  tipo: "quiz" | "preTeste" = "quiz",
+  tipo: "quiz" | "preTeste" | "drill" = "quiz",
+  extra: { erradas?: number[]; enganos?: number } = {},
 ): Progresso {
   sincronizar(trilha);
   return atualizar((p) => {
     const agora = Date.now();
     const t = garantirTrilha(p, trilha);
-    const chave = tipo === "quiz" ? "quizzes" : "preTestes";
+    const chave = tipo === "quiz" ? "quizzes" : tipo === "preTeste" ? "preTestes" : "drills";
     return {
       ...p,
       trilhas: {
         ...p.trilhas,
         [trilha]: {
           ...t,
-          [chave]: { ...t[chave], [tema]: { acertos, total, atualizadoEm: agora } },
+          [chave]: { ...t[chave], [tema]: { acertos, total, atualizadoEm: agora, ...extra } },
           atualizadoEm: agora,
         },
       },
@@ -373,6 +391,7 @@ function mesclarTrilha(l: ProgressoTrilha, r: ProgressoTrilha): ProgressoTrilha 
     temasConcluidos: { ...r.temasConcluidos, ...l.temasConcluidos },
     quizzes: juntarQuizzes(l.quizzes, r.quizzes),
     preTestes: juntarQuizzes(l.preTestes, r.preTestes),
+    drills: juntarQuizzes(l.drills ?? {}, r.drills ?? {}),
     simulados,
     // Preferência do aluno (data da prova, meta diária, modo) segue o lado mais
     // recente: agora que dá para editar o plano, "o local sempre vence" faria a
