@@ -35,7 +35,7 @@ for (const caminho of PAGINAS) {
 
 test("o botão principal do hero tem contraste legível", async ({ page }) => {
   await page.goto("/");
-  const botao = page.getByRole("link", { name: /ver a trilha/i }).first();
+  const botao = page.getByRole("link", { name: /montar meu plano/i }).first();
   await expect(botao).toBeVisible();
 
   const cores = await botao.evaluate((el) => {
@@ -68,7 +68,9 @@ test("alvos de toque têm ao menos 44px", async ({ page }) => {
     if (!(await alvo.isVisible())) continue;
     const caixa = await alvo.boundingBox();
     if (caixa && caixa.height < 44) {
-      pequenos.push(`${(await alvo.textContent())?.trim().slice(0, 30)} (${Math.round(caixa.height)}px)`);
+      pequenos.push(
+        `${(await alvo.textContent())?.trim().slice(0, 30)} (${Math.round(caixa.height)}px)`,
+      );
     }
   }
 

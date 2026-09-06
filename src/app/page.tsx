@@ -12,7 +12,14 @@ import {
   IconeSimulado,
   IconeTrilha,
 } from "@/components/ui/icons";
-import { estatisticasDaTrilha, listarTrilhas, temasDoModulo } from "@/lib/content";
+import { Amostra } from "@/features/home/Amostra";
+import { DeVolta } from "@/features/home/DeVolta";
+import {
+  estatisticasDaTrilha,
+  listarTrilhas,
+  sequenciaDaTrilha,
+  temasDoModulo,
+} from "@/lib/content";
 import { formatarMinutos } from "@/lib/utils";
 import { trilhasEmBreve } from "@content/trilhas";
 
@@ -50,29 +57,22 @@ const DIFERENCIAIS = [
   },
 ];
 
-const PASSOS = [
-  {
-    titulo: "Responda antes de aprender",
-    texto: "Todo tema abre com um pré-teste. Errar antes fixa mais do que ler duas vezes.",
-  },
-  {
-    titulo: "Uma próxima ação por vez",
-    texto: "A tela Hoje mostra um tema, um drill ou os cards vencidos. Nunca um menu de opções.",
-  },
-  {
-    titulo: "Revisão espaçada e intercalada",
-    texto: "Os cards voltam em 1, 3, 7 e 12 dias, misturando módulos para você não decorar a ordem.",
-  },
-  {
-    titulo: "Simulado e ponto fraco",
-    texto: "No fim, o placar por módulo aponta onde voltar. O plano do dia seguinte já reflete isso.",
-  },
-];
-
 export default function Home() {
   const trilhas = listarTrilhas();
   const principal = trilhas[0];
   const numeros = principal ? estatisticasDaTrilha(principal) : null;
+
+  // Amostra escolhida do próprio conteúdo: o primeiro tema da trilha, para a
+  // home mostrar o que promete em vez de descrever.
+  const primeiro = sequenciaDaTrilha(principal!)[0];
+  const cardAmostra = primeiro?.tema.flashcards[0];
+  const oralAmostra = primeiro?.tema.perguntas.find((q) => q.tipo === "oral");
+  const sequencia = sequenciaDaTrilha(principal!).map(({ modulo, tema }) => ({
+    slug: tema.slug,
+    titulo: tema.titulo,
+    modulo: modulo.slug,
+    minutos: tema.minutos,
+  }));
 
   return (
     <AppShell largura="site">
@@ -93,36 +93,50 @@ export default function Home() {
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/25 bg-[var(--accent)]/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--accent)]">
               <span className="size-1.5 rounded-full bg-[var(--accent)]" />
-              Trilhas em português
+              {principal?.origem ?? "Trilhas em português"}
             </p>
 
+            {/* Quem busca "sabatina de engenharia de dados" precisa saber em
+                cinco segundos que chegou ao lugar certo. O título genérico
+                deixava isso para o texto do botão. */}
             <h1 className="font-display mt-5 text-[34px] font-bold leading-[1.08] sm:text-[42px] lg:text-[46px]">
-              Estude do jeito que a{" "}
-              <span className="relative whitespace-nowrap text-[var(--accent)]">prova cobra</span>.
+              {principal?.titulo ?? "Trilhas de estudo"} em{" "}
+              <span className="relative whitespace-nowrap text-[var(--accent)]">
+                {principal?.prazoSugeridoDias ?? 14} dias
+              </span>
             </h1>
 
             <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-[var(--text-2)]">
-              A Lumarys pega a ementa oficial de uma prova, sabatina ou certificação e transforma
-              em estudo ativo: vídeo em português conferido, explicação escrita, revisão espaçada e
-              simulado no formato real.
+              {principal?.formatoProva ?? "Prova"} no {principal?.origem ?? ""}. A ementa oficial
+              vira estudo ativo: {numeros?.temas ?? 30} temas com vídeo em português conferido,
+              explicação escrita, repetição espaçada e simulado no formato real.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <BotaoLink href={principal ? `/trilhas/${principal.slug}/` : "/trilhas/"}>
-                <span className="sm:hidden">Ver a trilha de dados</span>
-                <span className="hidden sm:inline">Ver a trilha de Engenharia de Dados</span>
+              <BotaoLink href={principal ? `/trilhas/${principal.slug}/plano/` : "/trilhas/"}>
+                Montar meu plano de {principal?.prazoSugeridoDias ?? 14} dias
                 <IconeSeta size={18} />
               </BotaoLink>
-              <BotaoLink href="/metodo/" variante="secundario">
-                Como o método funciona
+              <BotaoLink
+                href={principal ? `/trilhas/${principal.slug}/` : "/trilhas/"}
+                variante="fantasma"
+              >
+                ou ver os {numeros?.temas ?? 30} temas
               </BotaoLink>
             </div>
 
             <p className="mt-4 flex items-center gap-2 text-[13px] text-[var(--muted)]">
               <IconeCheck size={15} className="text-[var(--color-success)]" />
-              Grátis e sem cadastro para começar. A conta só serve para continuar em outro
-              aparelho.
+              Grátis e sem cadastro para começar. A conta só serve para continuar em outro aparelho.
             </p>
+
+            {principal ? (
+              <DeVolta
+                trilhaSlug={principal.slug}
+                temas={sequencia}
+                prazoDias={principal.prazoSugeridoDias}
+              />
+            ) : null}
           </div>
 
           {/* Prova concreta do que existe hoje, com números contados no build. */}
@@ -130,7 +144,7 @@ export default function Home() {
             <div className="mt-12 lg:mt-0">
               <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)]/80 p-6 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                  Publicado hoje
+                  No ar agora
                 </p>
                 <p className="font-display mt-1.5 text-xl font-semibold">{principal.titulo}</p>
                 <p className="mt-1 text-[13px] text-[var(--text-2)]">{principal.origem}</p>
@@ -152,6 +166,44 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ─────────────────────────── Amostra ──────────────────────────── */}
+      {cardAmostra && oralAmostra && primeiro ? (
+        <section className="border-b border-[var(--border)]" aria-labelledby="amostra">
+          <div className="mx-auto max-w-6xl px-5 py-14">
+            <h2 id="amostra" className="font-display text-[26px] font-bold sm:text-[30px]">
+              Veja antes de decidir
+            </h2>
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[var(--text-2)]">
+              Isto é conteúdo real do primeiro tema, não exemplo inventado.
+            </p>
+
+            <div className="mt-8">
+              <Amostra
+                card={{
+                  frente: cardAmostra.frente,
+                  verso: cardAmostra.verso,
+                  tema: primeiro.tema.titulo,
+                }}
+                pergunta={{
+                  enunciado: oralAmostra.enunciado,
+                  rubrica: oralAmostra.rubrica,
+                  tema: primeiro.tema.titulo,
+                }}
+              />
+            </div>
+
+            <BotaoLink
+              href={`/trilhas/${principal!.slug}/${primeiro.modulo.slug}/${primeiro.tema.slug}/`}
+              variante="secundario"
+              className="mt-6"
+            >
+              Abrir o tema inteiro
+              <IconeSeta size={18} />
+            </BotaoLink>
+          </div>
+        </section>
+      ) : null}
+
       {/* ───────────────────────── Diferenciais ───────────────────────── */}
       <section className="border-b border-[var(--border)]" aria-labelledby="diferenciais">
         <div className="mx-auto max-w-6xl px-5 py-16 lg:py-20">
@@ -159,8 +211,8 @@ export default function Home() {
             Por que isto funciona melhor que um curso
           </h2>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[var(--text-2)]">
-            Curso é feito para ser assistido. Prova é feita para ser respondida. A diferença está
-            em quatro escolhas.
+            Curso é feito para ser assistido. Prova é feita para ser respondida. A diferença está em
+            quatro escolhas.
           </p>
 
           <ul className="mt-10 grid list-none gap-4 p-0 sm:grid-cols-2">
@@ -242,65 +294,39 @@ export default function Home() {
       ) : null}
 
       {/* ───────────────────────── Como funciona ───────────────────────── */}
-      <section className="border-b border-[var(--border)]" aria-labelledby="como">
-        <div className="mx-auto max-w-6xl px-5 py-16 lg:py-20">
-          <h2 id="como" className="font-display text-[26px] font-bold sm:text-[30px]">
-            Uma sessão de estudo, do começo ao fim
+      <section className="border-b border-[var(--border)]" aria-labelledby="metodo">
+        <div className="mx-auto max-w-6xl px-5 py-14">
+          <h2 id="metodo" className="font-display text-[26px] font-bold sm:text-[30px]">
+            Uma sessão, do começo ao fim
           </h2>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[var(--text-2)]">
-            O método vem dos nove princípios de <em>Ultraaprendizado</em>, de Scott Young, somados
-            a práticas com evidência em pesquisa: recuperação, espaçamento e intercalação.
+            Pré-teste antes de aprender, vídeo e explicação, cards espaçados em 1, 3, 7 e 12 dias, e
+            simulado no ponto fraco. O método vem dos nove princípios de <em>Ultraaprendizado</em>,
+            de Scott Young, somados a práticas com evidência em pesquisa de aprendizagem.
           </p>
-
-          <ol className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-4">
-            {PASSOS.map((passo, i) => (
-              <li key={passo.titulo} className="relative">
-                <span className="font-display block text-[13px] font-bold text-[var(--accent)]">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div className="mt-2 h-px w-full bg-gradient-to-r from-[var(--accent)]/40 to-transparent" />
-                <h3 className="font-display mt-4 text-[16px] font-semibold leading-snug">
-                  {passo.titulo}
-                </h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[var(--text-2)]">
-                  {passo.texto}
-                </p>
-              </li>
-            ))}
-          </ol>
-
-          <p className="mt-8 text-[14px] text-[var(--text-2)]">
-            <Link href="/metodo/">Veja cada princípio e como usar</Link>.
+          <p className="mt-4 text-[15px]">
+            <Link href="/metodo/">Ver cada princípio e como usar</Link>
           </p>
         </div>
       </section>
 
       {/* ─────────────────────────── Em breve ──────────────────────────── */}
       <section aria-labelledby="breve">
-        <div className="mx-auto max-w-6xl px-5 py-16 lg:py-20">
+        <div className="mx-auto max-w-6xl px-5 py-14">
           <h2 id="breve" className="font-display text-[26px] font-bold sm:text-[30px]">
             Próximas trilhas
           </h2>
           <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[var(--text-2)]">
-            Mesma estrutura, outras ementas. A ordem segue o que a comunidade pedir.
-          </p>
-
-          <ul className="mt-8 grid list-none gap-3 p-0 sm:grid-cols-3">
-            {trilhasEmBreve.map((t) => (
-              <li
-                key={t.slug}
-                className="rounded-2xl border border-dashed border-[var(--border)] p-5"
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                  {t.origem}
-                </p>
-                <p className="font-display mt-1.5 text-[16px] font-semibold text-[var(--text-2)]">
-                  {t.titulo}
-                </p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--muted)]">{t.resumo}</p>
-              </li>
+            Mesma estrutura, outras ementas:{" "}
+            {trilhasEmBreve.map((t, i) => (
+              <span key={t.slug}>
+                {i > 0 ? (i === trilhasEmBreve.length - 1 ? " e " : ", ") : ""}
+                <strong className="font-semibold text-[var(--text)]">{t.titulo}</strong>
+              </span>
             ))}
-          </ul>
+            . A ordem segue o que a comunidade pedir —{" "}
+            <Link href="/trilhas/">veja o catálogo para pedir a sua</Link>.
+          </p>
 
           <div className="mt-12 rounded-3xl border border-[var(--accent)]/25 bg-[var(--surface)] p-8 text-center">
             <IconeCards size={26} className="mx-auto text-[var(--accent)]" />
