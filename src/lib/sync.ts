@@ -24,6 +24,32 @@ const ESPERA_MS = 4000;
 
 export const syncConfigurado = API.length > 0;
 
+/**
+ * Quando a conta e o aparelho falaram pela última vez. Fica em localStorage,
+ * e não em `Progresso.atualizadoEm`, porque aquele campo muda a cada resposta
+ * gravada aqui: usá-lo faria a Conta dizer "sincronizado agora" com a rede
+ * caída. Só é escrito quando a API confirma.
+ */
+const CHAVE_SINCRONIA = "lumarys.sync.em";
+
+function marcarSincronia(agora: number = Date.now()): void {
+  try {
+    window.localStorage.setItem(CHAVE_SINCRONIA, String(agora));
+  } catch {
+    /* sem armazenamento: a Conta simplesmente não mostra a última sincronia */
+  }
+}
+
+export function ultimaSincronia(): number | null {
+  try {
+    const cru = window.localStorage.getItem(CHAVE_SINCRONIA);
+    const em = Number(cru);
+    return cru && Number.isFinite(em) && em > 0 ? em : null;
+  } catch {
+    return null;
+  }
+}
+
 type ItemRemoto = { sk: string; [k: string]: unknown };
 
 let temporizador: number | null = null;
@@ -48,6 +74,7 @@ async function chamarApi(caminho: string, init: RequestInit = {}): Promise<Respo
 export async function baixar(): Promise<Progresso | null> {
   const resposta = await chamarApi("/me/progresso");
   if (!resposta?.ok) return null;
+  marcarSincronia();
 
   const { itens } = (await resposta.json()) as { itens: ItemRemoto[] };
   const remoto: Progresso = progressoVazio();
@@ -140,10 +167,11 @@ async function enviar(progresso: Progresso, trilhas: string[]): Promise<void> {
     const trilha = progresso.trilhas[slug];
     if (!trilha) continue;
 
-    await chamarApi(`/me/progresso/${slug}`, {
+    const gravou = await chamarApi(`/me/progresso/${slug}`, {
       method: "PUT",
       body: JSON.stringify(trilha),
     }).catch(() => null);
+    if (gravou?.ok) marcarSincronia();
 
     // Cards e contadores globais viajam junto da trilha: são poucos bytes e
     // evitam um item órfão quando o aluno estuda só flashcards.

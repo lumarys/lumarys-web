@@ -31,6 +31,7 @@ function notificar() {
 export function assinarProgresso(ouvinte: () => void): () => void {
   if (!carregado) {
     cache = ler();
+    armazenamentoOk = armazenamentoDisponivel();
     carregado = true;
   }
 

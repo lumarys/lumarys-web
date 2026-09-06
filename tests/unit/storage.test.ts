@@ -214,3 +214,23 @@ describe("armazenamento indisponível", () => {
     expect(armazenamentoDisponivel()).toBe(true);
   });
 });
+
+describe("armazenamento indisponível", () => {
+  it("é detectado antes da primeira gravação, por sondagem", async () => {
+    // Janela privada: setItem existe e lança. Sem a sonda, a interface só
+    // descobria isso depois de a pessoa perder uma resposta. O módulo é
+    // reimportado porque o resultado da sonda fica em cache de propósito.
+    const espia = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("bloqueado", "SecurityError");
+    });
+    vi.resetModules();
+    const modulo = await import("@/lib/storage");
+    expect(modulo.armazenamentoDisponivel()).toBe(false);
+    espia.mockRestore();
+  });
+
+  it("com armazenamento normal, a sonda não deixa lixo para trás", () => {
+    expect(armazenamentoDisponivel()).toBe(true);
+    expect(window.localStorage.getItem(`${CHAVE}.sonda`)).toBeNull();
+  });
+});
