@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  CHAVE,
   contarRespostas,
+  marcarVisita,
   mesclar,
   progressoVazio,
   trilhaIniciada,
@@ -127,5 +129,26 @@ describe("preferências do plano na mesclagem", () => {
       dataProva: "2026-09-19",
       modo: "manutencao",
     });
+  });
+});
+
+describe("marcar visita", () => {
+  it("lembra o tema aberto, que é o que se quer retomar", () => {
+    window.localStorage.clear();
+    marcarVisita("ed", "spark-rdd");
+
+    const p = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
+    expect(p.trilhas.ed?.ultimoTema).toBe("spark-rdd");
+  });
+
+  it("abrir o mesmo tema de novo não regrava nem agenda envio", () => {
+    window.localStorage.clear();
+    marcarVisita("ed", "spark-rdd");
+    const antes = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
+
+    marcarVisita("ed", "spark-rdd");
+    const depois = JSON.parse(window.localStorage.getItem(CHAVE)!) as Progresso;
+
+    expect(depois.atualizadoEm).toBe(antes.atualizadoEm);
   });
 });

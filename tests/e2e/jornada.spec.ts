@@ -53,19 +53,26 @@ test("3. abrir temas sem estudar não inventa cards vencidos", async () => {
 
   await page.goto("/hoje/");
   await expect(page.getByText(/cards vencidos/i)).toHaveCount(0);
-  await expect(page.getByText("Próxima ação")).toBeVisible();
+  await expect(page.getByRole("link", { name: /começar/i })).toBeVisible();
 
   await page.goto("/cards/");
   await expect(page.getByText(/ainda não é hora/i)).toBeVisible();
+
+  // Abrir e sair no meio é o caso que "continuar de onde parou" atende.
+  await page.goto("/hoje/");
+  await expect(page.getByText(/continuar de onde parou/i)).toBeVisible();
+  await expect(page.getByText("MapReduce", { exact: false }).first()).toBeVisible();
 });
 
-test("4. Hoje aponta o primeiro tema como próxima ação", async () => {
+test("4. Hoje leva de volta ao tema deixado pela metade", async () => {
   await page.goto("/hoje/");
   await expect(page.getByText(/dia \d+\/14 · faltam \d+/i)).toBeVisible();
-  await expect(page.getByText("Próxima ação")).toBeVisible();
-  await expect(page.getByText("O que é Big Data")).toBeVisible();
   await page.getByRole("link", { name: /começar/i }).click();
-  await expect(page).toHaveURL(new RegExp("fundamentos/big-data/$"));
+  await expect(page).toHaveURL(new RegExp("hadoop/mapreduce/$"));
+
+  // A trilha aponta para o mesmo lugar que a tela Hoje: uma decisão só, em lib.
+  await page.goto(TRILHA);
+  await expect(page.getByRole("link", { name: /^continuar: mapreduce$/i })).toBeVisible();
 });
 
 test("5. pré-teste: responde as duas perguntas e libera o conteúdo", async () => {
