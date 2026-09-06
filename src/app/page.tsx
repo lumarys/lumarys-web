@@ -75,7 +75,7 @@ export default function Home() {
   const numeros = principal ? estatisticasDaTrilha(principal) : null;
 
   return (
-    <AppShell comAbas={false} comCabecalho largura="site">
+    <AppShell largura="site">
       {/* ───────────────────────────── Hero ───────────────────────────── */}
       <section className="relative overflow-hidden border-b border-[var(--border)]">
         {/* A luz é o conceito da marca: um brilho atrás do conteúdo, não um

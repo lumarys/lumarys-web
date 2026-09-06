@@ -1,7 +1,6 @@
-import Link from "next/link";
-
 import { AppShell } from "@/components/layout/AppShell";
-import { Card, Rotulo } from "@/components/ui/Card";
+import { BotaoLink } from "@/components/ui/Botao";
+import { Rotulo } from "@/components/ui/Card";
 import { listarTrilhas } from "@/lib/content";
 
 export const metadata = { title: "Página não encontrada" };
@@ -10,7 +9,7 @@ export default function NaoEncontrada() {
   const trilhas = listarTrilhas();
 
   return (
-    <AppShell comAbas={false} comCabecalho>
+    <AppShell>
       <div className="px-5 pb-8 pt-12">
         <Rotulo>Erro 404</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold">Esta página não existe</h1>
@@ -19,20 +18,15 @@ export default function NaoEncontrada() {
         </p>
 
         <div className="mt-6 flex flex-col gap-2">
-          <Link
-            href="/hoje/"
-            className="flex min-h-13 items-center justify-center rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)] no-underline"
-          >
-            Ir para o que estudar hoje
-          </Link>
+          <BotaoLink href="/">Voltar para a página inicial</BotaoLink>
           {trilhas.map((t) => (
-            <Link key={t.slug} href={`/trilhas/${t.slug}/`} className="no-underline">
-              <Card>
-                <p className="text-sm font-semibold text-[var(--text)]">{t.titulo}</p>
-                <p className="mt-0.5 text-[13px] text-[var(--text-2)]">{t.origem}</p>
-              </Card>
-            </Link>
+            <BotaoLink key={t.slug} href={`/trilhas/${t.slug}/`} variante="secundario">
+              Ver a trilha de {t.titulo}
+            </BotaoLink>
           ))}
+          <BotaoLink href="/hoje/" variante="fantasma">
+            Ou vá direto para o que estudar hoje
+          </BotaoLink>
         </div>
       </div>
     </AppShell>

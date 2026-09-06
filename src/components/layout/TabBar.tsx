@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { IconeCards, IconeHoje, IconeSimulado, IconeTrilha } from "@/components/ui/icons";
+import { ehTelaDeEstado } from "@/lib/rotas";
 import { cx } from "@/lib/utils";
 
 type Aba = {
@@ -23,9 +24,13 @@ const ABAS: Aba[] = [
 export function TabBar() {
   const caminho = usePathname() ?? "/";
 
+  // A regra mora em lib/rotas: abas só onde existe progresso do aluno. Antes,
+  // /sobre e /contato ofereciam "Cards" e "Simulado" a quem nunca estudou.
+  if (!ehTelaDeEstado(caminho)) return null;
+
   return (
     <nav
-      aria-label="Navegação principal"
+      aria-label="Estudo"
       data-casca="abas"
       className="sticky bottom-0 z-20 grid grid-cols-4 border-t border-[var(--border)] bg-[var(--bg)]/95 px-2 pb-4 pt-2 backdrop-blur"
     >

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { BotaoLink } from "@/components/ui/Botao";
 import { Card, Rotulo } from "@/components/ui/Card";
 import { JsonLd, jsonLdBreadcrumb, alternativas } from "@/lib/seo";
+import { listarTrilhas } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "O método",
@@ -18,7 +20,8 @@ const PRINCIPIOS = [
     frase: "Descubra o mapa antes de andar.",
     noSite:
       "Cada trilha abre com o que, por que e como, e cada tema diz por que ele cai na prova e como o entrevistador pergunta.",
-    comoUsar: "Leia a página da trilha inteira uma vez antes do primeiro tema. Custa cinco minutos.",
+    comoUsar:
+      "Leia a página da trilha inteira uma vez antes do primeiro tema. Custa cinco minutos.",
   },
   {
     nome: "Foco",
@@ -31,7 +34,8 @@ const PRINCIPIOS = [
     frase: "Pratique do jeito que você vai ser cobrado.",
     noSite:
       "A prova é oral, então o simulado é oral: você fala, se ouve e se avalia por rubrica. Nada de só marcar alternativa.",
-    comoUsar: "Responda em voz alta mesmo quando estiver sozinho. Ler a resposta na cabeça não conta.",
+    comoUsar:
+      "Responda em voz alta mesmo quando estiver sozinho. Ler a resposta na cabeça não conta.",
   },
   {
     nome: "Drills",
@@ -79,16 +83,18 @@ const PRINCIPIOS = [
 ];
 
 export default function PaginaMetodo() {
+  const [principal] = listarTrilhas();
+
   return (
-    <AppShell comCabecalho>
+    <AppShell>
       <div className="px-5 pb-8 pt-5">
         <Rotulo>O método</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold leading-[1.15]">
           Nove princípios, aplicados
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-[var(--text-2)]">
-          A Lumarys segue os nove princípios de <em>Ultraaprendizado</em>, de Scott Young, somados
-          a práticas com evidência em pesquisa de aprendizagem: recuperação, espaçamento e
+          A Lumarys segue os nove princípios de <em>Ultraaprendizado</em>, de Scott Young, somados a
+          práticas com evidência em pesquisa de aprendizagem: recuperação, espaçamento e
           intercalação. Abaixo, o que cada princípio significa, onde ele aparece no site e o que
           você faz com ele.
         </p>
@@ -120,6 +126,16 @@ export default function PaginaMetodo() {
             Uma próxima ação por vez. Se você abrir o site e ficar decidindo o que fazer, o método
             falhou. A tela <Link href="/hoje/">Hoje</Link> existe para tirar essa decisão de você.
           </p>
+          {/* A página mais bem escrita do site terminava sem nenhum botão: quem
+              se convencia lendo não tinha para onde ir. */}
+          <div className="mt-4 flex flex-col gap-2">
+            <BotaoLink href={principal ? `/trilhas/${principal.slug}/plano/` : "/trilhas/"}>
+              Começar pelo plano
+            </BotaoLink>
+            <BotaoLink href="/trilhas/" variante="secundario">
+              Ver as trilhas
+            </BotaoLink>
+          </div>
         </Card>
       </div>
 

@@ -16,7 +16,7 @@ const ATUALIZADO = "3 de setembro de 2026";
 
 export default function PaginaTermos() {
   return (
-    <AppShell comCabecalho>
+    <AppShell>
       <div className="prose-lumarys px-5 pb-8 pt-5">
         <Rotulo>Legal</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold leading-tight">Termos de uso</h1>

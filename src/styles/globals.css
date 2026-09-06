@@ -35,6 +35,8 @@
 
 :root {
   color-scheme: dark;
+  /* Sombra do botão primário: era um âmbar fixo, que no tema claro pesava. */
+  --sombra-acento: rgba(245, 184, 61, 0.6);
   --bg: var(--color-bg);
   --surface: var(--color-surface);
   --elevated: var(--color-elevated);
