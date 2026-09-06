@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Card, RotuloAcento } from "@/components/ui/Card";
+import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { IconeCheck, IconeFechar } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
 import { registrarQuiz } from "@/lib/storage";
@@ -27,6 +27,7 @@ export function Quiz({
   const [revelado, setRevelado] = useState(false);
   const [acertos, setAcertos] = useState(0);
   const [terminou, setTerminou] = useState(false);
+  const [erradas, setErradas] = useState<number[]>([]);
   const { progresso, pronto } = useProgresso();
   const anterior = progresso.trilhas[trilhaSlug]?.quizzes[temaSlug];
   const [refazendo, setRefazendo] = useState(false);
@@ -73,12 +74,13 @@ export function Quiz({
     const certo =
       marcadas.length === corretas.length && corretas.every((i) => marcadas.includes(i));
     if (certo) setAcertos((a) => a + 1);
+    else setErradas((e) => [...e, indice]);
     setRevelado(true);
   }
 
   function avancar() {
     if (indice + 1 >= perguntas.length) {
-      registrarQuiz(trilhaSlug, temaSlug, acertos, perguntas.length);
+      registrarQuiz(trilhaSlug, temaSlug, acertos, perguntas.length, "quiz", { erradas });
       setTerminou(true);
       return;
     }
@@ -98,6 +100,26 @@ export function Quiz({
             ? "Bom o bastante para seguir. O que fixa daqui em diante são os cards."
             : "Abaixo de 70%: vale reler a explicação e refazer o drill antes de marcar o tema como concluído."}
         </p>
+
+        {/* Saber a nota não diz o que revisar. As erradas, sim. */}
+        {erradas.length > 0 ? (
+          <div className="mt-3">
+            <Rotulo className="mb-1.5">O que revisar</Rotulo>
+            <ul className="flex list-none flex-col gap-1.5 p-0">
+              {erradas.map((i) => (
+                <li key={i} className="text-sm leading-relaxed text-[var(--text-2)]">
+                  · {perguntas[i]?.enunciado}
+                </li>
+              ))}
+            </ul>
+            <a
+              href="#cards"
+              className="mt-3 flex min-h-12 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--elevated)] text-sm font-semibold no-underline"
+            >
+              Revisar os cards deste tema
+            </a>
+          </div>
+        ) : null}
       </Card>
     );
   }

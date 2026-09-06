@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Card, RotuloAcento } from "@/components/ui/Card";
+import { registrarQuiz } from "@/lib/storage";
 import { cx } from "@/lib/utils";
 import type { Drill as TipoDrill } from "@content/types";
 
@@ -11,7 +12,15 @@ import type { Drill as TipoDrill } from "@content/types";
  * sem cronômetro. O objetivo é repetir o julgamento que a sabatina cobra, não
  * medir velocidade.
  */
-export function Drill({ drill }: { drill: TipoDrill }) {
+export function Drill({
+  drill,
+  trilhaSlug,
+  temaSlug,
+}: {
+  drill: TipoDrill;
+  trilhaSlug: string;
+  temaSlug: string;
+}) {
   const [respostas, setRespostas] = useState<Record<number, string>>({});
   const [revelado, setRevelado] = useState(false);
 
@@ -101,7 +110,12 @@ export function Drill({ drill }: { drill: TipoDrill }) {
       ) : (
         <button
           type="button"
-          onClick={() => setRevelado(true)}
+          onClick={() => {
+            // O resultado do drill era mostrado e descartado: não entrava em
+            // lugar nenhum, então praticar não deixava rastro.
+            registrarQuiz(trilhaSlug, temaSlug, acertos, drill.itens.length, "drill");
+            setRevelado(true);
+          }}
           className="mt-4 min-h-12 w-full rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)]"
         >
           Conferir
@@ -112,9 +126,5 @@ export function Drill({ drill }: { drill: TipoDrill }) {
 }
 
 function normalizar(s: string): string {
-  return s
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "");
+  return s.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 }

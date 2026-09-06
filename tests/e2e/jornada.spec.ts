@@ -142,6 +142,17 @@ test("9. quiz: responde até o resultado", async () => {
   await expect(page.getByText("Quiz concluído")).toBeVisible();
 });
 
+test("9b. drill e quiz deixam rastro no progresso", async () => {
+  const gravado = await page.evaluate(() => {
+    const p = JSON.parse(window.localStorage.getItem("lumarys.progresso.v1")!);
+    const t = p.trilhas["engenharia-de-dados"];
+    return { drills: Object.keys(t.drills ?? {}), temQuiz: Boolean(t.quizzes["big-data"]) };
+  });
+
+  expect(gravado.drills).toContain("big-data");
+  expect(gravado.temQuiz).toBe(true);
+});
+
 test("10. concluir o tema muda o botão e oferece o próximo", async () => {
   await page.getByRole("button", { name: /concluir tema/i }).click();
   await expect(page.getByText("Tema concluído")).toBeVisible();

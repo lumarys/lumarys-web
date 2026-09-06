@@ -54,6 +54,9 @@ test("o resultado fica gravado: reabrir o tema mostra o pré-teste concluído, e
   await page.reload();
   await expect(page.getByText("Pré-teste concluído")).toBeVisible();
   await expect(page.getByText(/2 de 2, em/)).toBeVisible();
+  // A confiança alta com erro é o sinal mais valioso do método e agora fica
+  // gravado, em vez de aparecer uma vez e sumir com o recarregar da página.
+  await expect(page.getByText(/confiança alta e errou/i)).toHaveCount(0);
   await expect(page.getByText(/^Pré-teste · 1 de/)).toHaveCount(0);
 
   await page.getByRole("button", { name: /refazer o pré-teste/i }).click();
