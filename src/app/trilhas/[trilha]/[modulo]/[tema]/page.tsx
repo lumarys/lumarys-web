@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
+import { Recolhivel } from "@/components/ui/Recolhivel";
+import { IconeSeta, IconeVoltar } from "@/components/ui/icons";
 import { componentesMdx } from "@/components/mdx";
 import { corpos } from "@content/temas/corpos.generated";
 import { ConcluirTema } from "@/features/tema/ConcluirTema";
@@ -14,6 +16,7 @@ import { Pomodoro } from "@/features/tema/Pomodoro";
 import { PreTeste } from "@/features/tema/PreTeste";
 import { Quiz } from "@/features/tema/Quiz";
 import { RegistrarVisita } from "@/features/tema/RegistrarVisita";
+import { SumarioTema, VoltarAoTopo } from "@/features/tema/SumarioTema";
 import { VideoEmbed } from "@/features/tema/VideoEmbed";
 import {
   localizarTema,
@@ -56,7 +59,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
   if (!local || local.modulo.slug !== moduloSlug) notFound();
 
   const { trilha, modulo, tema } = local;
-  const { proximo } = vizinhosDoTema(trilha, temaSlug);
+  const { anterior, proximo } = vizinhosDoTema(trilha, temaSlug);
   const sequencia = sequenciaDaTrilha(trilha);
   const posicao = sequencia.findIndex((x) => x.tema.slug === temaSlug) + 1;
 
@@ -64,9 +67,22 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
     (p): p is Extract<typeof p, { tipo: "unica" | "multipla" }> => p.tipo !== "oral",
   );
   const orais = tema.perguntas.filter((p) => p.tipo === "oral");
-  const proximoModulo = proximo
-    ? trilha.modulos.find((m) => m.temas.includes(proximo.slug))?.slug
-    : undefined;
+  const moduloDe = (slug?: string) =>
+    slug ? trilha.modulos.find((m) => m.temas.includes(slug))?.slug : undefined;
+  const proximoModulo = moduloDe(proximo?.slug);
+  const anteriorModulo = moduloDe(anterior?.slug);
+
+  // Chips do sumário: só as etapas que este tema realmente tem.
+  const secoes = [
+    tema.preTeste.length > 0 ? { id: "preteste", rotulo: "Pré-teste" } : null,
+    tema.videos.length > 0 ? { id: "video", rotulo: "Vídeo" } : null,
+    { id: "ler", rotulo: "Ler" },
+    tema.flashcards.length > 0 ? { id: "cards", rotulo: `${tema.flashcards.length} cards` } : null,
+    tema.drills.length > 0 ? { id: "drill", rotulo: "Drill" } : null,
+    objetivas.length > 0 ? { id: "quiz", rotulo: "Quiz" } : null,
+    { id: "explicar", rotulo: "Explicar" },
+    { id: "concluir", rotulo: "Concluir" },
+  ].filter((s): s is { id: string; rotulo: string } => s !== null);
 
   const [videoPrincipal, ...videosExtras] = tema.videos;
 
@@ -77,6 +93,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
         <div className="flex items-center justify-between gap-3">
           <Breadcrumbs
             className="min-w-0"
+            compacto
             itens={[
               { nome: "Início", url: "/" },
               { nome: "Trilhas", url: "/trilhas/" },
@@ -102,34 +119,40 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
           </p>
         </header>
 
+        <SumarioTema secoes={secoes} />
+
         <Card destaque className="mt-5">
           <RotuloAcento>Por que cai</RotuloAcento>
           <p className="mt-1.5 text-[15px] leading-relaxed">{tema.porQue}</p>
         </Card>
 
+        <div id="preteste" className="scroll-mt-16" />
         <PreTeste perguntas={tema.preTeste} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
 
         {videoPrincipal ? (
-          <section className="mt-6">
+          <section id="video" className="mt-6 scroll-mt-16">
             <Rotulo className="mb-2">Vídeo · português · {videoPrincipal.duracao} min</Rotulo>
             <VideoEmbed video={videoPrincipal} />
           </section>
         ) : null}
 
-        <section className="prose-lumarys mt-6">
+        <section id="ler" className="prose-lumarys mt-6 scroll-mt-16">
           {/* Compilado no build pelo @next/mdx; nada de MDX em tempo de execução. */}
           <CorpoDoTema slug={tema.slug} />
         </section>
 
         {videosExtras.length > 0 ? (
-          <section className="mt-6">
-            <Rotulo className="mb-2">Se quiser outro ângulo</Rotulo>
+          <Recolhivel
+            className="mt-6"
+            titulo="Se quiser outro ângulo"
+            nota={`${videosExtras.length} vídeo${videosExtras.length > 1 ? "s" : ""}`}
+          >
             <div className="flex flex-col gap-4">
               {videosExtras.map((video) => (
                 <VideoEmbed key={video.id} video={video} />
               ))}
             </div>
-          </section>
+          </Recolhivel>
         ) : null}
 
         <Card className="mt-6 border-l-[3px] border-l-[var(--color-info)]">
@@ -153,24 +176,24 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
           </ul>
         </section>
 
-        <section className="mt-6">
+        <section id="cards" className="mt-6 scroll-mt-16">
           <Rotulo className="mb-2">Flashcards</Rotulo>
           <Flashcards cards={tema.flashcards} temaSlug={tema.slug} />
         </section>
 
         {tema.drills.map((drill, i) => (
-          <section key={i} className="mt-6">
+          <section key={i} id={i === 0 ? "drill" : undefined} className="mt-6 scroll-mt-16">
             <Drill drill={drill} />
           </section>
         ))}
 
         {objetivas.length > 0 ? (
-          <section className="mt-6">
+          <section id="quiz" className="mt-6 scroll-mt-16">
             <Quiz perguntas={objetivas} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
           </section>
         ) : null}
 
-        <Card className="mt-6">
+        <Card id="explicar" className="mt-6 scroll-mt-16">
           <RotuloAcento>Explique para um gerente</RotuloAcento>
           <p className="mt-1.5 text-[15px] leading-relaxed text-[var(--text-2)]">{tema.feynman}</p>
           <p className="mt-3 rounded-xl border border-dashed border-[var(--border)] px-3.5 py-3 text-sm text-[var(--muted)]">
@@ -180,9 +203,12 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
         </Card>
 
         {orais.length > 0 ? (
-          <Card className="mt-4">
-            <RotuloAcento>Perguntas de sabatina deste tema</RotuloAcento>
-            <ul className="mt-2 flex list-none flex-col gap-2 p-0">
+          <Recolhivel
+            className="mt-4"
+            titulo="Perguntas de sabatina deste tema"
+            nota={`${orais.length}`}
+          >
+            <ul className="flex list-none flex-col gap-2 p-0">
               {orais.map((p, i) => (
                 <li key={i} className="text-[15px] leading-relaxed">
                   · {p.enunciado}
@@ -195,11 +221,10 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
             >
               Responder no simulado
             </Link>
-          </Card>
+          </Recolhivel>
         ) : null}
 
-        <section className="mt-6">
-          <Rotulo className="mb-2">Para ir além</Rotulo>
+        <Recolhivel className="mt-6" titulo="Para ir além" nota={`${tema.artigos.length} artigos`}>
           <ul className="flex list-none flex-col gap-2 p-0">
             {tema.artigos.map((artigo) => (
               <li key={artigo.url}>
@@ -215,9 +240,9 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
               </li>
             ))}
           </ul>
-        </section>
+        </Recolhivel>
 
-        <div className="mt-8">
+        <div id="concluir" className="mt-8 scroll-mt-16">
           <ConcluirTema
             trilhaSlug={trilha.slug}
             temaSlug={tema.slug}
@@ -229,7 +254,46 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
             }
           />
         </div>
+
+        {anterior || proximo ? (
+          <nav aria-label="Navegar entre temas" className="mt-6 flex gap-2">
+            {anterior && anteriorModulo ? (
+              <Link
+                href={`/trilhas/${trilha.slug}/${anteriorModulo}/${anterior.slug}/`}
+                className="flex min-h-12 min-w-0 flex-1 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-xs no-underline"
+              >
+                <IconeVoltar size={18} />
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-[10px] uppercase tracking-wide text-[var(--muted)]">
+                    Anterior
+                  </span>
+                  <span className="truncate font-semibold text-[var(--text)]">
+                    {anterior.titulo}
+                  </span>
+                </span>
+              </Link>
+            ) : null}
+            {proximo && proximoModulo ? (
+              <Link
+                href={`/trilhas/${trilha.slug}/${proximoModulo}/${proximo.slug}/`}
+                className="flex min-h-12 min-w-0 flex-1 items-center justify-end gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 text-right text-xs no-underline"
+              >
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-[10px] uppercase tracking-wide text-[var(--muted)]">
+                    Próximo
+                  </span>
+                  <span className="truncate font-semibold text-[var(--text)]">
+                    {proximo.titulo}
+                  </span>
+                </span>
+                <IconeSeta size={18} />
+              </Link>
+            ) : null}
+          </nav>
+        ) : null}
       </article>
+
+      <VoltarAoTopo />
 
       <JsonLd
         dados={{

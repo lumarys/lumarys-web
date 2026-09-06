@@ -203,3 +203,51 @@
   border-left: 3px solid var(--border);
   color: var(--text-2);
 }
+
+/* Elementos que o corpo dos temas usa e o prose não cobria: link dentro do
+   texto, tabela solta (fora do Comparativo), imagem e subtítulo de quarto
+   nível. Sem isto, um link no meio da explicação herdava só a cor global e
+   uma tabela saía sem borda nenhuma. */
+.prose-lumarys a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-lumarys h4 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 6px;
+}
+
+.prose-lumarys img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+.prose-lumarys table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin: 16px 0;
+}
+
+.prose-lumarys th,
+.prose-lumarys td {
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.prose-lumarys th {
+  background: var(--elevated);
+  font-weight: 600;
+  white-space: nowrap;
+}

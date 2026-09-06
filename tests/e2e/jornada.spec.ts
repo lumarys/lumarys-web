@@ -145,7 +145,9 @@ test("9. quiz: responde até o resultado", async () => {
 test("10. concluir o tema muda o botão e oferece o próximo", async () => {
   await page.getByRole("button", { name: /concluir tema/i }).click();
   await expect(page.getByText("Tema concluído")).toBeVisible();
-  await expect(page.getByRole("link", { name: /próximo/i })).toContainText(/OLAP/i);
+  await expect(page.locator("#concluir").getByRole("link", { name: /próximo/i })).toContainText(
+    /OLAP/i,
+  );
 });
 
 test("11. o progresso reflete em Hoje e na trilha", async () => {
