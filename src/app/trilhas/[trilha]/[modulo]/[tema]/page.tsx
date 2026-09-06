@@ -10,6 +10,7 @@ import { IconeSeta, IconeVoltar } from "@/components/ui/icons";
 import { componentesMdx } from "@/components/mdx";
 import { corpos } from "@content/temas/corpos.generated";
 import { ConcluirTema } from "@/features/tema/ConcluirTema";
+import { ConfortoLeitura } from "@/features/tema/ConfortoLeitura";
 import { Drill } from "@/features/tema/Drill";
 import { Feynman } from "@/features/tema/Feynman";
 import { PreRequisitos } from "@/features/tema/PreRequisitos";
@@ -110,7 +111,10 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
               { nome: tema.titulo, url: `/trilhas/${trilha.slug}/${modulo.slug}/${tema.slug}/` },
             ]}
           />
-          <Pomodoro />
+          <div className="flex shrink-0 items-center gap-2">
+            <ConfortoLeitura />
+            <Pomodoro />
+          </div>
         </div>
 
         <header className="mt-3">

@@ -97,7 +97,9 @@ test("6. o vídeo é uma fachada até o toque", async () => {
 });
 
 test("7. flashcards: vira e avalia o baralho inteiro", async () => {
-  const card = page.locator("button[aria-expanded]").first();
+  // Ancorado na seção: "primeiro botão com aria-expanded da página" quebrou
+  // assim que o cabeçalho do tema ganhou o menu de conforto de leitura.
+  const card = page.locator("#cards button[aria-expanded]").first();
   for (let i = 0; i < 14; i++) {
     if (
       await page

@@ -26,6 +26,7 @@ export function TabBar() {
   return (
     <nav
       aria-label="Navegação principal"
+      data-casca="abas"
       className="sticky bottom-0 z-20 grid grid-cols-4 border-t border-[var(--border)] bg-[var(--bg)]/95 px-2 pb-4 pt-2 backdrop-blur"
     >
       {ABAS.map(({ href, rotulo, Icone, prefixo }) => {

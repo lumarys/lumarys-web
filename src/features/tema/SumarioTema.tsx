@@ -68,7 +68,10 @@ export function SumarioTema({ secoes }: { secoes: SecaoTema[] }) {
   if (secoes.length < 2) return null;
 
   return (
-    <div className="sticky top-0 z-20 -mx-5 border-b border-[var(--border)]/70 bg-[var(--bg)]/95 backdrop-blur-md">
+    <div
+      data-casca="sumario"
+      className="sticky top-0 z-20 -mx-5 border-b border-[var(--border)]/70 bg-[var(--bg)]/95 backdrop-blur-md"
+    >
       <div
         className="h-0.5 bg-[var(--accent)] transition-[width] duration-150"
         style={{ width: `${lido}%` }}
@@ -117,6 +120,7 @@ export function VoltarAoTopo() {
     <button
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      data-casca="topo"
       className="fixed bottom-24 right-4 z-30 flex size-11 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-[var(--text-2)] shadow-lg"
       aria-label="Voltar ao topo da página"
     >
