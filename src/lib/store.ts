@@ -1,6 +1,6 @@
 "use client";
 
-import { ler, type Progresso, progressoVazio } from "./storage";
+import { armazenamentoDisponivel, ler, type Progresso, progressoVazio } from "./storage";
 
 /**
  * Ponte entre o localStorage e o React.
@@ -17,12 +17,14 @@ import { ler, type Progresso, progressoVazio } from "./storage";
 const VAZIO = progressoVazio();
 
 let cache: Progresso = VAZIO;
+let armazenamentoOk = true;
 let carregado = false;
 
 const ouvintes = new Set<() => void>();
 
 function notificar() {
   cache = ler();
+  armazenamentoOk = armazenamentoDisponivel();
   for (const ouvinte of ouvintes) ouvinte();
 }
 
@@ -58,4 +60,13 @@ export function progressoDoServidor(): Progresso {
 
 export function recarregarProgresso(): void {
   notificar();
+}
+
+export function lerArmazenamentoOk(): boolean {
+  return armazenamentoOk;
+}
+
+/** No servidor não há como saber; assumir que dá certo evita alarme falso. */
+export function armazenamentoOkNoServidor(): boolean {
+  return true;
 }

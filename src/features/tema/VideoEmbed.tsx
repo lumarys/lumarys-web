@@ -12,6 +12,7 @@ import type { Video } from "@content/types";
  */
 export function VideoEmbed({ video }: { video: Video }) {
   const [tocando, setTocando] = useState(false);
+  const [capaQuebrada, setCapaQuebrada] = useState(false);
 
   return (
     <figure className="m-0">
@@ -32,13 +33,22 @@ export function VideoEmbed({ video }: { video: Video }) {
             aria-label={`Assistir: ${video.titulo}. ${video.canal}, ${video.duracao} min`}
             className="group absolute inset-0 size-full cursor-pointer border-0 p-0"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
-              alt=""
-              loading="lazy"
-              className="size-full object-cover opacity-70 transition-opacity group-hover:opacity-90"
-            />
+            {/* Miniatura que não carrega deixava um retângulo vazio com um botão
+                de play no meio, sem nenhuma pista do que houve. */}
+            {capaQuebrada ? (
+              <span className="flex size-full items-center justify-center bg-[var(--elevated)] px-4 text-center text-xs text-[var(--muted)]">
+                Miniatura indisponível — toque para assistir no player
+              </span>
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`}
+                alt=""
+                loading="lazy"
+                onError={() => setCapaQuebrada(true)}
+                className="size-full object-cover opacity-70 transition-opacity group-hover:opacity-90"
+              />
+            )}
             <span className="absolute inset-0 flex items-center justify-center">
               <span className="flex size-16 items-center justify-center rounded-full bg-[var(--accent)] text-[var(--accent-ink)] shadow-lg">
                 <IconePlay size={26} />

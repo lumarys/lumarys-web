@@ -119,14 +119,28 @@ export function ler(): Progresso {
   }
 }
 
+/**
+ * Falso quando o navegador recusou guardar o progresso: janela privada, cota
+ * cheia, armazenamento bloqueado. Antes isso era engolido em silêncio, e a
+ * pessoa concluía temas a tarde inteira achando que estava tudo salvo.
+ */
+let gravacaoBloqueada = false;
+
+export function armazenamentoDisponivel(): boolean {
+  return !gravacaoBloqueada;
+}
+
 export function gravar(p: Progresso): void {
   if (typeof window === "undefined") return;
   try {
     window.localStorage.setItem(CHAVE, JSON.stringify({ ...p, atualizadoEm: Date.now() }));
-    window.dispatchEvent(new CustomEvent("lumarys:progresso"));
+    gravacaoBloqueada = false;
   } catch {
-    /* sem persistência neste navegador; a sessão continua funcionando */
+    gravacaoBloqueada = true;
   }
+  // O evento sai nos dois casos: quem ouve precisa saber tanto do progresso
+  // novo quanto de que ele não pôde ser guardado.
+  window.dispatchEvent(new CustomEvent("lumarys:progresso"));
 }
 
 export function atualizar(fn: (p: Progresso) => Progresso): Progresso {
