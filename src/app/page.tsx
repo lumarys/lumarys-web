@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { BotaoLink } from "@/components/ui/Botao";
+import { Recolhivel } from "@/components/ui/Recolhivel";
 import {
   IconeCards,
   IconeCheck,
@@ -20,6 +21,7 @@ import {
   sequenciaDaTrilha,
   temasDoModulo,
 } from "@/lib/content";
+import { JsonLd, jsonLdFaq } from "@/lib/seo";
 import { formatarMinutos } from "@/lib/utils";
 import { trilhasEmBreve } from "@content/trilhas";
 
@@ -54,6 +56,39 @@ const DIFERENCIAIS = [
     titulo: "Prontidão medida, não sensação",
     texto:
       "A barra combina quatro sinais com pesos diferentes, e o simulado pesa mais que tudo. Dar “concluído” em todos os temas sem responder nada não faz a barra encher.",
+  },
+];
+
+const PERGUNTAS = [
+  {
+    pergunta: "Para quem é a Lumarys?",
+    resposta:
+      "Para profissionais que têm uma prova marcada: sabatina interna, processo de carreira ou certificação. A primeira trilha é a de Engenharia de Dados do Hub de Dados e Analytics do Itaú, montada a partir da ementa oficial.",
+  },
+  {
+    pergunta: "É pago?",
+    resposta:
+      "Não. Estudar não custa nada e não exige cadastro. A conta existe só para continuar de onde parou em outro aparelho.",
+  },
+  {
+    pergunta: "Preciso criar conta?",
+    resposta:
+      "Não para estudar. O progresso nasce no seu navegador. Se quiser continuar no computador o que começou no celular, entra com um código enviado por e-mail, sem senha.",
+  },
+  {
+    pergunta: "Quanto tempo por dia?",
+    resposta:
+      "Você escolhe entre 20 e 60 minutos ao montar o plano, e o cronograma de 14 dias se ajusta a essa escolha. A tela Hoje passa a dizer o que fazer na sessão.",
+  },
+  {
+    pergunta: "De onde vem o conteúdo?",
+    resposta:
+      "Da ementa oficial publicada pela empresa ou certificadora, acrescida de um módulo com o que a prova costuma cobrar e a ementa não cobre. Os vídeos são em português e conferidos um a um antes de publicar. Não reproduzimos questões reais de prova.",
+  },
+  {
+    pergunta: "O que é uma sabatina?",
+    resposta:
+      "Uma arguição oral com banca: você responde falando, e o avaliador cobra raciocínio e trade-offs, não definições decoradas. Por isso o simulado daqui é oral, com rubrica e resposta-modelo.",
   },
 ];
 
@@ -328,6 +363,28 @@ export default function Home() {
             <Link href="/trilhas/">veja o catálogo para pedir a sua</Link>.
           </p>
 
+          {/* ───────────────────────────── Dúvidas ─────────────────────────── */}
+          <section className="border-t border-[var(--border)]" aria-labelledby="duvidas">
+            <div className="mx-auto max-w-3xl px-5 py-14">
+              <h2 id="duvidas" className="font-display text-[26px] font-bold sm:text-[30px]">
+                Perguntas que todo mundo faz
+              </h2>
+              <div className="mt-6 flex flex-col gap-2">
+                {PERGUNTAS.map((p) => (
+                  <Recolhivel key={p.pergunta} titulo={p.pergunta}>
+                    <p className="text-[15px] leading-relaxed text-[var(--text-2)]">{p.resposta}</p>
+                  </Recolhivel>
+                ))}
+              </div>
+
+              <p className="mt-6 text-[13px] leading-relaxed text-[var(--muted)]">
+                Escrito e mantido por Diego Vieira, na <Link href="/sobre/">Cernyn</Link>. A
+                política editorial e o jeito de apontar um erro estão na página{" "}
+                <Link href="/sobre/">Sobre</Link>.
+              </p>
+            </div>
+          </section>
+
           <div className="mt-12 rounded-3xl border border-[var(--accent)]/25 bg-[var(--surface)] p-8 text-center">
             <IconeCards size={26} className="mx-auto text-[var(--accent)]" />
             <h2 className="font-display mt-4 text-[22px] font-bold sm:text-[26px]">
@@ -346,6 +403,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <JsonLd dados={jsonLdFaq(PERGUNTAS)} />
     </AppShell>
   );
 }

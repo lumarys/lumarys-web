@@ -136,3 +136,37 @@ test("manifesto, favicon e ícones de app existem", async ({ page, request }) =>
   expect(apple).toBeTruthy();
   expect((await request.get(apple!)).status()).toBe(200);
 });
+
+test("a home responde as perguntas que todo mundo faz, e o buscador entende", async ({ page }) => {
+  await page.goto("/");
+
+  const dados = await jsonLd(page);
+  const faq = dados.find((d) => d["@type"] === "FAQPage") as
+    { mainEntity: { name: string; acceptedAnswer: { text: string } }[] } | undefined;
+
+  expect(faq?.mainEntity).toHaveLength(6);
+  expect(faq?.mainEntity.map((q) => q.name)).toContain("É pago?");
+  for (const q of faq!.mainEntity) expect(q.acceptedAnswer.text.length).toBeGreaterThan(40);
+
+  await expect(page.getByRole("group").filter({ hasText: "É pago?" })).toBeVisible();
+});
+
+test("o contato aparece mesmo sem JavaScript", async ({ browser }) => {
+  // Era o ponto de falha mais concreto do site: o botão montava o mailto no
+  // clique e não havia endereço nenhum para copiar.
+  const contexto = await browser.newContext({ javaScriptEnabled: false });
+  const page = await contexto.newPage();
+
+  await page.goto("/contato/");
+  await expect(page.getByText("pinus@cernyn.com")).toBeVisible();
+
+  await contexto.close();
+});
+
+test("a autoria tem nome e o buscador vê a pessoa", async ({ page }) => {
+  await page.goto("/sobre/");
+  await expect(page.getByText(/diego vieira/i).first()).toBeVisible();
+
+  const dados = await jsonLd(page);
+  expect(dados.map((d) => d["@type"])).toContain("Person");
+});

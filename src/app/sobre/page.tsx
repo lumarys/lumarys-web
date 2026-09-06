@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo } from "@/components/ui/Card";
 import { ContatoLink } from "@/components/layout/ContatoLink";
 import { EMPRESA } from "@/lib/company";
-import { alternativas } from "@/lib/seo";
+import { alternativas, JsonLd, jsonLdPessoa } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Sobre a Lumarys",
@@ -30,8 +30,11 @@ export default function PaginaSobre() {
             e vira estudo ativo em sessões curtas.
           </p>
           <p>
-            A marca é da <a href={EMPRESA.controladoraUrl} target="_blank" rel="noopener noreferrer">Cernyn</a>,
-            consultoria de engenharia digital sediada em Joinville. A Cernyn responde pela
+            A marca é da{" "}
+            <a href={EMPRESA.controladoraUrl} target="_blank" rel="noopener noreferrer">
+              Cernyn
+            </a>
+            , consultoria de engenharia digital sediada em Joinville. A Cernyn responde pela
             plataforma, inclusive pelo tratamento dos dados descrito na{" "}
             <Link href="/privacidade/">política de privacidade</Link>.
           </p>
@@ -39,11 +42,15 @@ export default function PaginaSobre() {
 
         <Card className="mt-5">
           <h2 className="font-display text-lg font-semibold">Política editorial</h2>
+          <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-2)]">
+            Quem escreve e mantém: Diego Vieira. Um nome, não uma redação anônima — se um tema está
+            errado, há alguém para responder por ele.
+          </p>
           <ul className="mt-2.5 flex list-none flex-col gap-2 p-0 text-[15px] leading-relaxed">
             <li>
-              <strong className="font-semibold">Ementa oficial primeiro.</strong> O que a empresa
-              ou a certificadora publica define a espinha da trilha. O que acrescentamos vem
-              marcado como “além da ementa”.
+              <strong className="font-semibold">Ementa oficial primeiro.</strong> O que a empresa ou
+              a certificadora publica define a espinha da trilha. O que acrescentamos vem marcado
+              como “além da ementa”.
             </li>
             <li>
               <strong className="font-semibold">Vídeo verificado.</strong> Todo vídeo é conferido
@@ -78,6 +85,7 @@ export default function PaginaSobre() {
           />
         </Card>
       </div>
+      <JsonLd dados={jsonLdPessoa()} />
     </AppShell>
   );
 }

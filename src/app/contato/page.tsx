@@ -31,9 +31,10 @@ export default function PaginaContato() {
             <br />
             CNPJ {EMPRESA.cnpj}
           </p>
-          <ContatoLink rotulo="Abrir e-mail" className="mt-3.5 w-full" />
+          <ContatoLink comEndereco rotulo="Abrir e-mail" className="mt-3.5 w-full" />
           <p className="mt-2.5 text-xs text-[var(--muted)]">
-            O endereço é montado no clique, para não ser colhido por robôs de spam.
+            O botão monta o endereço no clique; o texto acima serve para copiar quando o navegador
+            não tem cliente de e-mail.
           </p>
         </Card>
       </div>
