@@ -13,14 +13,18 @@ import { IconeCheck, IconeCopiar } from "@/components/ui/icons";
  */
 export function PromptIA({ prompt }: { prompt: string }) {
   const [copiado, setCopiado] = useState(false);
+  const [falhou, setFalhou] = useState(false);
 
   async function copiar() {
     try {
       await navigator.clipboard.writeText(prompt);
       setCopiado(true);
+      setFalhou(false);
       window.setTimeout(() => setCopiado(false), 2500);
     } catch {
-      /* navegador sem permissão de área de transferência: o texto continua visível abaixo */
+      // Sem permissão de área de transferência o botão não mudava e o texto
+      // ficava dentro de um bloco fechado: a pessoa não sabia o que houve.
+      setFalhou(true);
     }
   }
 
@@ -42,7 +46,13 @@ export function PromptIA({ prompt }: { prompt: string }) {
         {copiado ? "Copiado" : "Copiar o prompt"}
       </button>
 
-      <details className="mt-3">
+      {falhou ? (
+        <p className="mt-2 text-[13px] leading-relaxed text-[var(--color-danger)]">
+          Este navegador não deixou copiar. Abra o texto abaixo e selecione à mão.
+        </p>
+      ) : null}
+
+      <details className="mt-3" open={falhou}>
         <summary className="min-h-11 cursor-pointer list-none text-[13px] text-[var(--muted)]">
           Ver o texto
         </summary>

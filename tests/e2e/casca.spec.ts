@@ -64,3 +64,24 @@ test("o método termina com um caminho para começar", async ({ page }) => {
   await page.getByRole("link", { name: /começar pelo plano/i }).click();
   await expect(page).toHaveURL(/\/plano\/$/);
 });
+
+test("navegador que recusa guardar o progresso avisa, em vez de fingir que salvou", async ({
+  browser,
+}) => {
+  const contexto = await browser.newContext();
+  // Em janela privada, com cota cheia ou armazenamento bloqueado, gravar lança.
+  // Antes isso era engolido: a pessoa concluía temas a tarde inteira achando
+  // que estava tudo salvo.
+  await contexto.addInitScript(() => {
+    Storage.prototype.setItem = () => {
+      throw new DOMException("bloqueado", "SecurityError");
+    };
+  });
+
+  const page = await contexto.newPage();
+  await page.goto("/trilhas/engenharia-de-dados/fundamentos/big-data/");
+  await page.getByRole("button", { name: /concluir tema/i }).click();
+
+  await expect(page.getByText(/não está sendo salvo/i)).toBeVisible();
+  await contexto.close();
+});

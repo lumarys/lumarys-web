@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
+  armazenamentoDisponivel,
   CHAVE,
   contarRespostas,
+  gravar,
   marcarVisita,
   registrarQuiz,
   mesclar,
@@ -189,5 +191,26 @@ describe("sinais do tema que antes eram descartados", () => {
 
     expect(mesclar(antigo, semCampo).trilhas.ed?.drills?.["etl-vs-elt"]?.acertos).toBe(2);
     expect(mesclar(semCampo, antigo).trilhas.ed?.drills?.["etl-vs-elt"]?.acertos).toBe(2);
+  });
+});
+
+describe("armazenamento indisponível", () => {
+  it("gravar que falha não quebra a página e fica sinalizado", () => {
+    // O método vive no prototype de Storage; trocar a propriedade da instância
+    // não surte efeito no jsdom.
+    const espia = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("cheio", "QuotaExceededError");
+    });
+
+    try {
+      expect(() => gravar(progressoVazio())).not.toThrow();
+      expect(armazenamentoDisponivel()).toBe(false);
+    } finally {
+      espia.mockRestore();
+    }
+
+    // Voltando a funcionar, o aviso some sozinho na próxima gravação.
+    gravar(progressoVazio());
+    expect(armazenamentoDisponivel()).toBe(true);
   });
 });

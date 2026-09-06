@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useSyncExternalStore } from "react";
 
 import {
+  armazenamentoOkNoServidor,
   assinarProgresso,
+  lerArmazenamentoOk,
   lerProgresso,
   progressoDoServidor,
   recarregarProgresso,
@@ -21,13 +23,11 @@ import { agendarEnvio } from "@/lib/sync";
 export function useProgresso(): {
   progresso: Progresso;
   pronto: boolean;
+  /** Falso quando o navegador está recusando guardar o progresso. */
+  armazenamentoOk: boolean;
   recarregar: () => void;
 } {
-  const progresso = useSyncExternalStore(
-    assinarProgresso,
-    lerProgresso,
-    progressoDoServidor,
-  );
+  const progresso = useSyncExternalStore(assinarProgresso, lerProgresso, progressoDoServidor);
 
   const pronto = useSyncExternalStore(
     assinarProgresso,
@@ -39,7 +39,13 @@ export function useProgresso(): {
     registrarSincronizador(agendarEnvio);
   }, []);
 
+  const armazenamentoOk = useSyncExternalStore(
+    assinarProgresso,
+    lerArmazenamentoOk,
+    armazenamentoOkNoServidor,
+  );
+
   const recarregar = useCallback(() => recarregarProgresso(), []);
 
-  return { progresso, pronto, recarregar };
+  return { progresso, pronto, armazenamentoOk, recarregar };
 }
