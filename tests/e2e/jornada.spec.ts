@@ -153,9 +153,15 @@ test("9b. drill e quiz deixam rastro no progresso", async () => {
   expect(gravado.temQuiz).toBe(true);
 });
 
-test("10. concluir o tema muda o botão e oferece o próximo", async () => {
+test("10. concluir o tema mostra o que mudou e oferece o próximo", async () => {
   await page.getByRole("button", { name: /concluir tema/i }).click();
   await expect(page.getByText("Tema concluído")).toBeVisible();
+
+  // O recibo: o esforço vira número em vez de um selo verde mudo.
+  await expect(page.getByText("O que isso mudou")).toBeVisible();
+  await expect(page.getByText(/da sua meta/)).toBeVisible();
+  await expect(page.getByText(/dia seguido|dias seguidos/)).toBeVisible();
+  await expect(page.getByText(/prontidão/i).first()).toBeVisible();
   await expect(page.locator("#concluir").getByRole("link", { name: /próximo/i })).toContainText(
     /OLAP/i,
   );

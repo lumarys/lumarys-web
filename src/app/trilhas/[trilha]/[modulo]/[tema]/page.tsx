@@ -247,6 +247,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
             trilhaSlug={trilha.slug}
             temaSlug={tema.slug}
             minutos={tema.minutos}
+            modulos={trilha.modulos.map((m) => ({ slug: m.slug, temas: m.temas }))}
             proximo={
               proximo && proximoModulo
                 ? { slug: proximo.slug, titulo: proximo.titulo, modulo: proximoModulo }
