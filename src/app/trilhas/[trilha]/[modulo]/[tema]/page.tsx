@@ -13,6 +13,7 @@ import { Flashcards } from "@/features/tema/Flashcards";
 import { Pomodoro } from "@/features/tema/Pomodoro";
 import { PreTeste } from "@/features/tema/PreTeste";
 import { Quiz } from "@/features/tema/Quiz";
+import { RegistrarVisita } from "@/features/tema/RegistrarVisita";
 import { VideoEmbed } from "@/features/tema/VideoEmbed";
 import {
   localizarTema,
@@ -71,6 +72,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
 
   return (
     <AppShell>
+      <RegistrarVisita trilhaSlug={trilha.slug} temaSlug={tema.slug} />
       <article className="px-5 pb-8 pt-4">
         <div className="flex items-center justify-between gap-3">
           <Breadcrumbs

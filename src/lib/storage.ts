@@ -155,6 +155,26 @@ export function garantirTrilha(p: Progresso, trilha: string): ProgressoTrilha {
   return p.trilhas[trilha] ?? trilhaVazia();
 }
 
+/**
+ * Registra que o aluno abriu este tema. É o que permite "continuar de onde
+ * parou": antes, `ultimoTema` só era gravado ao **concluir**, então o tema
+ * aberto e abandonado no meio — justamente o que a pessoa quer retomar —
+ * nunca era lembrado.
+ */
+export function marcarVisita(trilha: string, tema: string): void {
+  const atual = ler().trilhas[trilha];
+  if (atual?.ultimoTema === tema) return; // nada mudou: não gravar nem sincronizar
+
+  sincronizar(trilha);
+  atualizar((p) => {
+    const t = garantirTrilha(p, trilha);
+    return {
+      ...p,
+      trilhas: { ...p.trilhas, [trilha]: { ...t, ultimoTema: tema, atualizadoEm: Date.now() } },
+    };
+  });
+}
+
 export function concluirTema(trilha: string, tema: string, minutos: number): Progresso {
   sincronizar(trilha);
   return atualizar((p) => {
