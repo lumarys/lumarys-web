@@ -125,9 +125,30 @@ export function ler(): Progresso {
  * pessoa concluía temas a tarde inteira achando que estava tudo salvo.
  */
 let gravacaoBloqueada = false;
+let sondagem: boolean | null = null;
 
+/**
+ * Descobrir isto só quando a primeira gravação falha é tarde: quem abre a
+ * Conta em janela privada merece saber antes de estudar, não depois. A sonda
+ * escreve e apaga uma chave própria, e o resultado fica em cache — uma
+ * gravação de verdade sobrepõe a sonda nos dois sentidos.
+ */
 export function armazenamentoDisponivel(): boolean {
-  return !gravacaoBloqueada;
+  if (gravacaoBloqueada) return false;
+  if (sondagem === null) sondagem = sondar();
+  return sondagem;
+}
+
+function sondar(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const chave = `${CHAVE}.sonda`;
+    window.localStorage.setItem(chave, "1");
+    window.localStorage.removeItem(chave);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function gravar(p: Progresso): void {
@@ -135,8 +156,10 @@ export function gravar(p: Progresso): void {
   try {
     window.localStorage.setItem(CHAVE, JSON.stringify({ ...p, atualizadoEm: Date.now() }));
     gravacaoBloqueada = false;
+    sondagem = true;
   } catch {
     gravacaoBloqueada = true;
+    sondagem = false;
   }
   // O evento sai nos dois casos: quem ouve precisa saber tanto do progresso
   // novo quanto de que ele não pôde ser guardado.

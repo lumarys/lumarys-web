@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
+import { Botao, classesDeBotao } from "@/components/ui/Botao";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
+import { Dialogo } from "@/components/ui/Dialogo";
 import { IconeAlerta, IconeCheck, IconeConta } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
 import { useSessao } from "./useSessao";
@@ -15,14 +17,22 @@ import {
   sair,
   type Desafio,
 } from "@/lib/auth";
-import { entrarEMesclar, excluirConta, exportar, syncConfigurado } from "@/lib/sync";
+import {
+  entrarEMesclar,
+  excluirConta,
+  exportar,
+  syncConfigurado,
+  ultimaSincronia,
+} from "@/lib/sync";
 import { cx } from "@/lib/utils";
-import { estaNovo } from "@/lib/srs";
+import { desdeEntao, resumoDoAparelho } from "@/lib/resumoConta";
 
 type Etapa = "deslogado" | "codigo" | "logado";
 
+type Confirmacao = "sair" | "excluir";
+
 export function Conta() {
-  const { progresso, pronto, recarregar } = useProgresso();
+  const { progresso, pronto, armazenamentoOk, recarregar } = useProgresso();
   const sessao = useSessao();
   // Enquanto o pedido de código está aberto, a etapa é local; fora disso, quem
   // manda é a sessão que existe no aparelho.
@@ -36,14 +46,10 @@ export function Conta() {
   const [erro, setErro] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [confirmando, setConfirmando] = useState<Confirmacao | null>(null);
 
-  const temasConcluidos = Object.values(progresso.trilhas).reduce(
-    (acc, t) => acc + Object.keys(t.temasConcluidos).length,
-    0,
-  );
-  // "Em revisão" é o que já foi estudado ao menos uma vez; o resto ainda não
-  // entrou na fila (ver estaNovo em lib/srs).
-  const totalCards = Object.values(progresso.cards).filter((c) => !estaNovo(c)).length;
+  const resumo = resumoDoAparelho(progresso);
+  const sincronizadaEm = pronto ? ultimaSincronia() : null;
 
   const disponivel = authConfigurada && syncConfigurado;
 
@@ -96,12 +102,16 @@ export function Conta() {
     URL.revokeObjectURL(url);
   }
 
-  async function apagar() {
-    const certeza = window.confirm(
-      "Isso apaga sua conta, seu e-mail e todo o progresso salvo, sem volta. Confirma?",
-    );
-    if (!certeza) return;
+  async function encerrarSessao() {
+    setConfirmando(null);
+    await sair();
+    sessao.atualizar();
+    setEtapaLocal(null);
+    setAviso("Você saiu deste aparelho. O progresso local continua aqui.");
+  }
 
+  async function apagar() {
+    setConfirmando(null);
     setOcupado(true);
     const ok = await excluirConta();
     await sair();
@@ -123,14 +133,43 @@ export function Conta() {
     <div className="flex flex-col gap-3.5 px-5">
       <Card>
         <Rotulo className="mb-2">Neste aparelho</Rotulo>
-        <p className="text-[15px] leading-relaxed">
-          {temasConcluidos === 0 && totalCards === 0
-            ? "Nenhum progresso ainda. Comece por um tema."
-            : `${temasConcluidos} tema${temasConcluidos === 1 ? "" : "s"} concluído${temasConcluidos === 1 ? "" : "s"} e ${totalCards} card${totalCards === 1 ? "" : "s"} em revisão.`}
+        {resumo.vazio ? (
+          <p className="text-[15px] leading-relaxed">Nenhum progresso ainda. Comece por um tema.</p>
+        ) : (
+          <>
+            {/* O que a pessoa perde se limpar o navegador, item por item: um
+                número redondo escondia justamente o que dói perder. */}
+            <ul className="flex flex-col gap-1.5 text-[15px] leading-relaxed">
+              <Linha rotulo="Temas concluídos" valor={String(resumo.temas)} />
+              <Linha
+                rotulo="Sequência"
+                valor={`${resumo.sequencia} dia${resumo.sequencia === 1 ? "" : "s"}`}
+              />
+              <Linha
+                rotulo="Cards em revisão"
+                valor={`${resumo.emRevisao}${resumo.novos > 0 ? ` (+${resumo.novos} novos)` : ""}`}
+              />
+              {resumo.memorizados > 0 ? (
+                <Linha rotulo="Cards memorizados" valor={String(resumo.memorizados)} />
+              ) : null}
+              {resumo.planoAte ? <Linha rotulo="Plano até" valor={resumo.planoAte} /> : null}
+            </ul>
+          </>
+        )}
+        <p className="mt-3 text-[13px] leading-relaxed text-[var(--muted)]">
+          {etapa === "logado"
+            ? sincronizadaEm
+              ? `Sincronizado com a sua conta ${desdeEntao(sincronizadaEm)}.`
+              : "Ainda não consegui falar com a sua conta neste aparelho."
+            : "Sem conta, tudo isso fica só neste navegador. Limpar os dados do site apaga."}
         </p>
-        <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
-          Sem conta, tudo isso fica só neste navegador. Limpar os dados do site apaga.
-        </p>
+        {!armazenamentoOk ? (
+          <p className="mt-3 flex items-start gap-2 rounded-xl bg-[var(--color-danger)]/10 px-3.5 py-3 text-sm text-[var(--color-danger)]">
+            <IconeAlerta size={18} className="mt-0.5 shrink-0" />
+            Este navegador está recusando guardar o progresso. Em janela privada, o que você estudar
+            some ao fechar a aba.
+          </p>
+        ) : null}
       </Card>
 
       {aviso ? (
@@ -182,12 +221,7 @@ export function Conta() {
             <button
               type="button"
               disabled={ocupado}
-              onClick={async () => {
-                await sair();
-                sessao.atualizar();
-                setEtapaLocal(null);
-                setAviso("Você saiu deste aparelho. O progresso local continua aqui.");
-              }}
+              onClick={() => setConfirmando("sair")}
               className="min-h-12 rounded-xl border border-[var(--border)] text-sm font-semibold disabled:opacity-50"
             >
               Sair
@@ -195,7 +229,7 @@ export function Conta() {
             <button
               type="button"
               disabled={ocupado}
-              onClick={apagar}
+              onClick={() => setConfirmando("excluir")}
               className="min-h-12 rounded-xl border border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-sm font-semibold text-[var(--color-danger)] disabled:opacity-50"
             >
               Excluir minha conta
@@ -294,6 +328,63 @@ export function Conta() {
           </p>
         </Card>
       )}
+
+      <Dialogo
+        aberto={confirmando !== null}
+        aoFechar={() => setConfirmando(null)}
+        titulo={confirmando === "excluir" ? "Excluir minha conta" : "Sair deste aparelho"}
+      >
+        <h2 className="font-display text-lg font-bold">
+          {confirmando === "excluir" ? "Excluir minha conta?" : "Sair deste aparelho?"}
+        </h2>
+        {/* Dizer o que se perde e o que fica é a diferença entre um aviso e um
+            susto; o window.confirm não conseguia dizer nenhum dos dois. */}
+        <p className="mt-2 text-[15px] leading-relaxed text-[var(--text-2)]">
+          {confirmando === "excluir" ? (
+            <>
+              Apaga do servidor a sua conta, o seu e-mail e o progresso guardado nela, sem volta. O
+              progresso deste aparelho continua aqui, e você pode exportá-lo antes.
+            </>
+          ) : (
+            <>
+              Este aparelho para de sincronizar, mas nada é apagado. Você volta entrando com o mesmo
+              e-mail.
+            </>
+          )}
+        </p>
+        <div className="mt-5 flex flex-col gap-2">
+          <Botao
+            variante={confirmando === "excluir" ? "secundario" : "primario"}
+            className={
+              confirmando === "excluir"
+                ? "border-[var(--color-danger)]/40 bg-[var(--color-danger)]/10 text-[var(--color-danger)]"
+                : undefined
+            }
+            onClick={() => {
+              if (confirmando === "excluir") void apagar();
+              else void encerrarSessao();
+            }}
+          >
+            {confirmando === "excluir" ? "Sim, excluir tudo" : "Sair"}
+          </Botao>
+          <button
+            type="button"
+            onClick={() => setConfirmando(null)}
+            className={classesDeBotao("fantasma")}
+          >
+            Cancelar
+          </button>
+        </div>
+      </Dialogo>
     </div>
+  );
+}
+
+function Linha({ rotulo, valor }: { rotulo: string; valor: string }) {
+  return (
+    <li className="flex items-baseline justify-between gap-3">
+      <span className="text-[var(--text-2)]">{rotulo}</span>
+      <span className="font-display font-bold tabular-nums">{valor}</span>
+    </li>
   );
 }

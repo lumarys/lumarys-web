@@ -234,7 +234,11 @@ test("14. a prontidão sobe depois do simulado", async () => {
 
 test("15. conta em modo convidado resume o aparelho e exporta os dados", async () => {
   await page.goto("/conta/");
-  await expect(page.getByText(/1 tema concluído/)).toBeVisible();
+  // O resumo é linha a linha desde a Onda 3: é o que a pessoa perde se limpar
+  // o navegador, e "1 tema concluído" não dizia nada sobre cards nem plano.
+  const resumo = page.getByText("Neste aparelho").locator("..");
+  await expect(resumo.getByText("Temas concluídos")).toBeVisible();
+  await expect(resumo.getByText("Cards em revisão")).toBeVisible();
 
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: /exportar meus dados/i }).click();
