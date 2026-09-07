@@ -39,3 +39,45 @@ test("sair sem avaliar nada avisa antes, em vez de inventar uma nota", async ({ 
   await page.getByRole("button", { name: /continuar respondendo/i }).click();
   await expect(page.getByText(/entrevistador/i)).toBeVisible();
 });
+
+test("a pergunta traz cronômetro, os quatro passos e a rubrica ao alcance", async ({ page }) => {
+  await page.goto("/simulado/?modulo=fundamentos");
+  await page.getByRole("button", { name: /começar simulado/i }).click();
+
+  // Tempo desta pergunta e da sabatina inteira, lado a lado. É sugestão: nada
+  // corta a resposta no meio.
+  const tempo = page.getByLabel(/tempo nesta pergunta/i);
+  await expect(tempo).toBeVisible();
+  await expect(tempo).toContainText(/^00:0\d/);
+  await expect(tempo).toContainText(/total 00:0\d/);
+
+  for (const passo of ["Contexto", "Opções", "Trade-offs", "Recomendação"]) {
+    await expect(page.getByText(passo, { exact: true })).toBeVisible();
+  }
+
+  // A rubrica fica antes de revelar a resposta-modelo, fechada: lê-la de
+  // graça entregaria metade do exercício.
+  const rubrica = page.locator("details", { hasText: "O que o avaliador espera" });
+  await expect(rubrica).toBeVisible();
+  // exact: o botão "Já respondi. Ver resposta-modelo" contém o termo; o que
+  // não pode estar em tela é o cartão com a resposta.
+  await expect(page.getByText("Resposta-modelo", { exact: true })).toHaveCount(0);
+  await rubrica.locator("summary").click();
+  await expect(rubrica.locator("li").first()).toBeVisible();
+});
+
+test("o cronômetro da pergunta reinicia e o total continua", async ({ page }) => {
+  await page.clock.install();
+  await page.goto("/simulado/?modulo=fundamentos");
+  await page.getByRole("button", { name: /começar simulado/i }).click();
+
+  await page.clock.fastForward("03:00");
+  const tempo = page.getByLabel(/tempo nesta pergunta/i);
+  await expect(tempo).toContainText("03:00");
+
+  await page.getByRole("button", { name: /já respondi/i }).click();
+  await page.getByRole("button", { name: "4", exact: true }).click();
+
+  await expect(tempo).toContainText(/^00:0\d/);
+  await expect(tempo).toContainText("total 03:0");
+});
