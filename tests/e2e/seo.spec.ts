@@ -170,3 +170,22 @@ test("a autoria tem nome e o buscador vê a pessoa", async ({ page }) => {
   const dados = await jsonLd(page);
   expect(dados.map((d) => d["@type"])).toContain("Person");
 });
+
+test("as páginas públicas restantes declaram seus dados estruturados", async ({ page }) => {
+  // Home, método e tema já tinham; trilhas, sobre e contato eram as três que
+  // um buscador lia como texto solto.
+  await page.goto("/trilhas/");
+  const trilhas = await jsonLd(page);
+  const lista = trilhas.find((d) => d["@type"] === "ItemList");
+  expect(lista, "ItemList ausente em /trilhas/").toBeTruthy();
+  expect(Array.isArray(lista!.itemListElement)).toBe(true);
+  expect(trilhas.some((d) => d["@type"] === "BreadcrumbList")).toBe(true);
+
+  await page.goto("/contato/");
+  expect((await jsonLd(page)).some((d) => d["@type"] === "ContactPage")).toBe(true);
+
+  await page.goto("/sobre/");
+  const sobre = await jsonLd(page);
+  expect(sobre.some((d) => d["@type"] === "Person")).toBe(true);
+  expect(sobre.some((d) => d["@type"] === "BreadcrumbList")).toBe(true);
+});

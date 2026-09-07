@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AppShell } from "@/components/layout/AppShell";
+import { ContatoLink } from "@/components/layout/ContatoLink";
+import { classesDeBotao } from "@/components/ui/Botao";
 import { Card, Rotulo } from "@/components/ui/Card";
+import { Recolhivel } from "@/components/ui/Recolhivel";
 import { contarTemas, listarTrilhas, minutosDaTrilha } from "@/lib/content";
 import { formatarMinutos } from "@/lib/utils";
 import { trilhasEmBreve } from "@content/trilhas";
-import { alternativas } from "@/lib/seo";
+import { alternativas, JsonLd, jsonLdBreadcrumb, SITE } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Trilhas",
@@ -20,6 +23,26 @@ export default function PaginaTrilhas() {
 
   return (
     <AppShell>
+      <JsonLd
+        dados={jsonLdBreadcrumb([
+          { nome: "Início", url: `${SITE.url}/` },
+          { nome: "Trilhas", url: `${SITE.url}/trilhas/` },
+        ])}
+      />
+      <JsonLd
+        dados={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "Trilhas da Lumarys",
+          itemListElement: trilhas.map((trilha, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            name: trilha.titulo,
+            description: trilha.resumo,
+            url: `${SITE.url}/trilhas/${trilha.slug}/`,
+          })),
+        }}
+      />
       <div className="px-5 pb-8 pt-5">
         <h1 className="font-display text-[26px] font-bold">Trilhas</h1>
         <p className="mt-2 text-sm leading-relaxed text-[var(--text-2)]">
@@ -52,16 +75,30 @@ export default function PaginaTrilhas() {
         </ul>
 
         <Rotulo className="mb-2 mt-6">Em breve</Rotulo>
+        {/* Eram três cartões apagados que não faziam nada. Um cartão em 70% de
+            opacidade não é um estado: não diz o que falta nem o que a pessoa
+            pode fazer. Agora cada um abre, admite que não há data e oferece o
+            único caminho honesto — pedir, e ser avisado. */}
         <ul className="flex list-none flex-col gap-2 p-0">
           {trilhasEmBreve.map((t) => (
             <li key={t.slug}>
-              <Card className="opacity-70">
+              <Recolhivel titulo={t.titulo} nota="Em breve">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                   {t.origem}
                 </p>
-                <p className="mt-1 text-[15px] font-semibold">{t.titulo}</p>
-                <p className="mt-1 text-[13px] leading-relaxed text-[var(--text-2)]">{t.resumo}</p>
-              </Card>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-2)]">
+                  {t.resumo}
+                </p>
+                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+                  Ainda não há conteúdo publicado, e não há data marcada. Escrever ajuda a decidir
+                  qual sai primeiro, e eu aviso quando esta abrir.
+                </p>
+                <ContatoLink
+                  rotulo="Quero esta trilha"
+                  assunto={`Quero a trilha ${t.titulo}`}
+                  className={classesDeBotao("secundario", "mt-3 w-full")}
+                />
+              </Recolhivel>
             </li>
           ))}
         </ul>

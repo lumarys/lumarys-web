@@ -1,6 +1,6 @@
 "use client";
 
-import { EMPRESA } from "@/lib/company";
+import { CONTATO_EMAIL, enderecoDeContato } from "@/lib/company";
 import { cx } from "@/lib/utils";
 
 /**
@@ -16,13 +16,16 @@ export function ContatoLink({
   className,
   rotulo = "Contato",
   comEndereco = false,
+  assunto,
 }: {
   className?: string;
   rotulo?: string;
   /** Mostra o endereço em texto ao lado do botão. */
   comEndereco?: boolean;
+  /** Preenche o assunto da mensagem, para o pedido chegar já classificado. */
+  assunto?: string;
 }) {
-  const endereco = `${EMPRESA.contatoUsuario}@${EMPRESA.contatoDominio}`;
+  const endereco = CONTATO_EMAIL;
 
   return (
     <>
@@ -30,7 +33,7 @@ export function ContatoLink({
         type="button"
         className={className}
         onClick={() => {
-          window.location.href = ["mailto", endereco].join(":");
+          window.location.href = enderecoDeContato(assunto);
         }}
       >
         {rotulo}

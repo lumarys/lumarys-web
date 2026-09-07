@@ -4,7 +4,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo } from "@/components/ui/Card";
 import { ContatoLink } from "@/components/layout/ContatoLink";
 import { EMPRESA } from "@/lib/company";
-import { alternativas } from "@/lib/seo";
+import { alternativas, JsonLd, jsonLdBreadcrumb, SITE } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Contato",
@@ -15,6 +15,23 @@ export const metadata: Metadata = {
 export default function PaginaContato() {
   return (
     <AppShell>
+      <JsonLd
+        dados={jsonLdBreadcrumb([
+          { nome: "Início", url: `${SITE.url}/` },
+          { nome: "Contato", url: `${SITE.url}/contato/` },
+        ])}
+      />
+      <JsonLd
+        dados={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: "Fale com a Lumarys",
+          url: `${SITE.url}/contato/`,
+          // O endereço não entra aqui de propósito: a página inteira existe
+          // para não expor o e-mail em texto colhível por robô.
+          about: { "@type": "Organization", name: EMPRESA.controladora, taxID: EMPRESA.cnpj },
+        }}
+      />
       <div className="px-5 pb-8 pt-5">
         <Rotulo>Contato</Rotulo>
         <h1 className="font-display mt-1.5 text-[26px] font-bold">Fale com a gente</h1>
