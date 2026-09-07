@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { AppOffline } from "@/features/pwa/AppOffline";
 import { SincronizarConta } from "@/features/progresso/SincronizarConta";
 
 import { SiteFooter } from "./SiteFooter";
@@ -28,6 +29,7 @@ export function AppShell({
 }) {
   return (
     <div className="flex min-h-dvh flex-col">
+      <AppOffline />
       <SincronizarConta />
       <SiteHeader />
       <main
