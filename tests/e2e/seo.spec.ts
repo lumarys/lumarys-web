@@ -189,3 +189,31 @@ test("as páginas públicas restantes declaram seus dados estruturados", async (
   expect(sobre.some((d) => d["@type"] === "Person")).toBe(true);
   expect(sobre.some((d) => d["@type"] === "BreadcrumbList")).toBe(true);
 });
+
+test("o simulado é público: sem noindex, no sitemap e com pergunta no HTML", async ({
+  page,
+  request,
+}) => {
+  // Era o diferencial anunciado na home e estava fora do índice, fora do
+  // sitemap e sem link de nenhuma página pública.
+  await page.goto("/simulado/");
+  const robots = await meta(page, 'meta[name="robots"]');
+  expect(robots ?? "").not.toContain("noindex");
+
+  const mapa = await request.get("/sitemap.xml");
+  expect((await mapa.text()).includes("/simulado/")).toBe(true);
+
+  const dados = await jsonLd(page);
+  expect(dados.some((d) => d["@type"] === "FAQPage")).toBe(true);
+
+  // A pergunta precisa estar no HTML, não só depois de hidratar: é o que um
+  // buscador ou um agente lê.
+  const html = await (await request.get("/simulado/")).text();
+  expect(html).toContain("Uma pergunta de cada módulo");
+  expect(html).toContain("O que o avaliador espera");
+});
+
+test("a home leva a quem quer ver uma pergunta antes de decidir", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /ver perguntas da sabatina/i })).toBeVisible();
+});

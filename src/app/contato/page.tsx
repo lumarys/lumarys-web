@@ -17,8 +17,8 @@ export default function PaginaContato() {
     <AppShell>
       <JsonLd
         dados={jsonLdBreadcrumb([
-          { nome: "Início", url: `${SITE.url}/` },
-          { nome: "Contato", url: `${SITE.url}/contato/` },
+          { nome: "Início", url: "/" },
+          { nome: "Contato", url: "/contato/" },
         ])}
       />
       <JsonLd

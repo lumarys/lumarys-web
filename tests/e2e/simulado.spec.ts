@@ -57,11 +57,10 @@ test("a pergunta traz cronômetro, os quatro passos e a rubrica ao alcance", asy
 
   // A rubrica fica antes de revelar a resposta-modelo, fechada: lê-la de
   // graça entregaria metade do exercício.
-  const rubrica = page.locator("details", { hasText: "O que o avaliador espera" });
+  // #rubrica: a amostra pública, no fim da página, também tem esse texto.
+  const rubrica = page.locator("#rubrica");
   await expect(rubrica).toBeVisible();
-  // exact: o botão "Já respondi. Ver resposta-modelo" contém o termo; o que
-  // não pode estar em tela é o cartão com a resposta.
-  await expect(page.getByText("Resposta-modelo", { exact: true })).toHaveCount(0);
+  await expect(page.locator("#resposta-modelo")).toHaveCount(0);
   await rubrica.locator("summary").click();
   await expect(rubrica.locator("li").first()).toBeVisible();
 });
@@ -80,4 +79,16 @@ test("o cronômetro da pergunta reinicia e o total continua", async ({ page }) =
 
   await expect(tempo).toContainText(/^00:0\d/);
   await expect(tempo).toContainText("total 03:0");
+});
+
+test("ler a amostra pública não cria progresso no navegador", async ({ page }) => {
+  await page.goto("/simulado/");
+
+  const amostra = page.locator("details").first();
+  await amostra.locator("summary").click();
+  await expect(amostra.getByText("Resposta-modelo")).toBeVisible();
+  await expect(amostra.getByText(/o que o avaliador espera/i)).toBeVisible();
+
+  const guardado = await page.evaluate(() => window.localStorage.getItem("lumarys.progresso.v1"));
+  expect(guardado).toBeNull();
 });

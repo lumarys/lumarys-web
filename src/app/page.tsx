@@ -228,14 +228,20 @@ export default function Home() {
               />
             </div>
 
-            <BotaoLink
-              href={`/trilhas/${principal!.slug}/${primeiro.modulo.slug}/${primeiro.tema.slug}/`}
-              variante="secundario"
-              className="mt-6"
-            >
-              Abrir o tema inteiro
-              <IconeSeta size={18} />
-            </BotaoLink>
+            <div className="mt-6 flex flex-wrap gap-2.5">
+              <BotaoLink
+                href={`/trilhas/${principal!.slug}/${primeiro.modulo.slug}/${primeiro.tema.slug}/`}
+                variante="secundario"
+              >
+                Abrir o tema inteiro
+                <IconeSeta size={18} />
+              </BotaoLink>
+              {/* O simulado é o diferencial anunciado aqui em cima e não tinha
+                  link de página pública nenhuma. */}
+              <BotaoLink href="/simulado/" variante="fantasma">
+                Ver perguntas da sabatina
+              </BotaoLink>
+            </div>
           </div>
         </section>
       ) : null}

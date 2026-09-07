@@ -8,14 +8,21 @@ export const dynamic = "force-static";
 export default function sitemap(): MetadataRoute.Sitemap {
   const agora = new Date();
 
-  const estaticas = ["/", "/trilhas/", "/metodo/", "/sobre/", "/contato/", "/privacidade/", "/termos/"].map(
-    (rota) => ({
-      url: `${SITE.url}${rota}`,
-      lastModified: agora,
-      changeFrequency: "monthly" as const,
-      priority: rota === "/" ? 1 : 0.6,
-    }),
-  );
+  const estaticas = [
+    "/",
+    "/trilhas/",
+    "/simulado/",
+    "/metodo/",
+    "/sobre/",
+    "/contato/",
+    "/privacidade/",
+    "/termos/",
+  ].map((rota) => ({
+    url: `${SITE.url}${rota}`,
+    lastModified: agora,
+    changeFrequency: "monthly" as const,
+    priority: rota === "/" ? 1 : 0.6,
+  }));
 
   const trilhas = listarTrilhas().flatMap((t) => [
     {
