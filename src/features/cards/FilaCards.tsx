@@ -159,7 +159,10 @@ export function FilaCards({ conteudo }: { conteudo: Record<string, CardConteudo>
             id="card"
             onClick={() => setVirado((v) => !v)}
             aria-expanded={virado}
-            className="min-h-56 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left"
+            // flex-col e não o padrão do botão: um <button> centraliza o
+            // conteúdo na vertical, e com a altura mínima que segura a
+            // resposta a pergunta ficava boiando no meio de um vazio.
+            className="flex min-h-56 flex-col items-start rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left"
           >
             <p className="text-[17px] font-medium leading-snug">{card.frente}</p>
             {virado ? (
