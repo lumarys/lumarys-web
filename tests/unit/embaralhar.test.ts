@@ -3,7 +3,7 @@ import { join } from "node:path";
 import matter from "gray-matter";
 import { describe, expect, it } from "vitest";
 
-import { embaralhar, sementeDeTexto } from "@/lib/utils";
+import { embaralhar, formatarData, sementeDeTexto } from "@/lib/utils";
 
 /**
  * Regressão de um defeito real: as alternativas eram exibidas na ordem em que
@@ -104,5 +104,19 @@ describe("ordem das alternativas", () => {
       expect(new Set(saida.map((a) => a.texto))).toEqual(new Set(alts.map((a) => a.texto)));
       expect(saida.filter((a) => a.correta)).toHaveLength(alts.filter((a) => a.correta).length);
     }
+  });
+});
+
+describe("formatar data", () => {
+  it("não deixa o ponto da abreviação virar ponto duplo na frase", () => {
+    // O Intl devolve "4 de set."; toda frase que terminava com a data
+    // imprimia "em 4 de set..".
+    const texto = formatarData(Date.parse("2026-09-04T12:00:00"));
+    expect(texto).toBe("4 de set");
+    expect(texto.endsWith(".")).toBe(false);
+  });
+
+  it("mês sem abreviação continua inteiro", () => {
+    expect(formatarData(Date.parse("2026-05-10T12:00:00"))).toBe("10 de mai");
   });
 });

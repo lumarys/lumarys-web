@@ -53,7 +53,15 @@ export function embaralhar<T>(itens: T[], semente = Date.now()): T[] {
   return saida;
 }
 
-/** "4 de set." — só para texto renderizado no cliente, depois de hidratar. */
+/**
+ * "4 de set" — só para texto renderizado no cliente, depois de hidratar.
+ *
+ * O ponto da abreviação sai fora: o Intl devolve "set." e toda frase que
+ * terminava com a data imprimia "em 4 de set..". Quem precisa de ponto final
+ * põe o seu.
+ */
 export function formatarData(ms: number): string {
-  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(new Date(ms));
+  return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" })
+    .format(new Date(ms))
+    .replace(/\.$/, "");
 }
