@@ -15,14 +15,7 @@ const PROIBIDOS = [
   [/lorem ipsum/i, "texto de preenchimento"],
 ];
 
-const COMPONENTES = new Set([
-  "Video",
-  "Callout",
-  "Comparativo",
-  "Passos",
-  "Termo",
-  "Formula",
-]);
+const COMPONENTES = new Set(["Video", "Callout", "Comparativo", "Passos", "Termo", "Formula"]);
 
 const temas = lerTemas();
 const erros = [];
@@ -41,10 +34,23 @@ for (const { arquivo, dados, corpo } of temas) {
     }
   }
 
+  // HTML cru (tag minúscula) não entra: o MDX executa o que estiver ali, e a
+  // allowlist de componentes acima só olha para tags com inicial maiúscula.
+  // Blocos e trechos de código ficam de fora da checagem — "<div>" dentro de
+  // um exemplo de XML é conteúdo, não marcação.
+  const semCodigo = corpo.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
+  for (const tag of semCodigo.matchAll(/<([a-z][a-z0-9]*)(?=[\s>/])/g)) {
+    erros.push(
+      `${arquivo}: HTML cru <${tag[1]}> no corpo; use Markdown ou um componente da allowlist.`,
+    );
+  }
+
   // O glossário da trilha é montado destes termos: um termo sem definição, ou
   // com a mesma palavra definida de dois jeitos, vira verbete errado numa
   // página pública.
-  for (const [, nome, definicao] of corpo.matchAll(/<Termo\s+nome="([^"]*)"\s*>([\s\S]*?)<\/Termo>/g)) {
+  for (const [, nome, definicao] of corpo.matchAll(
+    /<Termo\s+nome="([^"]*)"\s*>([\s\S]*?)<\/Termo>/g,
+  )) {
     if (!nome.trim()) erros.push(`${arquivo}: <Termo> sem nome.`);
     if (definicao.trim().length < 10) {
       erros.push(`${arquivo}: termo "${nome}" com definição vazia ou curta demais.`);
@@ -66,7 +72,8 @@ for (const { arquivo, dados, corpo } of temas) {
 
   const palavras = corpo.split(/\s+/).filter(Boolean).length;
   if (palavras < 250) erros.push(`${arquivo}: corpo com ${palavras} palavras, mínimo 250.`);
-  if (palavras > 1800) avisos.push(`${arquivo}: corpo com ${palavras} palavras, longo para 25 min.`);
+  if (palavras > 1800)
+    avisos.push(`${arquivo}: corpo com ${palavras} palavras, longo para 25 min.`);
 
   if (vistos.has(dados.slug)) erros.push(`${arquivo}: slug "${dados.slug}" duplicado.`);
   vistos.add(dados.slug);
@@ -97,7 +104,9 @@ for (const { arquivo, dados, corpo } of temas) {
  * não precisa avaliar o TS, só saber quais temas a trilha promete.
  */
 const DIR_TRILHAS = join(process.cwd(), "content", "trilhas");
-for (const arquivo of readdirSync(DIR_TRILHAS).filter((f) => f.endsWith(".ts") && f !== "index.ts")) {
+for (const arquivo of readdirSync(DIR_TRILHAS).filter(
+  (f) => f.endsWith(".ts") && f !== "index.ts",
+)) {
   const fonte = readFileSync(join(DIR_TRILHAS, arquivo), "utf8");
   for (const bloco of fonte.matchAll(/temas:\s*\[([^\]]*)\]/g)) {
     for (const slug of bloco[1].matchAll(/"([a-z0-9-]+)"/g)) {
