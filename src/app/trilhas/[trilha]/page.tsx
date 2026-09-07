@@ -52,6 +52,7 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
     titulo: m.titulo,
     resumo: m.resumo,
     oficial: m.oficial,
+    status: m.status,
     temas: temasDoModulo(m).map((t) => ({ slug: t.slug, titulo: t.titulo, minutos: t.minutos })),
   }));
   const total = contarTemas(trilha);

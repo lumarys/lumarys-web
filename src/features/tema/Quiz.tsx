@@ -12,10 +12,13 @@ import { formatarData } from "@/lib/utils";
 export function Quiz({
   perguntas,
   trilhaSlug,
+  espelhos = [],
   temaSlug,
 }: {
   perguntas: Objetiva[];
   trilhaSlug: string;
+  /** Outras trilhas que contêm este tema: o progresso vale nelas também. */
+  espelhos?: string[];
   temaSlug: string;
 }) {
   const [indice, setIndice] = useState(0);
@@ -57,7 +60,9 @@ export function Quiz({
 
   function avancar() {
     if (indice + 1 >= perguntas.length) {
-      registrarQuiz(trilhaSlug, temaSlug, acertos, perguntas.length, "quiz", { erradas });
+      registrarQuiz([trilhaSlug, ...espelhos], temaSlug, acertos, perguntas.length, "quiz", {
+        erradas,
+      });
       setTerminou(true);
       return;
     }

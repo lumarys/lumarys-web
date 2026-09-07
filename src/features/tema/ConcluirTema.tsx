@@ -31,12 +31,15 @@ type Recibo = {
  */
 export function ConcluirTema({
   trilhaSlug,
+  espelhos = [],
   temaSlug,
   minutos,
   modulos,
   proximo,
 }: {
   trilhaSlug: string;
+  /** Outras trilhas que contêm este tema: o progresso vale nelas também. */
+  espelhos?: string[];
   temaSlug: string;
   minutos: number;
   /** Módulos da trilha, para calcular a prontidão antes e depois. */
@@ -51,7 +54,7 @@ export function ConcluirTema({
 
   function concluir() {
     const antes = ler();
-    const depois = concluirTema(trilhaSlug, temaSlug, minutos);
+    const depois = concluirTema([trilhaSlug, ...espelhos], temaSlug, minutos);
     setRecibo(montarRecibo(antes, depois, trilhaSlug, temaSlug, minutos, modulos));
   }
 

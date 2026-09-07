@@ -1,12 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   armazenamentoDisponivel,
   CHAVE,
+  concluirTema,
   contarRespostas,
   gravar,
+  ler,
   marcarVisita,
   registrarQuiz,
+  salvarFeynman,
   mesclar,
   progressoVazio,
   trilhaIniciada,
@@ -232,5 +235,38 @@ describe("armazenamento indisponível", () => {
   it("com armazenamento normal, a sonda não deixa lixo para trás", () => {
     expect(armazenamentoDisponivel()).toBe(true);
     expect(window.localStorage.getItem(`${CHAVE}.sonda`)).toBeNull();
+  });
+});
+
+describe("tema compartilhado entre trilhas", () => {
+  beforeEach(() => window.localStorage.clear());
+
+  it("concluir conta nas duas, mas o 'onde parei' fica só na principal", () => {
+    concluirTema(["ed", "an"], "big-data", 25);
+    const p = ler();
+    expect(p.trilhas.ed?.temasConcluidos["big-data"]).toBeTruthy();
+    expect(p.trilhas.an?.temasConcluidos["big-data"]).toBeTruthy();
+    expect(p.trilhas.ed?.ultimoTema).toBe("big-data");
+    expect(p.trilhas.an?.ultimoTema).toBeUndefined();
+  });
+
+  it("minutos e sequência não contam duas vezes", () => {
+    concluirTema(["ed", "an"], "big-data", 25);
+    const p = ler();
+    expect(Object.values(p.minutosPorDia)).toEqual([25]);
+    expect(p.streak.atual).toBe(1);
+  });
+
+  it("quiz e explicação espelham na outra trilha", () => {
+    registrarQuiz(["ed", "an"], "big-data", 4, 5);
+    salvarFeynman(["ed", "an"], "big-data", "é o perfil do problema");
+    const p = ler();
+    expect(p.trilhas.an?.quizzes["big-data"]?.acertos).toBe(4);
+    expect(p.trilhas.an?.feynman?.["big-data"]).toBe("é o perfil do problema");
+  });
+
+  it("uma trilha só continua funcionando como antes", () => {
+    concluirTema("ed", "big-data", 10);
+    expect(Object.keys(ler().trilhas)).toEqual(["ed"]);
   });
 });

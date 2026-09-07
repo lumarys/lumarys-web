@@ -15,10 +15,13 @@ import type { Drill as TipoDrill } from "@content/types";
 export function Drill({
   drill,
   trilhaSlug,
+  espelhos = [],
   temaSlug,
 }: {
   drill: TipoDrill;
   trilhaSlug: string;
+  /** Outras trilhas que contêm este tema: o progresso vale nelas também. */
+  espelhos?: string[];
   temaSlug: string;
 }) {
   const [respostas, setRespostas] = useState<Record<number, string>>({});
@@ -113,7 +116,13 @@ export function Drill({
           onClick={() => {
             // O resultado do drill era mostrado e descartado: não entrava em
             // lugar nenhum, então praticar não deixava rastro.
-            registrarQuiz(trilhaSlug, temaSlug, acertos, drill.itens.length, "drill");
+            registrarQuiz(
+              [trilhaSlug, ...espelhos],
+              temaSlug,
+              acertos,
+              drill.itens.length,
+              "drill",
+            );
             setRevelado(true);
           }}
           className="mt-4 min-h-12 w-full rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)]"

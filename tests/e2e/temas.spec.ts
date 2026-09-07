@@ -1,45 +1,39 @@
-import { readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 
 /**
- * Cada um dos 30 temas abre sem erro de console, com vídeo, pré-teste, cards e
- * as perguntas de sabatina no lugar. É o "revisar a trilha inteira" em forma
+ * Cada tema abre sem erro de console, com vídeo, pré-teste, cards e as
+ * perguntas de sabatina no lugar. É o "revisar a trilha inteira" em forma
  * executável.
+ *
+ * As rotas vêm do sitemap gerado no build: uma URL canônica por tema. Antes
+ * havia um mapa escrito à mão de slug para módulo, que envelhecia a cada tema
+ * novo e não sabia de tema compartilhado entre trilhas.
  */
-const dir = join(process.cwd(), "content", "temas");
-const slugs = readdirSync(dir)
-  .filter((f) => f.endsWith(".mdx"))
-  .map((f) => f.replace(/\.mdx$/, ""))
+const mapa = readFileSync(join(process.cwd(), "out", "sitemap.xml"), "utf8");
+const rotas = [
+  ...mapa.matchAll(/<loc>https:\/\/lumarys\.com\.br(\/trilhas\/[^<]+\/[^<]+\/[^<]+\/)<\/loc>/g),
+]
+  .map((m) => m[1]!)
+  // Só página de tema: trilha/módulo/tema. Plano, glossário, resumo e
+  // checkpoint têm outra forma.
+  .filter((r) => r.split("/").filter(Boolean).length === 4)
+  .filter((r) => !/\/(plano|glossario|resumo|checkpoint)\/$/.test(r))
   .sort();
 
-const MODULOS: Record<string, string[]> = {
-  fundamentos: ["big-data", "olap-oltp-etl", "data-centric-data-driven"],
-  hadoop: ["hadoop-arquitetura", "mapreduce"],
-  processamento: ["batch-vs-stream", "etl-vs-elt", "particionamento-de-dados"],
-  spark: ["spark-introducao", "spark-rdd"],
-  "camada-de-dados": ["zonas-data-lake"],
-  databricks: ["lakehouse-delta-lake", "databricks-plataforma"],
-  "tipos-de-dados": ["classificacao-tipos-dados", "xml", "json"],
-  qualidade: ["governanca-de-dados", "data-quality"],
-};
-
-function moduloDe(slug: string): string {
-  for (const [m, temas] of Object.entries(MODULOS)) if (temas.includes(slug)) return m;
-  return "alem-da-ementa";
-}
-
-test("existem 30 temas", () => {
-  expect(slugs).toHaveLength(30);
+test("existem 31 temas", () => {
+  expect(rotas).toHaveLength(31);
 });
 
-for (const slug of slugs) {
+for (const rota of rotas) {
+  const slug = rota.split("/").filter(Boolean).at(-1)!;
   test(`tema ${slug} abre íntegro`, async ({ page }) => {
     const erros: string[] = [];
     page.on("console", (m) => m.type() === "error" && erros.push(m.text()));
     page.on("pageerror", (e) => erros.push(e.message));
 
-    const resposta = await page.goto(`/trilhas/engenharia-de-dados/${moduloDe(slug)}/${slug}/`);
+    const resposta = await page.goto(rota);
     expect(resposta?.status()).toBe(200);
     await page.waitForLoadState("networkidle");
 

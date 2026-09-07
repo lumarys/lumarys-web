@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { listarTrilhas, todasAsRotasDeTema } from "@/lib/content";
+import { listarTrilhas, rotasCanonicasDeTema } from "@/lib/content";
 import { SITE } from "@/lib/seo";
 
 export const dynamic = "force-static";
@@ -53,7 +53,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ]);
 
-  const temas = todasAsRotasDeTema().map((r) => ({
+  // Só a rota canônica de cada tema: um tema compartilhado por duas trilhas
+  // tem duas URLs, e listar as duas seria declarar conteúdo duplicado.
+  const temas = rotasCanonicasDeTema().map((r) => ({
     url: `${SITE.url}/trilhas/${r.trilha}/${r.modulo}/${r.tema}/`,
     lastModified: agora,
     changeFrequency: "monthly" as const,

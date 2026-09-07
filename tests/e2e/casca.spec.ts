@@ -55,7 +55,8 @@ test("o 404 oferece a home e a trilha, não só a tela de estudo", async ({ page
   await page.goto("/404.html");
 
   await expect(page.getByRole("link", { name: /voltar para a página inicial/i })).toBeVisible();
-  await expect(page.getByRole("link", { name: /ver a trilha de/i })).toBeVisible();
+  // Um atalho por trilha do catálogo: eram um, viraram dois com Analytics.
+  await expect(page.getByRole("link", { name: /ver a trilha de/i })).toHaveCount(2);
   await expect(page.getByRole("link", { name: /estudar hoje/i })).toBeVisible();
 });
 

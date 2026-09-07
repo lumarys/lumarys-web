@@ -20,10 +20,13 @@ type Confianca = "baixa" | "media" | "alta";
 export function PreTeste({
   perguntas,
   trilhaSlug,
+  espelhos = [],
   temaSlug,
 }: {
   perguntas: TipoPreTeste[];
   trilhaSlug: string;
+  /** Outras trilhas que contêm este tema: o progresso vale nelas também. */
+  espelhos?: string[];
   temaSlug: string;
 }) {
   const [indice, setIndice] = useState(0);
@@ -96,7 +99,9 @@ export function PreTeste({
 
   function avancar() {
     if (indice + 1 >= perguntas.length) {
-      registrarQuiz(trilhaSlug, temaSlug, acertos, perguntas.length, "preTeste", { enganos });
+      registrarQuiz([trilhaSlug, ...espelhos], temaSlug, acertos, perguntas.length, "preTeste", {
+        enganos,
+      });
       setTerminou(true);
       return;
     }

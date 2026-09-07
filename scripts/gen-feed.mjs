@@ -13,6 +13,7 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import matter from "gray-matter";
+import { lerTrilhasNaOrdem } from "./_temas.mjs";
 
 const RAIZ = process.cwd();
 const SITE = "https://lumarys.com.br";
@@ -27,30 +28,24 @@ for (const arquivo of readdirSync(join(RAIZ, "content", "temas")).filter((f) =>
   temas.set(data.slug, data);
 }
 
-const dirTrilhas = join(RAIZ, "content", "trilhas");
 const entradas = [];
+// Um tema compartilhado entra uma vez, pela trilha canônica — a primeira do
+// catálogo que o contém. Duas URLs para o mesmo texto seriam duas entradas
+// iguais no leitor de quem assina.
+const vistos = new Set();
 
-for (const arquivo of readdirSync(dirTrilhas).filter(
-  (f) => f.endsWith(".ts") && f !== "index.ts",
-)) {
-  const fonte = readFileSync(join(dirTrilhas, arquivo), "utf8");
-  const trilhaSlug =
-    fonte.match(/slug:\s*"([a-z0-9-]+)",\s*\n\s*tipo:/)?.[1] ?? arquivo.replace(".ts", "");
-  const trilhaTitulo = fonte.match(/^\s{2}titulo:\s*"([^"]+)"/m)?.[1] ?? trilhaSlug;
-
-  for (const bloco of fonte.matchAll(
-    /\{\s*slug:\s*"([a-z0-9-]+)",\s*titulo:\s*"([^"]+)",[\s\S]*?temas:\s*\[([^\]]*)\]/g,
-  )) {
-    const moduloSlug = bloco[1];
-    for (const [, temaSlug] of bloco[3].matchAll(/"([a-z0-9-]+)"/g)) {
+for (const trilha of lerTrilhasNaOrdem()) {
+  for (const modulo of trilha.modulos) {
+    for (const temaSlug of modulo.temas) {
       const tema = temas.get(temaSlug);
-      if (!tema) continue;
+      if (!tema || vistos.has(temaSlug)) continue;
+      vistos.add(temaSlug);
       entradas.push({
         titulo: tema.titulo,
         resumo: tema.resumo,
-        url: `${SITE}/trilhas/${trilhaSlug}/${moduloSlug}/${temaSlug}/`,
+        url: `${SITE}/trilhas/${trilha.slug}/${modulo.slug}/${temaSlug}/`,
         data: tema.publicadoEm ?? LANCAMENTO,
-        trilha: trilhaTitulo,
+        trilha: trilha.titulo,
       });
     }
   }

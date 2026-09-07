@@ -1,0 +1,289 @@
+---
+slug: source-of-record-vs-source-of-truth
+titulo: "Source of Record vs Source of Truth"
+resumo: "Source of Record é o sistema onde o dado nasce e que responde pelo fato original; Source of Truth é a visão consolidada e governada que a organização usa para decidir. Saber qual é qual é o que resolve a briga de dois relatórios com números diferentes."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-07"
+porQue: "É o tema que separa a sabatina de Analytics da de Dados. A banca não quer saber se você conhece o termo; quer ver se, diante de dois números diferentes para o mesmo KPI, você sabe qual é o oficial, por que os dois existem e como reconciliar sem inventar um terceiro."
+comoCai: "O saldo do cliente aparece diferente no core bancário e no dashboard da diretoria. Qual está certo, e o que você faz?"
+feynman: "Explique em um minuto para alguém de negócio por que 'o sistema onde o dado nasce' e 'o número em que a empresa confia' quase nunca são o mesmo lugar, e por que isso é desejável."
+preRequisitos: ["zonas-data-lake", "olap-oltp-etl"]
+errosComuns:
+  - "Achar que Source of Truth é 'o sistema mais importante'. Não é hierarquia de prestígio: é a fonte declarada como oficial para uma decisão específica, e ela pode mudar de um KPI para outro."
+  - "Tratar os dois como sinônimos. O Source of Record é autoritativo sobre o fato bruto no momento em que ele aconteceu; o Source of Truth é autoritativo sobre a versão consolidada, tratada e governada. Um extrato do core e o saldo no DW são coisas diferentes por desenho."
+  - "Resolver a divergência escolhendo o número que agrada. Sem regra de precedência escrita, cada área elege o próprio relatório como verdade e a reunião vira disputa."
+  - "Copiar o Source of Record para o Source of Truth sem transformar nada. Se o DW é uma cópia crua do core, ele herda toda inconsistência de origem e não acrescenta governança nenhuma; virou só um backup caro."
+  - "Ignorar o tempo. Boa parte das divergências é defasagem: o core já processou a transação e o lake só recebe o lote à noite. Sem carimbo de corte, os números são incomparáveis, não errados."
+  - "Prometer um único Source of Truth para tudo. Sistemas grandes têm vários, um por domínio: cliente, contrato, transação. O que precisa ser único é a regra de qual vale para cada pergunta."
+preTeste:
+  - enunciado: "O relatório de inadimplência da diretoria mostra 4,1%; o sistema de crédito, consultado direto, mostra 3,8% para a mesma data. Qual é a primeira hipótese a investigar?"
+    alternativas:
+      - texto: "Defasagem ou diferença de regra entre a origem e a camada consolidada, começando pelo carimbo de corte de cada um."
+        correta: true
+        explicacao: "Dois números para o mesmo fato quase sempre diferem por tempo ou por definição, não por erro de soma. Confirmar o corte e a regra de cálculo vem antes de acusar qualquer sistema."
+      - texto: "O relatório está errado, porque o sistema de crédito é a origem e a origem sempre vale."
+        correta: false
+        explicacao: "A origem responde pelo fato bruto, não pela definição de inadimplência que a diretoria usa. Os dois podem estar certos para perguntas diferentes."
+      - texto: "O sistema de crédito está errado, porque o relatório é o que a diretoria aprovou."
+        correta: false
+        explicacao: "Aprovação não corrige dado. Se a regra consolidada diverge da origem, é preciso saber por quê antes de dizer quem está certo."
+  - enunciado: "Uma área propõe que o dashboard leia direto do core bancário, 'para evitar divergência'. Qual é o problema central dessa proposta?"
+    alternativas:
+      - texto: "O core é Source of Record: otimizado para transação, sem as regras de negócio consolidadas, e cada área passaria a aplicar as suas próprias."
+        correta: true
+        explicacao: "Ler da origem elimina a defasagem e cria um problema maior: cada dashboard recalcula o KPI do seu jeito, e a divergência volta multiplicada."
+      - texto: "Nenhum, porque a origem é sempre a fonte mais confiável."
+        correta: false
+        explicacao: "Confiável sobre o fato, não sobre o indicador. A definição do KPI mora na camada governada."
+      - texto: "O core não permite consulta de fora, então a proposta é tecnicamente impossível."
+        correta: false
+        explicacao: "Muitas vezes é possível, e é exatamente por isso que a proposta aparece. O problema é de governança, não de acesso."
+videos:
+  - id: QwLDbMiV-is
+    publicadoEm: "2026-04-29"
+    titulo: "Fonte Única da Verdade explicada: a regra que todo sistema distribuído deveria seguir"
+    canal: "Adriano AOli - Tech"
+    duracao: 17
+    porQue: "Apresenta o problema pelo sintoma que a banca descreve: duas telas do mesmo sistema com informações diferentes. Assista atento à diferença entre 'ter uma fonte' e 'ter uma regra de qual fonte vale', que é o que separa a resposta boa da decorada."
+artigos:
+  - titulo: "System of record"
+    url: "https://en.wikipedia.org/wiki/System_of_record"
+    fonte: "Wikipédia"
+  - titulo: "Master Data Management"
+    url: "https://pt.wikipedia.org/wiki/Master_Data_Management"
+    fonte: "Wikipédia"
+  - titulo: "O que é Master Data Management (MDM)?"
+    url: "https://www.ibm.com/br-pt/think/topics/master-data-management"
+    fonte: "IBM"
+flashcards:
+  - frente: "Source of Record, em uma frase."
+    verso: "O sistema onde o dado nasce e que é autoritativo sobre o fato original: o core bancário para a transação, o CRM para o cadastro."
+  - frente: "Source of Truth, em uma frase."
+    verso: "A visão consolidada, tratada e governada que a organização declara como oficial para decidir: a tabela certificada de onde sai o KPI."
+  - frente: "Por que um sistema quase nunca é os dois ao mesmo tempo?"
+    verso: "Porque a origem é otimizada para registrar a transação, não para responder pergunta de negócio. Consolidar, aplicar regra e governar é trabalho de outra camada."
+  - frente: "As duas causas mais comuns de dois números diferentes para o mesmo KPI."
+    verso: "Defasagem, quando a origem já mudou e a camada consolidada ainda não recebeu; e diferença de regra, quando cada lado calcula o indicador com uma definição."
+  - frente: "O que é regra de precedência?"
+    verso: "A declaração escrita de qual fonte vale para qual pergunta quando elas divergem. Sem ela, cada área elege o próprio relatório como verdade."
+  - frente: "O que é reconciliação?"
+    verso: "O processo que compara a origem com a visão consolidada, explica cada diferença (tempo, regra, erro) e prova que o número oficial fecha com o fato."
+  - frente: "Para que serve a linhagem neste tema?"
+    verso: "Para percorrer o caminho do número oficial de volta até o Source of Record. É o que transforma 'confio neste dashboard' em 'sei de onde ele veio'."
+  - frente: "Um Source of Truth só para a empresa inteira: faz sentido?"
+    verso: "Não. O que se tem é um por domínio (cliente, contrato, transação). O que precisa ser único é a regra de qual vale para cada decisão."
+  - frente: "Onde o Source of Truth costuma morar num lake com zonas?"
+    verso: "Na zona refined ou gold: dado já validado, modelado para a pergunta de negócio e com dono. A raw é a cópia fiel da origem, não a verdade consolidada."
+  - frente: "Golden record e Source of Truth: qual a relação?"
+    verso: "Golden record é a versão consolidada de uma entidade (o cliente 'único' a partir de vários cadastros). É o Source of Truth aplicado a dados mestres, geralmente por um MDM."
+  - frente: "O que carimbo de corte tem a ver com isso?"
+    verso: "É o instante que define 'de que momento' é cada número. Dois relatórios sem o mesmo corte são incomparáveis, não errados."
+  - frente: "Sinal de que a organização não tem Source of Truth definido."
+    verso: "A reunião em que duas áreas trazem números diferentes para o mesmo indicador e ninguém consegue dizer qual usar."
+drills:
+  - titulo: "Record ou Truth?"
+    instrucao: "Para cada item, diga se ele é Source of Record, Source of Truth ou nenhum dos dois."
+    opcoes: ["Source of Record", "Source of Truth", "Nenhum"]
+    itens:
+      - enunciado: "O core bancário que registra a autorização do cartão no instante da compra."
+        resposta: "Source of Record"
+        explicacao: "É onde o fato nasce. Autoritativo sobre a transação bruta."
+      - enunciado: "A tabela certificada de inadimplência que alimenta o painel da diretoria."
+        resposta: "Source of Truth"
+        explicacao: "Consolidada, com regra de negócio aplicada, dono e governança."
+      - enunciado: "A planilha que um analista mantém no próprio computador com os números 'ajustados'."
+        resposta: "Nenhum"
+        explicacao: "Não é origem nem visão governada. É justamente o que a regra de precedência existe para eliminar."
+      - enunciado: "O cadastro de clientes no CRM, de onde outros sistemas copiam nome e endereço."
+        resposta: "Source of Record"
+        explicacao: "Autoritativo sobre o dado cadastral no ponto de entrada."
+      - enunciado: "O golden record de cliente produzido pelo MDM, unificando CRM, core e canais."
+        resposta: "Source of Truth"
+        explicacao: "A versão consolidada e governada da entidade, usada por quem precisa de 'o cliente'."
+      - enunciado: "A cópia diária do core na zona raw do lake."
+        resposta: "Nenhum"
+        explicacao: "É uma réplica da origem para reprocessamento. Não é autoritativa sobre o fato (a origem é) nem consolidada."
+perguntas:
+  - tipo: oral
+    enunciado: "O saldo de um cliente aparece diferente no core bancário e no dashboard da diretoria. Qual está certo, e o que você faz?"
+    respostaModelo: "Os dois podem estar certos, e a primeira coisa que eu faço é parar de perguntar qual está certo e perguntar de que momento e com que regra cada um é. O core é o Source of Record: ele tem o saldo no instante em que a transação foi processada. O dashboard lê de uma camada consolidada, que é o Source of Truth para a decisão da diretoria, e essa camada tem carimbo de corte, normalmente o fechamento do dia anterior, e regras próprias, como excluir lançamentos pendentes. Então eu comparo os dois no mesmo corte. Se a diferença some, era defasagem, e a resposta é deixar claro no painel de que momento é o número. Se persiste, comparo a regra: o que o core chama de saldo e o que o KPI chama de saldo. Se ainda assim sobra diferença, aí sim é erro, e eu uso a linhagem para achar onde o pipeline se perdeu. O que eu não faço é escolher o número que agrada nem mandar o dashboard ler o core direto, porque isso troca uma divergência explicável por várias definições de saldo, uma por área."
+    rubrica:
+      - "Distinguiu Source of Record (core) de Source of Truth (camada consolidada) e disse que os dois podem estar certos"
+      - "Citou carimbo de corte ou defasagem como primeira hipótese e propôs comparar no mesmo corte"
+      - "Citou diferença de regra de cálculo como segunda hipótese"
+      - "Mencionou linhagem para localizar erro real quando as duas hipóteses caem"
+      - "Recusou ler direto da origem no dashboard, com o motivo"
+  - tipo: oral
+    enunciado: "Uma área de negócio diz que não confia nos números do DW e quer manter a própria planilha como referência. Como você conduz isso?"
+    respostaModelo: "Primeiro eu levo a sério, porque desconfiança quase sempre tem um caso concreto atrás: um número que saiu errado, ou uma mudança de regra que ninguém avisou. Eu peço esse caso e faço a reconciliação na frente da área: pego o KPI no DW, volto pela linhagem até o Source of Record e mostro onde a diferença nasce, se é corte, regra ou erro. Se for erro, corrijo e crio um teste para aquele caso, para ele não voltar. Depois eu ataco a causa da planilha, que é a falta de regra de precedência: proponho que aquele indicador tenha um dono de negócio, uma definição escrita e uma tabela certificada, e que a planilha vire consumidora dessa tabela, não concorrente. O argumento para a área é que a planilha resolve o problema dela e cria o de todo mundo: quando a diretoria recebe dois números, é a credibilidade da área que se perde. O trade-off que eu assumo é tempo: certificar um KPI é mais lento do que ajustar uma célula. Compenso publicando a definição e a linhagem, para a área conseguir auditar o número sozinha."
+    rubrica:
+      - "Tratou a desconfiança como sinal de um caso real e propôs reconciliar esse caso, não argumentar em abstrato"
+      - "Usou linhagem até o Source of Record para explicar a diferença"
+      - "Propôs dono, definição escrita e tabela certificada como solução estrutural"
+      - "Explicou por que a planilha paralela é um problema para a organização, não só para o time de dados"
+      - "Nomeou um trade-off, como tempo ou rigidez, em vez de vender a solução como sem custo"
+  - tipo: oral
+    enunciado: "Uma instituição tem vários Sources of Truth: um para cliente, um para contrato, um para transação. Isso é um problema?"
+    respostaModelo: "Não, é o normal, e tentar reduzir a um só é que seria o problema. Cada domínio tem uma origem diferente e uma consolidação diferente: o cliente único vem do MDM cruzando CRM, core e canais; o contrato vem do sistema de crédito; a transação vem do core. O que precisa ser único não é a fonte, é a regra: para cada pergunta, qual fonte vale, quem é o dono e como as fontes se reconciliam entre si. O risco de vários Sources of Truth não está em existirem, está em se contradizerem sem ninguém saber, por exemplo o cliente do MDM com um CPF e o contrato apontando para outro. Por isso eu exijo chave compartilhada entre os domínios, linhagem que atravessa as fronteiras e um catálogo que diz qual tabela é a certificada para cada entidade. Em Data Mesh isso fica explícito: cada domínio publica o seu produto de dados como verdade daquele domínio, e a governança federada cuida de os produtos conversarem."
+    rubrica:
+      - "Respondeu que vários por domínio é o esperado, e explicou por que um só não funciona"
+      - "Disse que o que precisa ser único é a regra de precedência ou a governança, não a fonte"
+      - "Nomeou o risco real: fontes que se contradizem sem controle"
+      - "Citou chave compartilhada, linhagem entre domínios ou catálogo como mecanismo"
+  - tipo: unica
+    enunciado: "Qual definição de Source of Truth é a mais defensável numa sabatina?"
+    alternativas:
+      - texto: "A fonte declarada como oficial para uma decisão específica, consolidada e governada, com dono e regra de cálculo escrita."
+        correta: true
+        explicacao: "Tem os três elementos que importam: é declarada (não emerge sozinha), é para uma pergunta (não para tudo) e é governada."
+      - texto: "O sistema mais antigo e mais confiável da empresa, de onde os outros copiam."
+        correta: false
+        explicacao: "Isso descreve um Source of Record. Idade e cópia não fazem uma fonte ser a verdade consolidada."
+      - texto: "O banco de dados central que substitui todos os outros para eliminar divergência."
+        correta: false
+        explicacao: "Sistemas grandes têm vários Sources of Truth, um por domínio. Um banco único para tudo é o sonho que gera o pântano."
+      - texto: "A cópia mais recente da origem, guardada no lake para consulta rápida."
+        correta: false
+        explicacao: "Cópia fiel é a zona raw. Sem regra aplicada nem governança, não é verdade consolidada."
+  - tipo: multipla
+    enunciado: "Diante de dois números diferentes para o mesmo KPI, quais ações fazem parte de uma reconciliação bem feita?"
+    alternativas:
+      - texto: "Comparar os dois no mesmo carimbo de corte antes de qualquer outra coisa."
+        correta: true
+        explicacao: "Defasagem é a causa mais comum, e a mais barata de descartar."
+      - texto: "Confrontar a regra de cálculo de cada lado, campo a campo."
+        correta: true
+        explicacao: "A segunda causa mais comum é definição: o que cada um chama de 'inadimplente', 'ativo', 'saldo'."
+      - texto: "Percorrer a linhagem do número oficial até o Source of Record."
+        correta: true
+        explicacao: "É o que localiza erro real quando corte e regra não explicam a diferença."
+      - texto: "Adotar o número maior, por conservadorismo."
+        correta: false
+        explicacao: "Escolher por preferência é o que a reconciliação existe para evitar."
+      - texto: "Fazer o dashboard ler direto do sistema de origem."
+        correta: false
+        explicacao: "Troca uma divergência explicável por várias definições do KPI, uma por consumidor."
+---
+
+## Em uma frase
+
+**Source of Record** é o sistema onde o dado nasce e que responde pelo fato
+original; **Source of Truth** é a visão consolidada e governada que a
+organização declara como oficial para decidir. Quase nunca são o mesmo lugar, e
+isso é por desenho.
+
+## O problema que este tema resolve
+
+Toda instituição grande vive a mesma reunião: duas áreas trazem números
+diferentes para o mesmo indicador, cada uma jura pelo seu relatório, e a
+discussão termina sem ninguém saber qual usar. O sintoma parece técnico, mas a
+causa é de governança. Não há regra escrita de **qual fonte vale para qual
+pergunta**.
+
+Este tema dá o vocabulário para transformar essa reunião numa investigação de
+dez minutos. E é o que a banca de Analytics cobra: não a definição dos termos,
+mas o que você faz diante da divergência.
+
+## Os dois papéis
+
+<Termo nome="Source of Record">O sistema autoritativo sobre o fato no momento em que ele acontece: o core bancário para a transação, o CRM para o cadastro, o sistema de crédito para o contrato.</Termo>
+
+O Source of Record é otimizado para **registrar**. Ele precisa aceitar a
+transação em milissegundos, garantir consistência naquele instante e nunca
+perder um lançamento. Ele não foi feito para responder "qual é a inadimplência
+da carteira": essa pergunta exige juntar contratos, aplicar uma definição de
+atraso, excluir renegociações e olhar para um fechamento.
+
+<Termo nome="Source of Truth">A visão consolidada, tratada e governada que a organização usa para decidir: a tabela certificada de onde sai o KPI, com dono, definição escrita e regra de cálculo.</Termo>
+
+O Source of Truth é otimizado para **responder**. Ele nasce da origem, mas
+passa por transformação, consolidação e regra de negócio. Num lake com zonas, é
+a refined ou a gold. Num MDM, é o golden record do cliente.
+
+<Comparativo
+  colunas={["", "Source of Record", "Source of Truth"]}
+  linhas={[
+    ["Autoritativo sobre", "O fato bruto, no instante", "A versão consolidada, para a decisão"],
+    ["Otimizado para", "Registrar transação", "Responder pergunta de negócio"],
+    ["Exemplo no banco", "Core, CRM, sistema de crédito", "Tabela certificada de inadimplência; golden record de cliente"],
+    ["Onde mora no lake", "Fora dele; a raw é só uma cópia", "Refined ou gold"],
+    ["Quantos existem", "Um por sistema de origem", "Um por domínio ou por KPI"],
+    ["Quem responde por ele", "O time do sistema", "Um dono de negócio, com definição escrita"]
+  ]}
+/>
+
+## Por que separar é desejável
+
+A tentação é juntar: "se o dashboard ler direto do core, acaba a divergência".
+Acaba a defasagem e nasce um problema maior. Cada consumidor passa a aplicar a
+própria regra sobre o dado cru, e a divergência volta multiplicada, agora sem
+ninguém conseguir explicar.
+
+Separar é o que permite:
+
+- **Aplicar a regra uma vez.** A definição de inadimplência vive num lugar e
+  todo relatório herda a mesma.
+- **Governar.** Dono, catálogo, controle de acesso e mascaramento de dado
+  sensível acontecem na camada consolidada, não em cada consulta.
+- **Reprocessar.** Quando a regra muda, a raw preserva a origem e a
+  consolidação é refeita. Se o dashboard lesse o core, a história se perderia.
+
+<Callout tipo="atencao" titulo="Onde a banca aperta">
+Depois que você separa os dois, o entrevistador pergunta: "e quando eles
+divergem, qual vale?". A resposta não é "a origem" nem "a consolidada". É:
+**depende da pergunta, e isso tem que estar escrito**. Para o saldo que o
+cliente vê no app, vale o core. Para a inadimplência que a diretoria decide,
+vale a tabela certificada. Quem não tem essa regra escrita não tem Source of
+Truth, tem opinião.
+</Callout>
+
+## Como reconciliar dois números
+
+<Termo nome="reconciliação">O processo que compara a origem com a visão consolidada, explica cada diferença e prova que o número oficial fecha com o fato.</Termo>
+
+A ordem importa, porque cada passo descarta a causa mais barata antes da mais
+cara:
+
+<Passos itens={[
+  "Comparar no mesmo carimbo de corte. A maioria das divergências é tempo: o core já processou, o lote da noite ainda não chegou. Sem o mesmo corte, os números são incomparáveis, não errados.",
+  "Confrontar a regra de cálculo. O que cada lado chama de saldo, de ativo, de inadimplente. Aqui aparecem as renegociações que um exclui e o outro não.",
+  "Percorrer a linhagem do número oficial de volta ao Source of Record. Só quando corte e regra não explicam a diferença é que existe erro de pipeline, e a linhagem diz em qual passo.",
+  "Registrar a causa e criar um teste. Diferença explicada vira documentação; erro corrigido vira teste de dados, para não voltar."
+]} />
+
+O que fica de fora da lista é escolher o número que agrada. Conservadorismo não
+é critério de reconciliação.
+
+## Vários Sources of Truth é o normal
+
+Uma instituição não tem **um** Source of Truth, tem um por domínio: cliente,
+contrato, transação, produto. Tentar reduzir tudo a um banco único é o sonho
+que gera o pântano.
+
+O que precisa ser único é a **regra de precedência** e o que a sustenta:
+
+- chave compartilhada entre domínios, para o cliente do MDM e o contrato do
+  crédito apontarem para a mesma pessoa;
+- linhagem que atravessa as fronteiras, para o KPI de carteira voltar até o
+  core;
+- catálogo que diz qual tabela é a certificada para cada entidade.
+
+Em Data Mesh isso fica explícito: cada domínio publica o próprio produto de
+dados como verdade daquele domínio, e a governança federada cuida de os
+produtos conversarem.
+
+<Callout tipo="dica" titulo="O que o engenheiro de analytics faz com isso">
+Você consome a zona refined, define métricas e garante que o mesmo número saia
+igual em todo dashboard. Na prática, três hábitos: todo KPI tem dono e definição
+escrita; todo painel mostra de que corte é o número; e toda divergência
+reportada vira uma reconciliação registrada, não uma discussão.
+</Callout>
+
+## Como responder isso em voz alta
+
+Quando vier o cenário dos dois números, estruture assim: **os dois podem estar
+certos** (Record e Truth respondem a perguntas diferentes); **comparo no mesmo
+corte** (defasagem); **comparo a regra** (definição); **sigo a linhagem** (erro
+real); e **recuso ler da origem no dashboard**, com o motivo. Quem dá essa
+resposta em ordem mostra que já viveu a reunião, não que decorou o termo.

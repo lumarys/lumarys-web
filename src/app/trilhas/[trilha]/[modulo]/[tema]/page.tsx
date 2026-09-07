@@ -24,8 +24,10 @@ import { SumarioTema, VoltarAoTopo } from "@/features/tema/SumarioTema";
 import { VideoEmbed } from "@/features/tema/VideoEmbed";
 import {
   localizarTema,
+  rotaCanonicaDoTema,
   sequenciaDaTrilha,
   todasAsRotasDeTema,
+  trilhasDoTema,
   vizinhosDoTema,
 } from "@/lib/content";
 import { JsonLd, SITE, alternativas } from "@/lib/seo";
@@ -42,7 +44,13 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const local = localizarTema(trilha, tema);
   if (!local) return {};
 
-  const url = `/trilhas/${trilha}/${modulo}/${tema}/`;
+  // Um tema compartilhado por duas trilhas existe em duas URLs. A canônica é a
+  // da primeira trilha do catálogo que o contém: o buscador indexa uma só, e
+  // esta página, quando não é a canônica, aponta para ela.
+  const canonica = rotaCanonicaDoTema(tema);
+  const url = canonica
+    ? `/trilhas/${canonica.trilha}/${canonica.modulo}/${canonica.tema}/`
+    : `/trilhas/${trilha}/${modulo}/${tema}/`;
   return {
     // Fora do template do site: o título do tema já carrega a trilha.
     title: { absolute: `${local.tema.titulo} | ${local.trilha.titulo} · ${SITE.nome}` },
@@ -64,6 +72,11 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
 
   const { trilha, modulo, tema } = local;
   const { anterior, proximo } = vizinhosDoTema(trilha, temaSlug);
+  // As outras trilhas que contêm este tema: concluir, responder e escrever
+  // aqui conta nelas também. É o mesmo estudo.
+  const espelhos = trilhasDoTema(temaSlug)
+    .map((t) => t.slug)
+    .filter((s) => s !== trilha.slug);
   const sequencia = sequenciaDaTrilha(trilha);
   const posicao = sequencia.findIndex((x) => x.tema.slug === temaSlug) + 1;
 
@@ -144,7 +157,12 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
         </Card>
 
         <div id="preteste" className="scroll-mt-16" />
-        <PreTeste perguntas={tema.preTeste} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
+        <PreTeste
+          perguntas={tema.preTeste}
+          trilhaSlug={trilha.slug}
+          espelhos={espelhos}
+          temaSlug={tema.slug}
+        />
 
         {videoPrincipal ? (
           <section id="video" className="mt-6 scroll-mt-16">
@@ -200,17 +218,32 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
 
         {tema.drills.map((drill, i) => (
           <section key={i} id={i === 0 ? "drill" : undefined} className="mt-6 scroll-mt-16">
-            <Drill drill={drill} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
+            <Drill
+              drill={drill}
+              trilhaSlug={trilha.slug}
+              espelhos={espelhos}
+              temaSlug={tema.slug}
+            />
           </section>
         ))}
 
         {objetivas.length > 0 ? (
           <section id="quiz" className="mt-6 scroll-mt-16">
-            <Quiz perguntas={objetivas} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
+            <Quiz
+              perguntas={objetivas}
+              trilhaSlug={trilha.slug}
+              espelhos={espelhos}
+              temaSlug={tema.slug}
+            />
           </section>
         ) : null}
 
-        <Feynman trilhaSlug={trilha.slug} temaSlug={tema.slug} pergunta={tema.feynman} />
+        <Feynman
+          trilhaSlug={trilha.slug}
+          espelhos={espelhos}
+          temaSlug={tema.slug}
+          pergunta={tema.feynman}
+        />
 
         {orais.length > 0 ? (
           <Recolhivel
@@ -255,6 +288,7 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
         <div id="concluir" className="mt-8 scroll-mt-16">
           <ConcluirTema
             trilhaSlug={trilha.slug}
+            espelhos={espelhos}
             temaSlug={tema.slug}
             minutos={tema.minutos}
             modulos={trilha.modulos.map((m) => ({ slug: m.slug, temas: m.temas }))}

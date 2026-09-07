@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { BotaoLink } from "@/components/ui/Botao";
 import { Drill } from "@/features/tema/Drill";
-import { localizarTema, todasAsRotasDeTema } from "@/lib/content";
+import { localizarTema, todasAsRotasDeTema, trilhasDoTema } from "@/lib/content";
 import { minutosDoDrill } from "@/lib/drills";
 import { alternativas } from "@/lib/seo";
 
@@ -66,7 +66,14 @@ export default async function PaginaDrill({ params }: { params: Promise<Params> 
           </p>
         </div>
 
-        <Drill drill={drill} trilhaSlug={trilha.slug} temaSlug={tema.slug} />
+        <Drill
+          drill={drill}
+          trilhaSlug={trilha.slug}
+          espelhos={trilhasDoTema(tema.slug)
+            .map((t) => t.slug)
+            .filter((s) => s !== trilha.slug)}
+          temaSlug={tema.slug}
+        />
 
         <BotaoLink href={hrefDoTema} variante="secundario">
           Reler o tema

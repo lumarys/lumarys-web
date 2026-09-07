@@ -17,6 +17,7 @@ import { Amostra } from "@/features/home/Amostra";
 import { DeVolta } from "@/features/home/DeVolta";
 import {
   estatisticasDaTrilha,
+  contarTemas,
   listarTrilhas,
   sequenciaDaTrilha,
   temasDoModulo,
@@ -331,6 +332,32 @@ export default function Home() {
                 );
               })}
             </ol>
+
+            {/* As demais trilhas do catálogo. O destaque continua sendo a
+                primeira — é a completa —, mas quem chega pela segunda precisa
+                achá-la na home, e não só em /trilhas/. */}
+            {trilhas.length > 1 ? (
+              <div className="mt-8 border-t border-[var(--border)] pt-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                  Também disponível
+                </p>
+                <ul className="mt-3 flex list-none flex-col gap-2 p-0 sm:flex-row sm:flex-wrap">
+                  {trilhas.slice(1).map((outra) => (
+                    <li key={outra.slug}>
+                      <Link
+                        href={`/trilhas/${outra.slug}/`}
+                        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 text-[14px] font-semibold no-underline"
+                      >
+                        {outra.titulo}
+                        <span className="text-[12px] font-normal text-[var(--muted)]">
+                          {contarTemas(outra)} temas
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
           </div>
         </section>
       ) : null}

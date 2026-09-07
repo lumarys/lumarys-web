@@ -1,19 +1,20 @@
 import type { Trilha } from "../types";
+import { engenhariaDeAnalytics } from "./engenharia-de-analytics";
 import { engenhariaDeDados } from "./engenharia-de-dados";
 
-/** Todas as trilhas do catálogo, na ordem em que aparecem na landing. */
-export const trilhas: Trilha[] = [engenhariaDeDados];
+/**
+ * Todas as trilhas do catálogo, na ordem em que aparecem na landing.
+ *
+ * A ordem também decide a URL canônica de um tema compartilhado: a primeira
+ * trilha que o contém é a que o buscador indexa. Dados vem antes de Analytics
+ * porque foi onde os temas nasceram.
+ */
+export const trilhas: Trilha[] = [engenhariaDeDados, engenhariaDeAnalytics];
 
 export const trilhasPorSlug = new Map(trilhas.map((t) => [t.slug, t]));
 
 /** Trilhas anunciadas no catálogo mas ainda sem conteúdo. */
 export const trilhasEmBreve = [
-  {
-    slug: "engenharia-de-analytics",
-    titulo: "Engenharia de Analytics",
-    origem: "Ementa oficial · mercado financeiro",
-    resumo: "Big Data, AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
-  },
   {
     slug: "aws-cloud-practitioner",
     titulo: "AWS Cloud Practitioner",

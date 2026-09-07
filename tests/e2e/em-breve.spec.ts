@@ -31,7 +31,8 @@ test("o pedido nomeia a trilha, para chegar classificado", async ({ page }) => {
   // é que o botão existe e é dessa trilha; o assunto em si é montado por
   // `enderecoDeContato`, coberto em tests/unit/company.test.ts.
   await expect(cartao.getByRole("button", { name: /quero esta trilha/i })).toBeVisible();
-  // As outras duas existem fechadas: o pedido é por trilha, não um só no fim
-  // da lista, para o assunto do e-mail dizer qual delas.
-  await expect(page.locator("details button", { hasText: "Quero esta trilha" })).toHaveCount(3);
+  // A outra existe fechada: o pedido é por trilha, não um só no fim da lista,
+  // para o assunto do e-mail dizer qual delas. (Eram três; Analytics saiu do
+  // "em breve" e virou trilha.)
+  await expect(page.locator("details button", { hasText: "Quero esta trilha" })).toHaveCount(2);
 });

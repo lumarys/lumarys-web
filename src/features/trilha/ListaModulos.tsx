@@ -14,6 +14,8 @@ export type ModuloResumo = {
   titulo: string;
   resumo: string;
   oficial: boolean;
+  /** "em-breve" é um módulo que a ementa nomeia e ainda não tem tema. */
+  status?: "disponivel" | "em-breve";
   temas: { slug: string; titulo: string; minutos: number }[];
 };
 
@@ -79,6 +81,42 @@ export function ListaModulos({
         const doDia = modulo.temas.some((t) => temasDeHoje.includes(t.slug));
         const checkpoint = trilha?.checkpoints?.[modulo.slug];
         const fechado = Boolean(checkpoint && aprovado(checkpoint.acertos, checkpoint.total));
+
+        // Módulo que a ementa nomeia e ainda não tem conteúdo. Aparece na
+        // lista, com o resumo do que vai cobrir, mas não abre: um acordeão
+        // vazio com "0/0" e link para um checkpoint sem perguntas seria pior
+        // que dizer "em breve".
+        if (modulo.status === "em-breve") {
+          return (
+            <li
+              key={modulo.slug}
+              id={modulo.slug}
+              className="scroll-mt-4 rounded-2xl border border-dashed border-[var(--border)] px-4 py-3"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="flex items-center gap-2.5">
+                  <span className="size-6 shrink-0 rounded-full border-2 border-dashed border-[var(--border)]" />
+                  <span className="flex flex-col">
+                    <span className="text-sm font-medium text-[var(--text-2)]">
+                      {modulo.titulo}
+                    </span>
+                    {!modulo.oficial ? (
+                      <span className="text-[11px] text-[var(--muted)]">
+                        além da ementa oficial
+                      </span>
+                    ) : null}
+                  </span>
+                </span>
+                <span className="shrink-0 rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  em breve
+                </span>
+              </div>
+              <p className="mt-2 text-[13px] leading-relaxed text-[var(--muted)]">
+                {modulo.resumo}
+              </p>
+            </li>
+          );
+        }
 
         return (
           <li key={modulo.slug} id={modulo.slug} className="scroll-mt-4">

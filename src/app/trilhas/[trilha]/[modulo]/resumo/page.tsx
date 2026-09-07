@@ -11,7 +11,10 @@ type Params = { trilha: string; modulo: string };
 
 export function generateStaticParams(): Params[] {
   return listarTrilhas().flatMap((trilha) =>
-    trilha.modulos.map((modulo) => ({ trilha: trilha.slug, modulo: modulo.slug })),
+    // Módulo "em breve" não tem tema: sem checkpoint nem folha para gerar.
+    trilha.modulos
+      .filter((modulo) => modulo.status === "disponivel")
+      .map((modulo) => ({ trilha: trilha.slug, modulo: modulo.slug })),
   );
 }
 

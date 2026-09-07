@@ -15,10 +15,13 @@ import { salvarFeynman } from "@/lib/storage";
  */
 export function Feynman({
   trilhaSlug,
+  espelhos = [],
   temaSlug,
   pergunta,
 }: {
   trilhaSlug: string;
+  /** Outras trilhas que contêm este tema: o progresso vale nelas também. */
+  espelhos?: string[];
   temaSlug: string;
   pergunta: string;
 }) {
@@ -44,7 +47,7 @@ export function Feynman({
     if (temporizador.current) window.clearTimeout(temporizador.current);
     // Salvar a cada tecla encheria a fila de sincronização por nada.
     temporizador.current = window.setTimeout(() => {
-      salvarFeynman(trilhaSlug, temaSlug, novo);
+      salvarFeynman([trilhaSlug, ...espelhos], temaSlug, novo);
       setGuardado(true);
     }, 1200);
   }

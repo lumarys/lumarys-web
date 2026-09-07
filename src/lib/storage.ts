@@ -231,6 +231,35 @@ export function garantirTrilha(p: Progresso, trilha: string): ProgressoTrilha {
  * aberto e abandonado no meio — justamente o que a pessoa quer retomar —
  * nunca era lembrado.
  */
+/**
+ * Os escritores de progresso por tema aceitam uma trilha ou uma lista. A
+ * primeira é a principal — a que a pessoa está navegando; as demais são as
+ * outras trilhas que contêm o mesmo tema. Um tema compartilhado (Big Data
+ * está em Dados e em Analytics) é um estudo só: concluir, responder o quiz
+ * ou escrever a explicação conta nas duas. O que NÃO se espelha é o
+ * "onde parei" (`ultimoTema`), que é navegação de cada trilha, e os minutos
+ * e a sequência, que são globais e contariam duas vezes.
+ *
+ * É espelhamento, não modelo único: o progresso continua guardado por trilha
+ * porque a API e a mesclagem trabalham por trilha. Mover o progresso de tema
+ * para fora das trilhas seria a solução de raiz, e uma migração de dados.
+ */
+function lista(trilha: string | readonly string[]): string[] {
+  return Array.isArray(trilha) ? [...trilha] : [trilha as string];
+}
+
+function emCadaTrilha(
+  p: Progresso,
+  trilhas: string[],
+  mudar: (t: ProgressoTrilha, principal: boolean) => ProgressoTrilha,
+): Progresso["trilhas"] {
+  const saida = { ...p.trilhas };
+  trilhas.forEach((slug, i) => {
+    saida[slug] = mudar(garantirTrilha({ ...p, trilhas: saida }, slug), i === 0);
+  });
+  return saida;
+}
+
 export function marcarVisita(trilha: string, tema: string): void {
   const atual = ler().trilhas[trilha];
   if (atual?.ultimoTema === tema) return; // nada mudou: não gravar nem sincronizar
@@ -245,23 +274,24 @@ export function marcarVisita(trilha: string, tema: string): void {
   });
 }
 
-export function concluirTema(trilha: string, tema: string, minutos: number): Progresso {
-  sincronizar(trilha);
+export function concluirTema(
+  trilha: string | readonly string[],
+  tema: string,
+  minutos: number,
+): Progresso {
+  const trilhas = lista(trilha);
+  trilhas.forEach(sincronizar);
   return atualizar((p) => {
     const agora = Date.now();
-    const t = garantirTrilha(p, trilha);
     const hoje = hojeISO();
     return {
       ...p,
-      trilhas: {
-        ...p.trilhas,
-        [trilha]: {
-          ...t,
-          temasConcluidos: { ...t.temasConcluidos, [tema]: agora },
-          ultimoTema: tema,
-          atualizadoEm: agora,
-        },
-      },
+      trilhas: emCadaTrilha(p, trilhas, (t, principal) => ({
+        ...t,
+        temasConcluidos: { ...t.temasConcluidos, [tema]: agora },
+        ...(principal ? { ultimoTema: tema } : {}),
+        atualizadoEm: agora,
+      })),
       minutosPorDia: { ...p.minutosPorDia, [hoje]: (p.minutosPorDia[hoje] ?? 0) + minutos },
       streak: aplicarStreak(p.streak, hoje),
     };
@@ -269,28 +299,25 @@ export function concluirTema(trilha: string, tema: string, minutos: number): Pro
 }
 
 export function registrarQuiz(
-  trilha: string,
+  trilha: string | readonly string[],
   tema: string,
   acertos: number,
   total: number,
   tipo: "quiz" | "preTeste" | "drill" = "quiz",
   extra: { erradas?: number[]; enganos?: number } = {},
 ): Progresso {
-  sincronizar(trilha);
+  const trilhas = lista(trilha);
+  trilhas.forEach(sincronizar);
   return atualizar((p) => {
     const agora = Date.now();
-    const t = garantirTrilha(p, trilha);
     const chave = tipo === "quiz" ? "quizzes" : tipo === "preTeste" ? "preTestes" : "drills";
     return {
       ...p,
-      trilhas: {
-        ...p.trilhas,
-        [trilha]: {
-          ...t,
-          [chave]: { ...t[chave], [tema]: { acertos, total, atualizadoEm: agora, ...extra } },
-          atualizadoEm: agora,
-        },
-      },
+      trilhas: emCadaTrilha(p, trilhas, (t) => ({
+        ...t,
+        [chave]: { ...t[chave], [tema]: { acertos, total, atualizadoEm: agora, ...extra } },
+        atualizadoEm: agora,
+      })),
     };
   });
 }
@@ -371,20 +398,22 @@ export function definirPlano(trilha: string, dataProva: string, minutosPorDia: n
  * Guarda a explicação que o aluno escreveu para si mesmo. Fica no aparelho
  * como o resto do progresso: é rascunho de estudo, não conteúdo publicado.
  */
-export function salvarFeynman(trilha: string, tema: string, texto: string): Progresso {
-  sincronizar(trilha);
+export function salvarFeynman(
+  trilha: string | readonly string[],
+  tema: string,
+  texto: string,
+): Progresso {
+  const trilhas = lista(trilha);
+  trilhas.forEach(sincronizar);
   return atualizar((p) => {
-    const t = garantirTrilha(p, trilha);
+    const agora = Date.now();
     return {
       ...p,
-      trilhas: {
-        ...p.trilhas,
-        [trilha]: {
-          ...t,
-          feynman: { ...(t.feynman ?? {}), [tema]: texto },
-          atualizadoEm: Date.now(),
-        },
-      },
+      trilhas: emCadaTrilha(p, trilhas, (t) => ({
+        ...t,
+        feynman: { ...(t.feynman ?? {}), [tema]: texto },
+        atualizadoEm: agora,
+      })),
     };
   });
 }

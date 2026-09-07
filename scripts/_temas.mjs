@@ -24,3 +24,42 @@ export function sair(erros, avisos, oque) {
   }
   console.log(`ok: ${oque} sem problemas${avisos.length ? ` (${avisos.length} aviso(s))` : ""}.`);
 }
+
+const DIR_TRILHAS = join(process.cwd(), "content", "trilhas");
+
+/**
+ * As trilhas na ordem do catálogo (content/trilhas/index.ts), com módulos e
+ * temas extraídos do texto dos arquivos TypeScript.
+ *
+ * A ordem importa: um tema compartilhado por duas trilhas é canônico na
+ * primeira que o contém, e o feed lista uma URL só. Ler o diretório em ordem
+ * alfabética daria "analytics" antes de "dados" e inverteria a canônica.
+ */
+export function lerTrilhasNaOrdem() {
+  const indice = readFileSync(join(DIR_TRILHAS, "index.ts"), "utf8");
+  const nomes = [
+    ...(indice.match(/trilhas:\s*Trilha\[\]\s*=\s*\[([^\]]*)\]/)?.[1] ?? "").matchAll(/(\w+)/g),
+  ].map((m) => m[1]);
+  const arquivos = readdirSync(DIR_TRILHAS).filter((f) => f.endsWith(".ts") && f !== "index.ts");
+
+  return nomes.flatMap((nome) => {
+    const arquivo = arquivos.find((f) =>
+      new RegExp(`export const ${nome}\\b`).test(readFileSync(join(DIR_TRILHAS, f), "utf8")),
+    );
+    if (!arquivo) return [];
+    const fonte = readFileSync(join(DIR_TRILHAS, arquivo), "utf8");
+    const slug =
+      fonte.match(/slug:\s*"([a-z0-9-]+)",\s*\n\s*tipo:/)?.[1] ?? arquivo.replace(".ts", "");
+    const titulo = fonte.match(/^\s{2}titulo:\s*"([^"]+)"/m)?.[1] ?? slug;
+    const modulos = [
+      ...fonte.matchAll(
+        /\{\s*slug:\s*"([a-z0-9-]+)",\s*titulo:\s*"([^"]+)",[\s\S]*?temas:\s*\[([^\]]*)\]/g,
+      ),
+    ].map((b) => ({
+      slug: b[1],
+      titulo: b[2],
+      temas: [...b[3].matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]),
+    }));
+    return [{ arquivo, slug, titulo, modulos }];
+  });
+}

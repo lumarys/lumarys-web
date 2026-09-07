@@ -7,11 +7,11 @@ import { join } from "node:path";
 import { AppShell } from "@/components/layout/AppShell";
 import { Rotulo } from "@/components/ui/Card";
 import { AmostraPublica, type PerguntaDeAmostra } from "@/features/simulado/AmostraPublica";
-import { PromptIA } from "@/features/simulado/PromptIA";
-import { SimuladoComEscopo } from "@/features/simulado/SimuladoComEscopo";
+import { SimuladoComEscopo, type TrilhaDeSimulado } from "@/features/simulado/SimuladoComEscopo";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
 import type { PerguntaSimulado } from "@/features/simulado/Simulado";
 import { alternativas, JsonLd, jsonLdBreadcrumb, jsonLdFaq } from "@/lib/seo";
+import type { Trilha } from "@content/types";
 
 export const metadata: Metadata = {
   title: "Simulado",
@@ -20,11 +20,8 @@ export const metadata: Metadata = {
   alternates: alternativas("/simulado/"),
 };
 
-export default function PaginaSimulado() {
-  const trilha = listarTrilhas()[0];
-  if (!trilha) return null;
-
-  const perguntas: PerguntaSimulado[] = trilha.modulos.flatMap((modulo) =>
+function perguntasDe(trilha: Trilha): PerguntaSimulado[] {
+  return trilha.modulos.flatMap((modulo) =>
     temasDoModulo(modulo).flatMap((tema) =>
       tema.perguntas
         .filter((p): p is Extract<typeof p, { tipo: "oral" }> => p.tipo === "oral")
@@ -41,28 +38,45 @@ export default function PaginaSimulado() {
         })),
     ),
   );
+}
 
-  // Uma por módulo, sempre a primeira: escolha determinística, para a página
-  // estática não mudar de conteúdo a cada build.
-  const amostra: PerguntaDeAmostra[] = trilha.modulos.flatMap((modulo) => {
-    const primeira = perguntas.find((p) => p.moduloSlug === modulo.slug);
-    return primeira
+function promptDe(trilha: Trilha): string | null {
+  const caminho = join(process.cwd(), "content", "prompts", `${trilha.slug}.md`);
+  return existsSync(caminho) ? readFileSync(caminho, "utf8").trim() : null;
+}
+
+export default function PaginaSimulado() {
+  const trilhas = listarTrilhas();
+  const primeira = trilhas[0];
+  if (!primeira) return null;
+
+  const porTrilha: TrilhaDeSimulado[] = trilhas.map((t) => ({
+    slug: t.slug,
+    titulo: t.titulo,
+    perguntas: perguntasDe(t),
+    prompt: promptDe(t),
+  }));
+
+  // A amostra pública é da primeira trilha do catálogo: é o HTML que o
+  // buscador indexa, e precisa ser o mesmo em todo build. Uma por módulo,
+  // sempre a primeira pergunta: escolha determinística.
+  const perguntasDaPrimeira = porTrilha[0]?.perguntas ?? [];
+  const amostra: PerguntaDeAmostra[] = primeira.modulos.flatMap((modulo) => {
+    const p = perguntasDaPrimeira.find((q) => q.moduloSlug === modulo.slug);
+    return p
       ? [
           {
             moduloSlug: modulo.slug,
             moduloTitulo: modulo.titulo,
-            temaTitulo: primeira.temaTitulo,
-            href: primeira.href,
-            enunciado: primeira.enunciado,
-            respostaModelo: primeira.respostaModelo,
-            rubrica: primeira.rubrica,
+            temaTitulo: p.temaTitulo,
+            href: p.href,
+            enunciado: p.enunciado,
+            respostaModelo: p.respostaModelo,
+            rubrica: p.rubrica,
           },
         ]
       : [];
   });
-
-  const caminhoPrompt = join(process.cwd(), "content", "prompts", `${trilha.slug}.md`);
-  const prompt = existsSync(caminhoPrompt) ? readFileSync(caminhoPrompt, "utf8").trim() : null;
 
   return (
     <AppShell comRodape={false}>
@@ -81,31 +95,22 @@ export default function PaginaSimulado() {
       />
       <header className="px-5 pb-4 pt-5">
         <Rotulo>Simulado</Rotulo>
-        <h1 className="font-display mt-1 text-[22px] font-semibold">{trilha.formatoProva}</h1>
+        <h1 className="font-display mt-1 text-[22px] font-semibold">{primeira.formatoProva}</h1>
       </header>
       <Suspense
         fallback={
           <div className="mx-5 h-48 animate-pulse rounded-2xl border border-[var(--border)]" />
         }
       >
-        <SimuladoComEscopo
-          trilhaSlug={trilha.slug}
-          trilhaTitulo={trilha.titulo}
-          perguntas={perguntas}
-        />
+        <SimuladoComEscopo trilhas={porTrilha} />
       </Suspense>
       {/* Fora do Suspense de propósito: `SimuladoComEscopo` lê a query string,
           o que faz o Next renderizar aquele trecho só no cliente. Se a amostra
           morasse lá dentro, ela não estaria no HTML — que é justamente o que
           um buscador ou um agente lê. */}
-      <div className="px-5 pt-8">
+      <div className="px-5 pb-8 pt-8">
         <AmostraPublica perguntas={amostra} />
       </div>
-      {prompt ? (
-        <div className="px-5 pb-8 pt-6">
-          <PromptIA prompt={prompt} />
-        </div>
-      ) : null}
     </AppShell>
   );
 }

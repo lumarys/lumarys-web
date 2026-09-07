@@ -26,7 +26,9 @@ export function carregarTemas(): Map<string, Tema> {
     return mapa;
   }
 
-  for (const arquivo of readdirSync(TEMAS_DIR).filter((f) => f.endsWith(".mdx")).sort()) {
+  for (const arquivo of readdirSync(TEMAS_DIR)
+    .filter((f) => f.endsWith(".mdx"))
+    .sort()) {
     const cru = readFileSync(join(TEMAS_DIR, arquivo), "utf8");
     const { data, content } = matter(cru);
     const resultado = temaFrontmatterSchema.safeParse(data);
@@ -113,6 +115,40 @@ export function todasAsRotasDeTema(): { trilha: string; modulo: string; tema: st
       })),
     ),
   );
+}
+
+/**
+ * Todas as trilhas que contêm o tema, na ordem do catálogo. A primeira é a
+ * canônica: um tema compartilhado (Big Data está em Dados e em Analytics)
+ * existe em duas URLs, e o Google precisa saber qual indexar. A ordem do
+ * catálogo decide — a trilha onde o tema nasceu vem antes.
+ */
+export function trilhasDoTema(temaSlug: string): Trilha[] {
+  return trilhas.filter((t) => t.modulos.some((m) => m.temas.includes(temaSlug)));
+}
+
+/** A rota canônica do tema: a da primeira trilha do catálogo que o contém. */
+export function rotaCanonicaDoTema(
+  temaSlug: string,
+): { trilha: string; modulo: string; tema: string } | undefined {
+  const trilha = trilhasDoTema(temaSlug)[0];
+  const modulo = trilha?.modulos.find((m) => m.temas.includes(temaSlug));
+  return trilha && modulo
+    ? { trilha: trilha.slug, modulo: modulo.slug, tema: temaSlug }
+    : undefined;
+}
+
+/**
+ * Uma rota por tema — a canônica — para sitemap e feed. Listar as duas URLs
+ * de um tema compartilhado seria declarar conteúdo duplicado ao buscador.
+ */
+export function rotasCanonicasDeTema(): { trilha: string; modulo: string; tema: string }[] {
+  const vistos = new Set<string>();
+  return todasAsRotasDeTema().filter((r) => {
+    if (vistos.has(r.tema)) return false;
+    vistos.add(r.tema);
+    return true;
+  });
 }
 
 export function contarTemas(trilha: Trilha): number {

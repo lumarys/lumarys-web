@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Suspense } from "react";
 
 import { AppShell } from "@/components/layout/AppShell";
-import { Rotulo } from "@/components/ui/Card";
-import { IconeConta } from "@/components/ui/icons";
-import { PainelHoje, type DadosHoje } from "@/features/hoje/PainelHoje";
+import { HojeAtivo } from "@/features/hoje/HojeAtivo";
+import type { DadosHoje } from "@/features/hoje/PainelHoje";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
 import { alternativas } from "@/lib/seo";
+import type { Trilha } from "@content/types";
 
 export const metadata: Metadata = {
   title: "Hoje",
@@ -15,11 +15,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: true },
 };
 
-export default function PaginaHoje() {
-  const trilha = listarTrilhas()[0];
-  if (!trilha) return null;
-
-  const dados: DadosHoje = {
+/** O que o painel precisa saber de uma trilha, resolvido no build. */
+function dadosDe(trilha: Trilha): DadosHoje {
+  return {
     trilhaSlug: trilha.slug,
     trilhaTitulo: trilha.titulo,
     temas: trilha.modulos.flatMap((m) =>
@@ -39,23 +37,22 @@ export default function PaginaHoje() {
       temas: temasDoModulo(m).map((t) => t.slug),
     })),
   };
+}
+
+export default function PaginaHoje() {
+  const trilhas = listarTrilhas().map(dadosDe);
 
   return (
     <AppShell comRodape={false}>
-      <header className="flex items-start justify-between gap-3 px-5 pb-3 pt-5">
-        <div>
-          <Rotulo>Hoje</Rotulo>
-          <h1 className="font-display mt-1 text-[22px] font-semibold">{trilha.titulo}</h1>
-        </div>
-        <Link
-          href="/conta/"
-          aria-label="Minha conta"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--elevated)] text-[var(--text-2)] no-underline"
-        >
-          <IconeConta size={22} />
-        </Link>
-      </header>
-      <PainelHoje dados={dados} />
+      {/* Suspense porque a escolha da trilha lê a query string, e isso faz o
+          Next renderizar o trecho só no cliente. */}
+      <Suspense
+        fallback={
+          <div className="mx-5 mt-5 h-64 animate-pulse rounded-2xl border border-[var(--border)]" />
+        }
+      >
+        <HojeAtivo trilhas={trilhas} />
+      </Suspense>
     </AppShell>
   );
 }
