@@ -118,9 +118,10 @@ export default function Home() {
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -top-40 left-1/2 size-[680px] -translate-x-1/2 rounded-full opacity-60"
+          // O brilho do herói era âmbar fixo: no tema claro virava uma
+          // mancha amarela sobre papel. Agora segue o realce do tema.
           style={{
-            background:
-              "radial-gradient(circle, rgba(245,184,61,0.16) 0%, rgba(245,184,61,0.05) 42%, transparent 68%)",
+            background: "radial-gradient(circle, var(--realce-acento) 0%, transparent 68%)",
           }}
         />
 
@@ -177,7 +178,7 @@ export default function Home() {
           {/* Prova concreta do que existe hoje, com números contados no build. */}
           {numeros && principal ? (
             <div className="mt-12 lg:mt-0">
-              <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)]/80 p-6 shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)] backdrop-blur">
+              <div className="rounded-3xl border border-[var(--border)] bg-[var(--surface)]/80 p-6 shadow-[0_24px_60px_-30px_var(--sombra-cartao)] backdrop-blur">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
                   No ar agora
                 </p>

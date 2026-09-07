@@ -79,7 +79,7 @@ export function Gravador({ aoMudarEstado }: { aoMudarEstado?: (gravando: boolean
         className={cx(
           "flex size-22 items-center justify-center rounded-full transition-shadow disabled:opacity-40",
           estado === "gravando"
-            ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_0_0_12px_rgba(245,184,61,0.12)]"
+            ? "bg-[var(--accent)] text-[var(--accent-ink)] shadow-[0_0_0_12px_var(--realce-acento)]"
             : "border border-[var(--border)] bg-[var(--surface)] text-[var(--text-2)]",
         )}
       >

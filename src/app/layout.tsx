@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Sora } from "next/font/google";
 
 import { JsonLd, SITE, alternativas, jsonLdOrganizacao } from "@/lib/seo";
+import { SCRIPT_TEMA } from "@/lib/tema";
 import "@/styles/globals.css";
 
 const inter = Inter({
@@ -55,6 +56,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${inter.variable} ${sora.variable}`}>
+      <head>
+        {/* Antes de qualquer pintura: sem isto a página abre no tema do
+            sistema e pisca para o escolhido depois de hidratar. O hash entra
+            na CSP de cada página no postbuild (scripts/csp.mjs). */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+      </head>
       <body>
         <a
           href="#conteudo"

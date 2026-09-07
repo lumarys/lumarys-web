@@ -22,6 +22,23 @@
   --color-danger: #f26d6d;
   --color-info: #6fa8ff;
 
+  /* Paleta do tema claro. Fica aqui para cada cor ser escrita uma vez só: os
+     dois blocos que aplicam o tema claro (preferência do sistema e escolha
+     explícita) apenas apontam para estes tokens. */
+  --color-claro-bg: #faf8f3;
+  --color-claro-surface: #ffffff;
+  --color-claro-elevated: #f2eee5;
+  --color-claro-border: #e2dcd0;
+  --color-claro-accent: #c98a12;
+  --color-claro-text: #14181f;
+  --color-claro-text-2: #46505f;
+  --color-claro-muted: #5a5750;
+  /* Verde, vermelho e azul do tema escuro sobre papel branco ficam em torno
+     de 2:1. Estes são os mesmos matizes, escurecidos até passar de 4.5:1. */
+  --color-claro-success: #12795a;
+  --color-claro-danger: #c02626;
+  --color-claro-info: #1d5fbf;
+
   --font-display: var(--font-sora), Sora, "Avenir Next", "Helvetica Neue", Helvetica, sans-serif;
   --font-sans: var(--font-inter), Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -37,6 +54,8 @@
   color-scheme: dark;
   /* Sombra do botão primário: era um âmbar fixo, que no tema claro pesava. */
   --sombra-acento: rgba(245, 184, 61, 0.6);
+  --realce-acento: rgba(245, 184, 61, 0.12);
+  --sombra-cartao: rgba(0, 0, 0, 0.9);
   --bg: var(--color-bg);
   --surface: var(--color-surface);
   --elevated: var(--color-elevated);
@@ -48,22 +67,52 @@
   --muted: var(--color-muted);
 }
 
+/* O tema claro aparece em dois lugares porque uma media query e um seletor de
+   atributo não cabem na mesma regra. Os valores não se repetem: os dois
+   apontam para os tokens --color-claro-*. A ordem importa — quem escolheu
+   "claro" no alternador vence a preferência do sistema, e quem escolheu
+   "escuro" fica com o :root acima, por isso o :not() na media query. */
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-tema="escuro"]) {
     color-scheme: light;
-    --bg: #faf8f3;
-    --surface: #ffffff;
-    --elevated: #f2eee5;
-    --border: #e2dcd0;
-    --accent: #c98a12;
+    --sombra-acento: rgba(201, 138, 18, 0.35);
+    --realce-acento: rgba(201, 138, 18, 0.14);
+    --sombra-cartao: rgba(20, 24, 31, 0.18);
+    --bg: var(--color-claro-bg);
+    --surface: var(--color-claro-surface);
+    --elevated: var(--color-claro-elevated);
+    --border: var(--color-claro-border);
+    --accent: var(--color-claro-accent);
     /* Tinta ESCURA sobre o âmbar nos dois temas. Branco sobre #c98a12 dá
        cerca de 3:1, abaixo do mínimo de 4.5:1 para texto de botão — o teste
        de contraste pegou isso. */
-    --accent-ink: #1a1204;
-    --text: #14181f;
-    --text-2: #46505f;
-    --muted: #5a5750;
+    --accent-ink: var(--color-accent-ink);
+    --text: var(--color-claro-text);
+    --text-2: var(--color-claro-text-2);
+    --muted: var(--color-claro-muted);
+    --color-success: var(--color-claro-success);
+    --color-danger: var(--color-claro-danger);
+    --color-info: var(--color-claro-info);
   }
+}
+
+:root[data-tema="claro"] {
+  color-scheme: light;
+  --sombra-acento: rgba(201, 138, 18, 0.35);
+  --realce-acento: rgba(201, 138, 18, 0.14);
+  --sombra-cartao: rgba(20, 24, 31, 0.18);
+  --bg: var(--color-claro-bg);
+  --surface: var(--color-claro-surface);
+  --elevated: var(--color-claro-elevated);
+  --border: var(--color-claro-border);
+  --accent: var(--color-claro-accent);
+  --accent-ink: var(--color-accent-ink);
+  --text: var(--color-claro-text);
+  --text-2: var(--color-claro-text-2);
+  --muted: var(--color-claro-muted);
+  --color-success: var(--color-claro-success);
+  --color-danger: var(--color-claro-danger);
+  --color-info: var(--color-claro-info);
 }
 
 @layer base {
