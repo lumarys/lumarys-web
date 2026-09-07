@@ -156,6 +156,20 @@ export function filaDoDia(
   return fila;
 }
 
+/**
+ * Composição da fila, para a tela poder dizer o que é revisão atrasada e o
+ * que é estreia. Um número só ("12 cards") junta duas coisas que custam
+ * esforços diferentes e dá a impressão de atraso onde não há.
+ */
+export function contarFila(fila: EstadoCard[]): {
+  total: number;
+  vencidos: number;
+  novos: number;
+} {
+  const novos = fila.filter(estaNovo).length;
+  return { total: fila.length, vencidos: fila.length - novos, novos };
+}
+
 /** Quantos cards vencem em cada um dos próximos dias, para o gráfico do plano. */
 export function previsao(cards: EstadoCard[], dias = 14, agora: Date = new Date()) {
   const base = hojeISO(agora);

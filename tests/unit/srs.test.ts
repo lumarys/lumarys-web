@@ -4,6 +4,7 @@ import {
   CAIXA_MAXIMA,
   CAIXA_PRONTO,
   cardNovo,
+  contarFila,
   estaNovo,
   estaVencido,
   filaDoDia,
@@ -171,5 +172,23 @@ describe("previsão", () => {
       { data: "2026-09-04", total: 0 },
       { data: "2026-09-05", total: 1 },
     ]);
+  });
+});
+
+describe("composição da fila", () => {
+  it("separa revisão atrasada de estreia", () => {
+    // "12 cards" junta duas coisas de custo diferente: rever o que se esqueceu
+    // e ver pela primeira vez.
+    const fila = [
+      { ...cardNovo("a", 0), caixa: 2 },
+      { ...cardNovo("a", 1), caixa: 1 },
+      cardNovo("a", 2),
+      cardNovo("a", 3),
+    ];
+    expect(contarFila(fila)).toEqual({ total: 4, vencidos: 2, novos: 2 });
+  });
+
+  it("fila vazia conta zero em tudo", () => {
+    expect(contarFila([])).toEqual({ total: 0, vencidos: 0, novos: 0 });
   });
 });
