@@ -63,7 +63,7 @@ const PERGUNTAS = [
   {
     pergunta: "Para quem é a Lumarys?",
     resposta:
-      "Para profissionais que têm uma prova marcada: sabatina interna, processo de carreira ou certificação. A primeira trilha é a de Engenharia de Dados do Hub de Dados e Analytics do Itaú, montada a partir da ementa oficial.",
+      "Para profissionais que têm uma prova marcada: sabatina interna, processo de carreira ou certificação. A primeira trilha é a de Engenharia de Dados de um banco brasileiro de grande porte, montada a partir da ementa oficial da carreira.",
   },
   {
     pergunta: "É pago?",

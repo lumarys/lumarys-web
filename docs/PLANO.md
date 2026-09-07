@@ -11,11 +11,11 @@
 
 ## Contexto
 
-O usuário tem sabatina de Engenharia de Dados no Itaú em ~2 semanas. A **Lumarys** (lumarys.com.br) nasce como site de estudos **mobile-first para profissionais**, organizado em **trilhas** derivadas do que empresas e certificadoras exigem. Método de estudo baseado nos 9 princípios de **Ultraaprendizado** (Scott Young) + práticas com evidência (recuperação, espaçamento, intercalação). Vídeos do YouTube só em **PT-BR**, explicações próprias, links para artigos.
+O usuário tem sabatina de Engenharia de Dados num banco de grande porte em ~2 semanas. A **Lumarys** (lumarys.com.br) nasce como site de estudos **mobile-first para profissionais**, organizado em **trilhas** derivadas do que empresas e certificadoras exigem. Método de estudo baseado nos 9 princípios de **Ultraaprendizado** (Scott Young) + práticas com evidência (recuperação, espaçamento, intercalação). Vídeos do YouTube só em **PT-BR**, explicações próprias, links para artigos.
 
 Trilhas iniciais:
-1. **Carreira · Engenharia de Dados (Itaú)** — prioridade; 17 artigos oficiais + Databricks + módulo "Além da ementa" **completo antes da sabatina** (decisão do usuário).
-2. **Carreira · Engenharia de Analytics (Itaú)** — módulo Big Data recebido (13 de 17 itens); AWS, Banco de dados, Programação, DevOps, Dataviz, Data Mesh pendentes de ementa.
+1. **Carreira · Engenharia de Dados (banco)** — prioridade; 17 artigos oficiais + Databricks + módulo "Além da ementa" **completo antes da sabatina** (decisão do usuário).
+2. **Carreira · Engenharia de Analytics (banco)** — módulo Big Data recebido (13 de 17 itens); AWS, Banco de dados, Programação, DevOps, Dataviz, Data Mesh pendentes de ementa.
 3. **Certificação · AWS Cloud Practitioner (CLF-C02)**, **Solutions Architect Associate (SAA-C03)** e **Solutions Architect Professional (SAP-C02)** — códigos confirmados nas páginas oficiais da AWS em 03/09/2026 (o "SAA-C04" citado em blogs não existe oficialmente).
 
 Situação verificada (inalterada): hosted zone `lumarys.com.br` (na conta AWS da Cernyn) só com MX/SPF/DKIM do Zoho — **não tocar**; OIDC do GitHub já existe na conta; Terraform 1.13.5, Node 24, `gh` como `vieiradiego`; org GitHub `lumarys` não existe. O usuário autorizou criá-la; porém o token do `gh` não tem escopo `admin:org` e o GitHub.com não expõe endpoint de criação de organização (só o Enterprise Server). Na execução: (1) `gh auth refresh -s admin:org` e tentativa via `gh api`; (2) se o GitHub.com recusar, o usuário cria a org em github.com/organizations/plan (1 minuto) e o repo é criado direto em `lumarys/lumarys-web`; (3) só se nada disso ocorrer a tempo, o repo nasce em `vieiradiego/lumarys-web` e é transferido (role OIDC já aceita os dois `sub`). Referências: `~/Projects/youco-io/youco-web` (Next 16 export + Tailwind 4; `deploy.yml` OIDC + `s3 sync`), `youco-io-core/infra/hosting-app.tf`, `youco-io-neo/infra/github-oidc.tf`.
@@ -146,11 +146,11 @@ Tema (frontmatter) { slug; titulo; minutos; porQue; nivel; preTeste[3]; videos[{
          artigos[{titulo,url,fonte}]; flashcards[8–12]; drills[]; perguntas[{tipo:"oral"|"unica"|"multipla"; enunciado;
          opcoes?; corretas?; respostaModelo; explicacao; rubrica?}]; feynman; errosComuns[]; comoCai: string }
 ```
-Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas Itaú; IAM/VPC/S3 aparecem nas três AWS com profundidade marcada por `nivel`).
+Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas de carreira em banco; IAM/VPC/S3 aparecem nas três AWS com profundidade marcada por `nivel`).
 
 ## 4. Ementas
 
-### 4.1 Carreira · Engenharia de Dados (Itaú)
+### 4.1 Carreira · Engenharia de Dados (banco)
 **Oficial (8 módulos, 18 temas)**: Fundamentos (Big Data 3→5 Vs; OLAP/OLTP/ETL/DW; Data Centric vs Data Driven) · Hadoop (HDFS/YARN; MapReduce) · Processamento (batch vs stream; ETL vs ELT; particionamento) · Spark (introdução; RDD/transformações/ações/narrow-wide/DataFrame) · Camada de dados (zonas do Data Lake) · Databricks (Lakehouse, Delta Lake, medallion, Unity Catalog, Workflows, Auto Loader) · Tipos de dados (classificação; XML; JSON) · Qualidade (governança; Data Quality).
 
 **Além da ementa (módulo 9, completo, marcado `oficial: false`)** — ver §5 para justificativa:
@@ -167,7 +167,7 @@ Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas 
 11. Custo e performance: particionamento/Z-order, tamanho de arquivo, cluster sizing, FinOps de dados
 12. Como responder na sabatina: estrutura de resposta, trade-offs, perguntas de cenário, erros de comunicação
 
-### 4.2 Carreira · Engenharia de Analytics (Itaú)
+### 4.2 Carreira · Engenharia de Analytics (banco)
 Big Data (disponível; = os 16 temas oficiais de Eng. de Dados + "Source of Record vs Source of Truth", conforme inferência em §5.2) · AWS, Banco de dados, Programação, DevOps, Dataviz, Data Mesh (sem itens na ementa recebida; construídos a partir da sugestão priorizada em §5.2, marcados `oficial: false` até o usuário validar) · "Além da ementa – Analytics" (dbt, camada semântica, modelagem para BI, estatística, reconciliação, LGPD, comunicação, como responder) · Feedback (link).
 
 ### 4.3 Certificação · AWS (ementa = guia oficial do exame; questões originais em estilo da prova, sem dumps)
@@ -205,7 +205,7 @@ Cada tema de certificação inclui: "o que o examinador quer ver", 2 cenários n
 
 Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento · **P2** provável · **P3** complementar. Profundidade: *conceito* (saber explicar) · *aplicação* (resolver cenário) · *prática* (escrever código/SQL).
 
-### 5.1 Engenharia de Dados (Itaú) — o que a ementa oficial cobre e o que falta
+### 5.1 Engenharia de Dados (banco) — o que a ementa oficial cobre e o que falta
 
 **Lacunas dentro dos temas oficiais** (ajustes nos 18 temas, não temas novos):
 | Tema oficial | Falta | Como cai |
@@ -243,11 +243,11 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 
 **Prioridade para as 2 semanas**: todos os P1 acima entram em D8–D11; P2 em D12–D13 em formato cheat-sheet + flashcards; aprofundamento de P2 e P3 (Data Vault, FinOps, Docker/IaC) pós-sabatina.
 
-### 5.2 Engenharia de Analytics (Itaú) — revisão da ementa recebida e lacunas
+### 5.2 Engenharia de Analytics (banco) — revisão da ementa recebida e lacunas
 
 **O que foi recebido**: trilha "Preparação para Prova – Engenharia de Analytics" (Hub de Dados e Analytics; coautores listados) com 8 módulos: Big Data, AWS, Banco de dados, Programação, DevOps, Dataviz, Data Mesh, Feedback. Só o módulo **Big Data** veio com itens: 13 dos 17 (2h17 no total).
 
-**Os 13 itens recebidos**: Big Data · OLAP/OLTP/ETL · Data Centric vs Data Driven · Hadoop · MapReduce · Batch x Stream · ETL x ELT · Particionamento · Spark Introdução · Spark RDD · Zonas do Data Lake · **Source of Record vs Source of Truth** (artigo interno Itaú, 4 min) · Classificação de tipos de dados.
+**Os 13 itens recebidos**: Big Data · OLAP/OLTP/ETL · Data Centric vs Data Driven · Hadoop · MapReduce · Batch x Stream · ETL x ELT · Particionamento · Spark Introdução · Spark RDD · Zonas do Data Lake · **Source of Record vs Source of Truth** (artigo interno do banco, 4 min) · Classificação de tipos de dados.
 
 **Os 4 itens ausentes (inferência forte)**: a trilha de Eng. de Dados tem 16 itens únicos; os 13 acima cobrem 12 deles + SoR vs SoT. Os 4 que faltam para fechar 17 são exatamente os 4 da trilha de Dados que não aparecem aqui: **Tipos de dados – XML**, **Tipos de dados – JSON**, **Qualidade – Governança de dados**, **Qualidade – Data Quality**. Conclusão: o módulo Big Data de Analytics = módulo completo de Eng. de Dados + SoR vs SoT. Modelar assim (temas compartilhados) e confirmar com o usuário; se a inferência estiver errada, basta ajustar `content/trilhas/engenharia-de-analytics.ts`.
 
@@ -262,7 +262,7 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 - **Programação**: Python para dados (pandas, tipos, funções, tratamento de nulos) (P1), SQL como linguagem principal (P1), Git básico e fluxo de PR (P1), testes (pytest) e qualidade de código (P2), notebooks e reprodutibilidade (P2), APIs/JSON (P2).
 - **DevOps**: CI/CD para dados e dashboards (P1), Docker (P2), IaC/Terraform noções (P2), observabilidade e alertas (P2), ambientes dev/homolog/prod e versionamento (P1).
 - **Dataviz**: percepção visual e princípios (Tufte, pré-atenção) (P1), escolha de gráfico por pergunta (P1), storytelling com dados (P1), dashboards eficazes e KPIs (P1), erros comuns (eixos, cores, pizza) (P1), ferramentas: QuickSight, Power BI, Looker (P2), acessibilidade em gráficos (P3).
-- **Data Mesh**: 4 princípios (P1), data product e suas características (P1), contratos de dados (P1), plataforma self-serve (P2), governança federada (P2), Mesh vs Lake centralizado — trade-offs (P1), como fica no Itaú/Hub (P2).
+- **Data Mesh**: 4 princípios (P1), data product e suas características (P1), contratos de dados (P1), plataforma self-serve (P2), governança federada (P2), Mesh vs Lake centralizado — trade-offs (P1), como fica no banco (P2).
 - **Feedback**: não é conteúdo; vira formulário/link de avaliação da trilha.
 
 **O que falta na trilha inteira e é núcleo de Analytics Engineering (recomendo módulo "Além da ementa – Analytics")**:
@@ -334,7 +334,7 @@ Por tema: 1 vídeo principal + até 1 complementar, em português (para AWS: can
 
 ### Entrega 1 — MVP: trilha de Engenharia de Dados + progresso salvo
 
-**Objetivo**: em `lumarys.com.br`, uma pessoa abre no celular, estuda a trilha completa de Engenharia de Dados (ementa oficial do Itaú + "Além da ementa") com o método Ultraaprendizado, faz o simulado da sabatina e, se quiser, entra com código por e-mail para continuar de onde parou em qualquer dispositivo. Prazo-alvo: pronto para uso antes da sabatina (≈ 2 semanas), com o conteúdo entrando por módulo para o usuário já estudar enquanto o resto é produzido.
+**Objetivo**: em `lumarys.com.br`, uma pessoa abre no celular, estuda a trilha completa de Engenharia de Dados (ementa oficial da carreira + "Além da ementa") com o método Ultraaprendizado, faz o simulado da sabatina e, se quiser, entra com código por e-mail para continuar de onde parou em qualquer dispositivo. Prazo-alvo: pronto para uso antes da sabatina (≈ 2 semanas), com o conteúdo entrando por módulo para o usuário já estudar enquanto o resto é produzido.
 
 **Escopo do MVP (dentro)**
 - Fundação (§2): scaffold Next.js 16 + Tailwind 4, tooling (lint, typecheck, Vitest, Playwright smoke, Lefthook, Conventional Commits, Dependabot, gitleaks), infra Terraform (§9 + §12), CI no PR e deploy no `main`, cabeçalhos de segurança e demais controles da §13.

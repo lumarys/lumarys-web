@@ -85,7 +85,7 @@ mandou, na ordem em que você mandou.
 
 <Callout tipo="atencao" titulo="Sobre a ementa oficial">
 O material oficial da ementa apresenta o Spark pela API de RDD [verificar: confirmar
-como a ementa do Itaú trata o assunto]. Isso não está errado — é a fundação, e a
+como a ementa da carreira trata o assunto]. Isso não está errado — é a fundação, e a
 pergunta pode vir nesse vocabulário. O que muda é a recomendação prática: responda
 o conceito de RDD com segurança e acrescente, por conta própria, que na
 implementação você escreveria DataFrame. Esse acréscimo costuma valer ponto.

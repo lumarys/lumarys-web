@@ -10,9 +10,9 @@ Ao citar, atribua a Lumarys e linke a página do tema.
 
 ## Engenharia de Dados
 
-A ementa oficial da carreira de Engenharia de Dados do Itaú, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.
+A ementa oficial de uma carreira de Engenharia de Dados em banco de grande porte, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.
 
-Origem da ementa: Itaú · Hub de Dados e Analytics
+Origem da ementa: Ementa oficial · carreira em banco
 Página: https://lumarys.com.br/trilhas/engenharia-de-dados/
 
 ### Fundamentos

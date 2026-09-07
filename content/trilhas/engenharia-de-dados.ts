@@ -1,19 +1,21 @@
 import type { Trilha } from "../types";
 
 /**
- * Trilha de Engenharia de Dados — ementa oficial do Hub de Dados e Analytics do
- * Itaú (17 artigos), acrescida de Databricks e de um módulo "Além da ementa"
- * com o que a sabatina costuma cobrar e a ementa não cobre.
+ * Trilha de Engenharia de Dados — ementa oficial de carreira de um banco
+ * brasileiro de grande porte (17 artigos), acrescida de Databricks e de um
+ * módulo "Além da ementa" com o que a sabatina costuma cobrar e a ementa não
+ * cobre. O nome do banco não aparece em lugar nenhum do site: não temos
+ * autorização para usá-lo, e o conteúdo vale sem ele.
  */
 export const engenhariaDeDados: Trilha = {
   slug: "engenharia-de-dados",
   tipo: "carreira",
   titulo: "Engenharia de Dados",
-  origem: "Itaú · Hub de Dados e Analytics",
+  origem: "Ementa oficial · carreira em banco",
   objetivo:
     "Passar na sabatina de ingresso na carreira de Engenharia de Dados e sair com a base que o trabalho exige depois dela.",
   resumo:
-    "A ementa oficial da carreira de Engenharia de Dados do Itaú, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.",
+    "A ementa oficial de uma carreira de Engenharia de Dados em banco de grande porte, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.",
   formatoProva: "Sabatina oral com banca",
   prazoSugeridoDias: 14,
   status: "disponivel",
