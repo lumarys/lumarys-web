@@ -11,7 +11,7 @@ export const trilhasEmBreve = [
   {
     slug: "engenharia-de-analytics",
     titulo: "Engenharia de Analytics",
-    origem: "Ementa oficial · carreira em banco",
+    origem: "Ementa oficial · mercado financeiro",
     resumo: "Big Data, AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
   },
   {

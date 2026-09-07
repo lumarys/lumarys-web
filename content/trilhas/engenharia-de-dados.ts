@@ -1,21 +1,25 @@
 import type { Trilha } from "../types";
 
 /**
- * Trilha de Engenharia de Dados — ementa oficial de carreira de um banco
- * brasileiro de grande porte (17 artigos), acrescida de Databricks e de um
- * módulo "Além da ementa" com o que a sabatina costuma cobrar e a ementa não
- * cobre. O nome do banco não aparece em lugar nenhum do site: não temos
- * autorização para usá-lo, e o conteúdo vale sem ele.
+ * Trilha de Engenharia de Dados — ementa oficial de carreira de uma grande
+ * instituição do mercado financeiro (17 artigos), acrescida de Databricks e de
+ * um módulo "Além da ementa" com o que a sabatina costuma cobrar e a ementa
+ * não cobre.
+ *
+ * O nome da instituição não aparece em lugar nenhum do site nem do
+ * repositório: não temos autorização para usá-lo, e o conteúdo vale sem ele.
+ * "Mercado financeiro" também abre espaço para as próximas trilhas, que não
+ * precisam vir de banco.
  */
 export const engenhariaDeDados: Trilha = {
   slug: "engenharia-de-dados",
   tipo: "carreira",
   titulo: "Engenharia de Dados",
-  origem: "Ementa oficial · carreira em banco",
+  origem: "Ementa oficial · mercado financeiro",
   objetivo:
     "Passar na sabatina de ingresso na carreira de Engenharia de Dados e sair com a base que o trabalho exige depois dela.",
   resumo:
-    "A ementa oficial de uma carreira de Engenharia de Dados em banco de grande porte, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.",
+    "A ementa oficial de uma carreira de Engenharia de Dados no mercado financeiro, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.",
   formatoProva: "Sabatina oral com banca",
   prazoSugeridoDias: 14,
   status: "disponivel",

@@ -11,7 +11,7 @@
 
 ## Contexto
 
-O usuário tem sabatina de Engenharia de Dados num banco de grande porte em ~2 semanas. A **Lumarys** (lumarys.com.br) nasce como site de estudos **mobile-first para profissionais**, organizado em **trilhas** derivadas do que empresas e certificadoras exigem. Método de estudo baseado nos 9 princípios de **Ultraaprendizado** (Scott Young) + práticas com evidência (recuperação, espaçamento, intercalação). Vídeos do YouTube só em **PT-BR**, explicações próprias, links para artigos.
+O usuário tem sabatina de Engenharia de Dados numa grande instituição do mercado financeiro em ~2 semanas. A **Lumarys** (lumarys.com.br) nasce como site de estudos **mobile-first para profissionais**, organizado em **trilhas** derivadas do que empresas e certificadoras exigem. Método de estudo baseado nos 9 princípios de **Ultraaprendizado** (Scott Young) + práticas com evidência (recuperação, espaçamento, intercalação). Vídeos do YouTube só em **PT-BR**, explicações próprias, links para artigos.
 
 Trilhas iniciais:
 1. **Carreira · Engenharia de Dados (banco)** — prioridade; 17 artigos oficiais + Databricks + módulo "Além da ementa" **completo antes da sabatina** (decisão do usuário).
@@ -146,7 +146,7 @@ Tema (frontmatter) { slug; titulo; minutos; porQue; nivel; preTeste[3]; videos[{
          artigos[{titulo,url,fonte}]; flashcards[8–12]; drills[]; perguntas[{tipo:"oral"|"unica"|"multipla"; enunciado;
          opcoes?; corretas?; respostaModelo; explicacao; rubrica?}]; feynman; errosComuns[]; comoCai: string }
 ```
-Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas de carreira em banco; IAM/VPC/S3 aparecem nas três AWS com profundidade marcada por `nivel`).
+Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas do mercado financeiro; IAM/VPC/S3 aparecem nas três AWS com profundidade marcada por `nivel`).
 
 ## 4. Ementas
 
