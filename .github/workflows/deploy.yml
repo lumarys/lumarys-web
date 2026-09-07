@@ -85,8 +85,13 @@ jobs:
           sync_tipo "*.txt"  "text/plain; charset=utf-8"
           sync_tipo "*.md"   "text/markdown; charset=utf-8"
           sync_tipo "*.xml"  "application/xml; charset=utf-8"
-          # Depois do genérico, para vencer: leitor de feed espera atom+xml.
-          sync_tipo "feed.xml" "application/atom+xml; charset=utf-8"
+          # `cp` e não `sync`: o sync genérico acima já subiu o feed, e o sync
+          # seguinte o considera igual e pula — deixando o content-type errado.
+          # Leitor de feed espera atom+xml.
+          aws s3 cp out/feed.xml s3://${{ vars.SITE_BUCKET }}/feed.xml \
+            --cache-control "public, max-age=0, s-maxage=300, must-revalidate" \
+            --content-type "application/atom+xml; charset=utf-8" \
+            --no-cli-pager
           sync_tipo "*.json" "application/json; charset=utf-8"
           sync_tipo "*.webmanifest" "application/manifest+json; charset=utf-8"
 
