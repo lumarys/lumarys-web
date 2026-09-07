@@ -7,6 +7,7 @@ import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { BarraProgresso } from "@/components/ui/ProgressRing";
 import { IconeFechar } from "@/components/ui/icons";
 import { Gravador } from "./Gravador";
+import { HistoricoSimulados } from "./HistoricoSimulados";
 import { calcularResultado, paraProgresso } from "@/lib/simulado";
 import { registrarSimulado } from "@/lib/storage";
 import { cx, embaralhar } from "@/lib/utils";
@@ -110,6 +111,11 @@ export function Simulado({
         >
           Começar simulado
         </button>
+
+        <HistoricoSimulados
+          trilhaSlug={trilhaSlug}
+          titulosDeModulo={Object.fromEntries(modulos.map((m) => [m.slug, m.titulo]))}
+        />
       </div>
     );
   }

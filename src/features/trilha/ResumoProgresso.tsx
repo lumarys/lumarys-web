@@ -1,12 +1,16 @@
 "use client";
 
+import Link from "next/link";
+
 import { BotaoLink } from "@/components/ui/Botao";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { useProgresso } from "@/features/progresso/useProgresso";
+import { historico } from "@/lib/historicoSimulados";
 import { estadoDoPlano, ritmoDoPlano } from "@/lib/plano";
 import { proximaAcao, type TemaRef } from "@/lib/proximaAcao";
 import { prontidaoDaTrilha, rotuloProntidao } from "@/lib/readiness";
 import { contarRespostas, trilhaIniciada } from "@/lib/storage";
+import { formatarData } from "@/lib/utils";
 
 /**
  * O cartão de topo da trilha responde a duas perguntas, nesta ordem: onde eu
@@ -38,6 +42,7 @@ export function ResumoProgresso({
   const concluidos = dadosTrilha?.temasConcluidos ?? {};
   const feitos = Object.keys(concluidos).length;
   const { geral, pontoFraco } = prontidaoDaTrilha(modulos, progresso, trilhaSlug);
+  const [ultimoSimulado] = historico(dadosTrilha?.simulados ?? []);
   const nomePontoFraco = modulos.find((m) => m.slug === pontoFraco?.moduloSlug)?.titulo;
   const respostas = contarRespostas(dadosTrilha);
   const estado = estadoDoPlano(dadosTrilha?.dataProva, prazoDias);
@@ -119,6 +124,34 @@ export function ResumoProgresso({
           ) : null}
         </div>
       </div>
+
+      {/* A nota do último ensaio, com data. Ficava guardada e não aparecia em
+          lugar nenhum; aqui ela fica ao lado da prontidão, que é o número que
+          ela mais explica. */}
+      {ultimoSimulado ? (
+        <Link
+          href="/simulado/"
+          className="flex min-h-11 items-center justify-between gap-3 rounded-xl border border-[var(--border)] px-3.5 text-[13px] no-underline"
+        >
+          <span className="text-[var(--text-2)]">
+            Último simulado:{" "}
+            <strong className="text-[var(--text)]">{ultimoSimulado.percentual}%</strong> em{" "}
+            {formatarData(ultimoSimulado.em)}
+          </span>
+          {ultimoSimulado.variacao !== null && ultimoSimulado.variacao !== 0 ? (
+            <span
+              className={
+                ultimoSimulado.variacao > 0
+                  ? "shrink-0 font-semibold text-[var(--color-success)]"
+                  : "shrink-0 font-semibold text-[var(--color-danger)]"
+              }
+            >
+              {ultimoSimulado.variacao > 0 ? "+" : ""}
+              {ultimoSimulado.variacao}
+            </span>
+          ) : null}
+        </Link>
+      ) : null}
 
       {temaDaAcao ? (
         <BotaoLink href={`/trilhas/${trilhaSlug}/${temaDaAcao.modulo}/${temaDaAcao.slug}/`}>
