@@ -1,11 +1,12 @@
 import type { ComponentType, ReactNode } from "react";
 
+import { RolagemHorizontal } from "@/components/ui/RolagemHorizontal";
 import { cx } from "@/lib/utils";
 
 /** Allowlist de componentes que um tema pode usar no MDX (ver content-lint). */
 
 const ESTILOS_CALLOUT = {
-  dica: { borda: "var(--info)", rotulo: "Dica" },
+  dica: { borda: "var(--color-info)", rotulo: "Dica" },
   atencao: { borda: "var(--accent)", rotulo: "Atenção" },
   erro: { borda: "var(--color-danger)", rotulo: "Cuidado" },
 } as const;
@@ -40,8 +41,14 @@ export function Callout({
 
 export function Comparativo({ colunas, linhas }: { colunas: string[]; linhas: string[][] }) {
   return (
-    <div className="scroll-x my-5 rounded-2xl border border-[var(--border)]">
-      <table className="w-full border-collapse text-sm">
+    <RolagemHorizontal
+      rotulo="Tabela comparativa"
+      className="my-5 overflow-hidden rounded-2xl border border-[var(--border)]"
+    >
+      {/* A largura mínima é o ponto: com `w-full` sozinho a tabela sempre
+          cabia, espremendo três colunas em 390 px até cada célula virar uma
+          palavra por linha. Melhor manter a coluna legível e rolar. */}
+      <table className="w-full min-w-[520px] border-collapse text-sm">
         <thead>
           <tr className="bg-[var(--elevated)] text-left">
             {colunas.map((coluna) => (
@@ -73,7 +80,7 @@ export function Comparativo({ colunas, linhas }: { colunas: string[]; linhas: st
           ))}
         </tbody>
       </table>
-    </div>
+    </RolagemHorizontal>
   );
 }
 

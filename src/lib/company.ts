@@ -18,3 +18,16 @@ export const EMPRESA = {
 } as const;
 
 export const CONTATO_EMAIL = `${EMPRESA.contatoUsuario}@${EMPRESA.contatoDominio}`;
+
+/**
+ * Destino do botão de contato. Fica aqui, e não no componente, porque o
+ * assunto é a única parte com regra: um pedido de trilha precisa chegar já
+ * classificado, e um assunto com acento ou espaço tem de ser escapado.
+ *
+ * O "mailto" é montado por junção, e não por template, porque o linter do
+ * Next lê um template atribuído a location.href como rota interna.
+ */
+export function enderecoDeContato(assunto?: string): string {
+  const consulta = assunto ? `?subject=${encodeURIComponent(assunto)}` : "";
+  return ["mailto", CONTATO_EMAIL + consulta].join(":");
+}

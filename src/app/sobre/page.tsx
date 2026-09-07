@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Card, Rotulo } from "@/components/ui/Card";
 import { ContatoLink } from "@/components/layout/ContatoLink";
 import { EMPRESA } from "@/lib/company";
-import { alternativas, JsonLd, jsonLdPessoa } from "@/lib/seo";
+import { alternativas, JsonLd, jsonLdBreadcrumb, jsonLdPessoa, SITE } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Sobre a Lumarys",
@@ -86,6 +86,12 @@ export default function PaginaSobre() {
         </Card>
       </div>
       <JsonLd dados={jsonLdPessoa()} />
+      <JsonLd
+        dados={jsonLdBreadcrumb([
+          { nome: "Início", url: `${SITE.url}/` },
+          { nome: "Sobre", url: `${SITE.url}/sobre/` },
+        ])}
+      />
     </AppShell>
   );
 }

@@ -107,3 +107,28 @@ test("conforto de leitura: tamanho da letra persiste e o modo foco esconde a cas
     )
     .not.toBe(antes);
 });
+
+test("tabela larga demais avisa que dá para rolar", async ({ page, viewport }) => {
+  // No computador a tabela cabe, e então não há dica nenhuma para mostrar —
+  // é o comportamento certo, e por isso o teste é dos perfis estreitos.
+  test.skip((viewport?.width ?? 0) >= 560, "a tabela cabe nesta largura");
+
+  // Em 390px a última coluna do comparativo fica fora da tela, e nada dizia
+  // isso: a pessoa lia duas colunas de três achando que a tabela acabava ali.
+  await page.goto("/trilhas/engenharia-de-dados/hadoop/mapreduce/");
+
+  const rolavel = page.getByRole("region", { name: /rolável na horizontal/i }).first();
+  await expect(rolavel).toBeVisible();
+
+  const caixa = await rolavel.boundingBox();
+  const largura = await rolavel.evaluate((el) => el.scrollWidth);
+  expect(largura, "a tabela caberia na tela; o teste precisa de outra").toBeGreaterThan(
+    caixa!.width,
+  );
+
+  // A dica da direita começa acesa e apaga ao chegar no fim.
+  const direita = rolavel.locator("xpath=../span[2]");
+  await expect(direita).toHaveCSS("opacity", "1");
+  await rolavel.evaluate((el) => el.scrollTo({ left: el.scrollWidth }));
+  await expect(direita).toHaveCSS("opacity", "0");
+});
