@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
+import { Recolhivel } from "@/components/ui/Recolhivel";
 import { BarraProgresso } from "@/components/ui/ProgressRing";
 import { IconeFechar } from "@/components/ui/icons";
+import { Cronometro } from "./Cronometro";
 import { Gravador } from "./Gravador";
 import { HistoricoSimulados } from "./HistoricoSimulados";
 import { calcularResultado, paraProgresso } from "@/lib/simulado";
 import { registrarSimulado } from "@/lib/storage";
 import { cx, embaralhar } from "@/lib/utils";
+
+/** A estrutura que a banca espera ouvir, na ordem. */
+const PASSOS = ["Contexto", "Opções", "Trade-offs", "Recomendação"] as const;
 
 export type PerguntaSimulado = {
   id: string;
@@ -52,6 +57,14 @@ export function Simulado({
   const [revelado, setRevelado] = useState(false);
   const [notas, setNotas] = useState<Record<string, number>>({});
   const [terminou, setTerminou] = useState(false);
+  // Instantes, não contadores: a aba em segundo plano não perde segundos, e
+  // trocar de pergunta não zera o total.
+  const [inicioSessao, setInicioSessao] = useState(0);
+  const [inicioPergunta, setInicioPergunta] = useState(0);
+  const pararGravacao = useRef<(() => void) | null>(null);
+  const registrarParada = useCallback((parar: () => void) => {
+    pararGravacao.current = parar;
+  }, []);
 
   const modulos = useMemo(() => {
     const mapa = new Map<string, string>();
@@ -106,7 +119,12 @@ export function Simulado({
 
         <button
           type="button"
-          onClick={() => setIniciado(true)}
+          onClick={() => {
+            const agora = Date.now();
+            setInicioSessao(agora);
+            setInicioPergunta(agora);
+            setIniciado(true);
+          }}
           className="min-h-13 rounded-xl bg-[var(--accent)] text-[15px] font-semibold text-[var(--accent-ink)]"
         >
           Começar simulado
@@ -220,7 +238,9 @@ export function Simulado({
     setTerminou(true);
   }
 
-  function avaliar(nota: number) {
+  // O instante entra como argumento porque `Date.now()` no corpo do componente
+  // é chamada impura em render — a regra que o compilador do React aplica.
+  function avaliar(nota: number, agora: number) {
     if (!pergunta) return;
     const atualizadas = { ...notas, [pergunta.id]: nota };
     setNotas(atualizadas);
@@ -232,6 +252,7 @@ export function Simulado({
     }
     setIndice((i) => i + 1);
     setRevelado(false);
+    setInicioPergunta(agora);
   }
 
   return (
@@ -244,9 +265,13 @@ export function Simulado({
         >
           <IconeFechar size={20} /> Encerrar
         </button>
-        <span className="text-xs text-[var(--muted)]">
-          {indice + 1} de {selecionadas.length} · {trilhaTitulo}
-        </span>
+        <div className="flex items-center gap-3">
+          <Cronometro desdePergunta={inicioPergunta} desdeSessao={inicioSessao} />
+          <span className="text-xs text-[var(--muted)]">
+            {indice + 1} de {selecionadas.length}
+            <span className="hidden sm:inline"> · {trilhaTitulo}</span>
+          </span>
+        </div>
       </div>
 
       <div className="flex gap-1">
@@ -297,7 +322,35 @@ export function Simulado({
         </Card>
       ) : null}
 
-      <Gravador key={pergunta.id} aoMudarEstado={setGravando} />
+      {/* Os quatro passos ficavam só na tela inicial, longe do momento em que
+          a pessoa precisa deles: na hora de abrir a boca. */}
+      <ol className="flex list-none flex-wrap justify-center gap-1.5 p-0">
+        {PASSOS.map((passo, i) => (
+          <li
+            key={passo}
+            className="flex items-center gap-1.5 rounded-full border border-[var(--border)] px-2.5 py-1 text-[11px] text-[var(--text-2)]"
+          >
+            <span className="font-semibold text-[var(--accent)]">{i + 1}</span>
+            <span>{passo}</span>
+          </li>
+        ))}
+      </ol>
+
+      {/* Fechada de propósito: a rubrica diz o que a resposta precisa ter, e
+          lê-la antes de responder entrega metade do exercício. Fica ao alcance
+          de quem travou, que é o caso em que ela ajuda. */}
+      <Recolhivel titulo="O que o avaliador espera" nota={`${pergunta.rubrica.length} critérios`}>
+        <ul className="flex list-none flex-col gap-1.5 p-0">
+          {pergunta.rubrica.map((criterio, i) => (
+            <li key={i} className="flex gap-2 text-[13px] leading-snug text-[var(--text-2)]">
+              <span className="font-semibold text-[var(--accent)]">{i + 1}</span>
+              <span>{criterio}</span>
+            </li>
+          ))}
+        </ul>
+      </Recolhivel>
+
+      <Gravador key={pergunta.id} aoMudarEstado={setGravando} registrarParada={registrarParada} />
 
       {gravando ? (
         <p className="text-center text-xs text-[var(--muted)]">
@@ -308,10 +361,16 @@ export function Simulado({
       {!revelado ? (
         <button
           type="button"
-          onClick={() => setRevelado(true)}
+          onClick={() => {
+            // Gravando, o mesmo botão fecha a gravação antes de revelar: sem
+            // isso a pessoa precisava lembrar de parar, e o áudio que ela
+            // queria ouvir continuava correndo por cima da resposta-modelo.
+            if (gravando) pararGravacao.current?.();
+            setRevelado(true);
+          }}
           className="min-h-13 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[15px] font-semibold"
         >
-          Já respondi. Ver resposta-modelo
+          {gravando ? "Parar e avaliar" : "Já respondi. Ver resposta-modelo"}
         </button>
       ) : (
         <>
@@ -341,7 +400,7 @@ export function Simulado({
                 <button
                   key={nota}
                   type="button"
-                  onClick={() => avaliar(nota)}
+                  onClick={() => avaliar(nota, Date.now())}
                   className="min-h-12 flex-1 rounded-lg bg-[var(--elevated)] text-sm font-semibold hover:bg-[var(--accent)] hover:text-[var(--accent-ink)]"
                 >
                   {nota}
