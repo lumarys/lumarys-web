@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { AlternadorTema } from "@/components/ui/AlternadorTema";
 import { Dialogo } from "@/components/ui/Dialogo";
 import { Marca } from "@/components/ui/icons";
 import { EMPRESA } from "@/lib/company";
@@ -115,6 +116,7 @@ export function SiteHeader() {
             </li>
           ))}
         </ul>
+        <AlternadorTema className="mt-3" />
         <button
           type="button"
           onClick={() => setMenuAberto(false)}

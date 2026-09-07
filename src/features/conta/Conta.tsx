@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { AlternadorTema } from "@/components/ui/AlternadorTema";
 import { Botao, classesDeBotao } from "@/components/ui/Botao";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { Dialogo } from "@/components/ui/Dialogo";
@@ -328,6 +329,12 @@ export function Conta() {
           </p>
         </Card>
       )}
+
+      {/* No celular o alternador também está no menu; no computador não há
+          menu, e esta é a única casa que ele tem. */}
+      <Card>
+        <AlternadorTema />
+      </Card>
 
       <Dialogo
         aberto={confirmando !== null}
