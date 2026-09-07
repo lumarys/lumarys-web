@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { BotaoLink } from "@/components/ui/Botao";
 import { Rotulo } from "@/components/ui/Card";
+import { CartaoConquista } from "@/features/conquista/CartaoConquista";
 import { ListaModulos } from "@/features/trilha/ListaModulos";
 import { ResumoProgresso } from "@/features/trilha/ResumoProgresso";
 import {
@@ -129,6 +130,15 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
             modulos={modulos}
             cronograma={trilha.cronograma.map((d) => ({ dia: d.dia, temas: d.temas }))}
             prazoDias={trilha.prazoSugeridoDias}
+          />
+        </div>
+
+        <div className="mt-6">
+          <CartaoConquista
+            trilhaSlug={trilha.slug}
+            trilhaTitulo={trilha.titulo}
+            modulos={modulos.map((m) => ({ slug: m.slug, temas: m.temas.map((t) => t.slug) }))}
+            totalTemas={total}
           />
         </div>
       </div>
