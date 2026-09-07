@@ -4,8 +4,15 @@ import Link from "next/link";
 
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { BarraProgresso } from "@/components/ui/ProgressRing";
-import { IconeCards, IconeDrill, IconeRelogio, IconeSeta } from "@/components/ui/icons";
+import {
+  IconeCards,
+  IconeDrill,
+  IconeRelogio,
+  IconeSeta,
+  IconeSimulado,
+} from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
+import { filaDeDrills, minutosDoDrill } from "@/lib/drills";
 import { estadoDoPlano } from "@/lib/plano";
 import { proximaAcao } from "@/lib/proximaAcao";
 import { PESOS, prontidaoDaTrilha, rotuloProntidao } from "@/lib/readiness";
@@ -17,6 +24,8 @@ export type TemaHoje = {
   minutos: number;
   modulo: string;
   moduloTitulo: string;
+  /** Itens do primeiro drill do tema; zero quando o tema não tem drill. */
+  itensDeDrill: number;
 };
 
 export type DadosHoje = {
@@ -61,6 +70,14 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
   const estado = estadoDoPlano(trilha?.dataProva, dados.prazoDias);
   const emManutencao = trilha?.modo === "manutencao";
   const nomePontoFraco = dados.modulos.find((m) => m.slug === pontoFraco?.moduloSlug)?.titulo;
+
+  // Drill do que já se errou. Vinha antes só dentro do corpo do tema, ou seja,
+  // só acontecia por acaso.
+  const [drill] = filaDeDrills(
+    trilha,
+    dados.temas.filter((t) => t.itensDeDrill > 0).map((t) => t.slug),
+  );
+  const temaDoDrill = drill ? dados.temas.find((t) => t.slug === drill.temaSlug) : undefined;
   const feitos = Object.keys(concluidos).length;
 
   const acao = proximaAcao({
@@ -154,9 +171,17 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
             {vencidos.length} card{vencidos.length === 1 ? "" : "s"}
           </Chip>
         ) : null}
+        {temaDoDrill ? (
+          <Chip
+            href={`/trilhas/${dados.trilhaSlug}/${temaDoDrill.modulo}/${temaDoDrill.slug}/drill/`}
+            icone={<IconeDrill size={16} />}
+          >
+            Drill · {minutosDoDrill(temaDoDrill.itensDeDrill)} min
+          </Chip>
+        ) : null}
         <Chip
           href={`/simulado/?trilha=${dados.trilhaSlug}${pontoFraco ? `&modulo=${pontoFraco.moduloSlug}` : ""}`}
-          icone={<IconeDrill size={16} />}
+          icone={<IconeSimulado size={16} />}
         >
           {nomePontoFraco ? `Simular ${nomePontoFraco}` : "Simulado"}
         </Chip>

@@ -29,6 +29,7 @@ export default function PaginaHoje() {
         minutos: t.minutos,
         modulo: m.slug,
         moduloTitulo: m.titulo,
+        itensDeDrill: t.drills[0]?.itens.length ?? 0,
       })),
     ),
     prazoDias: trilha.prazoSugeridoDias,
