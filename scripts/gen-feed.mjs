@@ -20,7 +20,9 @@ const LANCAMENTO = "2026-09-03";
 const LIMITE = 50;
 
 const temas = new Map();
-for (const arquivo of readdirSync(join(RAIZ, "content", "temas")).filter((f) => f.endsWith(".mdx"))) {
+for (const arquivo of readdirSync(join(RAIZ, "content", "temas")).filter((f) =>
+  f.endsWith(".mdx"),
+)) {
   const { data } = matter(readFileSync(join(RAIZ, "content", "temas", arquivo), "utf8"));
   temas.set(data.slug, data);
 }
@@ -28,7 +30,9 @@ for (const arquivo of readdirSync(join(RAIZ, "content", "temas")).filter((f) => 
 const dirTrilhas = join(RAIZ, "content", "trilhas");
 const entradas = [];
 
-for (const arquivo of readdirSync(dirTrilhas).filter((f) => f.endsWith(".ts") && f !== "index.ts")) {
+for (const arquivo of readdirSync(dirTrilhas).filter(
+  (f) => f.endsWith(".ts") && f !== "index.ts",
+)) {
   const fonte = readFileSync(join(dirTrilhas, arquivo), "utf8");
   const trilhaSlug =
     fonte.match(/slug:\s*"([a-z0-9-]+)",\s*\n\s*tipo:/)?.[1] ?? arquivo.replace(".ts", "");
@@ -57,8 +61,16 @@ for (const arquivo of readdirSync(dirTrilhas).filter((f) => f.endsWith(".ts") &&
 entradas.sort((a, b) => b.data.localeCompare(a.data) || a.titulo.localeCompare(b.titulo, "pt-BR"));
 const recentes = entradas.slice(0, LIMITE);
 
+// Aspas e apóstrofo entram na lista porque o mesmo escape serve a texto de
+// elemento E a valor de atributo (`term="..."`): um título com aspas partiria
+// o atributo e invalidaria o feed inteiro.
 const escapar = (t) =>
-  String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  String(t)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 const instante = (d) => `${d}T12:00:00-03:00`;
 const maisRecente = recentes[0]?.data ?? LANCAMENTO;
 

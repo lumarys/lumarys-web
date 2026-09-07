@@ -64,7 +64,11 @@ test("tema: breadcrumbs visíveis levam à trilha", async ({ page }) => {
   // dividiam a linha com o Pomodoro e quebravam em duas alturas de toque. O que
   // não pode faltar em nenhuma largura é o caminho de volta para a trilha.
   await nav.getByRole("link").last().click();
-  await expect(page).toHaveURL(new RegExp(TRILHA.replace(/\//g, "\\/")));
+  // Predicado em vez de regex: a versão anterior escapava só a barra e deixava
+  // passar ponto e outros metacaracteres. Ler `page.url()` direto também não
+  // serve — perde a espera pela navegação, e o teste passa a depender do
+  // tempo do clique.
+  await expect(page).toHaveURL((url) => url.pathname === TRILHA);
 });
 
 test("tema: JSON-LD com breadcrumb, recurso de aprendizagem, vídeos datados e FAQ", async ({

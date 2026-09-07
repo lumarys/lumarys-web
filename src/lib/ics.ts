@@ -17,11 +17,18 @@ export type EventoDeEstudo = {
   minutos: number;
 };
 
-/** RFC 5545 quebra linhas em 75 octetos; um `\n` cru invalida o arquivo. */
+/**
+ * Escapa o que a RFC 5545 reserva dentro de um valor de propriedade.
+ *
+ * O `\\;` precisa das duas barras: `"\;"` em JavaScript é só `";"`, e a
+ * substituição virava troca do caractere por ele mesmo — o ponto e vírgula
+ * saía cru e podia partir a propriedade em parâmetros num leitor rigoroso.
+ * O CodeQL pegou; o teste não, porque ele afirmava a mesma coisa errada.
+ */
 function escapar(texto: string): string {
   return texto
     .replace(/\\/g, "\\\\")
-    .replace(/;/g, "\;")
+    .replace(/;/g, "\\;")
     .replace(/,/g, "\\,")
     .replace(/\r?\n/g, "\\n");
 }

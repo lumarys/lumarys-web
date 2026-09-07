@@ -21,8 +21,18 @@ if (!existsSync(sitemap)) {
   process.exit(1);
 }
 
+// O filtro por host não é paranoia gratuita: o corpo desta requisição sai
+// para um serviço externo, montado a partir de um arquivo. Se algum dia o
+// sitemap ganhar uma URL de fora, ela não vai junto.
 const urls = [...readFileSync(sitemap, "utf8").matchAll(/<loc>([^<]+)<\/loc>/g)]
   .map((m) => m[1])
+  .filter((u) => {
+    try {
+      return new URL(u).host === host;
+    } catch {
+      return false;
+    }
+  })
   .slice(0, 10_000);
 
 const resposta = await fetch("https://api.indexnow.org/IndexNow", {

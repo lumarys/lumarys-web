@@ -39,8 +39,11 @@ describe("montar ics", () => {
   });
 
   it("escapa vírgula e ponto e vírgula, que separam campos na norma", () => {
+    // String.raw porque a asserção anterior escrevia "\;", que em JavaScript
+    // é só ";": o teste passava afirmando exatamente o defeito que existia no
+    // código. Aqui o que se compara é o texto literal que vai para o arquivo.
     const ics = montarIcs([{ ...evento, descricao: "Big Data; OLAP, OLTP" }], "ed", AGORA);
-    expect(ics).toContain("Big Data\; OLAP\\, OLTP");
+    expect(ics).toContain(String.raw`Big Data\; OLAP\, OLTP`);
   });
 
   it("dobra linha longa, como a norma exige", () => {
