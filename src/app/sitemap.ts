@@ -37,6 +37,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly" as const,
       priority: 0.5,
     },
+    // O glossário é a porta de entrada de busca de cauda longa ("o que é
+    // particionamento de dados"), e o resumo é a folha de véspera.
+    {
+      url: `${SITE.url}/trilhas/${t.slug}/glossario/`,
+      lastModified: agora,
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    },
+    ...t.modulos.map((m) => ({
+      url: `${SITE.url}/trilhas/${t.slug}/${m.slug}/resumo/`,
+      lastModified: agora,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ]);
 
   const temas = todasAsRotasDeTema().map((r) => ({

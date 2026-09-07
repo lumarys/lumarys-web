@@ -28,6 +28,7 @@ const temas = lerTemas();
 const erros = [];
 const avisos = [];
 const vistos = new Set();
+const termos = new Map();
 
 for (const { arquivo, dados, corpo } of temas) {
   for (const [padrao, oque] of PROIBIDOS) {
@@ -38,6 +39,29 @@ for (const { arquivo, dados, corpo } of temas) {
     if (!COMPONENTES.has(tag[1])) {
       erros.push(`${arquivo}: componente <${tag[1]}> fora da allowlist do MDX.`);
     }
+  }
+
+  // O glossário da trilha é montado destes termos: um termo sem definição, ou
+  // com a mesma palavra definida de dois jeitos, vira verbete errado numa
+  // página pública.
+  for (const [, nome, definicao] of corpo.matchAll(/<Termo\s+nome="([^"]*)"\s*>([\s\S]*?)<\/Termo>/g)) {
+    if (!nome.trim()) erros.push(`${arquivo}: <Termo> sem nome.`);
+    if (definicao.trim().length < 10) {
+      erros.push(`${arquivo}: termo "${nome}" com definição vazia ou curta demais.`);
+    }
+    const chave = nome.trim().toLocaleLowerCase("pt-BR");
+    const anterior = termos.get(chave);
+    if (anterior && anterior.arquivo !== arquivo) {
+      avisos.push(
+        `${arquivo}: termo "${nome}" já definido em ${anterior.arquivo}; o glossário fica com o primeiro.`,
+      );
+    } else if (!anterior) {
+      termos.set(chave, { arquivo });
+    }
+  }
+
+  if (/<Termo[^>]*\/>/.test(corpo)) {
+    erros.push(`${arquivo}: <Termo> autofechado não tem definição.`);
   }
 
   const palavras = corpo.split(/\s+/).filter(Boolean).length;
