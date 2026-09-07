@@ -84,7 +84,9 @@ test("o cronômetro da pergunta reinicia e o total continua", async ({ page }) =
 test("ler a amostra pública não cria progresso no navegador", async ({ page }) => {
   await page.goto("/simulado/");
 
-  const amostra = page.locator("details").first();
+  // Escopado à seção da amostra: o prompt de IA também é um <details>, e
+  // agora vem antes — fica junto do simulado da trilha ativa.
+  const amostra = page.locator('section[aria-labelledby="amostra-simulado"] details').first();
   await amostra.locator("summary").click();
   await expect(amostra.getByText("Resposta-modelo")).toBeVisible();
   await expect(amostra.getByText(/o que o avaliador espera/i)).toBeVisible();
