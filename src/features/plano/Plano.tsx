@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { IconeCheck } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
-import { estadoDoPlano, ritmoDoPlano } from "@/lib/plano";
+import { montarIcs, type EventoDeEstudo } from "@/lib/ics";
+import { datasDoPlano, estadoDoPlano, ritmoDoPlano } from "@/lib/plano";
 import { definirModo, definirPlano } from "@/lib/storage";
 import { hojeISO, somarDias } from "@/lib/srs";
 import { cx } from "@/lib/utils";
@@ -142,6 +143,38 @@ export function Plano({
   const pedeHoje = dias[diaAtual - 1]?.temas.reduce((a, t) => a + t.minutos, 0) ?? 0;
   const ritmo = ritmoDoPlano(estado, Object.keys(concluidos).length, totalTemas);
 
+  function baixarCalendario(dataProva: string, minutosPorDia: number) {
+    const datas = datasDoPlano(dataProva, dias.length);
+    const eventos: EventoDeEstudo[] = dias.flatMap((dia, i) => {
+      const data = datas[i];
+      if (!data || dia.temas.length === 0) return [];
+      return [
+        {
+          data,
+          // 19h é palpite, mas é palpite editável: o evento entra na agenda e
+          // a pessoa arrasta. Sem horário nenhum, viraria um dia inteiro.
+          hora: 19,
+          minutos: Math.max(
+            dia.temas.reduce((a, t) => a + t.minutos, 0),
+            minutosPorDia,
+          ),
+          titulo: `Lumarys · dia ${dia.dia}: ${dia.titulo}`,
+          descricao: dia.temas.map((t) => t.titulo).join("; "),
+        },
+      ];
+    });
+
+    const arquivo = new Blob([montarIcs(eventos, trilhaSlug)], {
+      type: "text/calendar;charset=utf-8",
+    });
+    const url = URL.createObjectURL(arquivo);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "lumarys-plano.ics";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="flex flex-col gap-3.5 px-5">
       {confirmado ? (
@@ -240,6 +273,19 @@ export function Plano({
           </>
         )}
       </Card>
+
+      {/* O plano vivia só dentro do site: fechada a aba, era preciso lembrar
+          sozinho de estudar. Um .ics põe os dias na agenda que a pessoa já
+          olha, sem conta, sem permissão de notificação e sem servidor. */}
+      {trilha?.dataProva && !emManutencao ? (
+        <button
+          type="button"
+          onClick={() => baixarCalendario(trilha.dataProva!, meta)}
+          className="min-h-12 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-sm font-semibold"
+        >
+          Pôr o plano na minha agenda
+        </button>
+      ) : null}
 
       <Rotulo>Cronograma</Rotulo>
       <ol className="flex list-none flex-col gap-2 p-0">

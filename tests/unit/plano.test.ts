@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { estadoDoPlano, ritmoDoPlano } from "@/lib/plano";
+import { datasDoPlano, estadoDoPlano, ritmoDoPlano } from "@/lib/plano";
 
 const AGORA = new Date("2026-09-05T10:00:00-03:00");
 const TOTAL = 14;
@@ -52,5 +52,23 @@ describe("ritmo do plano", () => {
 
   it("fora do cronograma não inventa atraso", () => {
     expect(ritmoDoPlano(estadoDoPlano(undefined, TOTAL, AGORA), 0, 30).atraso).toBe(0);
+  });
+});
+
+describe("datas do plano", () => {
+  it("o último dia é a véspera da prova, e o primeiro fica `total-1` dias antes", () => {
+    // O plano é ancorado no fim, não no começo: é assim que estadoDoPlano conta.
+    const datas = datasDoPlano("2026-09-19", 14);
+    expect(datas).toHaveLength(14);
+    expect(datas[13]).toBe("2026-09-19");
+    expect(datas[0]).toBe("2026-09-06");
+  });
+
+  it("plano de um dia é o próprio dia da prova", () => {
+    expect(datasDoPlano("2026-09-19", 1)).toEqual(["2026-09-19"]);
+  });
+
+  it("total inválido não devolve data nenhuma", () => {
+    expect(datasDoPlano("2026-09-19", 0)).toEqual([]);
   });
 });

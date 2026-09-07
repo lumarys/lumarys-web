@@ -61,6 +61,18 @@ export function estadoDoPlano(
 }
 
 /**
+ * A data de cada dia do cronograma, do dia 1 ao último.
+ *
+ * O plano é ancorado no fim, e não no começo: o último dia é a véspera da
+ * prova. Foi assim que `estadoDoPlano` sempre contou, e é o que permite pôr o
+ * plano na agenda sem inventar um começo.
+ */
+export function datasDoPlano(dataProva: string, total: number): string[] {
+  if (total <= 0) return [];
+  return Array.from({ length: total }, (_, i) => somarDias(dataProva, -(total - 1 - i)));
+}
+
+/**
  * Quantos temas o cronograma esperava a esta altura, e o tamanho do atraso.
  * Serve para a trilha dizer "no ritmo" ou "atrasado 3 temas" em vez de só
  * mostrar uma barra.
