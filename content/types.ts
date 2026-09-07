@@ -169,7 +169,7 @@ export type Trilha = {
   slug: string;
   tipo: "carreira" | "certificacao";
   titulo: string;
-  /** Quem publica a ementa: "Itaú · Hub de Dados e Analytics", "AWS". */
+  /** Quem publica a ementa: "Ementa oficial · carreira em banco", "AWS". */
   origem: string;
   objetivo: string;
   resumo: string;
