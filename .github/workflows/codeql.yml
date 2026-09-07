@@ -1,0 +1,51 @@
+# Análise estática de segurança do próprio código.
+#
+# O `npm audit` e o gitleaks, que já rodam no CI, olham para dependência e para
+# segredo vazado. Nenhum dos dois lê o que a gente escreve. O CodeQL lê: é o
+# que pega injeção, caminho de arquivo montado com entrada externa e uso
+# perigoso de API no código do site e da Lambda.
+#
+# Roda semanalmente e a cada push em main, não a cada commit: a análise leva
+# minutos e o retorno dela é de tendência, não de gate de entrega.
+name: codeql
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Segunda-feira às 6h UTC, 3h em Brasília — antes do primeiro commit da semana.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analisar:
+    name: análise estática
+    runs-on: ubuntu-latest
+    permissions:
+      # security-events é o que permite publicar o resultado na aba Security.
+      security-events: write
+      contents: read
+      actions: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: preparar
+        uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        with:
+          languages: javascript-typescript
+          # "security-extended" acrescenta consultas de menor severidade que a
+          # suíte padrão deixa de fora. Num site estático o ruído é baixo.
+          queries: security-extended
+
+      - name: analisar
+        uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
+        with:
+          category: "/language:javascript-typescript"
