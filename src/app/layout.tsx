@@ -61,6 +61,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             sistema e pisca para o escolhido depois de hidratar. O hash entra
             na CSP de cada página no postbuild (scripts/csp.mjs). */}
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_TEMA }} />
+        {/* O feed é gerado no postbuild (scripts/gen-feed.mjs); o link é o que
+            faz leitores e agentes o encontrarem sem precisar adivinhar a URL. */}
+        <link
+          rel="alternate"
+          type="application/atom+xml"
+          title="Lumarys — novos temas"
+          href="/feed.xml"
+        />
       </head>
       <body>
         <a

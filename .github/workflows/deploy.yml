@@ -85,6 +85,8 @@ jobs:
           sync_tipo "*.txt"  "text/plain; charset=utf-8"
           sync_tipo "*.md"   "text/markdown; charset=utf-8"
           sync_tipo "*.xml"  "application/xml; charset=utf-8"
+          # Depois do genérico, para vencer: leitor de feed espera atom+xml.
+          sync_tipo "feed.xml" "application/atom+xml; charset=utf-8"
           sync_tipo "*.json" "application/json; charset=utf-8"
           sync_tipo "*.webmanifest" "application/manifest+json; charset=utf-8"
 

@@ -111,6 +111,16 @@ export const temaFrontmatterSchema = z.object({
   perguntas: z.array(perguntaSchema).min(3).max(10),
   /** Temas que convém estudar antes deste. */
   preRequisitos: z.array(slugSchema).default([]),
+  /**
+   * AAAA-MM-DD de publicação, para o feed. Opcional porque os 30 primeiros
+   * temas entraram todos no mesmo dia: sem o campo, o feed usa a data de
+   * lançamento do site, que é a verdade sobre eles. Tema novo deve trazer a
+   * sua.
+   */
+  publicadoEm: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "use AAAA-MM-DD")
+    .optional(),
 });
 
 export type TemaFrontmatter = z.infer<typeof temaFrontmatterSchema>;

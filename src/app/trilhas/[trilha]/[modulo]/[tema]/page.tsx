@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { ContatoLink } from "@/components/layout/ContatoLink";
 import { Card, Rotulo, RotuloAcento } from "@/components/ui/Card";
 import { Recolhivel } from "@/components/ui/Recolhivel";
 import { IconeSeta, IconeVoltar } from "@/components/ui/icons";
@@ -301,6 +302,17 @@ export default async function PaginaTema({ params }: { params: Promise<Params> }
             ) : null}
           </nav>
         ) : null}
+
+        {/* O caminho mais barato de qualidade editorial: quem lê é quem vê o
+            erro. O identificador do tema vai no assunto para o e-mail chegar
+            já endereçado. */}
+        <p className="mt-6 text-center text-[13px] text-[var(--muted)]">
+          <ContatoLink
+            rotulo="Achou um erro neste tema?"
+            assunto={`Erro no tema: ${tema.titulo} (${tema.slug})`}
+            className="min-h-11 underline underline-offset-4"
+          />
+        </p>
       </article>
 
       <VoltarAoTopo />

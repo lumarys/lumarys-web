@@ -40,20 +40,29 @@ export function SiteFooter() {
           </span>
         </div>
 
-        <nav aria-label="Rodapé" className="flex flex-wrap gap-x-1 text-[11px] text-[var(--text-2)]">
+        <nav
+          aria-label="Rodapé"
+          className="flex flex-wrap gap-x-1 text-[11px] text-[var(--text-2)]"
+        >
           <Link href="/metodo/" className="inline-flex min-h-11 items-center px-2 no-underline">
             Método
           </Link>
           <Link href="/sobre/" className="inline-flex min-h-11 items-center px-2 no-underline">
             Sobre
           </Link>
-          <Link href="/privacidade/" className="inline-flex min-h-11 items-center px-2 no-underline">
+          <Link
+            href="/privacidade/"
+            className="inline-flex min-h-11 items-center px-2 no-underline"
+          >
             Privacidade
           </Link>
           <Link href="/termos/" className="inline-flex min-h-11 items-center px-2 no-underline">
             Termos
           </Link>
           <ContatoLink className="inline-flex min-h-11 items-center px-2 text-[var(--text-2)]" />
+          <a href="/feed.xml" className="inline-flex min-h-11 items-center px-2 no-underline">
+            Novidades
+          </a>
         </nav>
       </div>
     </footer>
