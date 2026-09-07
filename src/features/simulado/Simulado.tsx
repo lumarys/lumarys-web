@@ -339,7 +339,11 @@ export function Simulado({
       {/* Fechada de propósito: a rubrica diz o que a resposta precisa ter, e
           lê-la antes de responder entrega metade do exercício. Fica ao alcance
           de quem travou, que é o caso em que ela ajuda. */}
-      <Recolhivel titulo="O que o avaliador espera" nota={`${pergunta.rubrica.length} critérios`}>
+      <Recolhivel
+        id="rubrica"
+        titulo="O que o avaliador espera"
+        nota={`${pergunta.rubrica.length} critérios`}
+      >
         <ul className="flex list-none flex-col gap-1.5 p-0">
           {pergunta.rubrica.map((criterio, i) => (
             <li key={i} className="flex gap-2 text-[13px] leading-snug text-[var(--text-2)]">
@@ -374,7 +378,7 @@ export function Simulado({
         </button>
       ) : (
         <>
-          <Card>
+          <Card id="resposta-modelo">
             <Rotulo className="mb-1.5">Resposta-modelo</Rotulo>
             <p className="text-[15px] leading-relaxed">{pergunta.respostaModelo}</p>
             <Link href={pergunta.href} className="mt-2.5 block text-[13px] no-underline">

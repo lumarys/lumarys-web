@@ -13,15 +13,18 @@ export function Recolhivel({
   nota,
   children,
   className,
+  id,
 }: {
   titulo: string;
   /** Contagem ou tempo, à direita do título. */
   nota?: string;
   children: ReactNode;
   className?: string;
+  id?: string;
 }) {
   return (
     <details
+      id={id}
       className={cx("rounded-2xl border border-[var(--border)] bg-[var(--surface)]", className)}
     >
       <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3">

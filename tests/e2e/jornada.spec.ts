@@ -215,7 +215,8 @@ test("13. simulado oral do módulo até o placar", async () => {
       break;
     await expect(page.getByText(/entrevistador · fundamentos/i)).toBeVisible();
     await page.getByRole("button", { name: /já respondi/i }).click();
-    await expect(page.getByText("Resposta-modelo")).toBeVisible();
+    // #resposta-modelo: a amostra pública no fim da página tem nove outras.
+    await expect(page.locator("#resposta-modelo")).toBeVisible();
     await page.getByRole("button", { name: "4", exact: true }).click();
   }
 

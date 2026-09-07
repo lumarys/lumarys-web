@@ -25,8 +25,8 @@ export default function PaginaTrilhas() {
     <AppShell>
       <JsonLd
         dados={jsonLdBreadcrumb([
-          { nome: "Início", url: `${SITE.url}/` },
-          { nome: "Trilhas", url: `${SITE.url}/trilhas/` },
+          { nome: "Início", url: "/" },
+          { nome: "Trilhas", url: "/trilhas/" },
         ])}
       />
       <JsonLd

@@ -50,11 +50,14 @@ test("com um simulado, a entrada mostra a nota e diz que ainda não há compara�
   await semearSimulados(page, [10]);
   await page.goto("/simulado/");
 
-  await expect(page.getByText("Seus simulados")).toBeVisible();
+  // Escopado ao cartão: a amostra pública, no fim da página, tem
+  // resposta-modelo com palavras como "estável" no meio do texto.
+  const cartao = page.getByText("Seus simulados").locator("../..");
+  await expect(cartao).toBeVisible();
   // 10/20 + 10/20 = 50%.
-  await expect(page.getByText("50%", { exact: false }).first()).toBeVisible();
-  await expect(page.getByText(/primeiro simulado/i)).toBeVisible();
-  await expect(page.getByText(/subindo|caindo|estável/i)).toHaveCount(0);
+  await expect(cartao.getByText("50%", { exact: false }).first()).toBeVisible();
+  await expect(cartao.getByText(/primeiro simulado/i)).toBeVisible();
+  await expect(cartao.getByText(/subindo|caindo|estável/i)).toHaveCount(0);
 });
 
 test("com três, aparece a tendência e a variação contra o anterior", async ({ page }) => {
