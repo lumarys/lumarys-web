@@ -123,6 +123,12 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
           </BotaoLink>
         </div>
 
+        <div className="mt-6 flex flex-wrap gap-2">
+          <BotaoLink href={`/trilhas/${trilha.slug}/glossario/`} variante="secundario">
+            Glossário da trilha
+          </BotaoLink>
+        </div>
+
         <div className="mt-6">
           <Rotulo className="mb-2">Módulos</Rotulo>
           <ListaModulos

@@ -183,6 +183,14 @@ export function ListaModulos({
                       : "ainda não feito"}
                   </span>
                 </Link>
+
+                <Link
+                  href={`/trilhas/${trilhaSlug}/${modulo.slug}/resumo/`}
+                  className="mt-2 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-[var(--border)] px-3.5 text-[13px] font-semibold no-underline"
+                >
+                  <span>Folha de revisão</span>
+                  <span className="shrink-0 font-normal text-[var(--muted)]">para imprimir</span>
+                </Link>
               </div>
             </details>
           </li>

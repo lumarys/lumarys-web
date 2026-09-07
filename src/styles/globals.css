@@ -178,6 +178,52 @@
   -webkit-overflow-scrolling: touch;
 }
 
+/* ---------------------------------------------------------------------------
+   Impressão. Existe pela folha de revisão de véspera (/resumo/): a pessoa
+   imprime, leva no bolso e lê no caminho da prova. Sem isto, o papel sai com
+   a barra de abas, o menu e texto claro sobre fundo escuro — que gasta tinta
+   e fica ilegível.
+--------------------------------------------------------------------------- */
+@media print {
+  :root {
+    color-scheme: light;
+    --bg: #fff;
+    --surface: #fff;
+    --elevated: #fff;
+    --border: #999;
+    --text: #000;
+    --text-2: #333;
+    --muted: #555;
+    --accent: #000;
+    --color-danger: #000;
+    --color-success: #000;
+    --color-info: #000;
+  }
+
+  /* A casca do app não vai para o papel. O seletor é o filho direto porque
+     `header` também aparece dentro das páginas. */
+  body > div > header,
+  footer,
+  nav[aria-label="Estudo"],
+  [role="status"],
+  .sr-only {
+    display: none !important;
+  }
+
+  main {
+    max-width: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  /* Um tema não pode começar no fim de uma folha e continuar na seguinte. */
+  .break-inside-avoid {
+    break-inside: avoid;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
