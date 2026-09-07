@@ -71,3 +71,14 @@ variable "retencao_logs_dias" {
   type        = number
   default     = 14
 }
+
+variable "waf_cognito_ativo" {
+  description = <<-TXT
+    Liga o WAF com limite por IP no Cognito. Desligado por padrão: custa cerca
+    de US$ 6/mês (30% do alerta de orçamento) e protege contra cadastro em
+    massa, que só é possível depois de o SES sair do sandbox e o site ter
+    tráfego de fora. Ligar quando as duas coisas forem verdade.
+  TXT
+  type        = bool
+  default     = false
+}

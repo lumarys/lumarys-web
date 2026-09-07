@@ -15,8 +15,10 @@
 # são decisões maiores que este card.
 #
 # Custo: US$ 5/mês pelo web ACL, US$ 1/mês pela regra e US$ 0,60 por milhão de
-# requisições. Com o tráfego atual, cerca de US$ 6/mês — dentro do alerta de
-# orçamento de US$ 20, mas é gasto novo e recorrente.
+# requisições — cerca de US$ 6/mês, 30% do alerta de orçamento. Por isso vem
+# DESLIGADO (var.waf_cognito_ativo = false): enquanto o SES estiver no sandbox
+# ninguém de fora cadastra, e o abuso que isto freia não existe. Liga-se com
+# uma variável no dia em que o SES for público e houver tráfego real.
 
 # 100 requisições em 5 minutos por IP. Uma entrada legítima usa 3 chamadas
 # (SignUp, InitiateAuth, RespondToAuthChallenge) mais a renovação de token;
@@ -27,6 +29,8 @@ locals {
 }
 
 resource "aws_wafv2_web_acl" "cognito" {
+  count = var.waf_cognito_ativo ? 1 : 0
+
   name        = "${local.nome}-cognito"
   description = "Limite por IP nas chamadas de cadastro e login."
   scope       = "REGIONAL"
@@ -71,8 +75,10 @@ resource "aws_wafv2_web_acl" "cognito" {
 }
 
 resource "aws_wafv2_web_acl_association" "cognito" {
+  count = var.waf_cognito_ativo ? 1 : 0
+
   resource_arn = aws_cognito_user_pool.alunos.arn
-  web_acl_arn  = aws_wafv2_web_acl.cognito.arn
+  web_acl_arn  = aws_wafv2_web_acl.cognito[0].arn
 }
 
 # Alarme quando o limite começa a bloquear de verdade. Sem isto o WAF vira
@@ -80,6 +86,8 @@ resource "aws_wafv2_web_acl_association" "cognito" {
 # painel. Cinco bloqueios em cinco minutos é sinal de script; um ou dois pode
 # ser alguém tentando entrar de novo depois de errar.
 resource "aws_cloudwatch_metric_alarm" "waf_cognito_bloqueios" {
+  count = var.waf_cognito_ativo ? 1 : 0
+
   alarm_name          = "${local.nome}-waf-cognito-bloqueios"
   alarm_description   = "O WAF do Cognito está bloqueando requisições: possível cadastro ou login automatizado."
   namespace           = "AWS/WAFV2"
@@ -96,7 +104,7 @@ resource "aws_cloudwatch_metric_alarm" "waf_cognito_bloqueios" {
   alarm_actions = [aws_sns_topic.ses_retorno.arn]
 
   dimensions = {
-    WebACL = aws_wafv2_web_acl.cognito.name
+    WebACL = aws_wafv2_web_acl.cognito[0].name
     Region = var.aws_region
     Rule   = "limite-por-ip"
   }
