@@ -41,6 +41,18 @@ export type ResultadoQuiz = {
   enganos?: number;
 };
 
+/**
+ * Checkpoint de um módulo. Guarda os temas errados, e não os índices das
+ * perguntas: índice depende do sorteio daquele dia e não significa nada
+ * depois; o tema é o que a fila de revisão precisa saber.
+ */
+export type ResultadoCheckpoint = {
+  acertos: number;
+  total: number;
+  atualizadoEm: number;
+  temasParaRevisar: string[];
+};
+
 export type ResultadoSimulado = {
   em: number;
   /** slug do módulo -> nota somada e máximo possível */
@@ -57,6 +69,8 @@ export type ProgressoTrilha = {
   preTestes: Record<string, ResultadoQuiz>;
   /** slug do tema -> último drill conferido */
   drills?: Record<string, ResultadoQuiz>;
+  /** slug do módulo -> último checkpoint. Campo aditivo: pode não existir. */
+  checkpoints?: Record<string, ResultadoCheckpoint>;
   /** slug do tema -> explicação que o aluno escreveu com as próprias palavras */
   feynman?: Record<string, string>;
   simulados: ResultadoSimulado[];
@@ -281,6 +295,38 @@ export function registrarQuiz(
   });
 }
 
+/**
+ * Grava o checkpoint de um módulo. Ao contrário do quiz do tema, aqui o que
+ * interessa guardar é quais temas caíram — é deles que sai a revisão.
+ */
+export function registrarCheckpoint(
+  trilha: string,
+  modulo: string,
+  acertos: number,
+  total: number,
+  temasParaRevisar: string[],
+): Progresso {
+  sincronizar(trilha);
+  return atualizar((p) => {
+    const agora = Date.now();
+    const t = garantirTrilha(p, trilha);
+    return {
+      ...p,
+      trilhas: {
+        ...p.trilhas,
+        [trilha]: {
+          ...t,
+          checkpoints: {
+            ...(t.checkpoints ?? {}),
+            [modulo]: { acertos, total, atualizadoEm: agora, temasParaRevisar },
+          },
+          atualizadoEm: agora,
+        },
+      },
+    };
+  });
+}
+
 export function registrarSimulado(
   trilha: string,
   resultado: Omit<ResultadoSimulado, "em">,
@@ -439,6 +485,23 @@ function mesclarTrilha(l: ProgressoTrilha, r: ProgressoTrilha): ProgressoTrilha 
     return saida;
   };
 
+  // Mesmo critério dos quizzes: fica o melhor resultado. Um checkpoint pior
+  // feito depois não apaga um módulo já fechado.
+  const juntarCheckpoints = (
+    x: Record<string, ResultadoCheckpoint>,
+    y: Record<string, ResultadoCheckpoint>,
+  ) => {
+    const saida: Record<string, ResultadoCheckpoint> = { ...y };
+    for (const [k, v] of Object.entries(x)) {
+      const outro = y[k];
+      saida[k] =
+        !outro || v.acertos / Math.max(v.total, 1) >= outro.acertos / Math.max(outro.total, 1)
+          ? v
+          : outro;
+    }
+    return saida;
+  };
+
   const simulados = [...r.simulados, ...l.simulados]
     .filter((s, i, arr) => arr.findIndex((o) => o.em === s.em) === i)
     .sort((a, b) => a.em - b.em)
@@ -453,6 +516,7 @@ function mesclarTrilha(l: ProgressoTrilha, r: ProgressoTrilha): ProgressoTrilha 
     quizzes: juntarQuizzes(l.quizzes, r.quizzes),
     preTestes: juntarQuizzes(l.preTestes, r.preTestes),
     drills: juntarQuizzes(l.drills ?? {}, r.drills ?? {}),
+    checkpoints: juntarCheckpoints(l.checkpoints ?? {}, r.checkpoints ?? {}),
     // Texto escrito: vence o lado mais recente, campo a campo.
     feynman: { ...(antigo.feynman ?? {}), ...(recente.feynman ?? {}) },
     simulados,

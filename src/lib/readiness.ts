@@ -4,13 +4,23 @@ import type { Progresso, ProgressoTrilha } from "./storage";
 /**
  * Prontidão: quanto do módulo você provou que sabe, não quanto você leu.
  *
- * Quatro sinais, porque cada um sozinho mente. Cobertura sozinha vira teatro
+ * Cinco sinais, porque cada um sozinho mente. Cobertura sozinha vira teatro
  * (dar "concluído" em tudo). Quiz sozinho premia acerto no calor do tema, sem
  * retenção. Card sozinho mede memória, não raciocínio. Simulado sozinho é
  * pouco frequente. O peso maior fica no simulado oral porque é o formato real
  * da sabatina.
+ *
+ * O checkpoint entrou depois, tirando peso da cobertura — que é o sinal mais
+ * fácil de fingir. Ele mede a mesma coisa que a cobertura diz medir (o módulo
+ * foi aprendido), só que perguntando em vez de acreditando.
  */
-export const PESOS = { cobertura: 0.2, quiz: 0.25, cards: 0.2, simulado: 0.35 } as const;
+export const PESOS = {
+  cobertura: 0.15,
+  quiz: 0.25,
+  cards: 0.2,
+  checkpoint: 0.05,
+  simulado: 0.35,
+} as const;
 
 export type ProntidaoModulo = {
   moduloSlug: string;
@@ -19,6 +29,7 @@ export type ProntidaoModulo = {
   cobertura: number;
   quiz: number;
   cards: number;
+  checkpoint: number;
   simulado: number;
   temasTotal: number;
   temasConcluidos: number;
@@ -38,6 +49,7 @@ export function prontidaoDoModulo(
     cobertura: 0,
     quiz: 0,
     cards: 0,
+    checkpoint: 0,
     simulado: 0,
     temasTotal: total,
     temasConcluidos: 0,
@@ -65,6 +77,11 @@ export function prontidaoDoModulo(
       : cardsDoModulo.reduce((acc, c) => acc + Math.min(c.caixa, CAIXA_PRONTO) / CAIXA_PRONTO, 0) /
         cardsDoModulo.length;
 
+  // Checkpoint nunca feito conta zero, como os demais sinais: não fazer é
+  // diferente de ter ido mal, mas em prontidão os dois significam "não provado".
+  const cp = trilha.checkpoints?.[modulo.slug];
+  const checkpoint = cp && cp.total > 0 ? cp.acertos / cp.total : 0;
+
   const ultimo = trilha.simulados.at(-1)?.porModulo[modulo.slug];
   const simulado = ultimo && ultimo.maximo > 0 ? ultimo.nota / ultimo.maximo : 0;
 
@@ -72,6 +89,7 @@ export function prontidaoDoModulo(
     (cobertura * PESOS.cobertura +
       quiz * PESOS.quiz +
       cards * PESOS.cards +
+      checkpoint * PESOS.checkpoint +
       simulado * PESOS.simulado) *
     100;
 
@@ -81,6 +99,7 @@ export function prontidaoDoModulo(
     cobertura: Math.round(cobertura * 100),
     quiz: Math.round(quiz * 100),
     cards: Math.round(cards * 100),
+    checkpoint: Math.round(checkpoint * 100),
     simulado: Math.round(simulado * 100),
     temasTotal: total,
     temasConcluidos: concluidos,
@@ -96,7 +115,13 @@ export function prontidaoDaTrilha(
   porModulo: ProntidaoModulo[];
   pontoFraco?: ProntidaoModulo;
   /** Os quatro sinais agregados na trilha inteira, para a tela explicar o número. */
-  componentes: { cobertura: number; quiz: number; cards: number; simulado: number };
+  componentes: {
+    cobertura: number;
+    quiz: number;
+    cards: number;
+    checkpoint: number;
+    simulado: number;
+  };
 } {
   const trilha = progresso.trilhas[trilhaSlug];
   const porModulo = modulos.map((m) => prontidaoDoModulo(m, progresso, trilha));
@@ -115,7 +140,7 @@ export function prontidaoDaTrilha(
   const iniciados = comTemas.filter((p) => p.temasConcluidos > 0 || p.cards > 0);
   const pontoFraco = iniciados.slice().sort((a, b) => a.score - b.score)[0];
 
-  const media = (campo: "cobertura" | "quiz" | "cards" | "simulado") =>
+  const media = (campo: "cobertura" | "quiz" | "cards" | "checkpoint" | "simulado") =>
     pesoTotal === 0
       ? 0
       : Math.round(comTemas.reduce((acc, p) => acc + p[campo] * p.temasTotal, 0) / pesoTotal);
@@ -128,6 +153,7 @@ export function prontidaoDaTrilha(
       cobertura: media("cobertura"),
       quiz: media("quiz"),
       cards: media("cards"),
+      checkpoint: media("checkpoint"),
       simulado: media("simulado"),
     },
   };

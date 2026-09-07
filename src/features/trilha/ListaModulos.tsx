@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { IconeCheck } from "@/components/ui/icons";
 import { useProgresso } from "@/features/progresso/useProgresso";
+import { aprovado } from "@/lib/checkpoint";
 import { estadoDoPlano } from "@/lib/plano";
 import { prontidaoDaTrilha } from "@/lib/readiness";
 import { cx } from "@/lib/utils";
@@ -76,6 +77,8 @@ export function ListaModulos({
         const completo = pronto && total > 0 && concluidos === total;
         const atual = proximoTema && modulo.temas.some((t) => t.slug === proximoTema.slug);
         const doDia = modulo.temas.some((t) => temasDeHoje.includes(t.slug));
+        const checkpoint = trilha?.checkpoints?.[modulo.slug];
+        const fechado = Boolean(checkpoint && aprovado(checkpoint.acertos, checkpoint.total));
 
         return (
           <li key={modulo.slug} id={modulo.slug} className="scroll-mt-4">
@@ -93,17 +96,26 @@ export function ListaModulos({
                       hoje
                     </span>
                   ) : null}
+                  {/* Três estados, não dois: círculo vazio, verde de "li
+                      todos os temas" e âmbar de "passei no checkpoint". A
+                      diferença entre ter lido e ter provado é o ponto do
+                      módulo fechado. */}
                   <span
+                    aria-label={
+                      fechado ? "Checkpoint aprovado" : completo ? "Temas concluídos" : undefined
+                    }
                     className={cx(
                       "flex size-6 shrink-0 items-center justify-center rounded-full",
-                      completo
-                        ? "bg-[var(--color-success)] text-[var(--bg)]"
-                        : atual
-                          ? "border-2 border-[var(--accent)]"
-                          : "border-2 border-[var(--border)]",
+                      fechado
+                        ? "bg-[var(--accent)] text-[var(--accent-ink)]"
+                        : completo
+                          ? "bg-[var(--color-success)] text-[var(--bg)]"
+                          : atual
+                            ? "border-2 border-[var(--accent)]"
+                            : "border-2 border-[var(--border)]",
                     )}
                   >
-                    {completo ? <IconeCheck size={14} /> : null}
+                    {fechado || completo ? <IconeCheck size={14} /> : null}
                   </span>
                   <span className="flex flex-col">
                     <span
@@ -156,6 +168,21 @@ export function ListaModulos({
                     );
                   })}
                 </ul>
+
+                {/* Sempre visível, e não só com o módulo inteiro concluído: o
+                    checkpoint também serve para descobrir o que já se sabe
+                    antes de ler. */}
+                <Link
+                  href={`/trilhas/${trilhaSlug}/${modulo.slug}/checkpoint/`}
+                  className="mt-2 flex min-h-11 items-center justify-between gap-3 rounded-xl border border-[var(--border)] px-3.5 text-[13px] font-semibold no-underline"
+                >
+                  <span>Checkpoint do módulo</span>
+                  <span className="shrink-0 font-normal text-[var(--muted)]">
+                    {checkpoint
+                      ? `${checkpoint.acertos}/${checkpoint.total}${fechado ? " · fechado" : ""}`
+                      : "ainda não feito"}
+                  </span>
+                </Link>
               </div>
             </details>
           </li>

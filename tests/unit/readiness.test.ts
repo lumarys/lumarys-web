@@ -135,3 +135,26 @@ describe("rótulo", () => {
     expect(rotuloProntidao(90)).toBe("pronto");
   });
 });
+
+describe("checkpoint na prontidão", () => {
+  it("um checkpoint aprovado sobe o score, e o peso é pequeno", () => {
+    const sem = prontidaoDoModulo(MODULO, progressoVazio(), trilhaVazia());
+    const com = prontidaoDoModulo(MODULO, progressoVazio(), {
+      ...trilhaVazia(),
+      checkpoints: {
+        spark: { acertos: 10, total: 10, atualizadoEm: 1, temasParaRevisar: [] },
+      },
+    });
+    expect(com.score - sem.score).toBe(Math.round(PESOS.checkpoint * 100));
+    expect(com.checkpoint).toBe(100);
+  });
+
+  it("checkpoint nunca feito conta zero, sem quebrar", () => {
+    expect(prontidaoDoModulo(MODULO, progressoVazio(), trilhaVazia()).checkpoint).toBe(0);
+  });
+
+  it("os pesos continuam somando 1", () => {
+    const soma = Object.values(PESOS).reduce((a, b) => a + b, 0);
+    expect(soma).toBeCloseTo(1, 10);
+  });
+});
