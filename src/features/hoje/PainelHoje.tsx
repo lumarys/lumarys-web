@@ -224,6 +224,7 @@ export function PainelHoje({ dados }: { dados: DadosHoje }) {
                 ["Temas concluídos", componentes.cobertura, PESOS.cobertura],
                 ["Quiz", componentes.quiz, PESOS.quiz],
                 ["Cards", componentes.cards, PESOS.cards],
+                ["Checkpoint", componentes.checkpoint, PESOS.checkpoint],
                 ["Simulado", componentes.simulado, PESOS.simulado],
               ] as const
             ).map(([nome, valor, peso]) => (
@@ -290,6 +291,7 @@ function maiorGanho(c: {
   cobertura: number;
   quiz: number;
   cards: number;
+  checkpoint: number;
   simulado: number;
 }): string {
   const candidatos = [
@@ -297,6 +299,7 @@ function maiorGanho(c: {
     { nome: "fazer os quizzes dos temas", valor: c.quiz, peso: PESOS.quiz },
     { nome: "revisar os cards", valor: c.cards, peso: PESOS.cards },
     { nome: "concluir os temas que faltam", valor: c.cobertura, peso: PESOS.cobertura },
+    { nome: "fazer o checkpoint dos módulos", valor: c.checkpoint, peso: PESOS.checkpoint },
   ];
   const alvo = candidatos.sort((a, b) => (100 - b.valor) * b.peso - (100 - a.valor) * a.peso)[0];
   return alvo ? `O que mais sobe agora é ${alvo.nome}.` : "";
