@@ -1,0 +1,24 @@
+# Gates locais, antes de o erro virar commit.
+#
+# O CI continua sendo a verdade — ele roda a suíte inteira. O que muda aqui é
+# o ciclo: descobrir lint quebrado depois do push custa um deploy vermelho e
+# um "arrumar o lint" no histórico. Estes hooks rodam só no que mudou, para
+# ficarem rápidos o bastante e ninguém adquirir o hábito de --no-verify.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: formatação
+      glob: "*.{ts,tsx,mjs,js,json,css,md,yml,yaml}"
+      run: npx prettier --write {staged_files}
+      stage_fixed: true
+
+    - name: lint
+      glob: "*.{ts,tsx}"
+      # --max-warnings 0: aviso que ninguém lê é regra que não existe.
+      run: npx eslint --max-warnings 0 {staged_files}
+
+commit-msg:
+  jobs:
+    - name: conventional commits
+      run: npx commitlint --edit {1}

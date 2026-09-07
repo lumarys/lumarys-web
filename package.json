@@ -24,7 +24,8 @@
     "generate": "node scripts/gen-seo.mjs",
     "predev": "npm run generate",
     "pretypecheck": "npm run generate",
-    "postbuild": "node scripts/og-extensao.mjs && node scripts/gen-feed.mjs && node scripts/sw.mjs && node scripts/csp.mjs"
+    "postbuild": "node scripts/og-extensao.mjs && node scripts/gen-feed.mjs && node scripts/sw.mjs && node scripts/csp.mjs",
+    "prepare": "lefthook install"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.1.1",
@@ -40,6 +41,8 @@
     "@aws-sdk/client-cognito-identity-provider": "^3.716.0",
     "@aws-sdk/client-dynamodb": "^3.716.0",
     "@aws-sdk/lib-dynamodb": "^3.716.0",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/aws-lambda": "^8.10.147",
@@ -51,6 +54,7 @@
     "eslint": "^10",
     "eslint-config-next": "16.3.4",
     "jsdom": "^30.0.1",
+    "lefthook": "^2.1.12",
     "prettier": "^3.4.2",
     "tailwindcss": "^4",
     "typescript": "^6.0.3",

@@ -37,6 +37,11 @@ export function Dialogo({
   }, [aberto]);
 
   return (
+    /* O onClick abaixo fecha ao clicar no fundo. A regra pede um handler de
+       teclado ao lado dele, e aqui ele existe sem código: o <dialog> aberto
+       com showModal() fecha no Escape por conta do navegador e dispara o mesmo
+       onClose. Quem navega por teclado nunca fica preso. */
+    /* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */
     <dialog
       ref={referencia}
       onClose={aoFechar}

@@ -58,6 +58,12 @@ export function RolagemHorizontal({
         onScroll={medir}
         // Só vira parada de tabulação quando há o que rolar: um contêiner que
         // não rola no teclado de ninguém não deveria receber foco.
+        //
+        // A regra desconfia de tabIndex em elemento não interativo, e aqui ela
+        // erra: uma região rolável PRECISA ser focável para quem usa teclado
+        // conseguir rolá-la com as setas. É o que o WAI-ARIA APG recomenda, e
+        // por isso vem junto de role="region" e de um nome acessível.
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={rolavel ? 0 : undefined}
         role={rolavel ? "region" : undefined}
         aria-label={rolavel ? `${rotulo} (rolável na horizontal)` : undefined}

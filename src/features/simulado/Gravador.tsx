@@ -115,6 +115,10 @@ export function Gravador({
               : "Toque para gravar, ou responda em voz alta sem gravar"}
       </p>
 
+      {/* Sem <track>: é a própria pessoa se ouvindo, gravado há segundos e
+          nunca compartilhado. Não existe legenda a fornecer, e exigir uma aqui
+          seria cumprir a regra sem servir a ninguém. */}
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       {audio ? <audio controls src={audio} className="w-full max-w-sm" /> : null}
     </div>
   );
