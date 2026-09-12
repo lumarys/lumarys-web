@@ -79,6 +79,17 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [Governança de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/big-data/governanca-de-dados/): Governança de dados é o conjunto de políticas, papéis, processos e padrões que fazem o dado ser confiável e usável. Quem responde pelo dado, onde ele está catalogado, de onde ele veio e quem pode vê-lo.
 - [Qualidade de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/big-data/data-quality/): Qualidade de dados é o quanto o dado serve para a decisão que ele sustenta, medido por dimensões: acurácia, completude, consistência, unicidade, atualidade e validade. E, principalmente, o que o pipeline faz quando uma delas falha.
 
+### AWS
+
+- [AWS para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/aws/aws-para-dados/): Os serviços que aparecem num pipeline de dados na AWS e o critério para escolher entre eles: S3, Glue, Athena, EMR, Redshift, Lake Formation, Kinesis, Lambda, Step Functions e o IAM que amarra tudo.
+- [Redshift e a camada de consumo analítico](https://lumarys.com.br/trilhas/engenharia-de-analytics/aws/redshift-e-consumo-analitico/): O data warehouse visto por quem entrega número para o negócio: por que o armazenamento colunar muda tudo, como chave de distribuição e de ordenação decidem o desempenho, quando usar Spectrum para ler o lake, e como o QuickSight consome o que você modelou.
+
+### Banco de dados
+
+- [Relacional e NoSQL: ACID, BASE e a escolha real](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/relacional-vs-nosql-e-consistencia/): A pergunta de fundamento que a banca usa para testar critério: o que ACID garante e o que se abre mão em BASE, o que o teorema CAP realmente diz, as famílias de NoSQL e por que a resposta quase nunca é 'NoSQL é melhor' nem 'relacional é seguro'.
+- [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
+- [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
+
 ## Engenharia de Dados
 
 A ementa oficial de uma carreira de Engenharia de Dados no mercado financeiro, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.
@@ -4756,6 +4767,704 @@ Eu testaria em camadas e o mais cedo possível. Na ingestão, checo contrato: sc
 ### Um teste de qualidade falhou às 3h da manhã no pipeline que alimenta o painel da diretoria às 8h. Descreva sua decisão.
 
 Minha decisão depende de duas perguntas que eu já deveria ter respondido antes: qual a criticidade do consumidor e qual o alcance da falha. Se a falha é localizada, poucas linhas afetadas e nada regulatório, eu quarentenei as linhas, publico o resto no horário e mando o alerta com contagem e amostra para o steward. Se a falha é sistêmica, volume despencou, schema mudou ou a reconciliação não fecha, eu não publico. Prefiro o painel vazio com aviso de indisponibilidade a um painel com número errado, porque número errado na diretoria vira decisão errada e depois vira retratação. Em qualquer dos casos eu comunico antes das 8h, digo o que aconteceu, o impacto e a previsão. Depois abro a causa raiz e transformo o achado em teste novo, para a mesma falha não passar duas vezes.
+
+---
+
+# AWS para engenharia de dados
+
+Trilha: Engenharia de Analytics · Módulo: AWS
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/aws/aws-para-dados/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Os serviços que aparecem num pipeline de dados na AWS e o critério para escolher entre eles: S3, Glue, Athena, EMR, Redshift, Lake Formation, Kinesis, Lambda, Step Functions e o IAM que amarra tudo.
+
+**Por que cai na prova.** A stack do time é AWS mais Databricks, então a banca vai testar se você sabe onde cada serviço encaixa e quanto ele custa. A pergunta de custo do Athena é quase certa, porque separa quem já pagou a conta de quem só leu a documentação.
+
+**Como o entrevistador pergunta.** "Uma consulta no Athena custou caro. O que você olha primeiro?"
+
+## Em uma frase
+
+Na AWS, um pipeline de dados é **S3 como camada de persistência, Glue como
+catálogo e motor de transformação, um motor de consulta escolhido pelo padrão de
+uso, e IAM amarrando quem pode o quê**.
+
+## S3: a base de tudo
+
+O S3 guarda objetos, não tabelas. Isso é a força — armazenamento barato e
+desacoplado do processamento — e a fonte dos problemas.
+
+- **Classes de armazenamento**: Standard para dado quente, Intelligent-Tiering
+  quando o padrão de acesso é imprevisível, Standard-IA e One Zone-IA para acesso
+  raro, e as famílias Glacier para arquivamento, com custo e latência de
+  recuperação crescentes.
+- **Lifecycle**: regra que move ou expira objeto por idade. Extrato bruto sai do
+  Standard em 90 dias, vai para Glacier em um ano e expira no fim do prazo legal
+  de retenção — que em banco é definido por norma, não por preferência
+  [verificar prazo aplicável ao seu caso].
+- **Organização por prefixo**: `zona/dominio/tabela/data_ref=2026-03-11/`. O
+  formato `coluna=valor` é o que permite ao motor fazer poda de partição.
+- **Consistência**: o S3 oferece leitura consistente após escrita para operações
+  de objeto. O que não se atualiza sozinho é o **catálogo**: partição nova no S3
+  continua invisível para o Athena até ser registrada.
+
+<Callout tipo="erro" titulo="Arquivo pequeno demais">
+Milhares de objetos de poucos KB derrubam o desempenho de Athena e Spark por
+sobrecarga de listagem e abertura. Compacte para a faixa de dezenas ou centenas
+de MB por arquivo.
+</Callout>
+
+## Glue: catálogo, crawler e jobs
+
+O **Data Catalog** é o metastore: schema, formato, localização no S3 e lista de
+partições. Athena, Spark e Redshift Spectrum leem a mesma definição a partir
+dele.
+
+O **crawler** inspeciona um caminho no S3, infere schema e registra ou atualiza a
+tabela. Útil na chegada de dado de terceiro; perigoso como fonte única de
+verdade de schema, porque inferência erra tipo.
+
+Os **jobs** são Spark gerenciado, para ETL sem manter cluster.
+
+## Athena: SQL sobre o S3
+
+Serverless: você não dimensiona nada, e a cobrança padrão é por **volume de dados
+varridos** [verificar preço por TB na região usada].
+
+Reduzir a conta é reduzir bytes lidos:
+
+<Passos itens={[
+  "Particionar pela coluna que você filtra, e registrar a partição no catálogo",
+  "Gravar em formato colunar (Parquet) com compressão",
+  "Projetar colunas: SELECT explícito em vez de SELECT estrela",
+  "Compactar arquivos pequenos para reduzir sobrecarga"
+]} />
+
+## EMR: quando ainda usar
+
+Quando você precisa de **controle**: versão específica de Spark, ecossistema
+Hadoop, bibliotecas nativas, ajuste fino de tipos de instância, uso agressivo de
+spot, carga longa em que o custo por hora compensa. Se nada disso é requisito,
+Glue ou Databricks entregam o mesmo Spark com menos operação.
+
+## Redshift
+
+Warehouse colunar e distribuído, para consulta recorrente e concorrente sobre
+dado modelado. **Spectrum** deixa o Redshift consultar dados que continuam no S3,
+permitindo juntar tabela do warehouse com histórico no lake.
+
+**Distribution key** define como as linhas se distribuem entre os nós, e a
+escolha certa evita redistribuir dados no JOIN. **Sort key** define a ordem
+física dos blocos, e a escolha certa permite pular blocos inteiros no filtro.
+
+## Athena, Redshift e EMR: quando cada um
+
+<Comparativo
+  colunas={["", "Athena", "Redshift", "EMR"]}
+  linhas={[
+    ["Modelo", "Serverless, sob demanda", "Cluster provisionado (ou serverless)", "Cluster que você configura"],
+    ["Cobrança típica", "Por dados varridos", "Por capacidade ligada", "Por hora de instância"],
+    ["Melhor para", "SQL ad hoc e esporádico sobre o lake", "Painel e consulta recorrente com concorrência alta", "Processamento pesado e customizado em Spark"],
+    ["Pior para", "Consulta repetitiva de alto volume, que fica cara por varredura", "Uso esporádico, que paga cluster ocioso", "Time pequeno, por causa do custo operacional"]
+  ]}
+/>
+
+## Lake Formation, Kinesis, Lambda e Step Functions
+
+**Lake Formation** concede permissão fina sobre o lake — por banco, tabela,
+coluna, linha e tag — aplicada de forma consistente aos motores de consulta.
+É o que permite liberar a tabela de clientes ao marketing **sem** a coluna de
+CPF, em vez de duplicar uma versão mascarada.
+
+**Kinesis Data Streams** é o streaming gerenciado: shard no lugar de partição,
+chave de partição com o mesmo papel do Kafka, retenção configurável.
+
+**Lambda** cobre tarefa curta orientada a evento: validar arquivo que chegou,
+disparar job, publicar métrica. **Step Functions** orquestra os passos como
+máquina de estados, com retry e tratamento de erro declarativos — alternativa ao
+Airflow quando o fluxo é todo de serviços AWS.
+
+## IAM para dados
+
+**Role** é a identidade que o job assume. **Policy** é o documento que diz quais
+ações são permitidas sobre quais recursos. **Menor privilégio** é conceder apenas
+o que aquele job usa: um prefixo específico do bucket, as ações de leitura e
+escrita necessárias, nada além.
+
+<Callout tipo="atencao" titulo="Resposta que vale ponto em banco">
+Uma role por job, escopo por prefixo, criptografia com KMS e permissão analítica
+por Lake Formation. Dizer isso sem ser perguntado mostra que você entende que em
+instituição financeira acesso é matéria regulatória, não conveniência.
+</Callout>
+
+## Erros comuns
+
+- Achar que Athena cobra por tempo de consulta. A cobrança padrão é por volume de dados varridos, então otimizar é reduzir bytes lidos, não segundos gastos.
+- Criar partição no S3 e esquecer de registrar no catálogo. Sem MSCK REPAIR, ALTER TABLE ADD PARTITION, crawler ou partition projection, o Athena não enxerga a partição e continua varrendo tudo.
+- Escolher Redshift para consulta exploratória esporádica sobre o lake. Você paga cluster ligado o tempo todo para um uso que o Athena atenderia sob demanda.
+- Usar EMR por hábito onde Glue ou Databricks resolveriam. EMR entrega controle do cluster e da versão do Spark, e cobra isso em operação e tuning.
+- Tratar Lake Formation como sinônimo de bucket policy. Ele dá permissão fina por tabela, coluna e linha sobre o catálogo, coisa que política de S3 não expressa.
+- Anexar policy larga na role do job para destravar o deploy. Menor privilégio é requisito em banco, e a banca pergunta como você restringiria depois.
+- Guardar arquivo pequeno demais no S3. Milhares de arquivos de poucos KB destroem a performance do Athena e do Spark por sobrecarga de listagem e abertura.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Uma consulta no Athena custou caro. O que você olha primeiro?
+
+Olho quantos bytes ela varreu, porque a cobrança padrão do Athena é por volume de dados lidos, não por tempo. O histórico de execução dá esse número, e ele já indica se o problema é a consulta ou o dado. A primeira hipótese é ausência de poda de partição: ou a tabela não está particionada pela coluna filtrada, ou a partição existe no S3 mas não foi registrada no catálogo, e aí o motor lê o prefixo inteiro. A segunda é formato: CSV ou JSON obrigam a ler tudo, enquanto Parquet comprimido permite ler só as colunas necessárias, o que só funciona se a consulta projetar colunas em vez de usar SELECT estrela. Depois olho tamanho de arquivo, porque milhares de arquivos pequenos custam em latência. Se ainda assim o custo for alto e a consulta for recorrente e previsível, aí discuto materializar uma tabela agregada ou levar a carga para o Redshift, que é o trade-off entre pagar por varredura e pagar por cluster.
+
+### Desenhe o pipeline na AWS para levar as transações de cartão do core até um painel de fraude, dizendo qual serviço faz o quê e como você trata segurança.
+
+Eu partiria de CDC no core, com DMS ou Debezium, publicando os eventos em Kinesis ou Kafka para não consultar as tabelas transacionais. A camada de persistência é o S3, organizado por zona, domínio, tabela e partição por data, com lifecycle levando o bruto para classes mais baratas conforme envelhece. A transformação eu faria em Spark, no Databricks ou em Glue jobs, gravando tabelas Delta com MERGE, e registraria os metadados no Glue Data Catalog para que Athena e Redshift Spectrum leiam a mesma definição. A orquestração fica no Airflow ou em Step Functions, dependendo de quanto o fluxo sai do perímetro AWS. Para segurança, cada job assume uma role própria com policy restrita ao prefixo e às ações que ele usa, criptografia com KMS, e a permissão de leitura analítica passa por Lake Formation, que me deixa esconder CPF por coluna em vez de duplicar tabela mascarada. O painel consulta a camada gold, nunca a raw.
+
+---
+
+# Redshift e a camada de consumo analítico
+
+Trilha: Engenharia de Analytics · Módulo: AWS
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/aws/redshift-e-consumo-analitico/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** O data warehouse visto por quem entrega número para o negócio: por que o armazenamento colunar muda tudo, como chave de distribuição e de ordenação decidem o desempenho, quando usar Spectrum para ler o lake, e como o QuickSight consome o que você modelou.
+
+**Por que cai na prova.** Na sabatina de Analytics, a pergunta não é o que é Redshift: é por que a sua consulta demora e o que você faria. Chave de distribuição errada é a resposta certa na maioria das vezes, e quem não sabe explicar embaralhamento entre nós não consegue defender nenhuma escolha de modelagem.
+
+**Como o entrevistador pergunta.** "Uma consulta que junta fato e dimensão ficou lenta depois que a tabela cresceu. O que você investiga?"
+
+## Em uma frase
+
+O Redshift é **colunar e paralelo**: o que decide o desempenho não é índice, é
+**onde cada linha mora** (distribuição), **em que ordem** (ordenação) e
+**quanto dado a consulta precisa ler**.
+
+## Por que colunar muda a conversa
+
+Num banco por linha, ler um registro é ler tudo dele junto — ótimo para
+cadastro. Num banco colunar, cada coluna é guardada separada: uma consulta que
+soma valor por mês lê **duas colunas** de milhões de linhas, e não as linhas
+inteiras. Some a isso que valores parecidos ficam vizinhos e comprimem muito
+melhor, e você tem a razão de relatórios voarem e cadastros sofrerem.
+
+É por isso que a otimização muda de vocabulário: índice por linha perde sentido,
+e entram distribuição e ordenação.
+
+## As duas decisões que decidem o tempo
+
+<Comparativo
+  colunas={["Estilo de distribuição", "O que faz", "Quando usar"]}
+  linhas={[
+    ["KEY", "Linhas com o mesmo valor da chave vão para o mesmo nó", "Tabelas grandes que se juntam sempre pela mesma coluna"],
+    ["ALL", "A tabela inteira é replicada em todos os nós", "Dimensão pequena e estável que entra em quase toda consulta"],
+    ["EVEN", "Espalha por rodízio, sem critério", "Tabela que não participa de junção relevante"],
+    ["AUTO", "O serviço escolhe e ajusta com o tempo", "Padrão razoável quando o padrão de consulta ainda não é claro"]
+  ]}
+/>
+
+<Termo nome="chave de distribuição">Coluna que decide em qual nó cada linha fica. Quando duas tabelas grandes se juntam pela mesma coluna e estão distribuídas por ela, a junção acontece dentro de cada nó, sem tráfego de rede.</Termo>
+
+<Termo nome="chave de ordenação">Coluna pela qual os blocos ficam ordenados. O cluster guarda o mínimo e o máximo de cada bloco e descarta blocos inteiros que não atendem ao filtro.</Termo>
+
+<Callout tipo="atencao" titulo="O sintoma que você vai ouvir">
+"A consulta ficou lenta depois que a tabela cresceu" quase sempre é
+**redistribuição entre nós** numa junção. A resposta que impressiona não é
+"aumento o cluster": é olhar o plano de execução, alinhar as chaves de
+distribuição e conferir se a chave de ordenação cobre o filtro mais comum.
+</Callout>
+
+## Spectrum: o warehouse lendo o lake
+
+<Termo nome="Redshift Spectrum">Consulta arquivos no S3 direto do cluster, sem carregá-los, cobrando por dado lido. Permite juntar tabela interna com histórico externo na mesma consulta.</Termo>
+
+O desenho que a sabatina espera: **quente dentro, frio fora**. Meses recentes
+em tabelas internas, modeladas para as consultas que existem; histórico em
+Parquet particionado no S3, consultável por Spectrum. Você para de pagar
+armazenamento de warehouse por dado que ninguém lê, sem tirar o acesso de
+ninguém.
+
+O trade-off precisa ser dito: consulta externa é mais lenta e cobra por dado
+lido, então **formato colunar e particionamento deixam de ser detalhe e viram
+requisito**.
+
+## A camada que o negócio vê
+
+<Termo nome="QuickSight">Ferramenta de BI da AWS. Conecta a Redshift, Athena, S3 e bancos, e tem o SPICE, um motor em memória que guarda uma cópia do conjunto para o painel responder sem consultar a origem a cada clique.</Termo>
+
+O SPICE resolve o painel lento e cria uma pergunta que o engenheiro de
+analytics precisa saber responder: **de que momento é esse número?** Ele é do
+último refresh, não de agora. É a mesma conversa de Source of Record e Source
+of Truth, aplicada à ferramenta.
+
+<Callout tipo="dica" titulo="Modelagem não some no colunar">
+Warehouse colunar rende com **poucas junções e grão bem definido**. Normalizar
+como se fosse um sistema transacional devolve a lentidão que a compressão tinha
+resolvido. Fato e dimensão existem exatamente por isso.
+</Callout>
+
+## Como responder isso em voz alta
+
+Para qualquer pergunta de lentidão: **plano de execução** primeiro, para ver
+se há redistribuição; **chaves de distribuição** alinhadas com a junção;
+**chave de ordenação** cobrindo o filtro; e só então capacidade. Para custo:
+**separar quente de frio**, com Spectrum sobre Parquet particionado. Quem
+começa por "aumento o cluster" está oferecendo a solução mais cara antes de
+entender o problema.
+
+## Erros comuns
+
+- Tratar o Redshift como um banco relacional maior. Ele é colunar e massivamente paralelo: a otimização que importa é distribuição e ordenação entre nós, não índice por linha.
+- Deixar a distribuição no padrão para tabelas grandes que se juntam. Chaves mal escolhidas fazem o dado atravessar a rede entre nós a cada junção, e é isso que aparece como lentidão.
+- Usar distribuição ALL numa tabela grande. Replicar em todos os nós só compensa para dimensão pequena e estável; numa tabela grande, multiplica armazenamento e o custo de carga.
+- Achar que Spectrum substitui a carga. Ele lê direto do S3, o que é ótimo para dado frio ou eventual; consulta frequente e sensível a desempenho continua melhor dentro do cluster.
+- Esquecer a chave de ordenação. Sem ela, filtros por data varrem blocos que poderiam ser descartados; é o ganho mais barato numa tabela de fato.
+- Modelar no Redshift como se fosse OLTP, normalizando tudo. Junção demais em colunar custa caro; a modelagem dimensional existe por isso.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Uma consulta que junta a tabela de fato de transações com a de clientes ficou lenta depois que o volume cresceu. Como você investiga e o que provavelmente encontra?
+
+Eu começo olhando o plano de execução para ver se há redistribuição de dados entre os nós, porque em arquitetura massivamente paralela é isso que costuma dominar o tempo. Se as duas tabelas estão distribuídas por chaves diferentes, cada junção obriga o cluster a mandar linhas de um nó para outro pela rede, e o tempo cresce com o volume, exatamente como descrito. A correção é distribuir as duas pela coluna da junção, no caso o identificador do cliente, de forma que as linhas correspondentes já nasçam no mesmo nó. Se a tabela de clientes for pequena, uma alternativa melhor é distribuição ALL, replicando ela em todos os nós, o que elimina o tráfego sem custo relevante de espaço. Em paralelo eu olho a chave de ordenação da tabela de fato: se a consulta filtra por data e a tabela não está ordenada por data, estamos varrendo blocos que poderiam ser descartados. O que eu não faço de primeira é aumentar o cluster, porque isso mascara o problema e multiplica a conta todo mês.
+
+### O time quer manter cinco anos de histórico disponível para consulta, mas o custo do cluster está alto. Que arquitetura você propõe?
+
+Eu separaria o dado quente do frio. Os últimos meses, que são consultados todo dia e sustentam os painéis, ficam em tabelas internas do cluster, modeladas com distribuição e ordenação pensadas para as consultas que existem. O histórico mais antigo vai para o S3 em Parquet, particionado por data, e continua consultável por Spectrum a partir do mesmo cluster, inclusive em junção com as tabelas internas. Assim eu paro de pagar armazenamento de warehouse por dado que quase ninguém lê, e o analista não perde o acesso: a consulta é a mesma, muda só onde o dado mora. O trade-off que eu declaro é desempenho: consulta em Spectrum é mais lenta e cobrada por dado lido, então particionamento e formato colunar deixam de ser detalhe e viram requisito. Também combinaria uma regra de ciclo de vida para o histórico bem antigo migrar para uma classe de armazenamento mais fria, já que a consulta dele é rara e tolera espera.
+
+---
+
+# Relacional e NoSQL: ACID, BASE e a escolha real
+
+Trilha: Engenharia de Analytics · Módulo: Banco de dados
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/relacional-vs-nosql-e-consistencia/
+Tempo estimado: 35 minutos · Nível: fundamental
+
+**Resumo.** A pergunta de fundamento que a banca usa para testar critério: o que ACID garante e o que se abre mão em BASE, o que o teorema CAP realmente diz, as famílias de NoSQL e por que a resposta quase nunca é 'NoSQL é melhor' nem 'relacional é seguro'.
+
+**Por que cai na prova.** É o tema em que se vê se a pessoa decide por moda ou por requisito. A banca pergunta 'quando você usaria NoSQL' esperando ouvir padrão de acesso, escala e tolerância a inconsistência temporária, não 'quando o dado não tem esquema'. Erro comum é explicar CAP errado, dizendo que se escolhe duas das três.
+
+**Como o entrevistador pergunta.** "Quando você usaria um banco NoSQL em vez de um relacional, e o que perderia?"
+
+## Em uma frase
+
+A escolha não é entre "antigo" e "moderno": é entre **impor correção a cada
+instante** (ACID, relacional) e **priorizar disponibilidade aceitando
+convergência** (BASE, muitos NoSQL) — e ela se faz por requisito, às vezes por
+operação.
+
+## ACID, letra por letra
+
+<Comparativo
+  colunas={["Letra", "Garante", "Exemplo do que quebra sem ela"]}
+  linhas={[
+    ["Atomicidade", "Tudo ou nada", "Débito sai e crédito não entra"],
+    ["Consistência", "Estado válido antes e depois, pelas regras do banco", "Pedido apontando para cliente que não existe"],
+    ["Isolamento", "Transações simultâneas não veem estados intermediários", "Dois saques leem o mesmo saldo e ambos passam"],
+    ["Durabilidade", "O confirmado sobrevive a queda", "Servidor cai e a confirmação some"]
+  ]}
+/>
+
+<Termo nome="BASE">Basically Available, Soft state, Eventually consistent. Prioriza responder sempre, aceitando que as réplicas fiquem temporariamente diferentes e convirjam depois.</Termo>
+
+Não é ausência de garantia: é **outra** garantia. Para um contador de
+visualizações, convergir em segundos é irrelevante. Para uma transferência, é
+inaceitável. O critério é o dano que a janela de inconsistência causa.
+
+## O teorema CAP, sem a versão errada
+
+A frase popular — "escolha duas entre consistência, disponibilidade e
+tolerância a partição" — engana. Em sistema distribuído, **partição de rede
+acontece**: cabo cai, zona fica inalcançável. Tolerância a partição não é
+escolha, é condição.
+
+A escolha real aparece **durante** a partição:
+
+<Passos itens={[
+  "O sistema continua respondendo, arriscando devolver dado desatualizado (prioriza disponibilidade).",
+  "Ou recusa a operação para não violar a consistência (prioriza consistência).",
+  "Fora da partição, os dois caminhos podem oferecer consistência forte; a diferença é o comportamento no incidente."
+]} />
+
+<Callout tipo="atencao" titulo="A repergunta que derruba">
+Se você disser "escolhe duas das três", a banca pergunta: "e um sistema que
+abre mão de tolerância a partição, como ele funciona?" A resposta honesta é
+que ele não é distribuído. Formular pela partição evita a armadilha e mostra
+que você entendeu, não decorou.
+</Callout>
+
+## As famílias, e o que cada uma resolve
+
+<Comparativo
+  colunas={["Família", "Modelo", "Padrão de acesso que ela serve"]}
+  linhas={[
+    ["Chave-valor", "Chave aponta para um valor opaco", "Buscar por identificador conhecido, em escala e baixa latência"],
+    ["Documento", "JSON com campos indexáveis", "Entidade completa lida junta, com atributos que variam"],
+    ["Colunar largo", "Linhas com colunas dinâmicas por família", "Escrita altíssima com leitura por faixa de chave"],
+    ["Grafo", "Nós e arestas", "Percorrer relacionamentos a várias profundidades"]
+  ]}
+/>
+
+O erro de vocabulário mais comum: **"NoSQL não tem esquema"**. O esquema
+existe; ele só não é imposto pelo banco. Passa a viver no código e nos dados —
+e, sem governança, vira esquema implícito e inconsistente, que é pior que o
+declarado.
+
+## Quando trocar de paradigma
+
+Três condições juntas, não uma:
+
+1. **Padrão de acesso conhecido e estável.** Em NoSQL você modela a partir da
+   consulta. Sem saber como vai ler, a escolha de chave é chute.
+2. **Escala que justifica.** Relacional escala bem verticalmente e com réplicas
+   de leitura; nem todo problema de volume exige mudar de família.
+3. **Tolerância a consistência eventual** naquele dado específico.
+
+O que se abre mão é o que o relacional **impõe por você**: junção eficiente,
+integridade referencial, transação entre entidades, consulta ad hoc que
+ninguém previu. Isso não desaparece — migra para a aplicação.
+
+<Callout tipo="dica" titulo="O que isso muda para quem entrega número">
+Consistência eventual significa que uma réplica pode estar atrasada. Antes de
+afirmar que dois relatórios divergem, confira **de que momento** é cada
+leitura. É a mesma conversa de carimbo de corte, agora na camada do banco.
+</Callout>
+
+## Como responder isso em voz alta
+
+Comece pelo requisito, não pelo rótulo: **o que precisa ser atômico**, **como
+o dado é lido**, **quanto de atraso causa dano**. Dê um exemplo que atende e
+um que não atende. E formule o CAP pela partição — é o detalhe que separa quem
+entendeu de quem repetiu.
+
+## Erros comuns
+
+- Dizer que o teorema CAP permite escolher duas das três propriedades. Em sistema distribuído, partição de rede acontece; a escolha real é entre consistência e disponibilidade quando ela ocorre.
+- Achar que NoSQL significa 'sem esquema'. Significa que o esquema não é imposto pelo banco; ele continua existindo, e passa a ser responsabilidade da aplicação e da governança.
+- Tratar BASE como ausência de garantias. É um conjunto diferente: disponibilidade em primeiro lugar e consistência que converge com o tempo, o que é adequado para muitos casos e inadequado para transferência de dinheiro.
+- Escolher NoSQL por volume sem olhar o padrão de acesso. O ganho vem de conhecer a consulta antes de modelar; sem isso, o mesmo volume vira consulta cara e varredura.
+- Esquecer que bancos relacionais escalam bem verticalmente e com réplicas de leitura. Nem todo problema de escala exige trocar de paradigma.
+- Dizer que relacional não serve para JSON. Postgres e outros tratam JSON com índices há anos; a escolha é de padrão de acesso e escala, não de formato.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Quando você usaria um banco NoSQL em vez de um relacional, e o que estaria abrindo mão?
+
+Eu uso NoSQL quando três coisas são verdadeiras ao mesmo tempo. Primeiro, o padrão de acesso é conhecido e estável, porque em NoSQL a modelagem parte da consulta: eu escolho a chave sabendo como vou ler. Segundo, a escala de leitura ou escrita é alta o suficiente para que escalar horizontalmente seja mais barato que escalar um relacional com réplicas. Terceiro, aquele dado tolera consistência eventual, ou seja, ver um valor com alguns segundos de atraso não causa dano. Um carrinho de compras lido pela chave do usuário atende aos três; uma transferência entre contas não atende ao terceiro. O que eu abro mão é do que o banco relacional impõe por mim: junção eficiente, integridade referencial, transação entre entidades e consulta ad hoc que ninguém previu. Essas coisas passam a ser responsabilidade da aplicação, e é aí que o custo aparece, não na infraestrutura. Por isso eu desconfio de decisão tomada por volume sozinho: volume grande com padrão de acesso desconhecido não vira NoSQL bom, vira varredura cara.
+
+### Explique o teorema CAP e o que ele significa na prática para uma equipe que opera um banco distribuído.
+
+A formulação que se ouve por aí, de escolher duas entre consistência, disponibilidade e tolerância a partição, é enganosa. Em um sistema distribuído, partição de rede vai acontecer: cabo cai, zona fica inalcançável. Então tolerância a partição não é uma escolha, é uma condição. A escolha real aparece no momento da partição: ou o sistema continua respondendo, arriscando devolver dado desatualizado, ou ele recusa a operação para não violar a consistência. Na prática, para uma equipe, isso vira uma decisão por caso de uso, e muitas vezes por operação, porque bancos modernos permitem escolher: eu posso ler com consistência forte no saldo e com consistência eventual no catálogo, no mesmo banco. O que a equipe precisa ter é isso escrito, junto com o que a aplicação faz quando a leitura vem atrasada. Sem essa decisão explícita, o comportamento na partição vira surpresa, e surpresa em produção durante incidente é o pior momento para descobrir qual dos dois o sistema escolheu.
+
+---
+
+# SQL para engenharia de dados
+
+Trilha: Engenharia de Analytics · Módulo: Banco de dados
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/
+Tempo estimado: 40 minutos · Nível: intermediario
+
+**Resumo.** O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
+
+**Por que cai na prova.** SQL é o único tema em que a banca pode pedir para você escrever ou descrever a consulta na hora. É teste de fluência: quem hesita entre ROW_NUMBER e GROUP BY entrega que usa SQL só para conferir resultado, não para transformar dado.
+
+**Como o entrevistador pergunta.** "Como você pegaria a última transação de cada conta?"
+
+## Em uma frase
+
+O SQL que a sabatina cobra é o de **transformação**: anti-join, CTE, window
+function, leitura de plano — e saber que o SQL analítico sobre arquivos joga com
+regras diferentes do SQL transacional sobre índice.
+
+## Join, anti-join e o perigo do NOT IN
+
+Anti-join é "traga o que não tem correspondência". Duas formas seguras e uma
+armadilha:
+
+```sql
+-- Forma canônica: NOT EXISTS
+SELECT c.id_conta
+FROM contas c
+WHERE NOT EXISTS (
+  SELECT 1 FROM transacoes t WHERE t.id_conta = c.id_conta
+);
+
+-- Equivalente: LEFT JOIN com IS NULL
+SELECT c.id_conta
+FROM contas c
+LEFT JOIN transacoes t ON t.id_conta = c.id_conta
+WHERE t.id_transacao IS NULL;
+```
+
+<Callout tipo="erro" titulo="Por que NOT IN quebra">
+Se a subconsulta devolver um único NULL, a comparação vira desconhecida para
+toda linha e a consulta retorna **vazio**, sem erro nenhum. É falha silenciosa,
+e a banca gosta de perguntar exatamente isso.
+</Callout>
+
+## Agregação e HAVING
+
+WHERE filtra **linha** antes da agregação. HAVING filtra **grupo** depois dela.
+"Clientes com mais de 50 transações no mês" precisa de HAVING, porque a contagem
+só existe depois do GROUP BY.
+
+## CTE no lugar de subquery aninhada
+
+CTE nomeia o passo. Três subqueries aninhadas obrigam a leitura de dentro para
+fora; a mesma lógica em CTE se lê na ordem em que foi pensada, e cada bloco pode
+ser executado isolado durante a depuração. Em consulta de pipeline, isso vale
+mais do que qualquer ganho de performance — o otimizador costuma produzir o
+mesmo plano.
+
+## Window functions: o coração do tema
+
+<Termo nome="window function">Função que calcula um valor por linha olhando um conjunto de linhas relacionadas (a janela), sem colapsar o resultado como o GROUP BY faz.</Termo>
+
+```sql
+-- Deduplicar / última transação por conta
+WITH ordenadas AS (
+  SELECT t.*,
+         ROW_NUMBER() OVER (
+           PARTITION BY id_conta
+           ORDER BY data_transacao DESC, id_transacao DESC
+         ) AS rn
+  FROM transacoes t
+)
+SELECT * FROM ordenadas WHERE rn = 1;
+
+-- Variação em relação à transação anterior
+SELECT id_conta, data_transacao, valor,
+       valor - LAG(valor) OVER (PARTITION BY id_conta ORDER BY data_transacao) AS variacao
+FROM transacoes;
+
+-- Gasto acumulado no mês
+SELECT id_conta, data_transacao, valor,
+       SUM(valor) OVER (
+         PARTITION BY id_conta ORDER BY data_transacao
+         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+       ) AS acumulado
+FROM transacoes;
+```
+
+<Comparativo
+  colunas={["Função", "Em caso de empate", "Uso típico"]}
+  linhas={[
+    ["ROW_NUMBER", "Desempata arbitrariamente, nunca repete", "Deduplicar, pegar a linha mais recente"],
+    ["RANK", "Repete o número e pula as posições seguintes", "Ranking em que o buraco é informativo"],
+    ["DENSE_RANK", "Repete o número e não pula", "Top N por categoria mantendo empates"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Janela não se filtra no WHERE">
+A window function é avaliada **depois** de WHERE e GROUP BY. Envolva numa CTE e
+filtre fora, ou use `QUALIFY` — que existe em Databricks SQL, Snowflake e
+BigQuery, mas não em Spark SQL puro.
+</Callout>
+
+```sql
+-- Mesma dedupe, com QUALIFY
+SELECT *
+FROM transacoes
+QUALIFY ROW_NUMBER() OVER (PARTITION BY id_transacao ORDER BY data_ingestao DESC) = 1;
+```
+
+## Ler o plano de execução
+
+`EXPLAIN` mostra o que o motor pretende fazer. O que procurar, em ordem:
+
+<Passos itens={[
+  "Varredura completa onde deveria haver poda de partição — quase sempre é filtro com função aplicada sobre a coluna particionada.",
+  "Estratégia de join escolhida: broadcast, sort-merge ou hash, e se ela faz sentido para o tamanho dos lados.",
+  "Estimativa de linhas muito distante do real, sinal de estatística desatualizada.",
+  "Ordenação ou agregação que você não pediu, geralmente induzida por DISTINCT ou por window mal escrita.",
+  "Ordem dos joins: filtrar cedo e juntar tarde costuma valer mais que qualquer hint."
+]} />
+
+## Índice: quando ajuda e quando atrapalha
+
+Ajuda em consulta **seletiva por chave** — cadastro por CPF, transação por id.
+Atrapalha em tabela com escrita intensa, porque cada INSERT mantém a estrutura,
+e quando a consulta lê boa parte da tabela, caso em que a varredura sequencial
+sai mais barata que o acesso aleatório.
+
+## SQL analítico não é SQL transacional
+
+<Comparativo
+  colunas={["Aspecto", "OLTP (Postgres, core bancário)", "Analítico (Spark SQL, Athena)"]}
+  linhas={[
+    ["Unidade de acesso", "Linha, via índice", "Arquivo e coluna, via varredura podada"],
+    ["Otimização principal", "Índice e estatística de coluna", "Particionamento, ordenação, poda por estatística do Parquet"],
+    ["Custo dominante", "Busca aleatória em disco", "Leitura de dados e shuffle na rede"],
+    ["Atualização", "UPDATE e DELETE por linha, transacional", "Reescrita de arquivo; MERGE só com formato de tabela como Delta"],
+    ["Transação", "ACID multi-tabela", "ACID por tabela, quando há Delta ou Iceberg"]
+  ]}
+/>
+
+Dizer isso em voz alta muda o tom da resposta: você não está usando "o mesmo
+SQL num lugar maior", está usando uma linguagem parecida sobre um motor com
+outra física de custo.
+
+## Erros comuns
+
+- Usar NOT IN com subconsulta que pode retornar NULL. Um único NULL faz a condição virar desconhecida e o resultado volta vazio. NOT EXISTS não tem esse problema.
+- Achar que GROUP BY resolve 'a última transação de cada conta'. GROUP BY colapsa a linha e você perde as outras colunas; o certo é ROW_NUMBER particionado pela conta.
+- Filtrar window function no WHERE. A janela é avaliada depois do WHERE; ou você envolve numa CTE e filtra fora, ou usa QUALIFY onde o motor suporta.
+- Confundir RANK com DENSE_RANK e com ROW_NUMBER. Em empate, ROW_NUMBER desempata arbitrariamente, RANK pula posições e DENSE_RANK não pula.
+- Pedir índice para tabela analítica em Parquet. Em Spark SQL e Athena não existe índice como no OLTP; o que ganha é particionamento, ordenação de arquivos e poda por estatística.
+- Empilhar subquery aninhada onde uma CTE resolveria. Além de ilegível, dificulta reaproveitar o mesmo bloco e conversar sobre o plano com outra pessoa.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Como você pegaria a última transação de cada conta? Descreva a consulta e diga por que não usa GROUP BY.
+
+Eu uso window function. Numa CTE, faço ROW_NUMBER particionado por id_conta e ordenado por data_transacao descendente, e fora da CTE filtro pela numeração igual a um. Não uso GROUP BY porque a agregação colapsa o grupo: eu conseguiria o MAX da data, mas perderia valor, estabelecimento e canal daquela linha, e precisaria de um segundo join com a mesma tabela para recuperá-los, o que custa outra leitura e outro shuffle. Um detalhe que eu cuidaria é o desempate: se duas transações tiverem exatamente o mesmo timestamp, ROW_NUMBER escolhe uma arbitrariamente, então eu acrescento o id_transacao como segundo critério de ordenação para o resultado ser determinístico e o reprocessamento dar sempre o mesmo dado. Em Databricks eu escreveria isso com QUALIFY, que dispensa a CTE; em Spark SQL puro, mantenho a CTE.
+
+### Uma consulta que roda em 2 segundos no ambiente de desenvolvimento leva 8 minutos em produção sobre a tabela real de transações. Como você investiga?
+
+Começo pelo volume: dev costuma ter amostra, então o primeiro fato a estabelecer é quantas linhas cada lado realmente lê. Depois abro o plano com EXPLAIN e procuro quatro coisas: se há varredura completa onde deveria haver poda por partição, qual estratégia de join foi escolhida, se a estimativa de linhas está muito longe do real, e se apareceu ordenação ou agregação que eu não pedi. O suspeito número um em tabela de transações é filtro que não usa a coluna de partição, por exemplo filtrar por uma data derivada com função em cima da coluna, o que impede a poda. O segundo é join com tabela pequena que não virou broadcast. Corrijo o filtro para bater na coluna particionada, confiro estatísticas e, se ainda estiver lento, olho distribuição da chave de join para descartar concentração num punhado de contas. Só mexo em configuração depois de entender o plano.
+
+---
+
+# Modelagem de dados
+
+Trilha: Engenharia de Analytics · Módulo: Banco de dados
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
+
+**Por que cai na prova.** Modelagem é onde a banca vê se você pensa antes de escrever pipeline. Perguntar o grão de um fato é o teste mais rápido para saber se a pessoa já modelou de verdade ou só consumiu tabela pronta.
+
+**Como o entrevistador pergunta.** "Modele o fato de transações de cartão: qual é o grão?"
+
+## Em uma frase
+
+Modelagem de dados é decidir **o que uma linha representa** e como o contexto se
+liga a ela — normalizando quando a carga é transacional, dimensionalizando
+quando a carga é analítica.
+
+## 3NF serve ao OLTP
+
+Normalizar até a terceira forma normal elimina redundância e dependência
+transitiva: cada fato fica em um lugar só, e atualizar o nome de um
+estabelecimento muda uma linha. Isso é exatamente o que um core bancário
+precisa, onde a escrita é constante e a integridade por linha é o produto.
+
+O preço é junção. Uma consulta analítica que atravesse oito tabelas
+normalizadas paga oito joins, e num motor distribuído cada join é um candidato a
+shuffle.
+
+## Modelagem dimensional de Kimball
+
+### Comece pelo grão
+
+<Termo nome="grão">A frase que define o que uma linha da tabela fato representa. "Uma linha por autorização de cartão" é um grão; "dados de cartão" não é.</Termo>
+
+Declarar o grão primeiro não é formalidade. Ele determina quais dimensões são
+aplicáveis, quais medidas são aditivas e qual teste de unicidade prova que a
+carga está certa. Modelo que começa pela lista de colunas quase sempre produz
+**grão misto** — linhas de transação convivendo com linhas de agregado mensal — e
+o erro só aparece quando alguém soma tudo e o número dobra.
+
+Prefira o grão atômico. Do evento você deriva qualquer agregado; do agregado
+você não recupera o evento.
+
+### Fato e dimensão
+
+<Comparativo
+  colunas={["", "Tabela fato", "Tabela dimensão"]}
+  linhas={[
+    ["Guarda", "Evento mensurável e chaves de dimensão", "Contexto descritivo"],
+    ["Tamanho", "Cresce sem parar", "Pequena e relativamente estável"],
+    ["Exemplo", "Transação de cartão, transferência PIX", "Cliente, conta, estabelecimento, data"],
+    ["Uso na consulta", "Somar, contar, medir", "Filtrar e agrupar"]
+  ]}
+/>
+
+Três tipos de fato aparecem sempre em banco: **transacional** (uma linha por
+evento), **snapshot periódico** (saldo da conta no fim de cada dia) e **snapshot
+acumulado** (a proposta de crédito, atualizada a cada etapa). Saldo é medida
+semiaditiva: soma entre contas, não soma ao longo do tempo — dizer isso rende
+ponto.
+
+### Star, snowflake e dimensão conformada
+
+Star mantém cada dimensão numa tabela desnormalizada, com redundância assumida.
+Snowflake quebra a dimensão em níveis. A economia de espaço do snowflake é
+pequena e o custo em joins é real, então o padrão é star, com snowflake apenas
+onde a hierarquia é grande e volátil.
+
+**Dimensão conformada** é a mesma dimensão, com a mesma definição e as mesmas
+chaves, compartilhada por vários fatos. É o que permite pôr receita de cartão e
+receita de crédito lado a lado por cliente e por mês. Sem ela, cada área traz o
+seu "cliente" e o painel não fecha.
+
+## SCD: o que fazer quando a dimensão muda
+
+O cliente muda de endereço. Três respostas possíveis:
+
+<Comparativo
+  colunas={["Tipo", "O que faz", "Quando usar"]}
+  linhas={[
+    ["Tipo 1", "Sobrescreve o valor antigo, sem histórico", "Correção de erro de digitação, atributo que o negócio não analisa no tempo"],
+    ["Tipo 2", "Encerra a versão vigente e insere uma nova linha com nova chave substituta", "Atributo que o negócio precisa analisar historicamente: região, segmento, faixa de risco"],
+    ["Tipo 3", "Guarda o valor anterior numa coluna paralela", "Um único nível de histórico, típico de reclassificação pontual"]
+  ]}
+/>
+
+Como se implementa o tipo 2, na prática:
+
+<Passos itens={[
+  "A dimensão ganha chave substituta (surrogate), além da chave natural do cliente.",
+  "Ganha também data de início de vigência, data de fim e uma flag de versão corrente.",
+  "Na carga, comparam-se os atributos monitorados com a versão vigente; se algum mudou, a linha atual recebe data de fim e a flag cai.",
+  "Insere-se uma nova linha com nova chave substituta, data de início igual à data da mudança e fim em aberto.",
+  "Na carga do fato, a chave de dimensão é resolvida por busca com faixa de vigência: a versão que valia na data do evento."
+]} />
+
+<Callout tipo="atencao" titulo="O erro que anula o tipo 2">
+Ligar o fato pela chave natural do cliente. Se você fizer isso, toda transação
+histórica passa a enxergar os atributos atuais — que é exatamente o problema que
+o tipo 2 existia para resolver.
+</Callout>
+
+## Data Vault, em resumo
+
+Três construções: **hub** guarda a chave de negócio, **link** guarda o
+relacionamento entre hubs, **satellite** guarda os atributos descritivos com
+histórico e origem. O modelo é feito para integrar e auditar, não para
+consumir.
+
+Faz sentido quando há muitas fontes heterogêneas, exigência forte de
+rastreabilidade e regras de negócio ainda em movimento. O padrão é usar Data
+Vault na integração e derivar um star schema para o consumo. Num banco isso
+aparece quando cadastro, cartões, crédito e canais digitais têm noções
+diferentes de "cliente" e ninguém quer congelar uma delas cedo demais.
+
+## One Big Table no Lakehouse
+
+Com armazenamento colunar e poda de coluna, muita gente desiste do join e
+publica o fato já desnormalizado, com os atributos das dimensões embutidos. A
+consulta fica trivial e rápida.
+
+O trade-off é manutenção: quando a definição de um atributo muda, você reescreve
+histórico em vez de atualizar uma dimensão pequena; e a regra de negócio deixa
+de ter um lugar único onde mora. Use OBT como **camada de consumo** derivada de
+um modelo dimensional, não como substituta dele.
+
+## Erros comuns
+
+- Começar pela lista de colunas em vez do grão. Sem declarar o grão, você não consegue decidir o que é medida, o que é dimensão e nem validar duplicidade depois.
+- Normalizar o modelo analítico até 3NF. Cada junção a mais custa leitura e shuffle; o modelo dimensional troca redundância controlada por velocidade e clareza.
+- Chamar de star um modelo com dimensão em vários níveis. Se a dimensão está quebrada em subtabelas, é snowflake, e você precisa justificar a escolha.
+- Usar SCD tipo 1 onde o negócio precisa de histórico. Sobrescrever o endereço do cliente reescreve o passado: a análise de risco por região do ano anterior muda sozinha.
+- Ligar o fato à chave natural do cliente numa dimensão SCD tipo 2. A chave tem que ser a substituta da versão vigente na data do evento, senão o histórico não fecha.
+- Adotar One Big Table por padrão. Ela é ótima para consulta e péssima para manter regra de negócio única; o custo aparece na terceira mudança de definição.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Modele o fato de transações de cartão. Comece pelo grão.
+
+O grão é uma linha por autorização de cartão. Escolho o evento atômico porque qualquer agregação por cliente, mês ou estabelecimento é derivável dele, e o caminho inverso não existe. As medidas são valor da transação, valor em moeda original e taxa de intercâmbio; valor é aditivo em todas as dimensões, o que facilita. As chaves de dimensão são cliente, conta, cartão, estabelecimento, bandeira, canal, data e hora, mais a moeda. Guardo o identificador da autorização como dimensão degenerada dentro do próprio fato, porque não faz sentido uma tabela só para ele. Cliente e conta eu trato como SCD tipo 2, então o fato aponta para a chave substituta da versão vigente na data da transação. Para validar o grão, testo unicidade pela chave de autorização mais a data: se duplicar, ou o grão está errado ou a ingestão não é idempotente.
+
+### O cliente mudou de endereço. Como você trata isso na dimensão cliente e por quê?
+
+Depende do que o negócio precisa enxergar. Se ninguém analisa endereço no tempo, tipo 1 resolve: sobrescrevo e pronto, é barato e a dimensão não cresce. Mas em banco isso raramente se sustenta, porque risco e prevenção a fraude analisam concentração por região, e sobrescrever reescreve o passado. Então uso tipo 2: encerro a linha vigente preenchendo a data de fim e a flag de corrente, e insiro uma nova linha com nova chave substituta, nova data de início e fim em aberto. O fato passa a apontar para a chave substituta da versão vigente na data do evento, resolvida por busca com faixa de vigência durante a carga. O custo é dimensão maior e carga mais complexa, e todo mundo que consulta precisa saber que existe mais de uma linha por cliente. Tipo 3 eu deixaria só para comparar antes e depois de uma reclassificação pontual.
 
 ---
 

@@ -79,6 +79,17 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [Governança de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/big-data/governanca-de-dados/): Governança de dados é o conjunto de políticas, papéis, processos e padrões que fazem o dado ser confiável e usável. Quem responde pelo dado, onde ele está catalogado, de onde ele veio e quem pode vê-lo.
 - [Qualidade de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/big-data/data-quality/): Qualidade de dados é o quanto o dado serve para a decisão que ele sustenta, medido por dimensões: acurácia, completude, consistência, unicidade, atualidade e validade. E, principalmente, o que o pipeline faz quando uma delas falha.
 
+### AWS
+
+- [AWS para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/aws/aws-para-dados/): Os serviços que aparecem num pipeline de dados na AWS e o critério para escolher entre eles: S3, Glue, Athena, EMR, Redshift, Lake Formation, Kinesis, Lambda, Step Functions e o IAM que amarra tudo.
+- [Redshift e a camada de consumo analítico](https://lumarys.com.br/trilhas/engenharia-de-analytics/aws/redshift-e-consumo-analitico/): O data warehouse visto por quem entrega número para o negócio: por que o armazenamento colunar muda tudo, como chave de distribuição e de ordenação decidem o desempenho, quando usar Spectrum para ler o lake, e como o QuickSight consome o que você modelou.
+
+### Banco de dados
+
+- [Relacional e NoSQL: ACID, BASE e a escolha real](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/relacional-vs-nosql-e-consistencia/): A pergunta de fundamento que a banca usa para testar critério: o que ACID garante e o que se abre mão em BASE, o que o teorema CAP realmente diz, as famílias de NoSQL e por que a resposta quase nunca é 'NoSQL é melhor' nem 'relacional é seguro'.
+- [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
+- [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
+
 ## Engenharia de Dados
 
 A ementa oficial de uma carreira de Engenharia de Dados no mercado financeiro, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.

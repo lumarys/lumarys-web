@@ -1,0 +1,243 @@
+---
+slug: redshift-e-consumo-analitico
+titulo: "Redshift e a camada de consumo analítico"
+resumo: "O data warehouse visto por quem entrega número para o negócio: por que o armazenamento colunar muda tudo, como chave de distribuição e de ordenação decidem o desempenho, quando usar Spectrum para ler o lake, e como o QuickSight consome o que você modelou."
+minutos: 35
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "Na sabatina de Analytics, a pergunta não é o que é Redshift: é por que a sua consulta demora e o que você faria. Chave de distribuição errada é a resposta certa na maioria das vezes, e quem não sabe explicar embaralhamento entre nós não consegue defender nenhuma escolha de modelagem."
+comoCai: "Uma consulta que junta fato e dimensão ficou lenta depois que a tabela cresceu. O que você investiga?"
+feynman: "Explique em um minuto por que guardar os dados por coluna, e não por linha, deixa um relatório mais rápido e um cadastro mais lento."
+preRequisitos: ["olap-oltp-etl", "modelagem-de-dados"]
+errosComuns:
+  - "Tratar o Redshift como um banco relacional maior. Ele é colunar e massivamente paralelo: a otimização que importa é distribuição e ordenação entre nós, não índice por linha."
+  - "Deixar a distribuição no padrão para tabelas grandes que se juntam. Chaves mal escolhidas fazem o dado atravessar a rede entre nós a cada junção, e é isso que aparece como lentidão."
+  - "Usar distribuição ALL numa tabela grande. Replicar em todos os nós só compensa para dimensão pequena e estável; numa tabela grande, multiplica armazenamento e o custo de carga."
+  - "Achar que Spectrum substitui a carga. Ele lê direto do S3, o que é ótimo para dado frio ou eventual; consulta frequente e sensível a desempenho continua melhor dentro do cluster."
+  - "Esquecer a chave de ordenação. Sem ela, filtros por data varrem blocos que poderiam ser descartados; é o ganho mais barato numa tabela de fato."
+  - "Modelar no Redshift como se fosse OLTP, normalizando tudo. Junção demais em colunar custa caro; a modelagem dimensional existe por isso."
+preTeste:
+  - enunciado: "Uma junção entre uma tabela de fato grande e outra tabela grande ficou muito lenta no Redshift. Qual é a primeira hipótese a investigar?"
+    alternativas:
+      - texto: "As chaves de distribuição das duas tabelas, que podem estar fazendo o dado trafegar entre os nós a cada junção."
+        correta: true
+        explicacao: "Em arquitetura massivamente paralela, junção entre tabelas distribuídas por chaves diferentes obriga a redistribuir dados pela rede. É a causa mais comum."
+      - texto: "A falta de um índice na coluna de junção."
+        correta: false
+        explicacao: "Redshift não usa índices como um banco por linha; o equivalente funcional é a chave de ordenação e a distribuição."
+      - texto: "O tamanho da instância do cluster."
+        correta: false
+        explicacao: "Pode ajudar, mas aumentar recurso sem corrigir a distribuição é caro e trata o sintoma."
+  - enunciado: "Uma equipe precisa consultar ocasionalmente cinco anos de histórico que já está em Parquet no S3, sem carregar tudo no cluster. Qual recurso usar?"
+    alternativas:
+      - texto: "Redshift Spectrum, que consulta os arquivos no S3 a partir do cluster."
+        correta: true
+        explicacao: "Spectrum lê dados externos no S3 sem carregá-los, que é exatamente o caso de histórico consultado de vez em quando."
+      - texto: "Carregar os cinco anos em tabelas internas."
+        correta: false
+        explicacao: "Paga armazenamento e tempo de carga por dado que é consultado raramente."
+      - texto: "Criar uma réplica de leitura do cluster."
+        correta: false
+        explicacao: "Não resolve o problema de onde o dado está, e o Redshift não trabalha com esse modelo de réplica."
+videos:
+  - id: xDT96bgzJsA
+    publicadoEm: "2023-11-07"
+    titulo: "Conheça os Principais Recursos do AWS Redshift"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 5
+    porQue: "Cinco minutos de panorama por quem trabalha com a ferramenta. Assista para fixar o vocabulário (nós, colunar, Spectrum) antes de entrar nas decisões de modelagem deste tema."
+  - id: 6XB-a6TeZWE
+    publicadoEm: "2026-04-17"
+    titulo: "Amazon Redshift: Gerenciamento de Carga de Trabalho (WLM) e Estilos de Distribuição"
+    canal: "TecnoCert"
+    duracao: 1
+    porQue: "Um minuto, direto nos estilos de distribuição, que é a decisão que mais afeta desempenho. Curto de propósito: é uma revisão, não uma aula."
+artigos:
+  - titulo: "Amazon Redshift best practices for designing tables"
+    url: "https://docs.aws.amazon.com/redshift/latest/dg/c_designing-tables-best-practices.html"
+    fonte: "AWS"
+  - titulo: "Distribution styles"
+    url: "https://docs.aws.amazon.com/redshift/latest/dg/c_choosing_dist_sort.html"
+    fonte: "AWS"
+  - titulo: "Querying external data using Amazon Redshift Spectrum"
+    url: "https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon QuickSight?"
+    url: "https://docs.aws.amazon.com/quicksight/latest/user/welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Por que armazenamento colunar acelera relatório?"
+    verso: "A consulta lê só as colunas pedidas, não a linha inteira, e colunas iguais comprimem muito melhor. Menos bytes lidos do disco é menos tempo."
+  - frente: "Por que colunar é ruim para cadastro?"
+    verso: "Gravar ou alterar uma linha toca várias colunas em lugares diferentes. Carga transacional, com escrita frequente de linhas inteiras, é caso de banco por linha."
+  - frente: "Os estilos de distribuição do Redshift."
+    verso: "KEY: distribui pela coluna escolhida, juntando linhas iguais no mesmo nó. ALL: replica a tabela em todos os nós. EVEN: espalha por rodízio. AUTO: o serviço decide e ajusta."
+  - frente: "Quando usar distribuição KEY?"
+    verso: "Em tabelas grandes que se juntam com frequência pela mesma coluna: distribuir as duas por essa chave evita tráfego entre nós na junção."
+  - frente: "Quando usar distribuição ALL?"
+    verso: "Em dimensão pequena e pouco mutável, que se junta com quase tudo. Replicar em todos os nós elimina o tráfego, ao custo de espaço e de carga mais lenta."
+  - frente: "O que a chave de ordenação faz?"
+    verso: "Mantém os blocos ordenados por essa coluna, e o cluster descarta blocos inteiros que não atendem ao filtro. Em tabela de fato com filtro por data, é o ganho mais barato."
+  - frente: "Redshift Spectrum, em uma linha."
+    verso: "Consulta arquivos no S3 a partir do cluster, sem carregar, cobrando por dado lido. Serve histórico frio e junção do lake com o warehouse."
+  - frente: "O que é WLM no Redshift?"
+    verso: "Gerenciamento de carga de trabalho: filas com memória e concorrência próprias, para consulta pesada de um time não travar o painel do outro."
+  - frente: "Como o formato do arquivo afeta o Spectrum?"
+    verso: "Parquet colunar e particionado reduz drasticamente o dado lido, e o custo vai junto. CSV sem partição lê tudo."
+  - frente: "QuickSight, em uma linha."
+    verso: "Ferramenta de BI da AWS: conecta a Redshift, Athena, S3 e bancos, com o SPICE como camada em memória para o painel responder rápido."
+  - frente: "O que é SPICE?"
+    verso: "Motor em memória do QuickSight que guarda uma cópia do conjunto de dados. Painel responde sem bater no warehouse a cada clique, ao custo de o dado ser do último refresh."
+  - frente: "Onde a modelagem dimensional entra aqui?"
+    verso: "O warehouse colunar rende com poucas junções e grão bem definido. Fato e dimensão existem para isso; normalizar demais devolve a lentidão."
+drills:
+  - titulo: "Qual decisão resolve?"
+    instrucao: "Para cada sintoma, diga a decisão de modelagem ou de arquitetura esperada."
+    opcoes: ["Chave de distribuição", "Chave de ordenação", "Distribuição ALL", "Spectrum", "SPICE"]
+    itens:
+      - enunciado: "Junção entre duas tabelas grandes redistribui dados entre nós toda vez."
+        resposta: "Chave de distribuição"
+        explicacao: "Distribuir as duas pela coluna da junção mantém as linhas correspondentes no mesmo nó."
+      - enunciado: "Consulta filtra sempre pelos últimos 30 dias e ainda assim varre a tabela toda."
+        resposta: "Chave de ordenação"
+        explicacao: "Ordenar por data permite descartar blocos fora da janela."
+      - enunciado: "Uma tabela de 500 linhas de categorias entra em quase toda consulta."
+        resposta: "Distribuição ALL"
+        explicacao: "Dimensão pequena replicada elimina tráfego entre nós."
+      - enunciado: "Cinco anos de histórico em Parquet no S3, consultados uma vez por trimestre."
+        resposta: "Spectrum"
+        explicacao: "Consulta externa sem carregar."
+      - enunciado: "O painel da diretoria fica lento porque cada filtro dispara consulta no warehouse."
+        resposta: "SPICE"
+        explicacao: "Camada em memória do QuickSight responde ao clique sem ir ao cluster."
+perguntas:
+  - tipo: oral
+    enunciado: "Uma consulta que junta a tabela de fato de transações com a de clientes ficou lenta depois que o volume cresceu. Como você investiga e o que provavelmente encontra?"
+    respostaModelo: "Eu começo olhando o plano de execução para ver se há redistribuição de dados entre os nós, porque em arquitetura massivamente paralela é isso que costuma dominar o tempo. Se as duas tabelas estão distribuídas por chaves diferentes, cada junção obriga o cluster a mandar linhas de um nó para outro pela rede, e o tempo cresce com o volume, exatamente como descrito. A correção é distribuir as duas pela coluna da junção, no caso o identificador do cliente, de forma que as linhas correspondentes já nasçam no mesmo nó. Se a tabela de clientes for pequena, uma alternativa melhor é distribuição ALL, replicando ela em todos os nós, o que elimina o tráfego sem custo relevante de espaço. Em paralelo eu olho a chave de ordenação da tabela de fato: se a consulta filtra por data e a tabela não está ordenada por data, estamos varrendo blocos que poderiam ser descartados. O que eu não faço de primeira é aumentar o cluster, porque isso mascara o problema e multiplica a conta todo mês."
+    rubrica:
+      - "Citou redistribuição entre nós como hipótese principal e disse que olharia o plano de execução"
+      - "Propôs alinhar as chaves de distribuição pela coluna da junção"
+      - "Ofereceu distribuição ALL como alternativa para dimensão pequena, com o trade-off"
+      - "Mencionou chave de ordenação e descarte de blocos para o filtro de data"
+      - "Recusou aumentar o cluster como primeira resposta, com justificativa de custo"
+  - tipo: oral
+    enunciado: "O time quer manter cinco anos de histórico disponível para consulta, mas o custo do cluster está alto. Que arquitetura você propõe?"
+    respostaModelo: "Eu separaria o dado quente do frio. Os últimos meses, que são consultados todo dia e sustentam os painéis, ficam em tabelas internas do cluster, modeladas com distribuição e ordenação pensadas para as consultas que existem. O histórico mais antigo vai para o S3 em Parquet, particionado por data, e continua consultável por Spectrum a partir do mesmo cluster, inclusive em junção com as tabelas internas. Assim eu paro de pagar armazenamento de warehouse por dado que quase ninguém lê, e o analista não perde o acesso: a consulta é a mesma, muda só onde o dado mora. O trade-off que eu declaro é desempenho: consulta em Spectrum é mais lenta e cobrada por dado lido, então particionamento e formato colunar deixam de ser detalhe e viram requisito. Também combinaria uma regra de ciclo de vida para o histórico bem antigo migrar para uma classe de armazenamento mais fria, já que a consulta dele é rara e tolera espera."
+    rubrica:
+      - "Separou dado quente no cluster de dado frio no S3, com critério explícito"
+      - "Citou Spectrum para consultar o histórico sem carregar, mantendo o acesso"
+      - "Exigiu Parquet e particionamento, ligando ao custo por dado lido"
+      - "Declarou o trade-off de desempenho da consulta externa"
+      - "Mencionou ciclo de vida ou classe de armazenamento para o histórico mais antigo"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre armazenamento colunar é mais defensável numa sabatina?"
+    alternativas:
+      - texto: "Ele acelera consultas analíticas porque lê apenas as colunas necessárias e comprime melhor, e é ruim para carga transacional que grava linhas inteiras com frequência."
+        correta: true
+        explicacao: "Diz o ganho, a razão do ganho e o limite. É a resposta completa."
+      - texto: "Ele é sempre mais rápido que o armazenamento por linha."
+        correta: false
+        explicacao: "Falso para carga transacional; a generalização é o que a banca ataca."
+      - texto: "Ele dispensa modelagem, porque a compressão resolve o desempenho."
+        correta: false
+        explicacao: "Distribuição, ordenação e grão continuam decidindo o tempo de resposta."
+      - texto: "Ele substitui o banco relacional da aplicação."
+        correta: false
+        explicacao: "São cargas diferentes: uma grava transação, a outra responde pergunta analítica."
+  - tipo: multipla
+    enunciado: "Quais DUAS decisões reduzem o custo de uma consulta do Redshift Spectrum sobre dados no S3?"
+    alternativas:
+      - texto: "Armazenar os arquivos em formato colunar, como Parquet."
+        correta: true
+        explicacao: "A cobrança é por dado lido; colunar lê só as colunas da consulta."
+      - texto: "Particionar os arquivos por data e filtrar pela partição na consulta."
+        correta: true
+        explicacao: "Partição permite ignorar diretórios inteiros, reduzindo o dado lido."
+      - texto: "Aumentar o número de nós do cluster."
+        correta: false
+        explicacao: "Aumenta o custo do cluster e não muda o dado lido no S3."
+      - texto: "Converter os arquivos para CSV, que é mais simples de ler."
+        correta: false
+        explicacao: "CSV lê tudo, inclusive colunas que a consulta não usa."
+      - texto: "Criar índices nas colunas consultadas."
+        correta: false
+        explicacao: "Não existe índice sobre dado externo no S3."
+---
+
+## Em uma frase
+
+O Redshift é **colunar e paralelo**: o que decide o desempenho não é índice, é
+**onde cada linha mora** (distribuição), **em que ordem** (ordenação) e
+**quanto dado a consulta precisa ler**.
+
+## Por que colunar muda a conversa
+
+Num banco por linha, ler um registro é ler tudo dele junto — ótimo para
+cadastro. Num banco colunar, cada coluna é guardada separada: uma consulta que
+soma valor por mês lê **duas colunas** de milhões de linhas, e não as linhas
+inteiras. Some a isso que valores parecidos ficam vizinhos e comprimem muito
+melhor, e você tem a razão de relatórios voarem e cadastros sofrerem.
+
+É por isso que a otimização muda de vocabulário: índice por linha perde sentido,
+e entram distribuição e ordenação.
+
+## As duas decisões que decidem o tempo
+
+<Comparativo
+  colunas={["Estilo de distribuição", "O que faz", "Quando usar"]}
+  linhas={[
+    ["KEY", "Linhas com o mesmo valor da chave vão para o mesmo nó", "Tabelas grandes que se juntam sempre pela mesma coluna"],
+    ["ALL", "A tabela inteira é replicada em todos os nós", "Dimensão pequena e estável que entra em quase toda consulta"],
+    ["EVEN", "Espalha por rodízio, sem critério", "Tabela que não participa de junção relevante"],
+    ["AUTO", "O serviço escolhe e ajusta com o tempo", "Padrão razoável quando o padrão de consulta ainda não é claro"]
+  ]}
+/>
+
+<Termo nome="chave de distribuição">Coluna que decide em qual nó cada linha fica. Quando duas tabelas grandes se juntam pela mesma coluna e estão distribuídas por ela, a junção acontece dentro de cada nó, sem tráfego de rede.</Termo>
+
+<Termo nome="chave de ordenação">Coluna pela qual os blocos ficam ordenados. O cluster guarda o mínimo e o máximo de cada bloco e descarta blocos inteiros que não atendem ao filtro.</Termo>
+
+<Callout tipo="atencao" titulo="O sintoma que você vai ouvir">
+"A consulta ficou lenta depois que a tabela cresceu" quase sempre é
+**redistribuição entre nós** numa junção. A resposta que impressiona não é
+"aumento o cluster": é olhar o plano de execução, alinhar as chaves de
+distribuição e conferir se a chave de ordenação cobre o filtro mais comum.
+</Callout>
+
+## Spectrum: o warehouse lendo o lake
+
+<Termo nome="Redshift Spectrum">Consulta arquivos no S3 direto do cluster, sem carregá-los, cobrando por dado lido. Permite juntar tabela interna com histórico externo na mesma consulta.</Termo>
+
+O desenho que a sabatina espera: **quente dentro, frio fora**. Meses recentes
+em tabelas internas, modeladas para as consultas que existem; histórico em
+Parquet particionado no S3, consultável por Spectrum. Você para de pagar
+armazenamento de warehouse por dado que ninguém lê, sem tirar o acesso de
+ninguém.
+
+O trade-off precisa ser dito: consulta externa é mais lenta e cobra por dado
+lido, então **formato colunar e particionamento deixam de ser detalhe e viram
+requisito**.
+
+## A camada que o negócio vê
+
+<Termo nome="QuickSight">Ferramenta de BI da AWS. Conecta a Redshift, Athena, S3 e bancos, e tem o SPICE, um motor em memória que guarda uma cópia do conjunto para o painel responder sem consultar a origem a cada clique.</Termo>
+
+O SPICE resolve o painel lento e cria uma pergunta que o engenheiro de
+analytics precisa saber responder: **de que momento é esse número?** Ele é do
+último refresh, não de agora. É a mesma conversa de Source of Record e Source
+of Truth, aplicada à ferramenta.
+
+<Callout tipo="dica" titulo="Modelagem não some no colunar">
+Warehouse colunar rende com **poucas junções e grão bem definido**. Normalizar
+como se fosse um sistema transacional devolve a lentidão que a compressão tinha
+resolvido. Fato e dimensão existem exatamente por isso.
+</Callout>
+
+## Como responder isso em voz alta
+
+Para qualquer pergunta de lentidão: **plano de execução** primeiro, para ver
+se há redistribuição; **chaves de distribuição** alinhadas com a junção;
+**chave de ordenação** cobrindo o filtro; e só então capacidade. Para custo:
+**separar quente de frio**, com Spectrum sobre Parquet particionado. Quem
+começa por "aumento o cluster" está oferecendo a solução mais cara antes de
+entender o problema.

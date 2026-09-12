@@ -1,0 +1,253 @@
+---
+slug: relacional-vs-nosql-e-consistencia
+titulo: "Relacional e NoSQL: ACID, BASE e a escolha real"
+resumo: "A pergunta de fundamento que a banca usa para testar critério: o que ACID garante e o que se abre mão em BASE, o que o teorema CAP realmente diz, as famílias de NoSQL e por que a resposta quase nunca é 'NoSQL é melhor' nem 'relacional é seguro'."
+minutos: 35
+nivel: fundamental
+publicadoEm: "2026-09-12"
+porQue: "É o tema em que se vê se a pessoa decide por moda ou por requisito. A banca pergunta 'quando você usaria NoSQL' esperando ouvir padrão de acesso, escala e tolerância a inconsistência temporária, não 'quando o dado não tem esquema'. Erro comum é explicar CAP errado, dizendo que se escolhe duas das três."
+comoCai: "Quando você usaria um banco NoSQL em vez de um relacional, e o que perderia?"
+feynman: "Explique em um minuto para alguém de negócio o que significa 'o saldo pode ficar desatualizado por alguns segundos' e em que situações isso é aceitável."
+preRequisitos: ["olap-oltp-etl"]
+errosComuns:
+  - "Dizer que o teorema CAP permite escolher duas das três propriedades. Em sistema distribuído, partição de rede acontece; a escolha real é entre consistência e disponibilidade quando ela ocorre."
+  - "Achar que NoSQL significa 'sem esquema'. Significa que o esquema não é imposto pelo banco; ele continua existindo, e passa a ser responsabilidade da aplicação e da governança."
+  - "Tratar BASE como ausência de garantias. É um conjunto diferente: disponibilidade em primeiro lugar e consistência que converge com o tempo, o que é adequado para muitos casos e inadequado para transferência de dinheiro."
+  - "Escolher NoSQL por volume sem olhar o padrão de acesso. O ganho vem de conhecer a consulta antes de modelar; sem isso, o mesmo volume vira consulta cara e varredura."
+  - "Esquecer que bancos relacionais escalam bem verticalmente e com réplicas de leitura. Nem todo problema de escala exige trocar de paradigma."
+  - "Dizer que relacional não serve para JSON. Postgres e outros tratam JSON com índices há anos; a escolha é de padrão de acesso e escala, não de formato."
+preTeste:
+  - enunciado: "O que o teorema CAP afirma sobre um sistema distribuído?"
+    alternativas:
+      - texto: "Quando há partição de rede, é preciso escolher entre manter a consistência e manter a disponibilidade."
+        correta: true
+        explicacao: "Partição não é opcional em sistema distribuído; a escolha real acontece quando ela ocorre."
+      - texto: "Que se pode escolher duas entre consistência, disponibilidade e tolerância a partição."
+        correta: false
+        explicacao: "É a formulação popular e enganosa: tolerância a partição não é escolha, é condição."
+      - texto: "Que bancos NoSQL são sempre disponíveis e relacionais são sempre consistentes."
+        correta: false
+        explicacao: "Muitos bancos permitem configurar o comportamento por operação; não é propriedade do rótulo."
+  - enunciado: "Uma aplicação precisa registrar transferências entre contas, em que o débito e o crédito precisam acontecer juntos ou não acontecer. Qual propriedade é indispensável?"
+    alternativas:
+      - texto: "Atomicidade, garantida por transações ACID."
+        correta: true
+        explicacao: "Ou tudo acontece ou nada acontece: é a definição de atomicidade, e é inegociável em movimentação de dinheiro."
+      - texto: "Consistência eventual, para não travar a escrita."
+        correta: false
+        explicacao: "Deixaria uma janela em que o dinheiro saiu de um lado e não entrou no outro."
+      - texto: "Disponibilidade acima de tudo, para a transferência nunca falhar."
+        correta: false
+        explicacao: "Aceitar a escrita sem garantir o par é justamente o que cria inconsistência financeira."
+videos:
+  - id: 4seTVanKCFY
+    publicadoEm: "2025-09-02"
+    titulo: "SQL vs NoSQL: como escolher? ACID, CAP, Escala e Casos de Uso"
+    canal: "CodeStack"
+    duracao: 7
+    porQue: "Sete minutos cobrindo exatamente o eixo deste tema. Assista prestando atenção em como ele formula o CAP; compare com a formulação deste tema e veja qual resiste a uma repergunta."
+  - id: 5IdR0pcXfTY
+    publicadoEm: "2025-02-11"
+    titulo: "Comparação do ACID (relacional) versus BASE (NoSQL)"
+    canal: "datalib"
+    duracao: 19
+    porQue: "Complementar e mais fundo, com demonstração das propriedades ACID. Bom para conseguir explicar isolamento com exemplo, que é onde a maioria trava."
+artigos:
+  - titulo: "ACID"
+    url: "https://pt.wikipedia.org/wiki/ACID"
+    fonte: "Wikipédia"
+  - titulo: "Teorema CAP"
+    url: "https://pt.wikipedia.org/wiki/Teorema_CAP"
+    fonte: "Wikipédia"
+  - titulo: "What is NoSQL?"
+    url: "https://aws.amazon.com/nosql/"
+    fonte: "AWS"
+flashcards:
+  - frente: "ACID, o que cada letra garante."
+    verso: "Atomicidade: tudo ou nada. Consistência: a transação leva o banco de um estado válido a outro. Isolamento: transações simultâneas não enxergam estados intermediários umas das outras. Durabilidade: o que foi confirmado sobrevive a queda."
+  - frente: "BASE, em uma linha."
+    verso: "Basically Available, Soft state, Eventually consistent: prioriza responder sempre, aceitando que as réplicas convergem com o tempo em vez de estarem iguais a cada instante."
+  - frente: "O que o teorema CAP realmente diz."
+    verso: "Diante de uma partição de rede, é preciso escolher entre consistência e disponibilidade. Tolerância a partição não é opção: em sistema distribuído, partição acontece."
+  - frente: "As famílias de NoSQL."
+    verso: "Chave-valor (Redis, DynamoDB), documento (MongoDB, DocumentDB), colunar largo (Cassandra, HBase), grafo (Neptune, Neo4j). Cada uma resolve um padrão de acesso."
+  - frente: "Consistência forte versus eventual."
+    verso: "Forte: toda leitura vê a última escrita confirmada. Eventual: leituras podem ver valor antigo por um tempo, e convergem. Muitos bancos deixam escolher por operação."
+  - frente: "Quando NoSQL é a escolha certa?"
+    verso: "Padrão de acesso conhecido e estável, escala de escrita ou leitura muito alta, necessidade de distribuição geográfica, e tolerância a consistência eventual naquele dado."
+  - frente: "Quando relacional continua sendo a escolha?"
+    verso: "Consultas variadas e imprevisíveis, junções, transações entre entidades, integridade referencial imposta pelo banco, e volume que cabe em escala vertical mais réplicas."
+  - frente: "'NoSQL não tem esquema' é verdade?"
+    verso: "Não. O esquema não é imposto pelo banco, mas existe no código e nos dados. Sem governança, ele vira esquema implícito e inconsistente."
+  - frente: "O que é desnormalização e por que ela aparece em NoSQL?"
+    verso: "Repetir dado para evitar junção. Em bancos sem junção eficiente, é o preço para responder rápido, e o custo é manter as cópias coerentes na escrita."
+  - frente: "O que é idempotência e por que importa aqui?"
+    verso: "Operação que pode ser repetida sem mudar o resultado. Em sistemas com entrega pelo menos uma vez, é o que evita duplicar efeito quando a mesma mensagem chega duas vezes."
+  - frente: "Relacional e JSON convivem?"
+    verso: "Sim. Postgres e outros armazenam e indexam JSON. A escolha entre paradigmas é de padrão de acesso e escala, não de formato do dado."
+  - frente: "Como um engenheiro de analytics é afetado pela consistência eventual?"
+    verso: "Um número lido de uma réplica pode estar atrasado. É a mesma conversa de carimbo de corte: antes de dizer que dois relatórios divergem, confira de que momento é cada um."
+drills:
+  - titulo: "Relacional ou NoSQL?"
+    instrucao: "Para cada requisito, diga qual paradigma a banca espera ouvir."
+    opcoes: ["Relacional", "NoSQL", "Depende do padrão de acesso"]
+    itens:
+      - enunciado: "Transferência entre contas, com débito e crédito atômicos."
+        resposta: "Relacional"
+        explicacao: "Atomicidade entre entidades é o caso clássico de ACID."
+      - enunciado: "Carrinho de compras lido milhões de vezes por segundo, sempre pela chave do usuário."
+        resposta: "NoSQL"
+        explicacao: "Padrão de acesso conhecido e escala altíssima."
+      - enunciado: "Relatórios que cruzam sete tabelas de formas diferentes a cada pergunta."
+        resposta: "Relacional"
+        explicacao: "Consulta ad hoc com junções é o terreno do relacional."
+      - enunciado: "Catálogo de produtos com atributos que variam por categoria."
+        resposta: "Depende do padrão de acesso"
+        explicacao: "Documento ajuda, mas Postgres com JSON resolve bem se o volume couber; a decisão é de acesso e escala."
+      - enunciado: "Sessão de usuário que precisa responder em microssegundos e pode ser recriada."
+        resposta: "NoSQL"
+        explicacao: "Chave-valor em memória; perda tolerável."
+perguntas:
+  - tipo: oral
+    enunciado: "Quando você usaria um banco NoSQL em vez de um relacional, e o que estaria abrindo mão?"
+    respostaModelo: "Eu uso NoSQL quando três coisas são verdadeiras ao mesmo tempo. Primeiro, o padrão de acesso é conhecido e estável, porque em NoSQL a modelagem parte da consulta: eu escolho a chave sabendo como vou ler. Segundo, a escala de leitura ou escrita é alta o suficiente para que escalar horizontalmente seja mais barato que escalar um relacional com réplicas. Terceiro, aquele dado tolera consistência eventual, ou seja, ver um valor com alguns segundos de atraso não causa dano. Um carrinho de compras lido pela chave do usuário atende aos três; uma transferência entre contas não atende ao terceiro. O que eu abro mão é do que o banco relacional impõe por mim: junção eficiente, integridade referencial, transação entre entidades e consulta ad hoc que ninguém previu. Essas coisas passam a ser responsabilidade da aplicação, e é aí que o custo aparece, não na infraestrutura. Por isso eu desconfio de decisão tomada por volume sozinho: volume grande com padrão de acesso desconhecido não vira NoSQL bom, vira varredura cara."
+    rubrica:
+      - "Citou padrão de acesso conhecido como primeiro critério, e não volume"
+      - "Mencionou escala e tolerância a consistência eventual como os outros dois"
+      - "Deu um exemplo que atende e um que não atende, com o porquê"
+      - "Nomeou o que se perde: junção, integridade, transação, consulta ad hoc"
+      - "Disse que o custo migra para a aplicação, não desaparece"
+  - tipo: oral
+    enunciado: "Explique o teorema CAP e o que ele significa na prática para uma equipe que opera um banco distribuído."
+    respostaModelo: "A formulação que se ouve por aí, de escolher duas entre consistência, disponibilidade e tolerância a partição, é enganosa. Em um sistema distribuído, partição de rede vai acontecer: cabo cai, zona fica inalcançável. Então tolerância a partição não é uma escolha, é uma condição. A escolha real aparece no momento da partição: ou o sistema continua respondendo, arriscando devolver dado desatualizado, ou ele recusa a operação para não violar a consistência. Na prática, para uma equipe, isso vira uma decisão por caso de uso, e muitas vezes por operação, porque bancos modernos permitem escolher: eu posso ler com consistência forte no saldo e com consistência eventual no catálogo, no mesmo banco. O que a equipe precisa ter é isso escrito, junto com o que a aplicação faz quando a leitura vem atrasada. Sem essa decisão explícita, o comportamento na partição vira surpresa, e surpresa em produção durante incidente é o pior momento para descobrir qual dos dois o sistema escolheu."
+    rubrica:
+      - "Recusou a formulação de 'escolher duas das três' e explicou por quê"
+      - "Disse que partição é condição, não escolha, em sistema distribuído"
+      - "Formulou a escolha real: responder com dado possivelmente velho ou recusar"
+      - "Mencionou que a decisão pode ser por operação e não por banco"
+      - "Apontou a consequência prática: decisão escrita e comportamento definido para a aplicação"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre ACID e BASE é mais defensável?"
+    alternativas:
+      - texto: "São conjuntos de garantias diferentes para problemas diferentes: ACID prioriza correção a cada instante, BASE prioriza disponibilidade com convergência ao longo do tempo."
+        correta: true
+        explicacao: "Trata os dois como escolhas de requisito, sem hierarquia, que é a resposta que resiste a repergunta."
+      - texto: "BASE é a evolução de ACID e substitui suas garantias em sistemas modernos."
+        correta: false
+        explicacao: "Não substitui: movimentação financeira continua exigindo atomicidade e isolamento."
+      - texto: "ACID só existe em bancos relacionais e BASE só em NoSQL."
+        correta: false
+        explicacao: "Vários bancos NoSQL oferecem transações ACID hoje, e a escolha costuma ser configurável."
+      - texto: "BASE significa que não há nenhuma garantia sobre os dados."
+        correta: false
+        explicacao: "Há garantias, apenas diferentes: disponibilidade e convergência."
+  - tipo: multipla
+    enunciado: "Uma equipe quer migrar um sistema transacional relacional para NoSQL alegando volume. Quais DUAS perguntas você faria antes de concordar?"
+    alternativas:
+      - texto: "Quais são os padrões de acesso, e eles são estáveis o suficiente para virar chave de modelagem?"
+        correta: true
+        explicacao: "Sem padrão de acesso conhecido, o ganho do NoSQL não aparece."
+      - texto: "Que operações exigem atomicidade entre entidades, e o que acontece se elas ficarem temporariamente inconsistentes?"
+        correta: true
+        explicacao: "É o requisito que pode inviabilizar a migração, independentemente do volume."
+      - texto: "O time já conhece a sintaxe do banco NoSQL escolhido?"
+        correta: false
+        explicacao: "Relevante para prazo, não para a decisão de arquitetura."
+      - texto: "O banco NoSQL é mais barato por gigabyte?"
+        correta: false
+        explicacao: "Custo de armazenamento raramente é o fator dominante nessa decisão."
+      - texto: "O volume atual já ultrapassou o maior tipo de instância disponível?"
+        correta: false
+        explicacao: "É um dado útil, mas isoladamente não justifica trocar de paradigma: réplicas e particionamento no relacional ainda existem."
+---
+
+## Em uma frase
+
+A escolha não é entre "antigo" e "moderno": é entre **impor correção a cada
+instante** (ACID, relacional) e **priorizar disponibilidade aceitando
+convergência** (BASE, muitos NoSQL) — e ela se faz por requisito, às vezes por
+operação.
+
+## ACID, letra por letra
+
+<Comparativo
+  colunas={["Letra", "Garante", "Exemplo do que quebra sem ela"]}
+  linhas={[
+    ["Atomicidade", "Tudo ou nada", "Débito sai e crédito não entra"],
+    ["Consistência", "Estado válido antes e depois, pelas regras do banco", "Pedido apontando para cliente que não existe"],
+    ["Isolamento", "Transações simultâneas não veem estados intermediários", "Dois saques leem o mesmo saldo e ambos passam"],
+    ["Durabilidade", "O confirmado sobrevive a queda", "Servidor cai e a confirmação some"]
+  ]}
+/>
+
+<Termo nome="BASE">Basically Available, Soft state, Eventually consistent. Prioriza responder sempre, aceitando que as réplicas fiquem temporariamente diferentes e convirjam depois.</Termo>
+
+Não é ausência de garantia: é **outra** garantia. Para um contador de
+visualizações, convergir em segundos é irrelevante. Para uma transferência, é
+inaceitável. O critério é o dano que a janela de inconsistência causa.
+
+## O teorema CAP, sem a versão errada
+
+A frase popular — "escolha duas entre consistência, disponibilidade e
+tolerância a partição" — engana. Em sistema distribuído, **partição de rede
+acontece**: cabo cai, zona fica inalcançável. Tolerância a partição não é
+escolha, é condição.
+
+A escolha real aparece **durante** a partição:
+
+<Passos itens={[
+  "O sistema continua respondendo, arriscando devolver dado desatualizado (prioriza disponibilidade).",
+  "Ou recusa a operação para não violar a consistência (prioriza consistência).",
+  "Fora da partição, os dois caminhos podem oferecer consistência forte; a diferença é o comportamento no incidente."
+]} />
+
+<Callout tipo="atencao" titulo="A repergunta que derruba">
+Se você disser "escolhe duas das três", a banca pergunta: "e um sistema que
+abre mão de tolerância a partição, como ele funciona?" A resposta honesta é
+que ele não é distribuído. Formular pela partição evita a armadilha e mostra
+que você entendeu, não decorou.
+</Callout>
+
+## As famílias, e o que cada uma resolve
+
+<Comparativo
+  colunas={["Família", "Modelo", "Padrão de acesso que ela serve"]}
+  linhas={[
+    ["Chave-valor", "Chave aponta para um valor opaco", "Buscar por identificador conhecido, em escala e baixa latência"],
+    ["Documento", "JSON com campos indexáveis", "Entidade completa lida junta, com atributos que variam"],
+    ["Colunar largo", "Linhas com colunas dinâmicas por família", "Escrita altíssima com leitura por faixa de chave"],
+    ["Grafo", "Nós e arestas", "Percorrer relacionamentos a várias profundidades"]
+  ]}
+/>
+
+O erro de vocabulário mais comum: **"NoSQL não tem esquema"**. O esquema
+existe; ele só não é imposto pelo banco. Passa a viver no código e nos dados —
+e, sem governança, vira esquema implícito e inconsistente, que é pior que o
+declarado.
+
+## Quando trocar de paradigma
+
+Três condições juntas, não uma:
+
+1. **Padrão de acesso conhecido e estável.** Em NoSQL você modela a partir da
+   consulta. Sem saber como vai ler, a escolha de chave é chute.
+2. **Escala que justifica.** Relacional escala bem verticalmente e com réplicas
+   de leitura; nem todo problema de volume exige mudar de família.
+3. **Tolerância a consistência eventual** naquele dado específico.
+
+O que se abre mão é o que o relacional **impõe por você**: junção eficiente,
+integridade referencial, transação entre entidades, consulta ad hoc que
+ninguém previu. Isso não desaparece — migra para a aplicação.
+
+<Callout tipo="dica" titulo="O que isso muda para quem entrega número">
+Consistência eventual significa que uma réplica pode estar atrasada. Antes de
+afirmar que dois relatórios divergem, confira **de que momento** é cada
+leitura. É a mesma conversa de carimbo de corte, agora na camada do banco.
+</Callout>
+
+## Como responder isso em voz alta
+
+Comece pelo requisito, não pelo rótulo: **o que precisa ser atômico**, **como
+o dado é lido**, **quanto de atraso causa dano**. Dê um exemplo que atende e
+um que não atende. E formule o CAP pela partição — é o detalhe que separa quem
+entendeu de quem repetiu.

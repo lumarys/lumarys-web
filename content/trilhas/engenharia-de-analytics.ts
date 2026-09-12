@@ -30,7 +30,7 @@ export const engenhariaDeAnalytics: Trilha = {
   resumo:
     "A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
   formatoProva: "Sabatina oral com banca",
-  prazoSugeridoDias: 8,
+  prazoSugeridoDias: 14,
   status: "disponivel",
   modulos: [
     {
@@ -64,19 +64,19 @@ export const engenhariaDeAnalytics: Trilha = {
       slug: "aws",
       titulo: "AWS",
       resumo:
-        "S3, Glue, Athena, Redshift e QuickSight: a pilha analítica na nuvem que a instituição usa.",
-      status: "em-breve",
+        "A pilha analítica na nuvem: S3, Glue, Athena, Redshift, Lake Formation e o consumo em QuickSight. O panorama é compartilhado com a trilha de Dados; o aprofundamento em warehouse é próprio daqui.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: ["aws-para-dados", "redshift-e-consumo-analitico"],
     },
     {
       slug: "banco-de-dados",
       titulo: "Banco de dados",
       resumo:
-        "Relacional e NoSQL, ACID e BASE, normalização e modelagem dimensional, índices e SQL avançado.",
-      status: "em-breve",
+        "Relacional e NoSQL, ACID e BASE, normalização e modelagem dimensional, índices, plano de execução e SQL avançado.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: ["relacional-vs-nosql-e-consistencia", "sql-para-dados", "modelagem-de-dados"],
     },
     {
       slug: "programacao",
@@ -159,10 +159,49 @@ export const engenhariaDeAnalytics: Trilha = {
     },
     {
       dia: 8,
-      titulo: "Revisão leve",
+      titulo: "Revisão e checkpoint do módulo Big Data",
       temas: [],
       revisao: ["big-data"],
-      nota: "Só cards vencidos, a folha de revisão do módulo e o checkpoint. Não estude conteúdo novo na véspera.",
+      nota: "Cards vencidos, a folha de revisão e o checkpoint do módulo. Abaixo de 70%, releia o tema apontado.",
+    },
+    {
+      dia: 9,
+      titulo: "A pilha analítica na AWS",
+      temas: ["aws-para-dados"],
+      revisao: ["big-data"],
+      nota: "Tema compartilhado com a trilha de Dados: se você já o concluiu lá, ele já conta aqui. Use o dia para os cards e o drill.",
+    },
+    {
+      dia: 10,
+      titulo: "Redshift e a camada de consumo",
+      temas: ["redshift-e-consumo-analitico"],
+      revisao: ["big-data"],
+    },
+    {
+      dia: 11,
+      titulo: "Relacional, NoSQL e consistência",
+      temas: ["relacional-vs-nosql-e-consistencia"],
+      revisao: ["aws"],
+    },
+    {
+      dia: 12,
+      titulo: "SQL que a banca cobra",
+      temas: ["sql-para-dados"],
+      revisao: ["aws"],
+      nota: "Também compartilhado com a trilha de Dados. Aqui o foco é a consulta que sustenta um indicador, não o pipeline.",
+    },
+    {
+      dia: 13,
+      titulo: "Modelagem dimensional",
+      temas: ["modelagem-de-dados"],
+      revisao: ["banco-de-dados"],
+    },
+    {
+      dia: 14,
+      titulo: "Revisão leve",
+      temas: [],
+      revisao: ["big-data", "aws", "banco-de-dados"],
+      nota: "Só cards vencidos e as folhas de revisão. Programação, DevOps, dataviz e Data Mesh entram em breve; o plano cresce com eles.",
     },
   ],
 };
