@@ -1,0 +1,278 @@
+---
+slug: balanceamento-e-auto-scaling
+titulo: "Balanceamento de carga e Auto Scaling"
+resumo: "Os dois mecanismos que sustentam quase toda arquitetura resiliente da prova: qual balanceador para cada caso (ALB, NLB e Gateway Load Balancer), como a verificação de integridade tira um alvo doente da rotação, e como o Auto Scaling repõe capacidade, escala por métrica e distribui entre zonas."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Aparece em metade dos cenários do Domínio 2 e reaparece nos de desempenho e custo. A prova cobra três decisões: qual balanceador (a pista está no protocolo e no tipo de roteamento), o que a verificação de integridade faz de fato, e a diferença entre repor capacidade e aumentar capacidade — que é o par Auto Scaling e política de escala."
+comoCai: "A aplicação precisa suportar picos imprevisíveis e sobreviver à falha de uma instância, com o MENOR custo. O que você desenha?"
+feynman: "Explique em um minuto por que ter um balanceador na frente não adianta se todas as máquinas estão no mesmo lugar."
+preRequisitos: ["alta-disponibilidade-e-tolerancia-a-falhas"]
+errosComuns:
+  - "Escolher NLB para roteamento por caminho ou por cabeçalho. NLB é camada 4: enxerga IP e porta, não URL. Roteamento por conteúdo é ALB."
+  - "Escolher ALB quando o enunciado pede IP estático, latência ultrabaixa ou milhões de conexões por segundo. Isso é NLB, que ainda suporta protocolos além de HTTP."
+  - "Achar que o balanceador dá alta disponibilidade sozinho. Ele distribui entre alvos saudáveis; se todos estão na mesma zona, a zona continua sendo o ponto único de falha."
+  - "Confundir verificação de integridade do balanceador com a do Auto Scaling. A do balanceador tira o alvo da rotação; para o Auto Scaling substituir a instância, o grupo precisa usar o tipo de verificação ELB, não só EC2."
+  - "Usar escala por agendamento para carga imprevisível, ou escala reativa para pico conhecido. Agendamento é para padrão previsível; rastreamento de alvo é para carga variável."
+  - "Ignorar o período de estabilização (cooldown) e o aquecimento. Sem eles, o grupo escala em cascata reagindo a métricas de instâncias que ainda nem subiram."
+preTeste:
+  - enunciado: "Uma aplicação precisa rotear /api para um conjunto de instâncias e /imagens para outro, no mesmo domínio. Qual balanceador atende?"
+    alternativas:
+      - texto: "Application Load Balancer, com regras de roteamento por caminho."
+        correta: true
+        explicacao: "Roteamento por conteúdo da requisição HTTP (caminho, cabeçalho, host) é exclusivo do ALB, que opera na camada 7."
+      - texto: "Network Load Balancer, com listeners diferentes."
+        correta: false
+        explicacao: "NLB opera na camada 4 e não enxerga o caminho da URL."
+      - texto: "Gateway Load Balancer, com regras por rota."
+        correta: false
+        explicacao: "GWLB serve para inserir appliances de rede no caminho do tráfego, não para rotear aplicação."
+  - enunciado: "Um grupo de Auto Scaling tem verificação de integridade do tipo EC2. Uma instância está ligada, mas a aplicação dentro dela travou e o balanceador a marcou como não saudável. O que acontece?"
+    alternativas:
+      - texto: "O balanceador para de enviar tráfego, mas o Auto Scaling não substitui a instância, porque para ele a instância está saudável."
+        correta: true
+        explicacao: "A verificação EC2 só olha o estado da instância. Para o grupo agir sobre a saúde da aplicação, é preciso usar a verificação do tipo ELB."
+      - texto: "O Auto Scaling substitui a instância automaticamente."
+        correta: false
+        explicacao: "Só com o tipo de verificação ELB configurado no grupo."
+      - texto: "O balanceador reinicia a aplicação na instância."
+        correta: false
+        explicacao: "Balanceador não age dentro da instância; ele apenas tira da rotação."
+videos:
+  - id: VPTcGzMi8es
+    publicadoEm: "2025-07-13"
+    titulo: "Módulo 5: Alta Disponibilidade na AWS: Entenda ELB e Auto Scaling de Forma Clara"
+    canal: "Jean Diogo"
+    duracao: 23
+    porQue: "Feito para prova, em português, e cobre exatamente o par deste tema. Assista anotando os tipos de balanceador e em que camada cada um trabalha; é a pista que a questão dá no enunciado."
+  - id: vCE8MijvqA4
+    publicadoEm: "2026-04-27"
+    titulo: "Alta disponibilidade AWS completa: ELB + Auto Scaling"
+    canal: "Jean Diogo"
+    duracao: 35
+    porQue: "Complementar e mais fundo, do mesmo autor: entra nas políticas de escala e nas verificações de integridade. Vale se o primeiro vídeo deixou dúvida sobre quando o grupo substitui uma instância."
+artigos:
+  - titulo: "What is Elastic Load Balancing?"
+    url: "https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon EC2 Auto Scaling?"
+    url: "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+    fonte: "AWS"
+  - titulo: "Health checks for Auto Scaling instances"
+    url: "https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-health-checks.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "ALB, em uma linha."
+    verso: "Balanceador de camada 7 para HTTP e HTTPS. Roteia por caminho, host, cabeçalho, método e string de consulta. Suporta WebSocket, redirecionamento, autenticação e alvos Lambda."
+  - frente: "NLB, em uma linha."
+    verso: "Balanceador de camada 4 para TCP, UDP e TLS. Latência ultrabaixa, milhões de conexões por segundo, IP estático por zona e possibilidade de Elastic IP. Preserva o IP de origem."
+  - frente: "Gateway Load Balancer, em uma linha."
+    verso: "Insere appliances de rede de terceiros (firewall, inspeção) no caminho do tráfego, de forma transparente, usando o protocolo GENEVE na porta 6081."
+  - frente: "Quando a pista do enunciado aponta para NLB?"
+    verso: "IP estático ou Elastic IP, protocolo não HTTP, latência extremamente baixa, altíssimo volume de conexões, ou necessidade de preservar o IP de origem."
+  - frente: "O que é um grupo de destino (target group)?"
+    verso: "O conjunto de alvos que o balanceador atende, com a verificação de integridade própria. Alvos podem ser instâncias, endereços IP, funções Lambda (no ALB) ou outro balanceador."
+  - frente: "Verificação de integridade do balanceador: o que ela faz?"
+    verso: "Testa periodicamente cada alvo; ao falhar o limiar, o alvo sai da rotação e para de receber tráfego. Não reinicia nem substitui nada."
+  - frente: "Verificação EC2 versus ELB no Auto Scaling."
+    verso: "EC2: só o estado da instância (ligada, checagens do hipervisor). ELB: usa o resultado do balanceador, então aplicação travada faz o grupo substituir a instância. A prova cobra a diferença."
+  - frente: "As políticas de escala do Auto Scaling."
+    verso: "Rastreamento de alvo (mantém uma métrica num valor, como 60% de CPU), por etapas (degraus por faixa de alarme), simples (um ajuste por alarme), agendada (horário conhecido) e preditiva (aprende o padrão)."
+  - frente: "Qual política para carga imprevisível?"
+    verso: "Rastreamento de alvo: você declara a métrica-alvo e o grupo ajusta sozinho. É a resposta de 'menor esforço' para variação não previsível."
+  - frente: "Qual política para pico conhecido, como campanha às 20h?"
+    verso: "Escala agendada, que sobe a capacidade antes do horário. Reativa demoraria a subir e a campanha pegaria capacidade insuficiente."
+  - frente: "Para que serve o período de estabilização (cooldown)?"
+    verso: "Impede novas ações de escala enquanto a anterior ainda não refletiu nas métricas, evitando escalada em cascata."
+  - frente: "Capacidade mínima, desejada e máxima."
+    verso: "Mínima é o piso que o grupo sempre mantém (e repõe); desejada é o alvo atual; máxima é o teto que protege a fatura. A reposição de instância falha usa a mínima."
+  - frente: "Como o Auto Scaling distribui entre zonas?"
+    verso: "Ele equilibra a capacidade entre as sub-redes informadas, uma por zona, e reequilibra depois de uma falha. Informar sub-redes de várias zonas é o que dá resiliência."
+  - frente: "Escalar horizontal ou vertical?"
+    verso: "Horizontal é somar instâncias (o que o Auto Scaling faz, e o que a prova prefere). Vertical é trocar por uma instância maior, exige parada e tem teto."
+drills:
+  - titulo: "Qual balanceador e qual política?"
+    instrucao: "Para cada requisito, diga a escolha esperada na prova."
+    opcoes: ["ALB", "NLB", "Gateway Load Balancer", "Rastreamento de alvo", "Escala agendada"]
+    itens:
+      - enunciado: "Rotear /checkout e /catalogo para conjuntos diferentes de instâncias."
+        resposta: "ALB"
+        explicacao: "Roteamento por caminho é camada 7."
+      - enunciado: "Endereço IP fixo para os clientes liberarem no firewall deles."
+        resposta: "NLB"
+        explicacao: "IP estático por zona e suporte a Elastic IP."
+      - enunciado: "Passar todo o tráfego por um firewall virtual de terceiro antes de chegar à aplicação."
+        resposta: "Gateway Load Balancer"
+        explicacao: "É a função dele: inserir appliance no caminho de forma transparente."
+      - enunciado: "Manter a CPU média do grupo perto de 50% com carga que varia sem padrão."
+        resposta: "Rastreamento de alvo"
+        explicacao: "Declara-se a métrica-alvo e o grupo ajusta sozinho."
+      - enunciado: "Toda segunda-feira às 9h o acesso triplica por duas horas."
+        resposta: "Escala agendada"
+        explicacao: "Padrão conhecido: subir capacidade antes, não reagir depois."
+      - enunciado: "Aplicação de jogos com UDP e latência crítica."
+        resposta: "NLB"
+        explicacao: "Camada 4 com UDP e latência mínima."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa executa uma aplicação HTTP em instâncias EC2 e precisa que o tráfego de /api vá para um conjunto de instâncias e o restante para outro, com a aplicação continuando disponível se uma instância ou uma zona falhar. Qual solução atende?"
+    alternativas:
+      - texto: "Um Application Load Balancer com dois grupos de destino e regras de roteamento por caminho, com um grupo de Auto Scaling distribuindo instâncias por várias zonas."
+        correta: true
+        explicacao: "ALB resolve o roteamento por caminho; o Auto Scaling em várias zonas resolve a falha de instância e de zona. As duas metades do requisito."
+      - texto: "Um Network Load Balancer com dois listeners em portas diferentes."
+        correta: false
+        explicacao: "NLB não roteia por caminho, e mudar a porta obrigaria o cliente a conhecer a divisão interna."
+      - texto: "Um Application Load Balancer com todas as instâncias na mesma zona."
+        correta: false
+        explicacao: "Resolve o roteamento e deixa a zona como ponto único de falha."
+      - texto: "Instâncias com IPs elásticos e roteamento por Route 53 ponderado."
+        correta: false
+        explicacao: "DNS não roteia por caminho da URL, e IP elástico por instância não repõe capacidade perdida."
+  - tipo: unica
+    enunciado: "Um grupo de Auto Scaling com verificação de integridade do tipo EC2 mantém instâncias atrás de um Application Load Balancer. Algumas instâncias passaram a responder erro 500 por travamento da aplicação, mas continuam ligadas. As instâncias não estão sendo substituídas. Qual mudança corrige o comportamento?"
+    alternativas:
+      - texto: "Alterar a verificação de integridade do grupo para o tipo ELB, para que o grupo use o resultado da verificação do balanceador."
+        correta: true
+        explicacao: "A verificação EC2 só enxerga o estado da instância. Com o tipo ELB, a falha de aplicação detectada pelo balanceador passa a disparar a substituição."
+      - texto: "Reduzir o período de estabilização do grupo."
+        correta: false
+        explicacao: "Cooldown afeta a frequência de ações de escala, não o critério de saúde."
+      - texto: "Aumentar a capacidade máxima do grupo."
+        correta: false
+        explicacao: "Adiciona instâncias, mas as travadas continuam no grupo, consumindo capacidade."
+      - texto: "Configurar um alarme do CloudWatch para os erros 500 e notificar a equipe."
+        correta: false
+        explicacao: "Avisa uma pessoa; não substitui a instância automaticamente."
+  - tipo: multipla
+    enunciado: "Uma aplicação tem tráfego imprevisível durante o dia e um pico garantido toda sexta-feira às 18h, quando a carga quadruplica. A empresa quer atender aos dois casos com o MENOR custo. Quais DUAS configurações de Auto Scaling atendem?"
+    alternativas:
+      - texto: "Uma política de rastreamento de alvo mantendo a utilização média de CPU em um valor definido."
+        correta: true
+        explicacao: "Cobre a variação imprevisível ajustando sozinha, sem capacidade ociosa fora dos picos."
+      - texto: "Uma ação de escala agendada que aumenta a capacidade desejada antes das 18h de sexta."
+        correta: true
+        explicacao: "Pico conhecido pede capacidade antecipada; reagir depois deixaria a aplicação lenta durante a subida."
+      - texto: "Fixar a capacidade desejada no valor do pico durante toda a semana."
+        correta: false
+        explicacao: "Atende, e paga capacidade ociosa em todos os outros horários. Falha no 'menor custo'."
+      - texto: "Usar somente escala simples com um alarme de CPU."
+        correta: false
+        explicacao: "Reage tarde ao pico conhecido e é menos eficiente que rastreamento de alvo para a variação."
+      - texto: "Substituir o Auto Scaling por instâncias maiores."
+        correta: false
+        explicacao: "Escala vertical tem teto, exige parada e mantém o custo alto o tempo todo."
+  - tipo: unica
+    enunciado: "Uma empresa de jogos precisa expor um serviço UDP com latência mínima e um endereço IP fixo, porque os clientes liberam esse endereço no firewall. Qual solução atende?"
+    alternativas:
+      - texto: "Um Network Load Balancer com listener UDP e Elastic IP em cada zona de disponibilidade."
+        correta: true
+        explicacao: "Camada 4 com UDP, latência mínima e IP estático por zona: os três requisitos são exatamente as características do NLB."
+      - texto: "Um Application Load Balancer com listener na porta correspondente."
+        correta: false
+        explicacao: "ALB só trata HTTP e HTTPS, e seu endereço é um nome DNS que muda de IP."
+      - texto: "Um Gateway Load Balancer apontando para as instâncias do jogo."
+        correta: false
+        explicacao: "GWLB serve para inserir appliances de inspeção, não para publicar um serviço."
+      - texto: "Route 53 com roteamento por latência direto para as instâncias."
+        correta: false
+        explicacao: "Resolve nomes, não distribui conexões nem oferece IP fixo único; e não repõe instância que caiu."
+---
+
+## Em uma frase
+
+O **balanceador** tira o alvo doente da rotação e distribui a carga; o **Auto
+Scaling** repõe o que morreu e ajusta a quantidade. Sem os dois, não há
+arquitetura resiliente na prova — e o par certo depende do protocolo e do tipo
+de variação da carga.
+
+## Os três balanceadores
+
+<Comparativo
+  colunas={["", "ALB", "NLB", "Gateway Load Balancer"]}
+  linhas={[
+    ["Camada", "7 (HTTP e HTTPS)", "4 (TCP, UDP, TLS)", "3 (GENEVE, porta 6081)"],
+    ["Roteia por", "Caminho, host, cabeçalho, método, consulta", "IP e porta", "Não roteia: insere appliance no caminho"],
+    ["Endereço", "Nome DNS (IP muda)", "IP estático por zona, aceita Elastic IP", "Endpoint na VPC"],
+    ["Alvos", "Instância, IP, Lambda, outro ALB", "Instância, IP, ALB", "Appliances de rede"],
+    ["Pista no enunciado", "Microsserviços, caminho, redirecionamento, autenticação", "IP fixo, UDP, latência mínima, milhões de conexões, IP de origem preservado", "Firewall de terceiro, inspeção transparente"]
+  ]}
+/>
+
+A decisão quase nunca é de gosto: o enunciado entrega a pista. "Rotear /api" só
+existe no ALB. "IP fixo para liberar no firewall do cliente" só existe no NLB.
+"Passar o tráfego por um appliance de inspeção" é o GWLB, que aparece pouco e
+com essa descrição exata.
+
+<Callout tipo="dica" titulo="O balanceador não é a resiliência">
+Um ALB com todas as instâncias na mesma zona não protege contra a falha
+daquela zona. O balanceador entrega a **distribuição**; a resiliência vem de
+ter alvos em mais de uma zona. Nas questões, a alternativa completa cita as
+duas coisas.
+</Callout>
+
+## Verificação de integridade: duas, e elas não são a mesma
+
+<Termo nome="verificação de integridade">Teste periódico que o balanceador faz em cada alvo. Ao falhar o limiar configurado, o alvo sai da rotação e deixa de receber tráfego.</Termo>
+
+O ponto que a prova adora: o **grupo de Auto Scaling** tem a própria noção de
+saúde, e ela é configurável:
+
+- **Tipo EC2** (padrão): olha só o estado da instância e as checagens do
+  hipervisor. Aplicação travada numa instância ligada continua "saudável".
+- **Tipo ELB**: adota o resultado da verificação do balanceador. Aí sim, uma
+  aplicação que devolve erro faz o grupo **substituir** a instância.
+
+O sintoma clássico da questão: "o balanceador tirou a instância da rotação, mas
+ela nunca é substituída". A resposta é mudar o tipo de verificação para ELB.
+
+## Auto Scaling: repor e ajustar
+
+<Termo nome="grupo de Auto Scaling">Conjunto de instâncias criado a partir de um modelo de lançamento, com capacidade mínima, desejada e máxima, distribuído pelas sub-redes informadas.</Termo>
+
+Ele faz duas coisas diferentes, e a prova separa:
+
+- **Repor**: se uma instância falha, o grupo cria outra para voltar à
+  capacidade desejada. Isso acontece mesmo sem nenhuma política de escala.
+- **Ajustar**: mudar a capacidade desejada conforme a demanda. Isso é
+  **política de escala**.
+
+<Comparativo
+  colunas={["Política", "Como funciona", "Quando é a resposta"]}
+  linhas={[
+    ["Rastreamento de alvo", "Mantém uma métrica num valor (CPU em 50%)", "Carga variável e imprevisível; menor esforço"],
+    ["Por etapas", "Degraus diferentes por faixa de alarme", "Reação proporcional ao tamanho do desvio"],
+    ["Simples", "Um ajuste por alarme, com cooldown", "Legado; raramente a melhor resposta"],
+    ["Agendada", "Muda a capacidade em horário definido", "Pico conhecido: campanha, fechamento, horário comercial"],
+    ["Preditiva", "Aprende o padrão histórico e antecipa", "Padrão recorrente que você não quer agendar à mão"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Imprevisível ou conhecido?">
+Essa é a palavra que decide entre as políticas. "Picos imprevisíveis" →
+rastreamento de alvo. "Toda sexta às 18h" → agendada. Um cenário com os dois
+pede as duas, e é aí que a múltipla resposta aparece: marcar só uma perde a
+questão.
+</Callout>
+
+## Distribuir entre zonas
+
+O grupo equilibra a capacidade entre as sub-redes que você informar, uma por
+zona. Depois de uma falha, ele reequilibra. É por isso que "adicionar sub-redes
+de uma segunda zona ao grupo de Auto Scaling" é uma resposta tão frequente: ela
+resolve falha de instância e de zona com uma mudança de configuração, sem
+arquitetura nova.
+
+Os limites importam na leitura: a **capacidade mínima** é o piso que o grupo
+repõe; a **máxima** é o teto que protege a fatura quando algo dispara a escala
+— inclusive um ataque, o que liga este tema ao Shield Advanced.
+
+## Como responder o cenário
+
+Leia o protocolo e o tipo de roteamento para escolher o balanceador. Leia o
+tipo de variação da carga para escolher a política. Confirme que a alternativa
+menciona **mais de uma zona** — sem isso, ela resolve metade do problema. E
+quando o sintoma for "a instância doente não é substituída", olhe o tipo de
+verificação de integridade do grupo antes de qualquer outra coisa.

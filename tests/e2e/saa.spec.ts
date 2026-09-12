@@ -35,7 +35,9 @@ test("a trilha mostra o exame: versão, formato, corte e o peso de cada domínio
     /docs\.aws\.amazon\.com/,
   );
   await expect(page.getByText("30% da prova")).toBeVisible();
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(3);
+  await expect(page.getByText("26% da prova")).toBeVisible();
+  // Dois domínios publicados; desempenho e custo seguem em breve.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(2);
   await expect(page.getByRole("link", { name: "Prova simulada" })).toBeVisible();
 });
 
@@ -62,7 +64,10 @@ test("a prova simulada é objetiva, cronometrada e sem gabarito até o fim", asy
 
   await expect(page.getByText(/\/1000/)).toBeVisible();
   await expect(page.getByText("Por domínio")).toBeVisible();
+  // Com dois domínios publicados, o resultado precisa separar os dois: é o
+  // sorteio por peso chegando até a tela de resultado.
   await expect(page.getByText("Arquiteturas seguras").first()).toBeVisible();
+  await expect(page.getByText("Arquiteturas resilientes").first()).toBeVisible();
 
   // O resultado entra no mesmo histórico da trilha, por domínio.
   const gravado = await page.evaluate((chave) => {

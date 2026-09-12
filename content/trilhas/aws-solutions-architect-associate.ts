@@ -13,9 +13,9 @@ import type { Trilha } from "../types";
  * sorteia pelo peso. Os temas usam `formato: prova`: cenários objetivos em vez
  * de perguntas orais.
  *
- * Onda 1: a prova, "como ler uma questão" e o Domínio 1 (seis temas, em duas
- * ondas). Os demais domínios entram um por onda; o cronograma cresce junto e
- * o prazo-alvo com a trilha completa é 42 dias.
+ * Publicados: "como ler uma questão", o Domínio 1 (seis temas) e o Domínio 2
+ * (seis temas). Os dois domínios restantes entram um por onda; o cronograma
+ * cresce junto e o prazo-alvo com a trilha completa é 42 dias.
  */
 export const awsSolutionsArchitectAssociate: Trilha = {
   slug: "aws-solutions-architect-associate",
@@ -27,7 +27,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
   resumo:
     "O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 130 minutos",
-  prazoSugeridoDias: 10,
+  prazoSugeridoDias: 18,
   status: "disponivel",
   exame: {
     codigo: "SAA-C03",
@@ -71,11 +71,18 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       titulo: "Arquiteturas resilientes",
       resumo:
         "Multi-AZ e multirregião, balanceamento e Auto Scaling, réplicas, roteamento do Route 53, desacoplamento e as estratégias de DR com RTO e RPO.",
-      status: "em-breve",
+      status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 2 · Design Resilient Architectures",
       pesoExame: 26,
-      temas: [],
+      temas: [
+        "alta-disponibilidade-e-tolerancia-a-falhas",
+        "balanceamento-e-auto-scaling",
+        "bancos-de-dados-resilientes",
+        "route-53-roteamento-e-failover",
+        "desacoplamento-com-filas-e-eventos",
+        "estrategias-de-recuperacao-de-desastres",
+      ],
     },
     {
       slug: "desempenho",
@@ -154,10 +161,62 @@ export const awsSolutionsArchitectAssociate: Trilha = {
     },
     {
       dia: 10,
+      titulo: "Zona, região e o vocabulário da resiliência",
+      temas: ["alta-disponibilidade-e-tolerancia-a-falhas"],
+      revisao: ["seguras"],
+      nota: "Começa o domínio de 26%. Este tema é curto e decide muita questão: é dele que sai o 'mais de uma zona'.",
+    },
+    {
+      dia: 11,
+      titulo: "Balanceamento e Auto Scaling",
+      temas: ["balanceamento-e-auto-scaling"],
+      revisao: ["seguras"],
+    },
+    {
+      dia: 12,
+      titulo: "Bancos resilientes",
+      temas: ["bancos-de-dados-resilientes"],
+      revisao: ["resilientes"],
+    },
+    {
+      dia: 13,
+      titulo: "Route 53: roteamento e failover",
+      temas: ["route-53-roteamento-e-failover"],
+      revisao: ["resilientes"],
+    },
+    {
+      dia: 14,
+      titulo: "Desacoplamento com filas e eventos",
+      temas: ["desacoplamento-com-filas-e-eventos"],
+      revisao: ["resilientes"],
+    },
+    {
+      dia: 15,
+      titulo: "Recuperação de desastres",
+      temas: ["estrategias-de-recuperacao-de-desastres"],
+      revisao: ["resilientes"],
+      nota: "Traga os números do enunciado para o eixo RTO e RPO antes de olhar as alternativas. É o hábito que a prova cobra.",
+    },
+    {
+      dia: 16,
+      titulo: "Cards e checkpoint do Domínio 2",
+      temas: [],
+      revisao: ["resilientes"],
+      nota: "Checkpoint do módulo. Abaixo de 70%, releia o tema apontado antes da prova de amanhã.",
+    },
+    {
+      dia: 17,
+      titulo: "Segunda prova simulada",
+      temas: [],
+      revisao: ["seguras", "resilientes"],
+      nota: "Agora com os dois domínios no banco. Compare o resultado por domínio com o da primeira prova.",
+    },
+    {
+      dia: 18,
       titulo: "Revisão leve",
       temas: [],
-      revisao: ["como-funciona-a-prova", "seguras"],
-      nota: "Só cards vencidos e a folha de revisão. Os próximos domínios entram em breve; o plano cresce com eles.",
+      revisao: ["como-funciona-a-prova", "seguras", "resilientes"],
+      nota: "Só cards vencidos e a folha de revisão. Os domínios de desempenho e custo entram em breve; o plano cresce com eles.",
     },
   ],
 };

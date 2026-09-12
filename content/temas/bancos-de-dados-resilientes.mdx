@@ -1,0 +1,268 @@
+---
+slug: bancos-de-dados-resilientes
+titulo: "Bancos resilientes: Multi-AZ, réplicas de leitura e tabelas globais"
+resumo: "A distinção que a prova mais cobra em banco de dados: Multi-AZ é disponibilidade com réplica síncrona que ninguém lê, réplica de leitura é desempenho com replicação assíncrona. Mais Aurora e seu Global Database, DynamoDB com tabelas globais, e o que cada um faz num failover."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Multi-AZ e réplica de leitura resolvem problemas diferentes e a prova oferece um como distrator do outro em quase todo cenário de banco. Quem sabe que a espera do Multi-AZ não aceita leitura, e que a réplica pode estar atrasada, elimina metade das alternativas antes de pensar no resto."
+comoCai: "O banco precisa sobreviver à falha de uma zona e aguentar relatórios pesados sem afetar as transações. O que você configura?"
+feynman: "Explique em um minuto por que ter uma cópia do banco em outra zona não ajuda a deixar os relatórios mais rápidos."
+preRequisitos: ["alta-disponibilidade-e-tolerancia-a-falhas"]
+errosComuns:
+  - "Achar que a instância de espera do Multi-AZ atende leitura. Ela não recebe tráfego nenhum; existe para assumir no failover. Quem quer distribuir leitura precisa de réplica de leitura."
+  - "Usar réplica de leitura como mecanismo de alta disponibilidade. A replicação é assíncrona e a promoção é manual: há atraso possível e não há failover automático."
+  - "Esquecer que o failover do Multi-AZ troca o registro DNS do endpoint. A aplicação precisa reconectar; conexão presa em cache de DNS é o sintoma clássico."
+  - "Confundir Aurora réplica com Aurora Global Database. Réplicas ficam na mesma região e podem ser alvo de failover; Global Database replica para outra região, com atraso típico abaixo de um segundo."
+  - "Achar que tabela global do DynamoDB precisa de configuração de failover. Ela é ativa em todas as regiões escolhidas: escreve-se e lê-se em qualquer uma, com resolução do último escritor em caso de conflito."
+  - "Tratar backup automático como alta disponibilidade. Backup restaura depois, com tempo parado; disponibilidade é continuar."
+preTeste:
+  - enunciado: "Um banco RDS precisa continuar disponível se a zona onde ele está falhar, e a equipe também quer tirar a carga de relatórios de cima do banco principal. Qual combinação atende?"
+    alternativas:
+      - texto: "Habilitar Multi-AZ para a disponibilidade e criar uma réplica de leitura para os relatórios."
+        correta: true
+        explicacao: "São dois mecanismos para dois problemas: espera síncrona para failover, réplica assíncrona para leitura."
+      - texto: "Criar duas réplicas de leitura e apontar a aplicação para elas."
+        correta: false
+        explicacao: "Réplica não faz failover automático; a disponibilidade continua dependendo da instância principal."
+      - texto: "Habilitar Multi-AZ e apontar os relatórios para a instância de espera."
+        correta: false
+        explicacao: "A instância de espera não aceita conexão nenhuma."
+  - enunciado: "Uma aplicação global precisa que usuários na Europa e nas Américas escrevam e leiam com baixa latência na mesma base de dados NoSQL. Qual solução atende?"
+    alternativas:
+      - texto: "DynamoDB com tabelas globais nas regiões correspondentes."
+        correta: true
+        explicacao: "Tabela global é ativa em todas as regiões: leitura e escrita locais, com replicação entre elas."
+      - texto: "DynamoDB em uma região, com CloudFront na frente."
+        correta: false
+        explicacao: "CloudFront acelera conteúdo, não escrita em banco; a latência de escrita continuaria atravessando o oceano."
+      - texto: "RDS Multi-AZ com réplicas de leitura na outra região."
+        correta: false
+        explicacao: "Réplica de leitura não aceita escrita; a escrita continuaria concentrada em uma região."
+videos:
+  - id: uwd8-CyFR3Y
+    publicadoEm: "2020-02-27"
+    titulo: "RDS Multi-AZ e Read Replica"
+    canal: "Webfor Treinamentos"
+    duracao: 22
+    porQue: "Trata os dois mecanismos no mesmo vídeo, que é exatamente como a prova cobra. Assista com uma pergunta: qual dos dois eu consigo ler, e qual é síncrono?"
+  - id: mr_WGUjuSvM
+    publicadoEm: "2021-09-27"
+    titulo: "Alta disponibilidade com Amazon RDS Multi-AZ - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 13
+    porQue: "Complementar, da própria AWS: mostra o Multi-AZ sendo habilitado e o que acontece no failover. Repare no endpoint, que não muda de nome mas passa a apontar para outra instância."
+artigos:
+  - titulo: "Multi-AZ DB instance deployments"
+    url: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html"
+    fonte: "AWS"
+  - titulo: "Working with DB instance read replicas"
+    url: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html"
+    fonte: "AWS"
+  - titulo: "Amazon Aurora DB clusters"
+    url: "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Overview.html"
+    fonte: "AWS"
+  - titulo: "Global tables - Amazon DynamoDB"
+    url: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GlobalTables.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Multi-AZ, em uma linha."
+    verso: "Uma instância de espera em outra zona, com replicação síncrona, que assume automaticamente no failover. Não aceita leitura nem escrita enquanto é espera. Serve disponibilidade, não desempenho."
+  - frente: "Réplica de leitura, em uma linha."
+    verso: "Cópia com replicação assíncrona, com endpoint próprio, que atende consultas de leitura. Pode ficar atrasada. Serve desempenho, e vira disponibilidade só com promoção manual."
+  - frente: "O que acontece com o endpoint no failover do Multi-AZ?"
+    verso: "O nome do endpoint continua o mesmo e passa a apontar para a instância que era espera. A aplicação precisa reconectar; conexão presa em cache de DNS é o problema típico."
+  - frente: "Réplica de leitura pode ficar em outra região?"
+    verso: "Sim. É uma forma de reduzir latência de leitura para usuários distantes e também de preparar uma recuperação entre regiões, com promoção manual."
+  - frente: "Como promover uma réplica de leitura?"
+    verso: "Promoção manual, que a torna uma instância independente e quebra a replicação. Não é automática e não volta atrás."
+  - frente: "Aurora: como é o armazenamento?"
+    verso: "Camada de armazenamento compartilhada, com seis cópias distribuídas em três zonas de disponibilidade, que cresce sozinha. As instâncias de computação ficam separadas do dado."
+  - frente: "Quantas réplicas o Aurora aceita e o que elas fazem?"
+    verso: "Até 15 réplicas na mesma região, que atendem leitura e são candidatas a assumir a escrita em segundos, com prioridade configurável (tier)."
+  - frente: "Aurora Global Database, em uma linha."
+    verso: "Replica o cluster para outras regiões com atraso típico abaixo de um segundo; região secundária serve leitura e pode ser promovida em cerca de um minuto."
+  - frente: "Endpoints do Aurora."
+    verso: "Writer (aponta para a instância de escrita), reader (balanceia entre réplicas) e personalizados. Usar o reader para consulta é o que distribui a leitura."
+  - frente: "Tabela global do DynamoDB, em uma linha."
+    verso: "Replicação ativa em várias regiões: leitura e escrita locais em qualquer uma delas, com resolução de conflito pelo último escritor."
+  - frente: "DynamoDB é resiliente dentro da região por padrão?"
+    verso: "Sim: replica entre três zonas por desenho. A decisão que sobra é entre regiões, com tabela global."
+  - frente: "O que é point-in-time recovery no DynamoDB?"
+    verso: "Restauração contínua para qualquer segundo dos últimos 35 dias. É recuperação de erro, não disponibilidade."
+  - frente: "RDS Multi-AZ com cluster (três instâncias), o que muda?"
+    verso: "Duas instâncias de espera legíveis e failover tipicamente mais rápido que o Multi-AZ de instância única. A prova cita pouco; saiba que existe."
+  - frente: "Backup automático do RDS: o que é retido?"
+    verso: "Snapshots diários e logs de transação, permitindo restaurar a um ponto no tempo dentro da janela de retenção. Restaurar cria uma instância nova, com outro endpoint."
+drills:
+  - titulo: "Disponibilidade ou desempenho?"
+    instrucao: "Para cada necessidade, diga o mecanismo esperado."
+    opcoes: ["Multi-AZ", "Réplica de leitura", "Tabela global", "Aurora Global Database"]
+    itens:
+      - enunciado: "Sobreviver à falha da zona do banco, sem intervenção manual."
+        resposta: "Multi-AZ"
+        explicacao: "Espera síncrona com failover automático."
+      - enunciado: "Relatórios pesados estão deixando as transações lentas."
+        resposta: "Réplica de leitura"
+        explicacao: "Tira a leitura analítica do principal."
+      - enunciado: "Usuários no Japão e no Brasil escrevendo na mesma base NoSQL com baixa latência."
+        resposta: "Tabela global"
+        explicacao: "Escrita local em várias regiões, com replicação ativa."
+      - enunciado: "Cluster MySQL compatível precisa de leitura em outra região e promoção rápida em caso de desastre."
+        resposta: "Aurora Global Database"
+        explicacao: "Replicação entre regiões com atraso abaixo de um segundo e promoção em cerca de um minuto."
+      - enunciado: "Reduzir a latência de leitura para usuários de outro continente num banco relacional."
+        resposta: "Réplica de leitura"
+        explicacao: "Réplica de leitura entre regiões atende consulta local."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação usa um banco RDS de instância única. O time de negócio executa relatórios pesados que degradam o desempenho das transações, e a diretoria exige que o banco continue disponível se a zona de disponibilidade falhar. Qual solução atende aos DOIS requisitos?"
+    alternativas:
+      - texto: "Habilitar a implantação Multi-AZ e criar uma réplica de leitura para os relatórios."
+        correta: true
+        explicacao: "Multi-AZ dá failover automático entre zonas; a réplica de leitura tira a carga analítica da instância principal. Cada requisito tem seu mecanismo."
+      - texto: "Criar duas réplicas de leitura, uma para relatórios e outra para failover."
+        correta: false
+        explicacao: "Réplica não faz failover automático; promovê-la é manual e quebra a replicação."
+      - texto: "Habilitar Multi-AZ e direcionar os relatórios para a instância de espera."
+        correta: false
+        explicacao: "A instância de espera do Multi-AZ não aceita conexões. É o distrator mais repetido deste tema."
+      - texto: "Aumentar o tamanho da instância e habilitar backups automáticos."
+        correta: false
+        explicacao: "Instância maior adia o problema de carga e backup não é disponibilidade."
+  - tipo: unica
+    enunciado: "Uma empresa precisa de um banco relacional compatível com MySQL que sirva leituras com baixa latência em uma segunda região e possa assumir as escritas em minutos caso a região principal fique indisponível. Qual solução atende?"
+    alternativas:
+      - texto: "Amazon Aurora com Global Database, com a região secundária servindo leitura e pronta para promoção."
+        correta: true
+        explicacao: "Global Database replica entre regiões com atraso típico abaixo de um segundo, serve leitura local e promove a secundária em cerca de um minuto."
+      - texto: "RDS MySQL Multi-AZ na região principal."
+        correta: false
+        explicacao: "Multi-AZ protege contra falha de zona, não de região, e a espera não serve leitura."
+      - texto: "Snapshots do RDS copiados para a segunda região a cada hora."
+        correta: false
+        explicacao: "Não serve leitura na secundária e a recuperação levaria bem mais que minutos."
+      - texto: "DynamoDB com tabelas globais."
+        correta: false
+        explicacao: "Resolve multirregião, mas não é relacional nem compatível com MySQL, que o enunciado exige."
+  - tipo: multipla
+    enunciado: "Uma equipe habilitou Multi-AZ em um banco RDS. Durante um failover real, a aplicação ficou vários minutos com erro mesmo depois de o banco já estar disponível. Quais DUAS afirmações explicam ou corrigem o problema?"
+    alternativas:
+      - texto: "O failover troca o destino do endpoint, e a aplicação precisa reconectar em vez de reutilizar conexões antigas."
+        correta: true
+        explicacao: "O nome não muda, mas o destino sim; conexões abertas para a instância antiga falham até serem refeitas."
+      - texto: "Configurar o cliente com TTL de DNS curto e lógica de reconexão com novas tentativas."
+        correta: true
+        explicacao: "É a correção esperada: sem reconexão e com DNS em cache, a aplicação continua tentando a instância antiga."
+      - texto: "A instância de espera precisa ser promovida manualmente."
+        correta: false
+        explicacao: "No Multi-AZ o failover é automático; promoção manual é o modelo da réplica de leitura."
+      - texto: "O Multi-AZ replica de forma assíncrona, então houve perda de dados."
+        correta: false
+        explicacao: "A replicação do Multi-AZ é síncrona; quem é assíncrona é a réplica de leitura."
+      - texto: "Era necessário criar uma réplica de leitura para o failover funcionar."
+        correta: false
+        explicacao: "Réplica de leitura não participa do failover do Multi-AZ."
+  - tipo: unica
+    enunciado: "Uma aplicação de comércio eletrônico usa DynamoDB em uma região. A empresa vai lançar na Europa e quer que os usuários de lá tenham leitura e escrita com baixa latência, mantendo os dados consistentes entre os continentes. Qual solução atende com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Configurar tabelas globais do DynamoDB, adicionando a região europeia como réplica."
+        correta: true
+        explicacao: "Tabela global é gerenciada: replicação ativa nas duas regiões, escrita local, sem código de sincronização."
+      - texto: "Criar uma segunda tabela na Europa e escrever uma função Lambda que sincronize as duas."
+        correta: false
+        explicacao: "Reimplementa, com código para manter e risco de conflito, o que a tabela global já faz."
+      - texto: "Manter a tabela na região original e usar o CloudFront para acelerar o acesso europeu."
+        correta: false
+        explicacao: "CloudFront acelera conteúdo em cache; escrita em banco continuaria atravessando o Atlântico."
+      - texto: "Habilitar point-in-time recovery e restaurar a tabela na Europa."
+        correta: false
+        explicacao: "Restauração é cópia pontual, não replicação contínua, e não mantém as duas em sincronia."
+---
+
+## Em uma frase
+
+**Multi-AZ** é disponibilidade: uma espera síncrona que ninguém lê e que assume
+sozinha. **Réplica de leitura** é desempenho: uma cópia assíncrona que você lê
+e que só vira principal por promoção manual. A prova oferece uma como distrator
+da outra.
+
+## A tabela que resolve metade das questões
+
+<Comparativo
+  colunas={["", "Multi-AZ", "Réplica de leitura"]}
+  linhas={[
+    ["Para que serve", "Disponibilidade", "Desempenho de leitura"],
+    ["Replicação", "Síncrona: nada se perde", "Assíncrona: pode estar atrasada"],
+    ["Aceita leitura?", "Não. A espera não recebe conexão", "Sim, com endpoint próprio"],
+    ["Failover", "Automático, em um a dois minutos", "Não existe: promoção é manual"],
+    ["Onde fica", "Outra zona da mesma região", "Mesma região ou outra"],
+    ["Quantas", "Uma espera (ou duas, no modelo de cluster)", "Várias"]
+  ]}
+/>
+
+O cenário mais repetido junta os dois requisitos numa frase só: "continuar
+disponível se a zona cair **e** tirar os relatórios de cima do banco". A
+resposta certa cita **Multi-AZ e réplica de leitura**; as erradas tentam
+resolver os dois com um mecanismo só.
+
+<Callout tipo="atencao" titulo="A espera não é legível">
+"Direcionar os relatórios para a instância de espera do Multi-AZ" aparece em
+quase toda questão deste tema e é sempre errada: a espera não aceita conexão
+nenhuma. Ela existe para assumir, não para ajudar.
+</Callout>
+
+## O failover e o endpoint
+
+No failover do Multi-AZ, o nome do endpoint **não muda**; o que muda é para
+onde ele aponta. Consequência prática, que vira questão: a aplicação precisa
+**reconectar**. Conexões antigas continuam tentando a instância que saiu, e
+cliente com cache de DNS longo demora a enxergar a troca. A correção esperada é
+TTL curto e lógica de reconexão com novas tentativas — não é configuração do
+banco, é do cliente.
+
+## Aurora: o mesmo vocabulário, outra arquitetura
+
+<Termo nome="Aurora">Banco compatível com MySQL e PostgreSQL em que o armazenamento é uma camada compartilhada, com seis cópias em três zonas, separada das instâncias de computação.</Termo>
+
+Como o dado não pertence a uma instância, as peças mudam:
+
+- Até **15 réplicas** na mesma região, que servem leitura **e** são candidatas
+  a assumir a escrita em segundos, com prioridade configurável.
+- **Endpoint de escrita** e **endpoint de leitura** separados: usar o de
+  leitura é o que distribui consulta entre as réplicas.
+- **Global Database** replica o cluster para outras regiões com atraso típico
+  abaixo de um segundo; a secundária serve leitura e é promovida em cerca de um
+  minuto.
+
+A pista do enunciado: "compatível com MySQL", "leitura em outra região",
+"promoção em minutos" junta os três e aponta para Global Database.
+
+## DynamoDB: resiliente por desenho, global por escolha
+
+Dentro da região, o DynamoDB já replica entre três zonas; não há Multi-AZ para
+ligar. O que sobra decidir é **entre regiões**:
+
+<Termo nome="tabela global">Replicação ativa em várias regiões: escreve-se e lê-se em qualquer uma delas, com resolução de conflito pelo último escritor.</Termo>
+
+É diferente de tudo que veio antes neste tema: não há primário e réplica, há
+**várias regiões ativas**. Por isso a pergunta "usuários dos dois lados do
+oceano precisam escrever com baixa latência" só tem essa resposta — réplica de
+leitura não aceita escrita.
+
+<Callout tipo="dica" titulo="Recuperação não é disponibilidade">
+Backup automático do RDS e point-in-time recovery do DynamoDB restauram o
+passado, criando um recurso novo, com tempo parado. Servem contra erro humano e
+corrupção, não contra falha de zona. Quando a alternativa oferece backup para
+um requisito de disponibilidade, ela está trocando de problema.
+</Callout>
+
+## Como responder o cenário
+
+Separe os requisitos antes de olhar as alternativas: **continuar no ar**
+(Multi-AZ, Aurora com réplicas), **aguentar leitura** (réplica de leitura,
+endpoint de leitura), **escrever perto do usuário em outra região** (tabela
+global, ou Aurora Global Database para relacional), **voltar de um erro**
+(backup, point-in-time). Quase toda questão combina dois desses, e a
+alternativa certa é a que nomeia os dois mecanismos.

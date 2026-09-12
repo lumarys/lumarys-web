@@ -1,0 +1,269 @@
+---
+slug: route-53-roteamento-e-failover
+titulo: "Route 53: políticas de roteamento e failover"
+resumo: "Como o DNS vira mecanismo de resiliência e de desempenho na prova: as políticas de roteamento (simples, failover, ponderada, latência, geolocalização, geoproximidade, multivalor), as verificações de integridade que as alimentam, e o registro de alias que aponta para recursos da AWS sem custo."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É a peça que liga duas regiões numa arquitetura, e a prova sempre dá a pista na palavra: 'usuário mais próximo' não é a mesma coisa que 'menor latência', e 'dividir o tráfego para testar' não é a mesma coisa que 'usar o outro se este cair'. Cada uma dessas frases aponta para uma política diferente."
+comoCai: "A aplicação roda em duas regiões e deve mandar o usuário para a mais rápida, caindo para a outra se ela falhar. O que configurar?"
+feynman: "Explique em um minuto como um serviço de nomes consegue tirar do ar um data center inteiro para os usuários, sem tocar em nenhum servidor."
+preRequisitos: ["alta-disponibilidade-e-tolerancia-a-falhas"]
+errosComuns:
+  - "Confundir roteamento por latência com geolocalização. Latência escolhe a região que responde mais rápido para aquele usuário; geolocalização escolhe pelo país ou continente de origem, mesmo que outra fosse mais rápida."
+  - "Confundir geolocalização com geoproximidade. Geolocalização é regra por local de origem; geoproximidade calcula distância até os recursos e permite deslocar tráfego com um viés (bias)."
+  - "Achar que failover funciona sem verificação de integridade. Sem ela, o Route 53 não sabe que o primário caiu e continua respondendo o mesmo endereço."
+  - "Esquecer o TTL. Enquanto o registro antigo estiver em cache do resolvedor, o cliente continua indo ao destino que caiu; TTL alto atrasa qualquer failover de DNS."
+  - "Usar registro CNAME na raiz do domínio. A raiz não aceita CNAME; para apontar a raiz a um recurso da AWS, usa-se o registro de alias."
+  - "Tratar roteamento multivalor como balanceador. Ele devolve até oito endereços saudáveis e o cliente escolhe; não distribui carga nem verifica capacidade."
+preTeste:
+  - enunciado: "Uma aplicação roda em São Paulo e na Irlanda. A empresa quer que cada usuário seja atendido pela região que responder mais rápido para ele. Qual política de roteamento usar?"
+    alternativas:
+      - texto: "Roteamento por latência."
+        correta: true
+        explicacao: "Ela mede a latência observada entre o usuário e cada região e devolve a mais rápida para aquele cliente."
+      - texto: "Roteamento por geolocalização."
+        correta: false
+        explicacao: "Decide pela origem geográfica declarada, que nem sempre corresponde à região mais rápida."
+      - texto: "Roteamento ponderado com pesos iguais."
+        correta: false
+        explicacao: "Divide o tráfego por proporção, sem considerar desempenho para o usuário."
+  - enunciado: "Uma empresa quer enviar 10% do tráfego para uma versão nova da aplicação e 90% para a atual, para avaliar o comportamento. Qual política atende?"
+    alternativas:
+      - texto: "Roteamento ponderado, com pesos 10 e 90."
+        correta: true
+        explicacao: "Peso é exatamente proporção de tráfego entre destinos; é a política de teste gradual."
+      - texto: "Roteamento por failover."
+        correta: false
+        explicacao: "Failover manda tudo para o primário e só usa o secundário quando o primário falha."
+      - texto: "Roteamento multivalor."
+        correta: false
+        explicacao: "Devolve vários endereços saudáveis sem controle de proporção."
+videos:
+  - id: sgRGnUYm1dc
+    publicadoEm: "2025-04-30"
+    titulo: "Módulo 6: AWS Route 53: Domínio, Registros, TTL e Políticas de Roteamento Explicadas"
+    canal: "Jean Diogo"
+    duracao: 18
+    porQue: "Cobre as políticas uma a uma, em português e no recorte da prova. Assista anotando a frase que caracteriza cada política; é ela que aparece no enunciado."
+  - id: r4pduRumyiw
+    publicadoEm: "2025-04-15"
+    titulo: "O que é o AWS Route 53? Registro de Domínio e Configuração de DNS"
+    canal: "Kiko na Cloud"
+    duracao: 19
+    porQue: "Complementar, para quem nunca configurou DNS: zona hospedada, tipos de registro e TTL na prática. Vale se os termos do primeiro vídeo soarem abstratos."
+artigos:
+  - titulo: "Choosing a routing policy"
+    url: "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/routing-policy.html"
+    fonte: "AWS"
+  - titulo: "How Amazon Route 53 checks the health of your resources"
+    url: "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/dns-failover-determining-health-of-endpoints.html"
+    fonte: "AWS"
+  - titulo: "Choosing between alias and non-alias records"
+    url: "https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Roteamento simples."
+    verso: "Um registro, um ou mais valores, sem verificação de integridade. Se houver vários valores, o cliente escolhe. É o padrão de um domínio comum."
+  - frente: "Roteamento por failover."
+    verso: "Primário e secundário. Enquanto a verificação de integridade do primário passa, todo tráfego vai para ele; ao falhar, o Route 53 devolve o secundário. É a política de DR ativo-passivo."
+  - frente: "Roteamento ponderado."
+    verso: "Proporção de tráfego por peso entre destinos. Serve para teste gradual, implantação azul e verde, e divisão entre regiões."
+  - frente: "Roteamento por latência."
+    verso: "Devolve a região que apresenta a menor latência medida para aquele usuário. Desempenho, não geografia declarada."
+  - frente: "Roteamento por geolocalização."
+    verso: "Decide pelo local de origem da consulta (continente, país, estado nos EUA). Serve conteúdo localizado, restrição por território e conformidade."
+  - frente: "Roteamento por geoproximidade."
+    verso: "Calcula a distância entre usuário e recursos e permite deslocar tráfego com um viés (bias), aumentando ou reduzindo a área de um recurso. Exige Traffic Flow."
+  - frente: "Roteamento multivalor."
+    verso: "Devolve até oito registros saudáveis, com verificação de integridade por registro. Dá alguma distribuição e resiliência a nível de DNS, mas não substitui balanceador."
+  - frente: "Verificação de integridade do Route 53: os três tipos."
+    verso: "De endpoint (testa um IP ou nome), de alarme do CloudWatch (usa o estado de um alarme) e calculada (combina outras verificações com lógica)."
+  - frente: "O que é registro de alias?"
+    verso: "Registro exclusivo do Route 53 que aponta para um recurso da AWS (ELB, CloudFront, S3 website, API Gateway) pelo nome do serviço. Resolve na raiz do domínio e não é cobrado por consulta."
+  - frente: "Por que não usar CNAME na raiz do domínio?"
+    verso: "O padrão DNS não permite CNAME no ápice da zona. Para a raiz apontar a um recurso da AWS, usa-se alias."
+  - frente: "Como o TTL afeta o failover?"
+    verso: "Resolvedores guardam a resposta pelo TTL. Com TTL alto, o cliente continua indo ao destino antigo mesmo depois da troca; failover de DNS pede TTL baixo, como 60 segundos."
+  - frente: "Route 53 é regional ou global?"
+    verso: "Global, e é um dos poucos serviços com acordo de nível de serviço de 100% de disponibilidade."
+  - frente: "Qual política para 'ativo-ativo em duas regiões com queda automática'?"
+    verso: "Latência ou ponderada, com verificação de integridade associada a cada registro: o destino sem saúde deixa de ser devolvido."
+drills:
+  - titulo: "Qual política a frase pede?"
+    instrucao: "Para cada trecho de enunciado, diga a política de roteamento."
+    opcoes: ["Failover", "Ponderada", "Latência", "Geolocalização", "Multivalor"]
+    itens:
+      - enunciado: "'Usuários devem ser atendidos pela região que responder mais rápido.'"
+        resposta: "Latência"
+        explicacao: "Desempenho medido, não origem declarada."
+      - enunciado: "'Usuários do Brasil devem receber o site em português e os da Espanha, em espanhol.'"
+        resposta: "Geolocalização"
+        explicacao: "Decisão por território de origem."
+      - enunciado: "'Enviar 5% do tráfego para a nova versão.'"
+        resposta: "Ponderada"
+        explicacao: "Proporção entre destinos."
+      - enunciado: "'Se o ambiente principal ficar indisponível, direcionar para o site estático de contingência.'"
+        resposta: "Failover"
+        explicacao: "Ativo-passivo com verificação de integridade."
+      - enunciado: "'Devolver vários endereços saudáveis para o cliente escolher, com checagem por endereço.'"
+        resposta: "Multivalor"
+        explicacao: "Até oito registros saudáveis por resposta."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação está implantada em duas regiões da AWS. A empresa quer que cada usuário seja atendido pela região de menor latência e que, se uma região ficar indisponível, o tráfego dela vá automaticamente para a outra. Qual configuração atende?"
+    alternativas:
+      - texto: "Registros de roteamento por latência para as duas regiões, cada um associado a uma verificação de integridade do Route 53."
+        correta: true
+        explicacao: "A política resolve o desempenho; a verificação de integridade associada faz o registro sem saúde deixar de ser devolvido, o que produz a queda automática."
+      - texto: "Roteamento por latência, sem verificações de integridade."
+        correta: false
+        explicacao: "O Route 53 continuaria devolvendo a região indisponível para quem está perto dela."
+      - texto: "Roteamento por failover com a região de menor latência como primária."
+        correta: false
+        explicacao: "Failover manda todo o tráfego para uma região só; não atende ao requisito de latência por usuário."
+      - texto: "Roteamento por geolocalização por continente."
+        correta: false
+        explicacao: "Decide por origem geográfica, não por latência medida, e sozinho não faz queda automática."
+  - tipo: unica
+    enunciado: "Uma empresa mantém o ambiente principal em uma região e um site estático no S3 como página de contingência. Se a aplicação principal falhar, os visitantes devem ver a página de contingência automaticamente. Qual solução atende com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Roteamento por failover no Route 53, com verificação de integridade no ambiente principal e o site do S3 como registro secundário."
+        correta: true
+        explicacao: "É o caso de uso exato da política de failover: primário monitorado, secundário assumindo quando a verificação falha, sem intervenção."
+      - texto: "Roteamento ponderado com peso 100 no principal e 0 no site estático."
+        correta: false
+        explicacao: "Peso zero não muda sozinho quando o principal cai; alguém teria de alterar os pesos."
+      - texto: "Uma função Lambda que altere o registro DNS ao detectar falha."
+        correta: false
+        explicacao: "Reimplementa com código o que a política de failover faz nativamente."
+      - texto: "Roteamento multivalor com os dois destinos."
+        correta: false
+        explicacao: "Devolveria os dois endereços em situação normal, mandando parte dos usuários para a contingência sem necessidade."
+  - tipo: multipla
+    enunciado: "Depois de configurar failover no Route 53, uma equipe percebeu que parte dos usuários continuou tentando o ambiente indisponível por vários minutos após a falha. Quais DUAS medidas reduzem esse tempo?"
+    alternativas:
+      - texto: "Reduzir o TTL dos registros envolvidos, para que os resolvedores consultem o Route 53 com mais frequência."
+        correta: true
+        explicacao: "Enquanto o TTL não expira, o resolvedor devolve a resposta em cache; TTL alto atrasa qualquer failover de DNS."
+      - texto: "Reduzir o intervalo e o limiar de falha da verificação de integridade, para detectar a queda mais rápido."
+        correta: true
+        explicacao: "O tempo total é detecção mais propagação; encurtar a detecção reduz a primeira metade."
+      - texto: "Trocar a política de failover por roteamento simples com dois valores."
+        correta: false
+        explicacao: "Roteamento simples não tem verificação de integridade; pioraria a situação."
+      - texto: "Substituir os registros de alias por CNAME."
+        correta: false
+        explicacao: "O tipo de registro não altera a velocidade do failover, e CNAME nem é válido na raiz do domínio."
+      - texto: "Aumentar o TTL para que menos consultas cheguem ao Route 53."
+        correta: false
+        explicacao: "É o oposto: aumentaria o tempo em que o cliente usa a resposta antiga."
+  - tipo: unica
+    enunciado: "Uma empresa precisa apontar o domínio raiz exemplo.com.br diretamente para um Application Load Balancer, sem usar um subdomínio como www. Qual configuração é possível no Route 53?"
+    alternativas:
+      - texto: "Criar um registro de alias na raiz da zona apontando para o balanceador."
+        correta: true
+        explicacao: "Alias é o mecanismo do Route 53 para a raiz apontar a recursos da AWS, e não é cobrado por consulta."
+      - texto: "Criar um registro CNAME na raiz apontando para o nome DNS do balanceador."
+        correta: false
+        explicacao: "O padrão DNS não permite CNAME no ápice da zona."
+      - texto: "Criar um registro A na raiz com o endereço IP do balanceador."
+        correta: false
+        explicacao: "O IP do ALB não é fixo; um registro A apontaria para um endereço que muda."
+      - texto: "Redirecionar a raiz para www por meio de um registro NS."
+        correta: false
+        explicacao: "Registro NS delega uma zona; não redireciona nem aponta para aplicação."
+---
+
+## Em uma frase
+
+O Route 53 decide **para onde** o nome resolve, e essa decisão vira desempenho
+(latência, geolocalização) ou resiliência (failover, verificação de
+integridade). A pista da questão está sempre numa frase do enunciado.
+
+## As sete políticas, pela frase que as denuncia
+
+<Comparativo
+  colunas={["Política", "Decide por", "Frase típica do enunciado"]}
+  linhas={[
+    ["Simples", "Nada: devolve o que está lá", "'Apenas apontar o domínio'"],
+    ["Failover", "Saúde do primário", "'Se o principal falhar, usar o de contingência'"],
+    ["Ponderada", "Proporção configurada", "'Enviar 10% para a nova versão'"],
+    ["Latência", "Latência medida por usuário", "'A região que responder mais rápido'"],
+    ["Geolocalização", "Origem geográfica da consulta", "'Usuários do Brasil veem o site em português'"],
+    ["Geoproximidade", "Distância, com viés ajustável", "'Deslocar parte do tráfego de uma região para outra'"],
+    ["Multivalor", "Vários registros saudáveis", "'Devolver vários endereços, checando cada um'"]
+  ]}
+/>
+
+Os pares que a prova confunde de propósito:
+
+- **Latência × geolocalização.** A primeira é desempenho medido; a segunda é
+  regra por território. Um usuário no Chile pode ter latência menor para a
+  região dos Estados Unidos que para a do Brasil, e a política de latência vai
+  mandá-lo para lá. A de geolocalização, não.
+- **Geolocalização × geoproximidade.** A primeira responde "de onde você vem";
+  a segunda calcula distância até os recursos e deixa você **deslocar** o
+  limite com um viés, para tirar carga de uma região.
+- **Ponderada × failover.** Peso divide tráfego o tempo todo; failover manda
+  tudo para um lado até ele cair.
+
+## Verificação de integridade: o que torna DNS resiliente
+
+<Termo nome="verificação de integridade do Route 53">Teste periódico, feito de vários pontos do mundo, contra um endereço, um alarme do CloudWatch ou outras verificações combinadas. Registros associados a uma verificação que falha deixam de ser devolvidos.</Termo>
+
+Três tipos caem:
+
+- **De endpoint**: testa um IP ou nome, com protocolo e caminho configuráveis.
+- **De alarme do CloudWatch**: usa o estado de um alarme, útil quando a saúde é
+  uma métrica interna e não uma porta aberta.
+- **Calculada**: combina outras verificações com lógica ("saudável se pelo menos
+  duas das três estiverem"), para representar a saúde de um sistema composto.
+
+<Callout tipo="atencao" titulo="Failover sem verificação não é failover">
+A política de failover só age porque uma verificação de integridade reprovou o
+primário. Alternativa que configura failover e não menciona verificação
+descreve algo que nunca vai comutar. O mesmo vale para latência e ponderada
+"com queda automática": é a verificação associada a cada registro que produz a
+queda.
+</Callout>
+
+## O TTL manda no tempo de recuperação
+
+Resolvedores guardam a resposta pelo tempo do **TTL**. Enquanto ele não expira,
+o cliente vai ao destino antigo, mesmo que o Route 53 já tenha mudado de
+opinião. O tempo total de um failover de DNS é, portanto:
+
+<Passos itens={[
+  "Detecção: intervalo da verificação de integridade vezes o número de falhas exigidas.",
+  "Troca: o Route 53 passa a devolver o secundário, quase imediatamente.",
+  "Propagação: cada resolvedor só pergunta de novo quando o TTL da resposta em cache expira."
+]} />
+
+Por isso a dupla de respostas para "demorou demais a comutar": **baixar o TTL**
+e **apertar a verificação de integridade**. Aumentar o TTL é o distrator, e ele
+aparece com frequência.
+
+## Alias: o registro que resolve a raiz
+
+<Termo nome="registro de alias">Registro exclusivo do Route 53 que aponta para um recurso da AWS (ELB, CloudFront, site em S3, API Gateway) pelo nome do serviço, funciona na raiz da zona e não é cobrado por consulta.</Termo>
+
+O padrão DNS proíbe CNAME no ápice da zona, e o IP de um balanceador muda. A
+combinação dessas duas restrições é o que torna o alias a única resposta para
+"apontar exemplo.com.br diretamente para o balanceador".
+
+<Callout tipo="dica" titulo="DNS não é balanceador">
+Roteamento multivalor devolve até oito endereços saudáveis e deixa o cliente
+escolher. Não conhece carga, não conhece capacidade e não repõe nada. Quando a
+questão pede distribuição de carga de verdade, a resposta é um balanceador; o
+Route 53 entra para escolher a **região**, não a instância.
+</Callout>
+
+## Como responder o cenário
+
+Ache a frase que descreve a intenção: **proporção** (ponderada), **mais
+rápido** (latência), **de onde vem** (geolocalização), **se cair** (failover).
+Depois confirme que a alternativa cita a **verificação de integridade** quando
+há queda automática, e cheque o **TTL** se a questão falar em tempo. Por fim,
+se o alvo é um recurso da AWS e o nome é a raiz do domínio, é **alias**.

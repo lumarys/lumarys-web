@@ -1,0 +1,264 @@
+---
+slug: estrategias-de-recuperacao-de-desastres
+titulo: "Estratégias de recuperação de desastres: RTO, RPO e as quatro opções"
+resumo: "O eixo que organiza o fim do Domínio 2: RTO é quanto tempo você pode ficar parado, RPO é quanto dado pode perder, e as quatro estratégias (backup e restauração, luz-piloto, espera morna e multissítio) são pontos numa reta entre custo baixo e recuperação rápida. A prova dá os números e espera a escolha."
+minutos: 40
+nivel: avancado
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É onde o Domínio 2 fecha, e a questão é sempre a mesma em roupas diferentes: o enunciado dá um RTO e um RPO e pergunta a estratégia mais barata que os atende. Quem sabe a ordem das quatro e o que cada uma mantém ligada responde em segundos; quem não sabe escolhe pela que parece mais robusta e erra por excesso."
+comoCai: "O negócio aceita 4 horas parado e no máximo 15 minutos de dados perdidos. Qual estratégia de DR atende com o MENOR custo?"
+feynman: "Explique em um minuto para alguém de negócio a diferença entre 'quanto tempo eu fico fora do ar' e 'quanto trabalho eu perco', e por que as duas perguntas custam dinheiro separadamente."
+preRequisitos: ["alta-disponibilidade-e-tolerancia-a-falhas", "bancos-de-dados-resilientes"]
+errosComuns:
+  - "Trocar RTO por RPO. RTO é tempo até voltar (olha para a frente); RPO é o ponto no passado a que você volta, ou seja, quanto dado se perde (olha para trás)."
+  - "Escolher a estratégia mais robusta quando o enunciado pede a mais barata que atende. A prova pune resposta acima do requisito: se 4 horas de RTO bastam, multissítio está errado."
+  - "Achar que luz-piloto mantém a aplicação ligada. Ela mantém só o núcleo, tipicamente o dado replicado; os servidores estão desligados ou nem existem, e sobem na hora do desastre."
+  - "Confundir espera morna com multissítio. Espera morna mantém uma versão reduzida rodando de verdade, que é escalada no desastre; multissítio atende tráfego nas duas regiões o tempo todo."
+  - "Esquecer que a região secundária precisa de mais que dados: AMIs, modelos de lançamento, configuração, limites de serviço e a zona de DNS também precisam existir lá."
+  - "Confiar num plano de DR nunca testado. A prova cobra teste periódico, e o custo real de um RTO baixo inclui o ensaio."
+preTeste:
+  - enunciado: "Uma empresa define RTO de 10 minutos e RPO de 1 minuto para um sistema crítico. Qual estratégia é compatível?"
+    alternativas:
+      - texto: "Espera morna ou multissítio, com replicação contínua do banco para a segunda região."
+        correta: true
+        explicacao: "RTO de minutos exige infraestrutura já rodando na secundária; RPO de um minuto exige replicação contínua, não backup periódico."
+      - texto: "Backup e restauração, com snapshots copiados a cada hora."
+        correta: false
+        explicacao: "Restaurar leva horas (fura o RTO) e o intervalo de uma hora entre cópias fura o RPO."
+      - texto: "Luz-piloto com o banco replicado e servidores desligados."
+        correta: false
+        explicacao: "O RPO é atendido, mas subir e configurar a camada de aplicação normalmente ultrapassa 10 minutos."
+  - enunciado: "Uma aplicação interna tolera um dia inteiro parada e a perda do trabalho das últimas horas. Qual estratégia atende com o MENOR custo?"
+    alternativas:
+      - texto: "Backup e restauração, com backups replicados para outra região."
+        correta: true
+        explicacao: "RTO e RPO folgados permitem a estratégia mais barata: nada ligado na secundária, só as cópias."
+      - texto: "Espera morna com uma versão reduzida sempre ligada."
+        correta: false
+        explicacao: "Paga infraestrutura permanente que o requisito não exige."
+      - texto: "Multissítio ativo-ativo."
+        correta: false
+        explicacao: "A mais cara de todas, para um requisito que aceita um dia de parada."
+videos:
+  - id: OxOzj4HIhqc
+    publicadoEm: "2026-06-06"
+    titulo: "AWS Disaster Recovery Completo: AWS Backup, DataSync, RTO, RPO e Continuidade de Negócios"
+    canal: "Jean Diogo"
+    duracao: 16
+    porQue: "Em português e no recorte de prova: define RTO e RPO antes de falar de serviço, que é a ordem certa. Anote a posição das quatro estratégias na reta de custo; é o que a questão pede."
+  - id: eaq4zfB3FQ4
+    publicadoEm: "2024-07-05"
+    titulo: "Estratégias de Backup e Recuperação de Desastres na AWS"
+    canal: "UpperStack"
+    duracao: 70
+    porQue: "Complementar e longo: vale pelos trechos de AWS Backup e de cópia de snapshot entre regiões, se você quiser ver a mecânica funcionando. Não precisa assistir inteiro para a prova."
+artigos:
+  - titulo: "Disaster recovery options in the cloud"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Backup?"
+    url: "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html"
+    fonte: "AWS"
+  - titulo: "Replicating objects - Amazon S3"
+    url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "RTO, em uma linha."
+    verso: "Recovery Time Objective: quanto tempo o negócio aceita ficar indisponível até o serviço voltar. Olha para a frente, a partir do desastre."
+  - frente: "RPO, em uma linha."
+    verso: "Recovery Point Objective: qual o ponto no passado a que se volta, ou seja, quanto dado o negócio aceita perder. Olha para trás, antes do desastre."
+  - frente: "Backup e restauração: RTO, RPO e custo."
+    verso: "RTO de horas, RPO de horas. O mais barato: nada ligado na região secundária, só cópias de dados e imagens."
+  - frente: "Luz-piloto (pilot light): o que fica ligado?"
+    verso: "Só o núcleo, quase sempre o banco replicado continuamente. Servidores de aplicação existem como imagem e modelo, desligados. RTO de dezenas de minutos, RPO de minutos."
+  - frente: "Espera morna (warm standby): o que muda em relação à luz-piloto?"
+    verso: "Uma versão reduzida do ambiente roda de verdade e pode até receber uma fatia de tráfego. No desastre, escala-se para a capacidade total. RTO de minutos."
+  - frente: "Multissítio (ativo-ativo): o que caracteriza?"
+    verso: "As duas regiões atendem tráfego o tempo todo, com dados replicados nos dois sentidos. RTO e RPO próximos de zero, e o custo mais alto."
+  - frente: "A ordem das quatro estratégias por custo e por RTO."
+    verso: "Do mais barato e mais lento para o mais caro e mais rápido: backup e restauração, luz-piloto, espera morna, multissítio."
+  - frente: "O que mais precisa existir na região secundária, além dos dados?"
+    verso: "AMIs e modelos de lançamento, configuração e segredos, papéis do IAM, rede (VPC e sub-redes), limites de serviço suficientes e os registros de DNS para comutar."
+  - frente: "AWS Backup, em uma linha."
+    verso: "Serviço central de backup para vários serviços (EBS, RDS, DynamoDB, EFS, S3, FSx), com planos, agendamento, retenção e cópia entre regiões e contas."
+  - frente: "Replicação do S3: CRR e SRR."
+    verso: "Cross-Region Replication copia objetos para um bucket em outra região; Same-Region Replication copia dentro da mesma. Assíncrona, exige versionamento nos dois buckets."
+  - frente: "Como comutar o tráfego no desastre?"
+    verso: "Route 53 com política de failover e verificação de integridade, ou Global Accelerator para comutação mais rápida, sem depender de cache de DNS."
+  - frente: "Por que o RTO real costuma ser maior que o previsto?"
+    verso: "Porque o plano não foi testado: falta AMI atualizada, limite de serviço na região secundária, segredo não replicado ou runbook desatualizado."
+  - frente: "Alta disponibilidade resolve DR?"
+    verso: "Não. Multi-AZ protege contra falha de zona dentro da região; DR trata da perda do ambiente ou da região inteira, e mede-se por RTO e RPO."
+drills:
+  - titulo: "Qual estratégia o número pede?"
+    instrucao: "Para cada par de requisitos, diga a estratégia mais barata que atende."
+    opcoes: ["Backup e restauração", "Luz-piloto", "Espera morna", "Multissítio"]
+    itens:
+      - enunciado: "RTO de 24 horas, RPO de 12 horas, sistema interno de relatórios."
+        resposta: "Backup e restauração"
+        explicacao: "Requisitos folgados permitem a opção mais barata."
+      - enunciado: "RTO de 30 minutos, RPO de 5 minutos."
+        resposta: "Luz-piloto"
+        explicacao: "Banco replicado continuamente atende o RPO; subir a camada de aplicação cabe em dezenas de minutos."
+      - enunciado: "RTO de 5 minutos, RPO de 1 minuto, com capacidade parcial aceitável no início."
+        resposta: "Espera morna"
+        explicacao: "Ambiente reduzido já rodando, escalado no desastre."
+      - enunciado: "Serviço financeiro que não pode parar nem perder transação."
+        resposta: "Multissítio"
+        explicacao: "RTO e RPO próximos de zero exigem as duas regiões ativas."
+      - enunciado: "RTO de 8 horas, RPO de 1 hora, orçamento apertado."
+        resposta: "Backup e restauração"
+        explicacao: "Cópias de hora em hora atendem o RPO e a restauração cabe em 8 horas."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa definiu para sua aplicação principal um RTO de 15 minutos e um RPO de 5 minutos, em caso de indisponibilidade da região. A equipe quer a solução de MENOR custo que atenda aos dois objetivos. Qual estratégia deve ser adotada?"
+    alternativas:
+      - texto: "Luz-piloto: banco replicado continuamente para a segunda região, com imagens e modelos de lançamento prontos e servidores de aplicação desligados até o desastre."
+        correta: true
+        explicacao: "A replicação contínua cobre o RPO de 5 minutos; subir a camada de aplicação a partir de imagens prontas cabe em 15 minutos. Mais barato que manter ambiente rodando."
+      - texto: "Backup e restauração com snapshots copiados a cada hora."
+        correta: false
+        explicacao: "Uma hora entre cópias já viola o RPO de 5 minutos, e a restauração levaria mais que 15 minutos."
+      - texto: "Multissítio ativo-ativo nas duas regiões."
+        correta: false
+        explicacao: "Atende de sobra e é a opção mais cara; a questão pede o menor custo que cumpre os objetivos."
+      - texto: "Implantação Multi-AZ na região principal, com backups automáticos."
+        correta: false
+        explicacao: "Multi-AZ protege contra falha de zona, não de região. Não é estratégia de DR regional."
+  - tipo: unica
+    enunciado: "Uma equipe implementou DR com luz-piloto em uma segunda região. Em um teste, o banco estava replicado e atualizado, mas a recuperação levou o dobro do RTO previsto. Qual é a causa mais provável?"
+    alternativas:
+      - texto: "Faltavam componentes não relacionados a dados na região secundária, como imagens atualizadas, configuração, papéis do IAM e limites de serviço suficientes."
+        correta: true
+        explicacao: "Luz-piloto cobre o dado; o resto do ambiente precisa estar preparado. É a causa clássica de RTO estourado em teste."
+      - texto: "A replicação do banco era assíncrona."
+        correta: false
+        explicacao: "Isso afetaria o RPO, não o tempo de subir o ambiente, e o enunciado diz que o banco estava atualizado."
+      - texto: "O RPO estava configurado muito baixo."
+        correta: false
+        explicacao: "RPO não influencia o tempo de recuperação."
+      - texto: "A estratégia correta seria backup e restauração."
+        correta: false
+        explicacao: "Seria mais lenta ainda; a questão é de preparo do ambiente, não de escolha de estratégia."
+  - tipo: multipla
+    enunciado: "Uma empresa vai implementar recuperação de desastres entre regiões para uma aplicação que usa S3 e RDS. Quais DUAS ações compõem a preparação dos dados na região secundária?"
+    alternativas:
+      - texto: "Configurar replicação entre regiões no bucket S3, com versionamento habilitado na origem e no destino."
+        correta: true
+        explicacao: "É o mecanismo nativo de replicação de objetos entre regiões, e o versionamento é pré-requisito."
+      - texto: "Configurar cópia automática de snapshots do RDS para a região secundária, ou uma réplica de leitura entre regiões conforme o RPO exigido."
+        correta: true
+        explicacao: "Snapshot copiado atende RPO de horas; réplica entre regiões atende RPO de minutos. A escolha depende do número exigido."
+      - texto: "Habilitar Multi-AZ no RDS da região principal."
+        correta: false
+        explicacao: "Protege contra falha de zona dentro da região; não cria nada na secundária."
+      - texto: "Criar uma tabela global do DynamoDB."
+        correta: false
+        explicacao: "A aplicação descrita usa S3 e RDS; não há DynamoDB no cenário."
+      - texto: "Aumentar o período de retenção dos backups na região principal."
+        correta: false
+        explicacao: "Guarda mais histórico no mesmo lugar; se a região se perder, os backups se perdem com ela."
+  - tipo: unica
+    enunciado: "Uma aplicação financeira global precisa continuar atendendo transações sem interrupção perceptível mesmo se uma região inteira ficar indisponível, e não pode perder transações confirmadas. Qual arquitetura atende?"
+    alternativas:
+      - texto: "Multissítio ativo-ativo em duas regiões, com dados replicados entre elas e roteamento que retira automaticamente a região indisponível."
+        correta: true
+        explicacao: "Sem interrupção perceptível e sem perda exige as duas regiões atendendo tráfego, com replicação e comutação automática."
+      - texto: "Espera morna, com uma versão reduzida na segunda região."
+        correta: false
+        explicacao: "Há um intervalo de escalada e comutação; existe interrupção perceptível, ainda que curta."
+      - texto: "Luz-piloto com o banco replicado."
+        correta: false
+        explicacao: "Exige subir a camada de aplicação; a interrupção é de dezenas de minutos."
+      - texto: "Backups replicados entre regiões com restauração automatizada."
+        correta: false
+        explicacao: "Recuperação em horas e perda de tudo que ocorreu desde o último backup."
+---
+
+## Em uma frase
+
+**RTO** é quanto tempo você aceita ficar parado; **RPO** é quanto dado aceita
+perder. As quatro estratégias são pontos numa reta: quanto menores os dois
+números, mais caro. A questão dá os números e espera a opção **mais barata que
+os atende**.
+
+## Os dois números, sem trocar um pelo outro
+
+<Termo nome="RTO">Recovery Time Objective: o tempo máximo aceitável entre o desastre e o serviço de volta. Olha para a frente.</Termo>
+
+<Termo nome="RPO">Recovery Point Objective: o ponto no passado a que se volta — na prática, quanto trabalho se perde. Olha para trás.</Termo>
+
+Uma forma de nunca trocar: RPO é definido pela **frequência da cópia** (backup
+de hora em hora dá RPO de uma hora; replicação contínua dá RPO de segundos).
+RTO é definido pelo **quanto já está de pé** na região secundária.
+
+## As quatro estratégias
+
+<Comparativo
+  colunas={["Estratégia", "O que fica na secundária", "RTO típico", "RPO típico", "Custo"]}
+  linhas={[
+    ["Backup e restauração", "Só cópias: backups e imagens", "Horas", "Horas", "O menor"],
+    ["Luz-piloto", "O núcleo de dados replicado; aplicação desligada", "Dezenas de minutos", "Minutos", "Baixo"],
+    ["Espera morna", "Ambiente reduzido rodando de verdade", "Minutos", "Segundos a minutos", "Médio"],
+    ["Multissítio", "Ambiente completo atendendo tráfego", "Perto de zero", "Perto de zero", "O maior"]
+  ]}
+/>
+
+A distinção que mais confunde é entre as duas do meio:
+
+- **Luz-piloto**: o dado está replicado e vivo; a aplicação **não está
+  rodando**. No desastre, você liga a partir de imagens e modelos prontos.
+- **Espera morna**: existe um ambiente **funcionando**, menor que o de
+  produção, que talvez já receba uma fatia do tráfego. No desastre, você
+  **escala** o que já está lá.
+
+Ligar leva mais tempo que escalar; daí a diferença de RTO e de custo.
+
+<Callout tipo="atencao" titulo="A prova pune resposta acima do requisito">
+Quando o enunciado diz "RTO de 4 horas" e pede o **menor custo**, multissítio
+está errado mesmo atendendo. O padrão da questão é dar dois números e várias
+alternativas que funcionam; a certa é a mais barata que cabe nos dois.
+</Callout>
+
+## O que mais precisa existir na outra região
+
+Replicar o banco é a parte visível. O RTO estoura no teste por causa do resto:
+
+<Passos itens={[
+  "Imagens (AMI) e modelos de lançamento atualizados, não os de seis meses atrás.",
+  "Rede pronta: VPC, sub-redes em mais de uma zona, grupos de segurança, endpoints.",
+  "Identidade e configuração: papéis do IAM, segredos no Secrets Manager, parâmetros.",
+  "Limites de serviço suficientes na região secundária para subir a capacidade inteira.",
+  "O caminho do tráfego: zona do Route 53 com failover e verificações prontas, ou Global Accelerator."
+]} />
+
+## As peças de replicação
+
+- **AWS Backup**: plano central com agendamento, retenção e **cópia entre
+  regiões e contas**, cobrindo EBS, RDS, DynamoDB, EFS, S3 e FSx. É a resposta
+  de "menor esforço" quando o cenário tem vários tipos de recurso.
+- **S3 com replicação entre regiões**: assíncrona, exige versionamento nos dois
+  buckets.
+- **Banco**: cópia de snapshot entre regiões para RPO de horas; réplica de
+  leitura ou Aurora Global Database para RPO de minutos ou menos; tabela global
+  do DynamoDB para ativo em várias regiões.
+- **Comutação**: Route 53 com failover e verificação de integridade, lembrando
+  que o **TTL** entra no RTO; Global Accelerator quando a comutação precisa ser
+  mais rápida que o DNS permite.
+
+<Callout tipo="dica" titulo="Disponibilidade não é DR">
+Multi-AZ, Auto Scaling entre zonas e réplicas na mesma região protegem contra
+falhas **dentro** da região. Nenhum deles ajuda se a região inteira cair. Quando
+a alternativa oferece Multi-AZ para um requisito de desastre regional, ela está
+trocando de problema — e é o distrator mais comum deste tema.
+</Callout>
+
+## Como responder o cenário
+
+Extraia os dois números do enunciado. Use o RPO para decidir o **mecanismo de
+dados** (backup periódico, réplica contínua, ativo em várias regiões) e o RTO
+para decidir **quanto fica ligado** na secundária. Depois aplique a palavra:
+com "menor custo", desça a reta até a última opção que ainda cabe nos dois
+números. E confira se a alternativa fala em falha de **região**: se ela oferece
+Multi-AZ, está respondendo outra pergunta.

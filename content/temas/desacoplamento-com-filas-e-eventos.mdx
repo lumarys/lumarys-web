@@ -1,0 +1,263 @@
+---
+slug: desacoplamento-com-filas-e-eventos
+titulo: "Desacoplamento: SQS, SNS e EventBridge"
+resumo: "Como a prova transforma 'o sistema caiu junto' em arquitetura resiliente: fila do SQS para absorver pico e tolerar consumidor fora do ar, tópico do SNS para entregar a vários assinantes, EventBridge para rotear eventos por regra. Mais fila FIFO, fila de mensagens mortas e o padrão de leque."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Desacoplar é a resposta estrutural do Domínio 2: componentes que falham juntos viram componentes que falham sozinhos. A prova testa a escolha entre os três serviços com pistas precisas — 'processar depois' é fila, 'avisar vários' é tópico, 'rotear por conteúdo do evento' é EventBridge — e cobra o que acontece com a mensagem quando o consumidor falha."
+comoCai: "Picos de pedidos derrubam o serviço de processamento e pedidos se perdem. Como redesenhar para não perder nada?"
+feynman: "Explique em um minuto por que colocar uma fila entre dois sistemas faz o conjunto aguentar mais, mesmo sem nenhum servidor a mais."
+preRequisitos: ["alta-disponibilidade-e-tolerancia-a-falhas"]
+errosComuns:
+  - "Achar que fila padrão do SQS garante ordem. Ela é de melhor esforço e pode entregar a mesma mensagem mais de uma vez; ordem estrita e exatamente uma entrega são da fila FIFO."
+  - "Esquecer que o consumidor precisa apagar a mensagem. Sem a exclusão, ela reaparece quando o tempo de visibilidade expira — que é justamente o que protege contra consumidor que morreu no meio."
+  - "Usar SNS quando o requisito é absorver pico. Tópico entrega e esquece; se o assinante estiver fora, a mensagem se perde. Absorver carga e reter é fila."
+  - "Usar SQS quando o requisito é avisar vários sistemas. Uma mensagem na fila é consumida por um consumidor; para vários destinos, é tópico, ou tópico com uma fila por destino."
+  - "Tratar EventBridge como fila. Ele roteia eventos por regra para destinos; não guarda para consumo posterior nem tem tempo de visibilidade."
+  - "Não configurar fila de mensagens mortas. Sem ela, uma mensagem que sempre falha fica reprocessando para sempre e trava a fila."
+preTeste:
+  - enunciado: "Um serviço web recebe picos de pedidos que derrubam o processamento, e pedidos são perdidos. A empresa quer garantir que nenhum pedido se perca e que o processamento aconteça no ritmo possível. Qual solução atende?"
+    alternativas:
+      - texto: "Colocar uma fila do Amazon SQS entre o serviço web e os processadores, com um grupo de Auto Scaling consumindo a fila."
+        correta: true
+        explicacao: "A fila absorve o pico e retém as mensagens; os consumidores processam no ritmo deles e escalam pela profundidade da fila."
+      - texto: "Publicar os pedidos em um tópico do SNS."
+        correta: false
+        explicacao: "SNS entrega imediatamente; se o assinante estiver sobrecarregado ou fora, a mensagem se perde."
+      - texto: "Aumentar o tamanho das instâncias de processamento."
+        correta: false
+        explicacao: "Adia o problema e continua perdendo pedidos no pico seguinte."
+  - enunciado: "Um evento de novo pedido precisa disparar, ao mesmo tempo, o faturamento, o estoque e um e-mail ao cliente, cada um com o próprio ritmo e tolerância a falha. Qual desenho atende?"
+    alternativas:
+      - texto: "Um tópico do SNS com uma fila SQS assinando para cada sistema."
+        correta: true
+        explicacao: "É o padrão de leque com retenção: o tópico multiplica, e cada fila isola o ritmo e as falhas de um consumidor."
+      - texto: "Uma única fila SQS lida pelos três sistemas."
+        correta: false
+        explicacao: "Cada mensagem seria consumida por um só deles; os outros não veriam o pedido."
+      - texto: "Chamadas HTTP síncronas do serviço de pedidos para os três."
+        correta: false
+        explicacao: "Acopla tudo: se um estiver fora, o pedido falha ou fica esperando."
+videos:
+  - id: 3qrBJuobRp8
+    publicadoEm: "2022-10-22"
+    titulo: "AWS SQS: O que é, como funciona e os detalhes de configuração"
+    canal: "aulasdev"
+    duracao: 24
+    porQue: "Cobre a fila com os detalhes que a prova cobra: visibilidade, retenção e FIFO. Assista atento ao que acontece quando o consumidor não apaga a mensagem; é o mecanismo por trás de metade das questões."
+  - id: 9phzwKOLBM4
+    publicadoEm: "2022-11-05"
+    titulo: "Amazon SNS: O que é, como funciona e qual a diferença do SQS?"
+    canal: "aulasdev"
+    duracao: 20
+    porQue: "Complementar do mesmo autor, e vai direto à comparação que decide a questão: quando tópico e quando fila. Repare no padrão de tópico com filas assinando."
+artigos:
+  - titulo: "What is Amazon Simple Queue Service?"
+    url: "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html"
+    fonte: "AWS"
+  - titulo: "Amazon SQS visibility timeout"
+    url: "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon SNS?"
+    url: "https://docs.aws.amazon.com/sns/latest/dg/welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon EventBridge?"
+    url: "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "SQS, em uma linha."
+    verso: "Fila gerenciada: o produtor escreve, a mensagem fica retida (até 14 dias) e um consumidor a lê e apaga. Absorve pico, tolera consumidor fora do ar, desacopla ritmos."
+  - frente: "SNS, em uma linha."
+    verso: "Tópico de publicação e assinatura: uma mensagem publicada é entregue a todos os assinantes (fila, Lambda, HTTP, e-mail, SMS). Entrega e esquece."
+  - frente: "EventBridge, em uma linha."
+    verso: "Barramento de eventos com regras que filtram por conteúdo e roteiam para destinos. Recebe eventos de serviços da AWS, de parceiros e da sua aplicação, com agendamento e catálogo de esquemas."
+  - frente: "Fila padrão versus FIFO."
+    verso: "Padrão: vazão praticamente ilimitada, ordem de melhor esforço, entrega pelo menos uma vez. FIFO: ordem estrita por grupo de mensagens e exatamente uma entrega, com vazão menor."
+  - frente: "O que é tempo de visibilidade?"
+    verso: "Período em que a mensagem lida fica invisível para outros consumidores. Se o consumidor apagar, acabou; se falhar antes disso, a mensagem reaparece e é reprocessada."
+  - frente: "Por que o consumidor precisa apagar a mensagem?"
+    verso: "Porque a leitura não remove nada. A exclusão explícita é o que confirma o processamento; é o que dá tolerância a consumidor que morre no meio."
+  - frente: "Fila de mensagens mortas (DLQ)."
+    verso: "Fila separada que recebe a mensagem depois de N tentativas de processamento sem sucesso. Evita reprocessamento infinito e guarda o caso para análise."
+  - frente: "Consulta longa (long polling)."
+    verso: "O consumidor espera até 20 segundos por mensagem em vez de responder vazio na hora. Reduz chamadas vazias e custo, e é o padrão recomendado."
+  - frente: "Padrão de leque (fan-out)."
+    verso: "Um tópico SNS com várias filas SQS assinando. Combina a multiplicação do tópico com a retenção e o isolamento da fila. É o desenho que a prova espera para 'vários sistemas, cada um no seu ritmo'."
+  - frente: "SNS FIFO existe?"
+    verso: "Sim, e só entrega a filas SQS FIFO, mantendo ordem e exatamente uma entrega ao longo do caminho."
+  - frente: "Como escalar consumidores pela fila?"
+    verso: "Auto Scaling com a métrica de profundidade da fila (ApproximateNumberOfMessagesVisible), ou número de mensagens por instância. É a métrica certa; CPU costuma ser o distrator."
+  - frente: "Quando EventBridge em vez de SNS?"
+    verso: "Quando a decisão de destino depende do conteúdo do evento, quando a origem é um serviço da AWS ou de parceiro, ou quando é preciso agendar. SNS é distribuição simples e de altíssima vazão."
+  - frente: "Retenção e tamanho da mensagem no SQS."
+    verso: "Retenção de 1 minuto a 14 dias (padrão 4 dias); mensagem de até 256 KB, com a biblioteca de payload estendido usando S3 para maiores."
+drills:
+  - titulo: "Fila, tópico ou barramento?"
+    instrucao: "Para cada necessidade, diga o serviço esperado."
+    opcoes: ["SQS", "SNS", "EventBridge", "SNS com filas SQS"]
+    itens:
+      - enunciado: "Absorver um pico de requisições e processar depois, sem perder nada."
+        resposta: "SQS"
+        explicacao: "Retenção e consumo no ritmo do consumidor."
+      - enunciado: "Notificar por e-mail e SMS quando um alarme disparar."
+        resposta: "SNS"
+        explicacao: "Entrega imediata a múltiplos protocolos."
+      - enunciado: "Disparar fluxos diferentes conforme o campo 'tipo' do evento."
+        resposta: "EventBridge"
+        explicacao: "Regra que filtra por conteúdo e roteia."
+      - enunciado: "O mesmo pedido precisa ir para faturamento, estoque e envio, cada um com retentativa própria."
+        resposta: "SNS com filas SQS"
+        explicacao: "Leque com retenção e isolamento por consumidor."
+      - enunciado: "Processar transações financeiras na ordem exata em que chegaram, sem duplicar."
+        resposta: "SQS"
+        explicacao: "Fila FIFO, com ordem estrita e exatamente uma entrega."
+      - enunciado: "Reagir quando uma instância EC2 muda de estado."
+        resposta: "EventBridge"
+        explicacao: "Eventos de serviços da AWS chegam ao barramento por padrão."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação de pedidos perde requisições durante picos, porque o serviço de processamento não acompanha o volume. A empresa exige que nenhum pedido seja perdido e quer o MENOR esforço operacional. Qual solução atende?"
+    alternativas:
+      - texto: "Publicar os pedidos em uma fila do Amazon SQS e processar com instâncias em um grupo de Auto Scaling que escala pela profundidade da fila."
+        correta: true
+        explicacao: "A fila retém os pedidos durante o pico e o Auto Scaling ajusta os consumidores à demanda real, medida pela própria fila."
+      - texto: "Aumentar o tamanho das instâncias do serviço de processamento."
+        correta: false
+        explicacao: "Escala vertical tem teto e continua perdendo pedidos quando o pico ultrapassar a nova capacidade."
+      - texto: "Publicar os pedidos em um tópico do Amazon SNS assinado pelo serviço de processamento."
+        correta: false
+        explicacao: "O SNS entrega na hora; se o processamento estiver saturado, a mensagem se perde. Não há retenção."
+      - texto: "Gravar os pedidos num arquivo no S3 e processar por um job noturno."
+        correta: false
+        explicacao: "Resolve a perda, mas muda o comportamento do produto para processamento em lote, o que o enunciado não pediu."
+  - tipo: unica
+    enunciado: "Um sistema de pagamentos precisa processar as transações de cada cliente exatamente na ordem em que foram recebidas, sem processar a mesma transação duas vezes. Qual configuração atende?"
+    alternativas:
+      - texto: "Uma fila FIFO do SQS, usando o identificador do cliente como identificador de grupo de mensagens."
+        correta: true
+        explicacao: "FIFO garante ordem dentro do grupo e entrega exatamente uma vez; agrupar por cliente mantém a ordem por cliente e ainda permite paralelismo entre clientes."
+      - texto: "Uma fila padrão do SQS com tempo de visibilidade alto."
+        correta: false
+        explicacao: "Fila padrão não garante ordem e pode entregar em duplicidade; visibilidade não corrige nenhum dos dois."
+      - texto: "Um tópico do SNS com assinatura da função de processamento."
+        correta: false
+        explicacao: "SNS padrão não garante ordem nem unicidade de entrega."
+      - texto: "Uma regra do EventBridge com destino na função de pagamento."
+        correta: false
+        explicacao: "EventBridge roteia eventos; não oferece ordenação estrita por chave nem semântica de exatamente uma vez."
+  - tipo: multipla
+    enunciado: "Em uma fila SQS, algumas mensagens estão sendo processadas repetidamente e nunca saem da fila, degradando a vazão. Quais DUAS causas ou correções são coerentes?"
+    alternativas:
+      - texto: "O consumidor não está apagando a mensagem após processá-la, então ela reaparece quando o tempo de visibilidade expira."
+        correta: true
+        explicacao: "A leitura não remove; a exclusão explícita é o que encerra a mensagem."
+      - texto: "Configurar uma fila de mensagens mortas com um número máximo de recebimentos, para tirar da fila a mensagem que sempre falha."
+        correta: true
+        explicacao: "É o mecanismo desenhado para reprocessamento infinito: depois de N tentativas, a mensagem vai para a DLQ."
+      - texto: "Trocar a fila padrão por uma fila FIFO."
+        correta: false
+        explicacao: "Ordem e unicidade não têm relação com mensagem que falha em processar."
+      - texto: "Reduzir o período de retenção da fila para um minuto."
+        correta: false
+        explicacao: "Descartaria mensagens legítimas ainda não processadas; trata o sintoma destruindo dado."
+      - texto: "Publicar as mensagens também em um tópico do SNS."
+        correta: false
+        explicacao: "Duplicaria a entrega sem resolver o processamento que falha."
+  - tipo: unica
+    enunciado: "Uma empresa quer que eventos de mudança de estado de instâncias EC2 disparem diferentes fluxos de automação conforme o tipo do evento e a etiqueta do recurso, com o MENOR esforço de desenvolvimento. Qual serviço deve ser usado?"
+    alternativas:
+      - texto: "Amazon EventBridge, com regras que filtram o padrão do evento e roteiam para destinos diferentes."
+        correta: true
+        explicacao: "Eventos de serviços da AWS chegam ao barramento por padrão, e a regra filtra por conteúdo sem código."
+      - texto: "Amazon SQS, com uma fila por tipo de evento."
+        correta: false
+        explicacao: "Alguém teria de ler o evento e decidir a fila; a filtragem por conteúdo não existe na fila."
+      - texto: "Amazon SNS, com um tópico por tipo de evento."
+        correta: false
+        explicacao: "O SNS filtra por atributos de mensagem que o publicador define; para eventos nativos de serviços da AWS, o barramento já traz o evento e a regra."
+      - texto: "AWS Step Functions, com uma máquina de estados por tipo."
+        correta: false
+        explicacao: "Step Functions orquestra passos depois que algo a inicia; não é o mecanismo que capta e roteia o evento."
+---
+
+## Em uma frase
+
+Desacoplar é pôr algo entre dois componentes para que a falha ou a lentidão de
+um não derrube o outro: **fila** quando é preciso reter e processar depois,
+**tópico** quando é preciso avisar vários, **barramento** quando a decisão
+depende do conteúdo do evento.
+
+## Os três, e a pista de cada um
+
+<Comparativo
+  colunas={["", "SQS", "SNS", "EventBridge"]}
+  linhas={[
+    ["Modelo", "Fila: um consumidor por mensagem", "Tópico: todos os assinantes recebem", "Barramento: regras roteiam por conteúdo"],
+    ["Retenção", "Até 14 dias", "Nenhuma: entrega e esquece", "Nenhuma (arquivamento é opcional e à parte)"],
+    ["Se o destino está fora", "A mensagem espera na fila", "A entrega falha ou tenta de novo conforme a política", "A regra tenta de novo e pode ir para DLQ"],
+    ["Pista no enunciado", "'Absorver pico', 'processar depois', 'não perder'", "'Avisar vários sistemas', 'notificar por e-mail e SMS'", "'Conforme o tipo do evento', 'reagir a um serviço da AWS', 'agendar'"]
+  ]}
+/>
+
+<Termo nome="SQS">Fila gerenciada. O produtor publica, a mensagem fica retida, o consumidor lê, processa e apaga. Absorve picos e isola ritmos.</Termo>
+
+<Termo nome="SNS">Tópico de publicação e assinatura. Uma mensagem chega a todos os assinantes: filas, funções, endpoints HTTP, e-mail, SMS.</Termo>
+
+## O mecanismo da fila que vira questão
+
+Ler uma mensagem **não a remove**. O que acontece é:
+
+<Passos itens={[
+  "O consumidor lê a mensagem, que fica invisível para os outros durante o tempo de visibilidade.",
+  "Se o processamento termina, o consumidor APAGA a mensagem. Só aí ela deixa a fila.",
+  "Se o consumidor falha ou morre antes de apagar, o tempo expira e a mensagem volta a ficar visível, para outro consumidor tentar.",
+  "Se ela falhar N vezes, a fila de mensagens mortas a recebe, tirando-a do ciclo."
+]} />
+
+Esse desenho é o que dá tolerância a falha do consumidor — e é também a origem
+do sintoma mais cobrado: "a mesma mensagem é processada repetidas vezes e nunca
+sai". As duas causas são não apagar a mensagem e não ter DLQ configurada.
+
+<Callout tipo="atencao" titulo="Padrão ou FIFO?">
+Fila **padrão**: vazão praticamente ilimitada, ordem de melhor esforço, entrega
+**pelo menos uma vez** (o consumidor precisa ser idempotente). Fila **FIFO**:
+ordem estrita dentro do grupo de mensagens e **exatamente uma** entrega, com
+vazão menor. "Na ordem exata" e "sem duplicar" são as frases que pedem FIFO; o
+identificador de grupo costuma ser a chave do negócio, como o cliente.
+</Callout>
+
+## Leque: tópico com filas
+
+Quando o mesmo evento precisa alimentar vários sistemas, e cada um tem ritmo e
+tolerância a falha diferentes, nem fila nem tópico sozinhos bastam:
+
+- Fila sozinha entrega a **um** consumidor: os outros não veem.
+- Tópico sozinho entrega e esquece: o sistema que estava fora **perde**.
+
+O desenho que a prova espera é o **leque**: um tópico SNS com uma fila SQS
+assinando para cada destino. O tópico multiplica; cada fila retém e isola. Se o
+faturamento cair, a fila dele acumula e os outros dois seguem.
+
+## Escalar pela fila, não pela CPU
+
+Um grupo de Auto Scaling que consome fila deve escalar pela **profundidade da
+fila** — `ApproximateNumberOfMessagesVisible`, ou a razão de mensagens por
+instância. A CPU do consumidor não representa o trabalho pendente: uma fila com
+dez mil mensagens e um consumidor ocioso aguardando entrada de rede tem CPU
+baixa. Nas questões, CPU é o distrator e profundidade da fila é a resposta.
+
+<Callout tipo="dica" titulo="EventBridge não é fila">
+Ele roteia por regra e tem destinos, mas não guarda para consumo posterior nem
+tem tempo de visibilidade. Quando a questão pede **retenção**, a resposta
+envolve SQS — inclusive como destino de uma regra do EventBridge.
+</Callout>
+
+## Como responder o cenário
+
+Pergunte primeiro **quantos destinos**: um (fila), vários (tópico, ou leque se
+cada um precisa reter). Depois, **o que acontece se o destino estiver fora**: se
+a resposta aceitável for "espera", é fila. Por fim, **quem decide o destino**: se
+for o conteúdo do evento ou um serviço da AWS que o emitiu, é EventBridge. E
+quando o enunciado citar ordem ou duplicidade, vá direto para FIFO.

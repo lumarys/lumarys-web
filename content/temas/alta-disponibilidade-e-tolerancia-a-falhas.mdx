@@ -1,0 +1,271 @@
+---
+slug: alta-disponibilidade-e-tolerancia-a-falhas
+titulo: "Alta disponibilidade e tolerância a falhas"
+resumo: "O vocabulário do Domínio 2 e o mapa da infraestrutura: região, zona de disponibilidade e borda; a diferença entre alta disponibilidade, tolerância a falhas e recuperação de desastres; o que é serviço de zona, de região e global; e por que a prova quase sempre responde 'mais de uma AZ'."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É a base do domínio de 26%, e onde nasce a resposta padrão da prova: se o enunciado fala em falha, a alternativa certa quase sempre distribui em mais de uma zona de disponibilidade. Sem saber o que é zona, região e serviço de escopo regional, você não distingue a alternativa que resolve da que só parece resolver."
+comoCai: "A aplicação precisa continuar disponível se um data center inteiro falhar. O que muda na arquitetura?"
+feynman: "Explique em um minuto para alguém de negócio a diferença entre 'o site não cai' e 'se tudo cair, eu volto em duas horas', e por que custam coisas diferentes."
+preRequisitos: ["como-ler-uma-questao-saa"]
+errosComuns:
+  - "Tratar região e zona de disponibilidade como sinônimos. Região é a área geográfica; zona é um ou mais data centers isolados dentro dela. Multi-AZ protege contra falha de data center; multirregião protege contra falha da região inteira."
+  - "Achar que multirregião é sempre melhor. Custa mais, adiciona latência de replicação e complexidade. A prova pune resposta acima do requisito: se o enunciado fala em falha de AZ, a resposta multirregião está errada."
+  - "Confundir alta disponibilidade com tolerância a falhas. Alta disponibilidade aceita uma interrupção curta durante o failover; tolerância a falhas não perde nada, e custa bem mais."
+  - "Esquecer que uma instância EC2 vive em uma única zona. Ela não migra sozinha: o que dá disponibilidade é ter várias, em zonas diferentes, atrás de um balanceador."
+  - "Achar que S3, DynamoDB e Lambda precisam de configuração para serem resilientes na região. Eles já replicam entre zonas por desenho; o que exige decisão é a proteção entre regiões."
+  - "Ignorar o modelo de responsabilidade compartilhada. A AWS entrega zonas isoladas; usar mais de uma é trabalho do arquiteto, não acontece por padrão."
+preTeste:
+  - enunciado: "Uma aplicação roda em uma única instância EC2. O requisito novo é continuar disponível se uma zona de disponibilidade falhar. Qual mudança atende?"
+    alternativas:
+      - texto: "Distribuir instâncias por pelo menos duas zonas, atrás de um balanceador de carga."
+        correta: true
+        explicacao: "Zona é a unidade de falha isolada; disponibilidade vem de ter capacidade em mais de uma, com algo distribuindo o tráfego."
+      - texto: "Aumentar o tipo da instância para um tamanho maior."
+        correta: false
+        explicacao: "Escalar verticalmente não protege contra falha da zona onde a instância está."
+      - texto: "Criar um snapshot diário do volume EBS."
+        correta: false
+        explicacao: "Snapshot é recuperação, não disponibilidade: você volta depois, com perda e tempo parado."
+  - enunciado: "Uma empresa quer proteção contra a indisponibilidade de uma região inteira da AWS, com o MENOR custo possível. Qual estratégia é coerente com o pedido?"
+    alternativas:
+      - texto: "Manter backups replicados em outra região e provisionar a infraestrutura quando necessário."
+        correta: true
+        explicacao: "Backup e restauração é a estratégia multirregião mais barata; o custo é o tempo de recuperação, que o enunciado não restringiu."
+      - texto: "Manter uma cópia completa e ativa da arquitetura na segunda região."
+        correta: false
+        explicacao: "É a mais cara. O enunciado pede o menor custo, e não exigiu recuperação imediata."
+      - texto: "Distribuir a aplicação por três zonas de disponibilidade da mesma região."
+        correta: false
+        explicacao: "Protege contra falha de zona, não da região inteira."
+videos:
+  - id: 4VIOuatXN6Y
+    publicadoEm: "2023-05-01"
+    titulo: "As Regiões e Zonas de Disponibilidade da AWS explicadas de forma simples e prática!"
+    canal: "Coffops"
+    duracao: 11
+    porQue: "Onze minutos para fixar o mapa: região, zona e a distância física entre elas. Assista prestando atenção em por que as zonas são separadas mas próximas; é isso que permite replicação síncrona sem latência proibitiva."
+  - id: e5ndhoRHC1c
+    publicadoEm: "2024-11-21"
+    titulo: "Availability Zones na AWS - Você nunca entendeu do jeito certo!"
+    canal: "Filipe Almeida"
+    duracao: 20
+    porQue: "Complementar, e resolve uma confusão real: o nome da zona (us-east-1a) é diferente em cada conta. Não cai direto na prova, mas evita conclusões erradas quando você comparar arquiteturas entre contas."
+artigos:
+  - titulo: "Regions and Availability Zones"
+    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html"
+    fonte: "AWS"
+  - titulo: "Reliability Pillar - AWS Well-Architected Framework"
+    url: "https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/welcome.html"
+    fonte: "AWS"
+  - titulo: "Shared Responsibility Model"
+    url: "https://aws.amazon.com/compliance/shared-responsibility-model/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Região e zona de disponibilidade, em uma linha."
+    verso: "Região é uma área geográfica (sa-east-1). Zona é um ou mais data centers isolados dentro da região, com energia e rede independentes, ligados por rede de baixa latência."
+  - frente: "Por que as zonas são próximas, mas separadas?"
+    verso: "Separadas o bastante para um desastre local não atingir duas; próximas o bastante para replicação síncrona (poucos milissegundos), que é o que permite Multi-AZ sem perda de dados."
+  - frente: "Alta disponibilidade versus tolerância a falhas."
+    verso: "Alta disponibilidade: o serviço volta rápido, aceitando uma interrupção curta no failover. Tolerância a falhas: nenhuma interrupção nem perda, com redundância total. A segunda custa muito mais."
+  - frente: "Disponibilidade versus recuperação de desastres."
+    verso: "Disponibilidade trata de falhas dentro da arquitetura (instância, zona). DR trata da perda do ambiente inteiro, geralmente da região, e é medida por RTO e RPO."
+  - frente: "Escopo dos serviços: zona, região, global."
+    verso: "Zona: instância EC2, volume EBS, sub-rede. Região: S3, DynamoDB, SQS, Lambda, ELB (replicam entre zonas sozinhos). Global: IAM, Route 53, CloudFront, WAF para CloudFront."
+  - frente: "Um volume EBS pode ser anexado a uma instância de outra zona?"
+    verso: "Não. EBS é de zona. Para mover, cria-se um snapshot (que é de região) e um volume novo na zona de destino."
+  - frente: "O que significa 'quatro noves'?"
+    verso: "99,99% de disponibilidade: cerca de 52 minutos de indisponibilidade por ano. Cada nove a mais reduz o tempo por um fator de dez e costuma multiplicar o custo."
+  - frente: "Como componentes em série afetam a disponibilidade?"
+    verso: "Multiplicam-se: dois componentes de 99% em série dão 98,01%. Em paralelo (redundantes), a indisponibilidade é que se multiplica, e o conjunto fica mais disponível que as partes."
+  - frente: "Quem é responsável por usar mais de uma zona?"
+    verso: "Você. A AWS entrega zonas isoladas (responsabilidade da nuvem); distribuir a carga entre elas é responsabilidade na nuvem, do arquiteto."
+  - frente: "Local Zones e Wavelength, em uma linha."
+    verso: "Extensões da região para perto do usuário: Local Zones para latência de milissegundo em metrópoles, Wavelength dentro da rede 5G. Não são mecanismo de disponibilidade."
+  - frente: "Quantas zonas usar numa arquitetura resiliente?"
+    verso: "No mínimo duas; três é comum quando se quer manter capacidade total mesmo com uma fora. A prova aceita 'pelo menos duas' como o requisito base."
+drills:
+  - titulo: "Zona, região ou global?"
+    instrucao: "Para cada recurso, diga o escopo dele."
+    opcoes: ["Zona", "Região", "Global"]
+    itens:
+      - enunciado: "Volume EBS anexado a uma instância."
+        resposta: "Zona"
+        explicacao: "Vive em uma zona e não atravessa para outra sem snapshot."
+      - enunciado: "Bucket S3."
+        resposta: "Região"
+        explicacao: "Criado numa região e replicado entre zonas pela própria AWS."
+      - enunciado: "Zona hospedada do Route 53."
+        resposta: "Global"
+        explicacao: "DNS é serviço global, fora do escopo de região."
+      - enunciado: "Sub-rede de uma VPC."
+        resposta: "Zona"
+        explicacao: "Cada sub-rede pertence a exatamente uma zona; a VPC é da região."
+      - enunciado: "Usuário e role do IAM."
+        resposta: "Global"
+        explicacao: "Identidades valem na conta inteira, em qualquer região."
+      - enunciado: "Fila do SQS."
+        resposta: "Região"
+        explicacao: "Serviço regional, redundante entre zonas por desenho."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação web roda em duas instâncias EC2 na mesma zona de disponibilidade, atrás de um Application Load Balancer. Durante uma falha dessa zona, a aplicação ficou indisponível. Qual mudança resolve o problema com o MENOR esforço?"
+    alternativas:
+      - texto: "Adicionar sub-redes em uma segunda zona de disponibilidade e configurar o grupo de Auto Scaling para distribuir as instâncias entre as duas zonas."
+        correta: true
+        explicacao: "O balanceador já suporta várias zonas; o que faltava era capacidade em mais de uma. O Auto Scaling faz a distribuição e a reposição sozinho."
+      - texto: "Replicar a aplicação inteira em uma segunda região com failover de DNS."
+        correta: false
+        explicacao: "Resolve, mas responde acima do requisito: a falha foi de zona, não de região. Mais custo e mais complexidade."
+      - texto: "Aumentar o número de instâncias na zona atual."
+        correta: false
+        explicacao: "Mais instâncias na mesma zona caem junto com a zona."
+      - texto: "Trocar o Application Load Balancer por um Network Load Balancer."
+        correta: false
+        explicacao: "O tipo de balanceador não muda nada aqui; o problema é onde a capacidade está."
+  - tipo: unica
+    enunciado: "Uma empresa executa uma aplicação crítica e quer entender por que a disponibilidade medida ficou abaixo da esperada. A arquitetura tem um balanceador (99,99%), instâncias em uma zona (99,95%) e um banco de dados de instância única (99,95%), todos necessários para a aplicação funcionar. O que explica o resultado?"
+    alternativas:
+      - texto: "Componentes necessários em série multiplicam suas disponibilidades, então o conjunto é menos disponível que qualquer uma das partes."
+        correta: true
+        explicacao: "99,99% × 99,95% × 99,95% dá cerca de 99,89%. É a razão de a prova insistir em redundância em cada camada."
+      - texto: "A disponibilidade do conjunto é a do componente mais disponível."
+        correta: false
+        explicacao: "Seria verdade em paralelo redundante, não em série com dependência."
+      - texto: "A disponibilidade do conjunto é a média das três."
+        correta: false
+        explicacao: "Não existe média em cálculo de disponibilidade de componentes dependentes."
+      - texto: "O balanceador compensa a indisponibilidade dos outros componentes."
+        correta: false
+        explicacao: "Ele distribui tráfego entre alvos saudáveis; não substitui um banco fora do ar."
+  - tipo: multipla
+    enunciado: "Um arquiteto revisa uma arquitetura e precisa identificar quais recursos ficam presos a uma única zona de disponibilidade. Quais DOIS são recursos de zona?"
+    alternativas:
+      - texto: "Volume EBS."
+        correta: true
+        explicacao: "Vive numa zona e só é anexável a instâncias da mesma zona."
+      - texto: "Sub-rede da VPC."
+        correta: true
+        explicacao: "Cada sub-rede pertence a exatamente uma zona."
+      - texto: "Bucket S3."
+        correta: false
+        explicacao: "Regional, com redundância entre zonas feita pela AWS."
+      - texto: "Tabela do DynamoDB."
+        correta: false
+        explicacao: "Regional, replicada entre zonas por desenho."
+      - texto: "Zona hospedada do Route 53."
+        correta: false
+        explicacao: "Serviço global."
+  - tipo: unica
+    enunciado: "Uma empresa pergunta se deve adotar uma arquitetura ativa em duas regiões para uma aplicação interna de relatórios, usada em horário comercial, cuja interrupção de algumas horas é tolerável. Qual recomendação é mais adequada?"
+    alternativas:
+      - texto: "Manter a aplicação em uma região com redundância entre zonas e backups replicados para outra região."
+        correta: true
+        explicacao: "Atende à falha provável (zona) com redundância e cobre o improvável (região) com backup, no custo compatível com a criticidade declarada."
+      - texto: "Adotar duas regiões ativas com replicação de dados síncrona."
+        correta: false
+        explicacao: "Custo e complexidade altos para uma aplicação que tolera horas de interrupção."
+      - texto: "Manter tudo em uma zona e aumentar a frequência dos snapshots."
+        correta: false
+        explicacao: "Deixa a falha mais provável, a de zona, sem nenhuma proteção."
+      - texto: "Migrar para instâncias maiores para reduzir a chance de falha."
+        correta: false
+        explicacao: "Tamanho de instância não altera a probabilidade de falha da zona ou do hardware."
+---
+
+## Em uma frase
+
+**Zona** é a unidade de falha isolada; **região** é o conjunto de zonas. A
+resposta padrão do Domínio 2 é distribuir em **mais de uma zona**; a região
+extra só entra quando o enunciado fala em perder a região inteira.
+
+## O mapa da infraestrutura
+
+<Termo nome="região">Área geográfica com várias zonas de disponibilidade, como sa-east-1 (São Paulo). Você escolhe a região por latência, custo, serviços disponíveis e exigência legal de onde o dado mora.</Termo>
+
+<Termo nome="zona de disponibilidade">Um ou mais data centers dentro de uma região, com energia, refrigeração e rede independentes. Separados o bastante para um desastre local não atingir dois; próximos o bastante para replicação síncrona.</Termo>
+
+Essa distância é uma decisão de engenharia que tem consequência direta na
+prova: como as zonas estão a poucos milissegundos umas das outras, dá para
+replicar **de forma síncrona** entre elas. É por isso que RDS Multi-AZ não
+perde transação, e é por isso que o mesmo truque não funciona entre regiões
+distantes, onde a replicação é assíncrona e existe janela de perda.
+
+Além das zonas, a rede tem os **pontos de presença** (borda), onde vivem
+CloudFront e Route 53. Eles servem desempenho e roteamento, não redundância de
+computação.
+
+## Três palavras que a prova separa
+
+<Comparativo
+  colunas={["Conceito", "Pergunta que responde", "Custo típico", "Mecanismo"]}
+  linhas={[
+    ["Alta disponibilidade", "Continua no ar se um componente cair?", "Moderado", "Redundância em mais de uma zona, failover automático"],
+    ["Tolerância a falhas", "Continua sem NENHUMA interrupção nem perda?", "Alto", "Redundância total, capacidade de sobra"],
+    ["Recuperação de desastres", "Se eu perder tudo, em quanto tempo volto e quanto perco?", "Depende da estratégia", "Backup, réplica ou ambiente em outra região; medido por RTO e RPO"]
+  ]}
+/>
+
+Alta disponibilidade aceita a interrupção curta do failover. Tolerância a
+falhas não aceita nenhuma, e paga por isso. Quando o enunciado diz "sem
+interrupção" ou "sem perder nenhuma transação", ele está pedindo a segunda, e
+a alternativa mais barata provavelmente não atende.
+
+## Escopo do recurso: onde ele vive
+
+Esta é a tabela que mais economiza tempo na prova:
+
+<Comparativo
+  colunas={["Escopo", "Recursos", "O que isso implica"]}
+  linhas={[
+    ["Zona", "Instância EC2, volume EBS, sub-rede, NAT Gateway", "Morre com a zona. Redundância é trabalho seu"],
+    ["Região", "S3, DynamoDB, SQS, SNS, Lambda, ELB, Aurora", "A AWS já replica entre zonas. Sua decisão é entre regiões"],
+    ["Global", "IAM, Route 53, CloudFront, Organizations", "Não pertence a região nenhuma"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O erro que o escopo revela">
+"Anexar o volume EBS à instância da outra zona" e "usar a mesma sub-rede nas
+duas zonas" aparecem como alternativas e são **impossíveis**, não apenas
+ruins. Saber o escopo elimina esse tipo de distrator sem raciocinar sobre o
+cenário.
+</Callout>
+
+## Por que "pelo menos duas zonas" é quase sempre a resposta
+
+Uma instância vive em uma zona e não migra sozinha. Um volume EBS idem. Se a
+zona cai, tudo que estava só nela cai junto. Distribuir em duas zonas é a
+mudança mais barata que transforma "cai" em "continua com metade da
+capacidade" — e, com Auto Scaling, em "continua e repõe".
+
+A matemática ajuda a entender a insistência: componentes **necessários em
+série** multiplicam disponibilidades. Um balanceador de 99,99%, instâncias de
+99,95% e um banco único de 99,95% resultam em cerca de 99,89%, pior que
+qualquer um deles. Redundância em cada camada é o que inverte essa conta.
+
+<Callout tipo="dica" titulo="Como a palavra do enunciado escolhe o escopo">
+"Falha de uma zona", "falha de um data center" → **duas ou mais zonas**.
+"Falha de uma região", "desastre regional", "continuidade de negócio" →
+**segunda região**, e aí a pergunta seguinte é qual estratégia de DR. Responder
+multirregião para falha de zona é responder acima do requisito, e a prova
+considera isso errado.
+</Callout>
+
+## Responsabilidade compartilhada
+
+A AWS entrega zonas isoladas e serviços regionais já redundantes. **Usar** mais
+de uma zona é decisão sua. Nenhuma arquitetura vira resiliente porque está na
+nuvem; ela vira resiliente porque alguém distribuiu a capacidade. Quando uma
+alternativa diz "a AWS já garante isso" para um recurso de zona, ela está
+errada.
+
+## Como responder o cenário
+
+Pergunte o que está falhando: **instância** (mais instâncias, Auto Scaling),
+**zona** (mais zonas), **região** (DR, e qual estratégia), **dado** (backup e
+replicação). Depois confira o escopo dos recursos citados: metade dos
+distratores propõe algo que o escopo não permite. Por fim, aplique a palavra
+do enunciado: "sem interrupção" pede mais que "continuar disponível", e
+"menor custo" impede subir para multirregião sem que ela tenha sido pedida.

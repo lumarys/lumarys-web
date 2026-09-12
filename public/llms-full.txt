@@ -28,6 +28,15 @@ Página: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/
 - [Detecção e auditoria: CloudTrail, Config, GuardDuty e Security Hub](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/deteccao-e-auditoria-na-aws/): Quem fez o quê (CloudTrail), como o recurso está configurado e se está conforme (Config), o que parece ameaça (GuardDuty), o que está vulnerável (Inspector) e onde tudo isso se junta (Security Hub). A prova cobra qual serviço responde a cada pergunta e como proteger o próprio registro de auditoria.
 - [Usuários de aplicação e acesso a APIs: Cognito, API Gateway e acesso privado](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/identidade-de-usuarios-e-acesso-a-apis/): Como a prova espera que uma aplicação autentique pessoas e proteja suas APIs: Cognito user pool para login e identity pool para credenciais temporárias, os autorizadores do API Gateway (Cognito, IAM, Lambda) e o acesso privado entre serviços. O erro clássico é dar usuário IAM a cliente de aplicativo.
 
+### Arquiteturas resilientes
+
+- [Alta disponibilidade e tolerância a falhas](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/alta-disponibilidade-e-tolerancia-a-falhas/): O vocabulário do Domínio 2 e o mapa da infraestrutura: região, zona de disponibilidade e borda; a diferença entre alta disponibilidade, tolerância a falhas e recuperação de desastres; o que é serviço de zona, de região e global; e por que a prova quase sempre responde 'mais de uma AZ'.
+- [Balanceamento de carga e Auto Scaling](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/balanceamento-e-auto-scaling/): Os dois mecanismos que sustentam quase toda arquitetura resiliente da prova: qual balanceador para cada caso (ALB, NLB e Gateway Load Balancer), como a verificação de integridade tira um alvo doente da rotação, e como o Auto Scaling repõe capacidade, escala por métrica e distribui entre zonas.
+- [Bancos resilientes: Multi-AZ, réplicas de leitura e tabelas globais](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/bancos-de-dados-resilientes/): A distinção que a prova mais cobra em banco de dados: Multi-AZ é disponibilidade com réplica síncrona que ninguém lê, réplica de leitura é desempenho com replicação assíncrona. Mais Aurora e seu Global Database, DynamoDB com tabelas globais, e o que cada um faz num failover.
+- [Route 53: políticas de roteamento e failover](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/route-53-roteamento-e-failover/): Como o DNS vira mecanismo de resiliência e de desempenho na prova: as políticas de roteamento (simples, failover, ponderada, latência, geolocalização, geoproximidade, multivalor), as verificações de integridade que as alimentam, e o registro de alias que aponta para recursos da AWS sem custo.
+- [Desacoplamento: SQS, SNS e EventBridge](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/desacoplamento-com-filas-e-eventos/): Como a prova transforma 'o sistema caiu junto' em arquitetura resiliente: fila do SQS para absorver pico e tolerar consumidor fora do ar, tópico do SNS para entregar a vários assinantes, EventBridge para rotear eventos por regra. Mais fila FIFO, fila de mensagens mortas e o padrão de leque.
+- [Estratégias de recuperação de desastres: RTO, RPO e as quatro opções](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/estrategias-de-recuperacao-de-desastres/): O eixo que organiza o fim do Domínio 2: RTO é quanto tempo você pode ficar parado, RPO é quanto dado pode perder, e as quatro estratégias (backup e restauração, luz-piloto, espera morna e multissítio) são pontos numa reta entre custo baixo e recuperação rápida. A prova dá os números e espera a escolha.
+
 ## Engenharia de Analytics
 
 A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.
@@ -894,6 +903,692 @@ sozinha, e a que tem usuário IAM para cliente de aplicativo cai primeiro.
 - Achar que autorizador IAM serve para usuário final de aplicativo. Autorizador IAM (SigV4) é para chamadas de serviços, contas e identidades da AWS, não para o público.
 - Expor a API na internet quando só serviços internos a consomem. API privada com endpoint de interface na VPC mantém tudo fora da internet.
 - Ignorar que o API Gateway já limita taxa. Throttling e chaves de API com planos de uso resolvem 'limitar clientes' antes de qualquer WAF.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Alta disponibilidade e tolerância a falhas
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas resilientes
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/alta-disponibilidade-e-tolerancia-a-falhas/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** O vocabulário do Domínio 2 e o mapa da infraestrutura: região, zona de disponibilidade e borda; a diferença entre alta disponibilidade, tolerância a falhas e recuperação de desastres; o que é serviço de zona, de região e global; e por que a prova quase sempre responde 'mais de uma AZ'.
+
+**Por que cai na prova.** É a base do domínio de 26%, e onde nasce a resposta padrão da prova: se o enunciado fala em falha, a alternativa certa quase sempre distribui em mais de uma zona de disponibilidade. Sem saber o que é zona, região e serviço de escopo regional, você não distingue a alternativa que resolve da que só parece resolver.
+
+**Como o entrevistador pergunta.** "A aplicação precisa continuar disponível se um data center inteiro falhar. O que muda na arquitetura?"
+
+## Em uma frase
+
+**Zona** é a unidade de falha isolada; **região** é o conjunto de zonas. A
+resposta padrão do Domínio 2 é distribuir em **mais de uma zona**; a região
+extra só entra quando o enunciado fala em perder a região inteira.
+
+## O mapa da infraestrutura
+
+<Termo nome="região">Área geográfica com várias zonas de disponibilidade, como sa-east-1 (São Paulo). Você escolhe a região por latência, custo, serviços disponíveis e exigência legal de onde o dado mora.</Termo>
+
+<Termo nome="zona de disponibilidade">Um ou mais data centers dentro de uma região, com energia, refrigeração e rede independentes. Separados o bastante para um desastre local não atingir dois; próximos o bastante para replicação síncrona.</Termo>
+
+Essa distância é uma decisão de engenharia que tem consequência direta na
+prova: como as zonas estão a poucos milissegundos umas das outras, dá para
+replicar **de forma síncrona** entre elas. É por isso que RDS Multi-AZ não
+perde transação, e é por isso que o mesmo truque não funciona entre regiões
+distantes, onde a replicação é assíncrona e existe janela de perda.
+
+Além das zonas, a rede tem os **pontos de presença** (borda), onde vivem
+CloudFront e Route 53. Eles servem desempenho e roteamento, não redundância de
+computação.
+
+## Três palavras que a prova separa
+
+<Comparativo
+  colunas={["Conceito", "Pergunta que responde", "Custo típico", "Mecanismo"]}
+  linhas={[
+    ["Alta disponibilidade", "Continua no ar se um componente cair?", "Moderado", "Redundância em mais de uma zona, failover automático"],
+    ["Tolerância a falhas", "Continua sem NENHUMA interrupção nem perda?", "Alto", "Redundância total, capacidade de sobra"],
+    ["Recuperação de desastres", "Se eu perder tudo, em quanto tempo volto e quanto perco?", "Depende da estratégia", "Backup, réplica ou ambiente em outra região; medido por RTO e RPO"]
+  ]}
+/>
+
+Alta disponibilidade aceita a interrupção curta do failover. Tolerância a
+falhas não aceita nenhuma, e paga por isso. Quando o enunciado diz "sem
+interrupção" ou "sem perder nenhuma transação", ele está pedindo a segunda, e
+a alternativa mais barata provavelmente não atende.
+
+## Escopo do recurso: onde ele vive
+
+Esta é a tabela que mais economiza tempo na prova:
+
+<Comparativo
+  colunas={["Escopo", "Recursos", "O que isso implica"]}
+  linhas={[
+    ["Zona", "Instância EC2, volume EBS, sub-rede, NAT Gateway", "Morre com a zona. Redundância é trabalho seu"],
+    ["Região", "S3, DynamoDB, SQS, SNS, Lambda, ELB, Aurora", "A AWS já replica entre zonas. Sua decisão é entre regiões"],
+    ["Global", "IAM, Route 53, CloudFront, Organizations", "Não pertence a região nenhuma"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O erro que o escopo revela">
+"Anexar o volume EBS à instância da outra zona" e "usar a mesma sub-rede nas
+duas zonas" aparecem como alternativas e são **impossíveis**, não apenas
+ruins. Saber o escopo elimina esse tipo de distrator sem raciocinar sobre o
+cenário.
+</Callout>
+
+## Por que "pelo menos duas zonas" é quase sempre a resposta
+
+Uma instância vive em uma zona e não migra sozinha. Um volume EBS idem. Se a
+zona cai, tudo que estava só nela cai junto. Distribuir em duas zonas é a
+mudança mais barata que transforma "cai" em "continua com metade da
+capacidade" — e, com Auto Scaling, em "continua e repõe".
+
+A matemática ajuda a entender a insistência: componentes **necessários em
+série** multiplicam disponibilidades. Um balanceador de 99,99%, instâncias de
+99,95% e um banco único de 99,95% resultam em cerca de 99,89%, pior que
+qualquer um deles. Redundância em cada camada é o que inverte essa conta.
+
+<Callout tipo="dica" titulo="Como a palavra do enunciado escolhe o escopo">
+"Falha de uma zona", "falha de um data center" → **duas ou mais zonas**.
+"Falha de uma região", "desastre regional", "continuidade de negócio" →
+**segunda região**, e aí a pergunta seguinte é qual estratégia de DR. Responder
+multirregião para falha de zona é responder acima do requisito, e a prova
+considera isso errado.
+</Callout>
+
+## Responsabilidade compartilhada
+
+A AWS entrega zonas isoladas e serviços regionais já redundantes. **Usar** mais
+de uma zona é decisão sua. Nenhuma arquitetura vira resiliente porque está na
+nuvem; ela vira resiliente porque alguém distribuiu a capacidade. Quando uma
+alternativa diz "a AWS já garante isso" para um recurso de zona, ela está
+errada.
+
+## Como responder o cenário
+
+Pergunte o que está falhando: **instância** (mais instâncias, Auto Scaling),
+**zona** (mais zonas), **região** (DR, e qual estratégia), **dado** (backup e
+replicação). Depois confira o escopo dos recursos citados: metade dos
+distratores propõe algo que o escopo não permite. Por fim, aplique a palavra
+do enunciado: "sem interrupção" pede mais que "continuar disponível", e
+"menor custo" impede subir para multirregião sem que ela tenha sido pedida.
+
+## Erros comuns
+
+- Tratar região e zona de disponibilidade como sinônimos. Região é a área geográfica; zona é um ou mais data centers isolados dentro dela. Multi-AZ protege contra falha de data center; multirregião protege contra falha da região inteira.
+- Achar que multirregião é sempre melhor. Custa mais, adiciona latência de replicação e complexidade. A prova pune resposta acima do requisito: se o enunciado fala em falha de AZ, a resposta multirregião está errada.
+- Confundir alta disponibilidade com tolerância a falhas. Alta disponibilidade aceita uma interrupção curta durante o failover; tolerância a falhas não perde nada, e custa bem mais.
+- Esquecer que uma instância EC2 vive em uma única zona. Ela não migra sozinha: o que dá disponibilidade é ter várias, em zonas diferentes, atrás de um balanceador.
+- Achar que S3, DynamoDB e Lambda precisam de configuração para serem resilientes na região. Eles já replicam entre zonas por desenho; o que exige decisão é a proteção entre regiões.
+- Ignorar o modelo de responsabilidade compartilhada. A AWS entrega zonas isoladas; usar mais de uma é trabalho do arquiteto, não acontece por padrão.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Balanceamento de carga e Auto Scaling
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas resilientes
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/balanceamento-e-auto-scaling/
+Tempo estimado: 40 minutos · Nível: intermediario
+
+**Resumo.** Os dois mecanismos que sustentam quase toda arquitetura resiliente da prova: qual balanceador para cada caso (ALB, NLB e Gateway Load Balancer), como a verificação de integridade tira um alvo doente da rotação, e como o Auto Scaling repõe capacidade, escala por métrica e distribui entre zonas.
+
+**Por que cai na prova.** Aparece em metade dos cenários do Domínio 2 e reaparece nos de desempenho e custo. A prova cobra três decisões: qual balanceador (a pista está no protocolo e no tipo de roteamento), o que a verificação de integridade faz de fato, e a diferença entre repor capacidade e aumentar capacidade — que é o par Auto Scaling e política de escala.
+
+**Como o entrevistador pergunta.** "A aplicação precisa suportar picos imprevisíveis e sobreviver à falha de uma instância, com o MENOR custo. O que você desenha?"
+
+## Em uma frase
+
+O **balanceador** tira o alvo doente da rotação e distribui a carga; o **Auto
+Scaling** repõe o que morreu e ajusta a quantidade. Sem os dois, não há
+arquitetura resiliente na prova — e o par certo depende do protocolo e do tipo
+de variação da carga.
+
+## Os três balanceadores
+
+<Comparativo
+  colunas={["", "ALB", "NLB", "Gateway Load Balancer"]}
+  linhas={[
+    ["Camada", "7 (HTTP e HTTPS)", "4 (TCP, UDP, TLS)", "3 (GENEVE, porta 6081)"],
+    ["Roteia por", "Caminho, host, cabeçalho, método, consulta", "IP e porta", "Não roteia: insere appliance no caminho"],
+    ["Endereço", "Nome DNS (IP muda)", "IP estático por zona, aceita Elastic IP", "Endpoint na VPC"],
+    ["Alvos", "Instância, IP, Lambda, outro ALB", "Instância, IP, ALB", "Appliances de rede"],
+    ["Pista no enunciado", "Microsserviços, caminho, redirecionamento, autenticação", "IP fixo, UDP, latência mínima, milhões de conexões, IP de origem preservado", "Firewall de terceiro, inspeção transparente"]
+  ]}
+/>
+
+A decisão quase nunca é de gosto: o enunciado entrega a pista. "Rotear /api" só
+existe no ALB. "IP fixo para liberar no firewall do cliente" só existe no NLB.
+"Passar o tráfego por um appliance de inspeção" é o GWLB, que aparece pouco e
+com essa descrição exata.
+
+<Callout tipo="dica" titulo="O balanceador não é a resiliência">
+Um ALB com todas as instâncias na mesma zona não protege contra a falha
+daquela zona. O balanceador entrega a **distribuição**; a resiliência vem de
+ter alvos em mais de uma zona. Nas questões, a alternativa completa cita as
+duas coisas.
+</Callout>
+
+## Verificação de integridade: duas, e elas não são a mesma
+
+<Termo nome="verificação de integridade">Teste periódico que o balanceador faz em cada alvo. Ao falhar o limiar configurado, o alvo sai da rotação e deixa de receber tráfego.</Termo>
+
+O ponto que a prova adora: o **grupo de Auto Scaling** tem a própria noção de
+saúde, e ela é configurável:
+
+- **Tipo EC2** (padrão): olha só o estado da instância e as checagens do
+  hipervisor. Aplicação travada numa instância ligada continua "saudável".
+- **Tipo ELB**: adota o resultado da verificação do balanceador. Aí sim, uma
+  aplicação que devolve erro faz o grupo **substituir** a instância.
+
+O sintoma clássico da questão: "o balanceador tirou a instância da rotação, mas
+ela nunca é substituída". A resposta é mudar o tipo de verificação para ELB.
+
+## Auto Scaling: repor e ajustar
+
+<Termo nome="grupo de Auto Scaling">Conjunto de instâncias criado a partir de um modelo de lançamento, com capacidade mínima, desejada e máxima, distribuído pelas sub-redes informadas.</Termo>
+
+Ele faz duas coisas diferentes, e a prova separa:
+
+- **Repor**: se uma instância falha, o grupo cria outra para voltar à
+  capacidade desejada. Isso acontece mesmo sem nenhuma política de escala.
+- **Ajustar**: mudar a capacidade desejada conforme a demanda. Isso é
+  **política de escala**.
+
+<Comparativo
+  colunas={["Política", "Como funciona", "Quando é a resposta"]}
+  linhas={[
+    ["Rastreamento de alvo", "Mantém uma métrica num valor (CPU em 50%)", "Carga variável e imprevisível; menor esforço"],
+    ["Por etapas", "Degraus diferentes por faixa de alarme", "Reação proporcional ao tamanho do desvio"],
+    ["Simples", "Um ajuste por alarme, com cooldown", "Legado; raramente a melhor resposta"],
+    ["Agendada", "Muda a capacidade em horário definido", "Pico conhecido: campanha, fechamento, horário comercial"],
+    ["Preditiva", "Aprende o padrão histórico e antecipa", "Padrão recorrente que você não quer agendar à mão"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Imprevisível ou conhecido?">
+Essa é a palavra que decide entre as políticas. "Picos imprevisíveis" →
+rastreamento de alvo. "Toda sexta às 18h" → agendada. Um cenário com os dois
+pede as duas, e é aí que a múltipla resposta aparece: marcar só uma perde a
+questão.
+</Callout>
+
+## Distribuir entre zonas
+
+O grupo equilibra a capacidade entre as sub-redes que você informar, uma por
+zona. Depois de uma falha, ele reequilibra. É por isso que "adicionar sub-redes
+de uma segunda zona ao grupo de Auto Scaling" é uma resposta tão frequente: ela
+resolve falha de instância e de zona com uma mudança de configuração, sem
+arquitetura nova.
+
+Os limites importam na leitura: a **capacidade mínima** é o piso que o grupo
+repõe; a **máxima** é o teto que protege a fatura quando algo dispara a escala
+— inclusive um ataque, o que liga este tema ao Shield Advanced.
+
+## Como responder o cenário
+
+Leia o protocolo e o tipo de roteamento para escolher o balanceador. Leia o
+tipo de variação da carga para escolher a política. Confirme que a alternativa
+menciona **mais de uma zona** — sem isso, ela resolve metade do problema. E
+quando o sintoma for "a instância doente não é substituída", olhe o tipo de
+verificação de integridade do grupo antes de qualquer outra coisa.
+
+## Erros comuns
+
+- Escolher NLB para roteamento por caminho ou por cabeçalho. NLB é camada 4: enxerga IP e porta, não URL. Roteamento por conteúdo é ALB.
+- Escolher ALB quando o enunciado pede IP estático, latência ultrabaixa ou milhões de conexões por segundo. Isso é NLB, que ainda suporta protocolos além de HTTP.
+- Achar que o balanceador dá alta disponibilidade sozinho. Ele distribui entre alvos saudáveis; se todos estão na mesma zona, a zona continua sendo o ponto único de falha.
+- Confundir verificação de integridade do balanceador com a do Auto Scaling. A do balanceador tira o alvo da rotação; para o Auto Scaling substituir a instância, o grupo precisa usar o tipo de verificação ELB, não só EC2.
+- Usar escala por agendamento para carga imprevisível, ou escala reativa para pico conhecido. Agendamento é para padrão previsível; rastreamento de alvo é para carga variável.
+- Ignorar o período de estabilização (cooldown) e o aquecimento. Sem eles, o grupo escala em cascata reagindo a métricas de instâncias que ainda nem subiram.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Bancos resilientes: Multi-AZ, réplicas de leitura e tabelas globais
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas resilientes
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/bancos-de-dados-resilientes/
+Tempo estimado: 40 minutos · Nível: intermediario
+
+**Resumo.** A distinção que a prova mais cobra em banco de dados: Multi-AZ é disponibilidade com réplica síncrona que ninguém lê, réplica de leitura é desempenho com replicação assíncrona. Mais Aurora e seu Global Database, DynamoDB com tabelas globais, e o que cada um faz num failover.
+
+**Por que cai na prova.** Multi-AZ e réplica de leitura resolvem problemas diferentes e a prova oferece um como distrator do outro em quase todo cenário de banco. Quem sabe que a espera do Multi-AZ não aceita leitura, e que a réplica pode estar atrasada, elimina metade das alternativas antes de pensar no resto.
+
+**Como o entrevistador pergunta.** "O banco precisa sobreviver à falha de uma zona e aguentar relatórios pesados sem afetar as transações. O que você configura?"
+
+## Em uma frase
+
+**Multi-AZ** é disponibilidade: uma espera síncrona que ninguém lê e que assume
+sozinha. **Réplica de leitura** é desempenho: uma cópia assíncrona que você lê
+e que só vira principal por promoção manual. A prova oferece uma como distrator
+da outra.
+
+## A tabela que resolve metade das questões
+
+<Comparativo
+  colunas={["", "Multi-AZ", "Réplica de leitura"]}
+  linhas={[
+    ["Para que serve", "Disponibilidade", "Desempenho de leitura"],
+    ["Replicação", "Síncrona: nada se perde", "Assíncrona: pode estar atrasada"],
+    ["Aceita leitura?", "Não. A espera não recebe conexão", "Sim, com endpoint próprio"],
+    ["Failover", "Automático, em um a dois minutos", "Não existe: promoção é manual"],
+    ["Onde fica", "Outra zona da mesma região", "Mesma região ou outra"],
+    ["Quantas", "Uma espera (ou duas, no modelo de cluster)", "Várias"]
+  ]}
+/>
+
+O cenário mais repetido junta os dois requisitos numa frase só: "continuar
+disponível se a zona cair **e** tirar os relatórios de cima do banco". A
+resposta certa cita **Multi-AZ e réplica de leitura**; as erradas tentam
+resolver os dois com um mecanismo só.
+
+<Callout tipo="atencao" titulo="A espera não é legível">
+"Direcionar os relatórios para a instância de espera do Multi-AZ" aparece em
+quase toda questão deste tema e é sempre errada: a espera não aceita conexão
+nenhuma. Ela existe para assumir, não para ajudar.
+</Callout>
+
+## O failover e o endpoint
+
+No failover do Multi-AZ, o nome do endpoint **não muda**; o que muda é para
+onde ele aponta. Consequência prática, que vira questão: a aplicação precisa
+**reconectar**. Conexões antigas continuam tentando a instância que saiu, e
+cliente com cache de DNS longo demora a enxergar a troca. A correção esperada é
+TTL curto e lógica de reconexão com novas tentativas — não é configuração do
+banco, é do cliente.
+
+## Aurora: o mesmo vocabulário, outra arquitetura
+
+<Termo nome="Aurora">Banco compatível com MySQL e PostgreSQL em que o armazenamento é uma camada compartilhada, com seis cópias em três zonas, separada das instâncias de computação.</Termo>
+
+Como o dado não pertence a uma instância, as peças mudam:
+
+- Até **15 réplicas** na mesma região, que servem leitura **e** são candidatas
+  a assumir a escrita em segundos, com prioridade configurável.
+- **Endpoint de escrita** e **endpoint de leitura** separados: usar o de
+  leitura é o que distribui consulta entre as réplicas.
+- **Global Database** replica o cluster para outras regiões com atraso típico
+  abaixo de um segundo; a secundária serve leitura e é promovida em cerca de um
+  minuto.
+
+A pista do enunciado: "compatível com MySQL", "leitura em outra região",
+"promoção em minutos" junta os três e aponta para Global Database.
+
+## DynamoDB: resiliente por desenho, global por escolha
+
+Dentro da região, o DynamoDB já replica entre três zonas; não há Multi-AZ para
+ligar. O que sobra decidir é **entre regiões**:
+
+<Termo nome="tabela global">Replicação ativa em várias regiões: escreve-se e lê-se em qualquer uma delas, com resolução de conflito pelo último escritor.</Termo>
+
+É diferente de tudo que veio antes neste tema: não há primário e réplica, há
+**várias regiões ativas**. Por isso a pergunta "usuários dos dois lados do
+oceano precisam escrever com baixa latência" só tem essa resposta — réplica de
+leitura não aceita escrita.
+
+<Callout tipo="dica" titulo="Recuperação não é disponibilidade">
+Backup automático do RDS e point-in-time recovery do DynamoDB restauram o
+passado, criando um recurso novo, com tempo parado. Servem contra erro humano e
+corrupção, não contra falha de zona. Quando a alternativa oferece backup para
+um requisito de disponibilidade, ela está trocando de problema.
+</Callout>
+
+## Como responder o cenário
+
+Separe os requisitos antes de olhar as alternativas: **continuar no ar**
+(Multi-AZ, Aurora com réplicas), **aguentar leitura** (réplica de leitura,
+endpoint de leitura), **escrever perto do usuário em outra região** (tabela
+global, ou Aurora Global Database para relacional), **voltar de um erro**
+(backup, point-in-time). Quase toda questão combina dois desses, e a
+alternativa certa é a que nomeia os dois mecanismos.
+
+## Erros comuns
+
+- Achar que a instância de espera do Multi-AZ atende leitura. Ela não recebe tráfego nenhum; existe para assumir no failover. Quem quer distribuir leitura precisa de réplica de leitura.
+- Usar réplica de leitura como mecanismo de alta disponibilidade. A replicação é assíncrona e a promoção é manual: há atraso possível e não há failover automático.
+- Esquecer que o failover do Multi-AZ troca o registro DNS do endpoint. A aplicação precisa reconectar; conexão presa em cache de DNS é o sintoma clássico.
+- Confundir Aurora réplica com Aurora Global Database. Réplicas ficam na mesma região e podem ser alvo de failover; Global Database replica para outra região, com atraso típico abaixo de um segundo.
+- Achar que tabela global do DynamoDB precisa de configuração de failover. Ela é ativa em todas as regiões escolhidas: escreve-se e lê-se em qualquer uma, com resolução do último escritor em caso de conflito.
+- Tratar backup automático como alta disponibilidade. Backup restaura depois, com tempo parado; disponibilidade é continuar.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Route 53: políticas de roteamento e failover
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas resilientes
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/route-53-roteamento-e-failover/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Como o DNS vira mecanismo de resiliência e de desempenho na prova: as políticas de roteamento (simples, failover, ponderada, latência, geolocalização, geoproximidade, multivalor), as verificações de integridade que as alimentam, e o registro de alias que aponta para recursos da AWS sem custo.
+
+**Por que cai na prova.** É a peça que liga duas regiões numa arquitetura, e a prova sempre dá a pista na palavra: 'usuário mais próximo' não é a mesma coisa que 'menor latência', e 'dividir o tráfego para testar' não é a mesma coisa que 'usar o outro se este cair'. Cada uma dessas frases aponta para uma política diferente.
+
+**Como o entrevistador pergunta.** "A aplicação roda em duas regiões e deve mandar o usuário para a mais rápida, caindo para a outra se ela falhar. O que configurar?"
+
+## Em uma frase
+
+O Route 53 decide **para onde** o nome resolve, e essa decisão vira desempenho
+(latência, geolocalização) ou resiliência (failover, verificação de
+integridade). A pista da questão está sempre numa frase do enunciado.
+
+## As sete políticas, pela frase que as denuncia
+
+<Comparativo
+  colunas={["Política", "Decide por", "Frase típica do enunciado"]}
+  linhas={[
+    ["Simples", "Nada: devolve o que está lá", "'Apenas apontar o domínio'"],
+    ["Failover", "Saúde do primário", "'Se o principal falhar, usar o de contingência'"],
+    ["Ponderada", "Proporção configurada", "'Enviar 10% para a nova versão'"],
+    ["Latência", "Latência medida por usuário", "'A região que responder mais rápido'"],
+    ["Geolocalização", "Origem geográfica da consulta", "'Usuários do Brasil veem o site em português'"],
+    ["Geoproximidade", "Distância, com viés ajustável", "'Deslocar parte do tráfego de uma região para outra'"],
+    ["Multivalor", "Vários registros saudáveis", "'Devolver vários endereços, checando cada um'"]
+  ]}
+/>
+
+Os pares que a prova confunde de propósito:
+
+- **Latência × geolocalização.** A primeira é desempenho medido; a segunda é
+  regra por território. Um usuário no Chile pode ter latência menor para a
+  região dos Estados Unidos que para a do Brasil, e a política de latência vai
+  mandá-lo para lá. A de geolocalização, não.
+- **Geolocalização × geoproximidade.** A primeira responde "de onde você vem";
+  a segunda calcula distância até os recursos e deixa você **deslocar** o
+  limite com um viés, para tirar carga de uma região.
+- **Ponderada × failover.** Peso divide tráfego o tempo todo; failover manda
+  tudo para um lado até ele cair.
+
+## Verificação de integridade: o que torna DNS resiliente
+
+<Termo nome="verificação de integridade do Route 53">Teste periódico, feito de vários pontos do mundo, contra um endereço, um alarme do CloudWatch ou outras verificações combinadas. Registros associados a uma verificação que falha deixam de ser devolvidos.</Termo>
+
+Três tipos caem:
+
+- **De endpoint**: testa um IP ou nome, com protocolo e caminho configuráveis.
+- **De alarme do CloudWatch**: usa o estado de um alarme, útil quando a saúde é
+  uma métrica interna e não uma porta aberta.
+- **Calculada**: combina outras verificações com lógica ("saudável se pelo menos
+  duas das três estiverem"), para representar a saúde de um sistema composto.
+
+<Callout tipo="atencao" titulo="Failover sem verificação não é failover">
+A política de failover só age porque uma verificação de integridade reprovou o
+primário. Alternativa que configura failover e não menciona verificação
+descreve algo que nunca vai comutar. O mesmo vale para latência e ponderada
+"com queda automática": é a verificação associada a cada registro que produz a
+queda.
+</Callout>
+
+## O TTL manda no tempo de recuperação
+
+Resolvedores guardam a resposta pelo tempo do **TTL**. Enquanto ele não expira,
+o cliente vai ao destino antigo, mesmo que o Route 53 já tenha mudado de
+opinião. O tempo total de um failover de DNS é, portanto:
+
+<Passos itens={[
+  "Detecção: intervalo da verificação de integridade vezes o número de falhas exigidas.",
+  "Troca: o Route 53 passa a devolver o secundário, quase imediatamente.",
+  "Propagação: cada resolvedor só pergunta de novo quando o TTL da resposta em cache expira."
+]} />
+
+Por isso a dupla de respostas para "demorou demais a comutar": **baixar o TTL**
+e **apertar a verificação de integridade**. Aumentar o TTL é o distrator, e ele
+aparece com frequência.
+
+## Alias: o registro que resolve a raiz
+
+<Termo nome="registro de alias">Registro exclusivo do Route 53 que aponta para um recurso da AWS (ELB, CloudFront, site em S3, API Gateway) pelo nome do serviço, funciona na raiz da zona e não é cobrado por consulta.</Termo>
+
+O padrão DNS proíbe CNAME no ápice da zona, e o IP de um balanceador muda. A
+combinação dessas duas restrições é o que torna o alias a única resposta para
+"apontar exemplo.com.br diretamente para o balanceador".
+
+<Callout tipo="dica" titulo="DNS não é balanceador">
+Roteamento multivalor devolve até oito endereços saudáveis e deixa o cliente
+escolher. Não conhece carga, não conhece capacidade e não repõe nada. Quando a
+questão pede distribuição de carga de verdade, a resposta é um balanceador; o
+Route 53 entra para escolher a **região**, não a instância.
+</Callout>
+
+## Como responder o cenário
+
+Ache a frase que descreve a intenção: **proporção** (ponderada), **mais
+rápido** (latência), **de onde vem** (geolocalização), **se cair** (failover).
+Depois confirme que a alternativa cita a **verificação de integridade** quando
+há queda automática, e cheque o **TTL** se a questão falar em tempo. Por fim,
+se o alvo é um recurso da AWS e o nome é a raiz do domínio, é **alias**.
+
+## Erros comuns
+
+- Confundir roteamento por latência com geolocalização. Latência escolhe a região que responde mais rápido para aquele usuário; geolocalização escolhe pelo país ou continente de origem, mesmo que outra fosse mais rápida.
+- Confundir geolocalização com geoproximidade. Geolocalização é regra por local de origem; geoproximidade calcula distância até os recursos e permite deslocar tráfego com um viés (bias).
+- Achar que failover funciona sem verificação de integridade. Sem ela, o Route 53 não sabe que o primário caiu e continua respondendo o mesmo endereço.
+- Esquecer o TTL. Enquanto o registro antigo estiver em cache do resolvedor, o cliente continua indo ao destino que caiu; TTL alto atrasa qualquer failover de DNS.
+- Usar registro CNAME na raiz do domínio. A raiz não aceita CNAME; para apontar a raiz a um recurso da AWS, usa-se o registro de alias.
+- Tratar roteamento multivalor como balanceador. Ele devolve até oito endereços saudáveis e o cliente escolhe; não distribui carga nem verifica capacidade.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Desacoplamento: SQS, SNS e EventBridge
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas resilientes
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/desacoplamento-com-filas-e-eventos/
+Tempo estimado: 40 minutos · Nível: intermediario
+
+**Resumo.** Como a prova transforma 'o sistema caiu junto' em arquitetura resiliente: fila do SQS para absorver pico e tolerar consumidor fora do ar, tópico do SNS para entregar a vários assinantes, EventBridge para rotear eventos por regra. Mais fila FIFO, fila de mensagens mortas e o padrão de leque.
+
+**Por que cai na prova.** Desacoplar é a resposta estrutural do Domínio 2: componentes que falham juntos viram componentes que falham sozinhos. A prova testa a escolha entre os três serviços com pistas precisas — 'processar depois' é fila, 'avisar vários' é tópico, 'rotear por conteúdo do evento' é EventBridge — e cobra o que acontece com a mensagem quando o consumidor falha.
+
+**Como o entrevistador pergunta.** "Picos de pedidos derrubam o serviço de processamento e pedidos se perdem. Como redesenhar para não perder nada?"
+
+## Em uma frase
+
+Desacoplar é pôr algo entre dois componentes para que a falha ou a lentidão de
+um não derrube o outro: **fila** quando é preciso reter e processar depois,
+**tópico** quando é preciso avisar vários, **barramento** quando a decisão
+depende do conteúdo do evento.
+
+## Os três, e a pista de cada um
+
+<Comparativo
+  colunas={["", "SQS", "SNS", "EventBridge"]}
+  linhas={[
+    ["Modelo", "Fila: um consumidor por mensagem", "Tópico: todos os assinantes recebem", "Barramento: regras roteiam por conteúdo"],
+    ["Retenção", "Até 14 dias", "Nenhuma: entrega e esquece", "Nenhuma (arquivamento é opcional e à parte)"],
+    ["Se o destino está fora", "A mensagem espera na fila", "A entrega falha ou tenta de novo conforme a política", "A regra tenta de novo e pode ir para DLQ"],
+    ["Pista no enunciado", "'Absorver pico', 'processar depois', 'não perder'", "'Avisar vários sistemas', 'notificar por e-mail e SMS'", "'Conforme o tipo do evento', 'reagir a um serviço da AWS', 'agendar'"]
+  ]}
+/>
+
+<Termo nome="SQS">Fila gerenciada. O produtor publica, a mensagem fica retida, o consumidor lê, processa e apaga. Absorve picos e isola ritmos.</Termo>
+
+<Termo nome="SNS">Tópico de publicação e assinatura. Uma mensagem chega a todos os assinantes: filas, funções, endpoints HTTP, e-mail, SMS.</Termo>
+
+## O mecanismo da fila que vira questão
+
+Ler uma mensagem **não a remove**. O que acontece é:
+
+<Passos itens={[
+  "O consumidor lê a mensagem, que fica invisível para os outros durante o tempo de visibilidade.",
+  "Se o processamento termina, o consumidor APAGA a mensagem. Só aí ela deixa a fila.",
+  "Se o consumidor falha ou morre antes de apagar, o tempo expira e a mensagem volta a ficar visível, para outro consumidor tentar.",
+  "Se ela falhar N vezes, a fila de mensagens mortas a recebe, tirando-a do ciclo."
+]} />
+
+Esse desenho é o que dá tolerância a falha do consumidor — e é também a origem
+do sintoma mais cobrado: "a mesma mensagem é processada repetidas vezes e nunca
+sai". As duas causas são não apagar a mensagem e não ter DLQ configurada.
+
+<Callout tipo="atencao" titulo="Padrão ou FIFO?">
+Fila **padrão**: vazão praticamente ilimitada, ordem de melhor esforço, entrega
+**pelo menos uma vez** (o consumidor precisa ser idempotente). Fila **FIFO**:
+ordem estrita dentro do grupo de mensagens e **exatamente uma** entrega, com
+vazão menor. "Na ordem exata" e "sem duplicar" são as frases que pedem FIFO; o
+identificador de grupo costuma ser a chave do negócio, como o cliente.
+</Callout>
+
+## Leque: tópico com filas
+
+Quando o mesmo evento precisa alimentar vários sistemas, e cada um tem ritmo e
+tolerância a falha diferentes, nem fila nem tópico sozinhos bastam:
+
+- Fila sozinha entrega a **um** consumidor: os outros não veem.
+- Tópico sozinho entrega e esquece: o sistema que estava fora **perde**.
+
+O desenho que a prova espera é o **leque**: um tópico SNS com uma fila SQS
+assinando para cada destino. O tópico multiplica; cada fila retém e isola. Se o
+faturamento cair, a fila dele acumula e os outros dois seguem.
+
+## Escalar pela fila, não pela CPU
+
+Um grupo de Auto Scaling que consome fila deve escalar pela **profundidade da
+fila** — `ApproximateNumberOfMessagesVisible`, ou a razão de mensagens por
+instância. A CPU do consumidor não representa o trabalho pendente: uma fila com
+dez mil mensagens e um consumidor ocioso aguardando entrada de rede tem CPU
+baixa. Nas questões, CPU é o distrator e profundidade da fila é a resposta.
+
+<Callout tipo="dica" titulo="EventBridge não é fila">
+Ele roteia por regra e tem destinos, mas não guarda para consumo posterior nem
+tem tempo de visibilidade. Quando a questão pede **retenção**, a resposta
+envolve SQS — inclusive como destino de uma regra do EventBridge.
+</Callout>
+
+## Como responder o cenário
+
+Pergunte primeiro **quantos destinos**: um (fila), vários (tópico, ou leque se
+cada um precisa reter). Depois, **o que acontece se o destino estiver fora**: se
+a resposta aceitável for "espera", é fila. Por fim, **quem decide o destino**: se
+for o conteúdo do evento ou um serviço da AWS que o emitiu, é EventBridge. E
+quando o enunciado citar ordem ou duplicidade, vá direto para FIFO.
+
+## Erros comuns
+
+- Achar que fila padrão do SQS garante ordem. Ela é de melhor esforço e pode entregar a mesma mensagem mais de uma vez; ordem estrita e exatamente uma entrega são da fila FIFO.
+- Esquecer que o consumidor precisa apagar a mensagem. Sem a exclusão, ela reaparece quando o tempo de visibilidade expira — que é justamente o que protege contra consumidor que morreu no meio.
+- Usar SNS quando o requisito é absorver pico. Tópico entrega e esquece; se o assinante estiver fora, a mensagem se perde. Absorver carga e reter é fila.
+- Usar SQS quando o requisito é avisar vários sistemas. Uma mensagem na fila é consumida por um consumidor; para vários destinos, é tópico, ou tópico com uma fila por destino.
+- Tratar EventBridge como fila. Ele roteia eventos por regra para destinos; não guarda para consumo posterior nem tem tempo de visibilidade.
+- Não configurar fila de mensagens mortas. Sem ela, uma mensagem que sempre falha fica reprocessando para sempre e trava a fila.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Estratégias de recuperação de desastres: RTO, RPO e as quatro opções
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas resilientes
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/estrategias-de-recuperacao-de-desastres/
+Tempo estimado: 40 minutos · Nível: avancado
+
+**Resumo.** O eixo que organiza o fim do Domínio 2: RTO é quanto tempo você pode ficar parado, RPO é quanto dado pode perder, e as quatro estratégias (backup e restauração, luz-piloto, espera morna e multissítio) são pontos numa reta entre custo baixo e recuperação rápida. A prova dá os números e espera a escolha.
+
+**Por que cai na prova.** É onde o Domínio 2 fecha, e a questão é sempre a mesma em roupas diferentes: o enunciado dá um RTO e um RPO e pergunta a estratégia mais barata que os atende. Quem sabe a ordem das quatro e o que cada uma mantém ligada responde em segundos; quem não sabe escolhe pela que parece mais robusta e erra por excesso.
+
+**Como o entrevistador pergunta.** "O negócio aceita 4 horas parado e no máximo 15 minutos de dados perdidos. Qual estratégia de DR atende com o MENOR custo?"
+
+## Em uma frase
+
+**RTO** é quanto tempo você aceita ficar parado; **RPO** é quanto dado aceita
+perder. As quatro estratégias são pontos numa reta: quanto menores os dois
+números, mais caro. A questão dá os números e espera a opção **mais barata que
+os atende**.
+
+## Os dois números, sem trocar um pelo outro
+
+<Termo nome="RTO">Recovery Time Objective: o tempo máximo aceitável entre o desastre e o serviço de volta. Olha para a frente.</Termo>
+
+<Termo nome="RPO">Recovery Point Objective: o ponto no passado a que se volta — na prática, quanto trabalho se perde. Olha para trás.</Termo>
+
+Uma forma de nunca trocar: RPO é definido pela **frequência da cópia** (backup
+de hora em hora dá RPO de uma hora; replicação contínua dá RPO de segundos).
+RTO é definido pelo **quanto já está de pé** na região secundária.
+
+## As quatro estratégias
+
+<Comparativo
+  colunas={["Estratégia", "O que fica na secundária", "RTO típico", "RPO típico", "Custo"]}
+  linhas={[
+    ["Backup e restauração", "Só cópias: backups e imagens", "Horas", "Horas", "O menor"],
+    ["Luz-piloto", "O núcleo de dados replicado; aplicação desligada", "Dezenas de minutos", "Minutos", "Baixo"],
+    ["Espera morna", "Ambiente reduzido rodando de verdade", "Minutos", "Segundos a minutos", "Médio"],
+    ["Multissítio", "Ambiente completo atendendo tráfego", "Perto de zero", "Perto de zero", "O maior"]
+  ]}
+/>
+
+A distinção que mais confunde é entre as duas do meio:
+
+- **Luz-piloto**: o dado está replicado e vivo; a aplicação **não está
+  rodando**. No desastre, você liga a partir de imagens e modelos prontos.
+- **Espera morna**: existe um ambiente **funcionando**, menor que o de
+  produção, que talvez já receba uma fatia do tráfego. No desastre, você
+  **escala** o que já está lá.
+
+Ligar leva mais tempo que escalar; daí a diferença de RTO e de custo.
+
+<Callout tipo="atencao" titulo="A prova pune resposta acima do requisito">
+Quando o enunciado diz "RTO de 4 horas" e pede o **menor custo**, multissítio
+está errado mesmo atendendo. O padrão da questão é dar dois números e várias
+alternativas que funcionam; a certa é a mais barata que cabe nos dois.
+</Callout>
+
+## O que mais precisa existir na outra região
+
+Replicar o banco é a parte visível. O RTO estoura no teste por causa do resto:
+
+<Passos itens={[
+  "Imagens (AMI) e modelos de lançamento atualizados, não os de seis meses atrás.",
+  "Rede pronta: VPC, sub-redes em mais de uma zona, grupos de segurança, endpoints.",
+  "Identidade e configuração: papéis do IAM, segredos no Secrets Manager, parâmetros.",
+  "Limites de serviço suficientes na região secundária para subir a capacidade inteira.",
+  "O caminho do tráfego: zona do Route 53 com failover e verificações prontas, ou Global Accelerator."
+]} />
+
+## As peças de replicação
+
+- **AWS Backup**: plano central com agendamento, retenção e **cópia entre
+  regiões e contas**, cobrindo EBS, RDS, DynamoDB, EFS, S3 e FSx. É a resposta
+  de "menor esforço" quando o cenário tem vários tipos de recurso.
+- **S3 com replicação entre regiões**: assíncrona, exige versionamento nos dois
+  buckets.
+- **Banco**: cópia de snapshot entre regiões para RPO de horas; réplica de
+  leitura ou Aurora Global Database para RPO de minutos ou menos; tabela global
+  do DynamoDB para ativo em várias regiões.
+- **Comutação**: Route 53 com failover e verificação de integridade, lembrando
+  que o **TTL** entra no RTO; Global Accelerator quando a comutação precisa ser
+  mais rápida que o DNS permite.
+
+<Callout tipo="dica" titulo="Disponibilidade não é DR">
+Multi-AZ, Auto Scaling entre zonas e réplicas na mesma região protegem contra
+falhas **dentro** da região. Nenhum deles ajuda se a região inteira cair. Quando
+a alternativa oferece Multi-AZ para um requisito de desastre regional, ela está
+trocando de problema — e é o distrator mais comum deste tema.
+</Callout>
+
+## Como responder o cenário
+
+Extraia os dois números do enunciado. Use o RPO para decidir o **mecanismo de
+dados** (backup periódico, réplica contínua, ativo em várias regiões) e o RTO
+para decidir **quanto fica ligado** na secundária. Depois aplique a palavra:
+com "menor custo", desça a reta até a última opção que ainda cabe nos dois
+números. E confira se a alternativa fala em falha de **região**: se ela oferece
+Multi-AZ, está respondendo outra pergunta.
+
+## Erros comuns
+
+- Trocar RTO por RPO. RTO é tempo até voltar (olha para a frente); RPO é o ponto no passado a que você volta, ou seja, quanto dado se perde (olha para trás).
+- Escolher a estratégia mais robusta quando o enunciado pede a mais barata que atende. A prova pune resposta acima do requisito: se 4 horas de RTO bastam, multissítio está errado.
+- Achar que luz-piloto mantém a aplicação ligada. Ela mantém só o núcleo, tipicamente o dado replicado; os servidores estão desligados ou nem existem, e sobem na hora do desastre.
+- Confundir espera morna com multissítio. Espera morna mantém uma versão reduzida rodando de verdade, que é escalada no desastre; multissítio atende tráfego nas duas regiões o tempo todo.
+- Esquecer que a região secundária precisa de mais que dados: AMIs, modelos de lançamento, configuração, limites de serviço e a zona de DNS também precisam existir lá.
+- Confiar num plano de DR nunca testado. A prova cobra teste periódico, e o custo real de um RTO baixo inclui o ensaio.
 
 ## Perguntas de sabatina e respostas-modelo
 
