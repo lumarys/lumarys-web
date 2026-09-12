@@ -13,8 +13,12 @@ import type { Trilha } from "../types";
  * sorteia pelo peso. Os temas usam `formato: prova`: cenários objetivos em vez
  * de perguntas orais.
  *
- * Publicados: "como ler uma questão" e os Domínios 1, 2 e 3. Falta o Domínio 4
- * (custo), que entra na próxima onda e fecha o cronograma.
+ * Trilha completa: "como ler uma questão" e os quatro domínios do exame, 22
+ * temas ao todo. O cronograma de 34 dias cobre um tema por dia útil, com
+ * checkpoint e prova simulada ao fim de cada domínio e uma prova completa de
+ * 65 questões na reta final. O plano original estimava 42 dias para cerca de
+ * 32 temas; os temas saíram menos numerosos e mais densos, e o cronograma
+ * acompanha o que existe em vez de esticar para a estimativa.
  */
 export const awsSolutionsArchitectAssociate: Trilha = {
   slug: "aws-solutions-architect-associate",
@@ -26,7 +30,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
   resumo:
     "O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 130 minutos",
-  prazoSugeridoDias: 26,
+  prazoSugeridoDias: 34,
   status: "disponivel",
   exame: {
     codigo: "SAA-C03",
@@ -105,11 +109,16 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       titulo: "Arquiteturas otimizadas em custo",
       resumo:
         "Modelos de preço, ciclo de vida e Intelligent-Tiering no S3, right-sizing, Spot e Savings Plans, e o custo de transferência que derruba candidato.",
-      status: "em-breve",
+      status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 4 · Design Cost-Optimized Architectures",
       pesoExame: 20,
-      temas: [],
+      temas: [
+        "modelos-de-preco-da-computacao",
+        "custo-de-transferencia-de-dados",
+        "dimensionamento-e-custo-de-armazenamento",
+        "ferramentas-de-custo-e-governanca",
+      ],
     },
   ],
   cronograma: [
@@ -273,7 +282,60 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       titulo: "Revisão leve",
       temas: [],
       revisao: ["como-funciona-a-prova", "desempenho"],
-      nota: "Só cards vencidos e a folha de revisão. O domínio de custo entra em breve; o plano cresce com ele.",
+      nota: "Só cards vencidos e a folha de revisão. Amanhã começa o último domínio.",
+    },
+    {
+      dia: 27,
+      titulo: "Modelos de preço da computação",
+      temas: ["modelos-de-preco-da-computacao"],
+      revisao: ["desempenho"],
+      nota: "Começa o domínio de 20%, o último. Aqui o enunciado descreve o padrão de uso e espera o modelo de compra.",
+    },
+    {
+      dia: 28,
+      titulo: "Custo de transferência de dados",
+      temas: ["custo-de-transferencia-de-dados"],
+      revisao: ["desempenho"],
+    },
+    {
+      dia: 29,
+      titulo: "Dimensionamento e custo de armazenamento",
+      temas: ["dimensionamento-e-custo-de-armazenamento"],
+      revisao: ["custo"],
+    },
+    {
+      dia: 30,
+      titulo: "Ferramentas de custo e governança",
+      temas: ["ferramentas-de-custo-e-governanca"],
+      revisao: ["custo"],
+    },
+    {
+      dia: 31,
+      titulo: "Cards e checkpoint do Domínio 4",
+      temas: [],
+      revisao: ["custo"],
+      nota: "Último checkpoint. Abaixo de 70%, releia o tema apontado: amanhã a prova é completa.",
+    },
+    {
+      dia: 32,
+      titulo: "Prova simulada completa",
+      temas: [],
+      revisao: ["seguras", "resilientes", "desempenho", "custo"],
+      nota: "As 65 questões, 130 minutos, os quatro domínios no peso real. Trate como a prova: sem consultar nada, de uma vez só.",
+    },
+    {
+      dia: 33,
+      titulo: "Atacar os domínios fracos",
+      temas: [],
+      revisao: ["seguras", "resilientes", "desempenho", "custo"],
+      nota: "Olhe o resultado por domínio da prova de ontem e releia só os temas dos dois domínios mais fracos. Refaça os drills deles.",
+    },
+    {
+      dia: 34,
+      titulo: "Véspera",
+      temas: [],
+      revisao: ["como-funciona-a-prova"],
+      nota: "Releia como ler uma questão, passe os cards vencidos e pare. Não estude conteúdo novo na véspera: durma.",
     },
   ],
 };

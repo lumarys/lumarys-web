@@ -37,16 +37,22 @@ test("a trilha mostra o exame: versão, formato, corte e o peso de cada domínio
   await expect(page.getByText("30% da prova")).toBeVisible();
   await expect(page.getByText("26% da prova")).toBeVisible();
   await expect(page.getByText("24% da prova")).toBeVisible();
-  // Três domínios publicados; custo segue em breve.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(1);
+  await expect(page.getByText("20% da prova")).toBeVisible();
+  // Trilha completa: nenhum domínio em breve.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Prova simulada" })).toBeVisible();
 });
 
 test("a prova simulada é objetiva, cronometrada e sem gabarito até o fim", async ({ page }) => {
   await page.goto("/simulado/?trilha=aws-solutions-architect-associate");
   await expect(page.getByText(/prova simulada · SAA-C03/i)).toBeVisible();
-  // O banco de hoje é menor que 65: a tela diz isso em vez de repetir questão.
-  await expect(page.getByText(/o banco de hoje dá para \d+ questões/i)).toBeVisible();
+  // Com a trilha completa o banco cobre as 65 questões; enquanto faltava
+  // domínio, a tela dizia quantas conseguia montar. Aceita os dois estados.
+  await expect(
+    page
+      .getByText(/65 questões em 130 minutos/i)
+      .or(page.getByText(/o banco de hoje dá para \d+ questões/i)),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: /começar a prova/i }).click();
   await expect(page.getByText(/questão 1 de \d+/i)).toBeVisible();

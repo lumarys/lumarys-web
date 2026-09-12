@@ -1,0 +1,244 @@
+---
+slug: modelos-de-preco-da-computacao
+titulo: "Modelos de preço: sob demanda, reservada, Savings Plans e Spot"
+resumo: "A decisão de custo que mais cai: sob demanda para carga imprevisível e curta, Savings Plans ou instâncias reservadas para uso previsível de um a três anos, Spot para carga tolerante a interrupção, e host dedicado só quando a licença exige. O enunciado descreve o padrão de uso e espera o modelo."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É o coração do Domínio 4 e reaparece em cenários de desempenho. A prova descreve o padrão de uso — contínuo por um ano, com picos, tolerante a interrupção — e espera que você escolha o modelo. Errar aqui costuma ser escolher Spot para carga que não pode parar, ou sob demanda para uso constante."
+comoCai: "A carga roda 24 horas por dia durante pelo menos um ano e é previsível. Qual modelo de preço tem o MENOR custo?"
+feynman: "Explique em um minuto por que assumir um compromisso de um ano deixa a mesma máquina mais barata, e o que você entrega em troca."
+preRequisitos: ["computacao-ec2-containers-e-serverless"]
+errosComuns:
+  - "Escolher Spot para carga que não tolera interrupção. A AWS recupera a capacidade com dois minutos de aviso; carga crítica e contínua não é candidata, por mais barata que seja."
+  - "Usar sob demanda para carga contínua e previsível. É o modelo mais caro por hora; sem compromisso, paga-se o preço cheio o tempo todo."
+  - "Achar que instância reservada reserva capacidade sempre. Só a reserva zonal garante capacidade; a regional dá desconto e flexibilidade, sem garantia de capacidade."
+  - "Confundir Savings Plans com instância reservada. Savings Plans é compromisso de gasto por hora, flexível entre famílias e até serviços; reservada é compromisso por configuração de instância."
+  - "Propor host dedicado sem exigência de licença ou conformidade. É o modelo mais caro; só entra quando o enunciado cita licença por soquete ou por núcleo físico, ou isolamento de hardware exigido."
+  - "Esquecer que Savings Plans e reservadas também cobrem Fargate e Lambda (no plano de computação). Carga serverless previsível também aceita compromisso."
+preTeste:
+  - enunciado: "Uma aplicação de produção roda 24 horas por dia e a empresa tem certeza de que vai mantê-la por pelo menos três anos. Qual modelo oferece o MENOR custo?"
+    alternativas:
+      - texto: "Savings Plans ou instâncias reservadas de três anos."
+        correta: true
+        explicacao: "Uso contínuo e previsível por longo prazo é exatamente o caso de compromisso, que dá o maior desconto sobre o sob demanda."
+      - texto: "Instâncias Spot."
+        correta: false
+        explicacao: "Podem ser interrompidas com dois minutos de aviso; produção contínua não tolera isso."
+      - texto: "Instâncias sob demanda."
+        correta: false
+        explicacao: "É o modelo mais caro por hora, indicado para carga imprevisível ou de curta duração."
+  - enunciado: "Um processamento em lote pode ser interrompido e retomado, roda fora do horário comercial e a empresa quer a maior economia possível. Qual modelo usar?"
+    alternativas:
+      - texto: "Instâncias Spot."
+        correta: true
+        explicacao: "Tolerância a interrupção é o pré-requisito do Spot, que oferece os maiores descontos sobre o sob demanda."
+      - texto: "Instâncias reservadas de um ano."
+        correta: false
+        explicacao: "Compromisso para carga que roda só parte do tempo desperdiça o que foi comprometido."
+      - texto: "Hosts dedicados."
+        correta: false
+        explicacao: "O modelo mais caro, e nada no enunciado exige isolamento de hardware."
+videos:
+  - id: niYxfTQdsMo
+    publicadoEm: "2022-10-10"
+    titulo: "Amazon Saving Plans para EC2, Lambda, Fargate e SageMaker | Reserva de instâncias na AWS"
+    canal: "Wesley Milan"
+    duracao: 15
+    porQue: "Trata Savings Plans e instâncias reservadas juntos, que é como a prova compara. Assista anotando o que cada um trava: gasto por hora ou configuração de instância."
+  - id: NcvJXqu-Cn0
+    publicadoEm: "2022-10-03"
+    titulo: "Entenda como as instâncias EC2 Spot funcionam e se vale a pena"
+    canal: "Wesley Milan"
+    duracao: 19
+    porQue: "Complementar, sobre o modelo que mais gera resposta errada. Preste atenção no aviso de interrupção: é ele que define quais cargas podem usar Spot."
+artigos:
+  - titulo: "Instance purchasing options"
+    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html"
+    fonte: "AWS"
+  - titulo: "What are Savings Plans?"
+    url: "https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html"
+    fonte: "AWS"
+  - titulo: "Amazon EC2 Spot Instances"
+    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Sob demanda, em uma linha."
+    verso: "Paga por segundo ou hora sem compromisso. O mais caro por unidade de tempo, e o certo para carga imprevisível, curta ou em avaliação."
+  - frente: "Instância reservada, em uma linha."
+    verso: "Compromisso de 1 ou 3 anos com uma configuração (família, tamanho, região ou zona), em troca de desconto grande. Pagamento adiantado total, parcial ou nenhum."
+  - frente: "Reserva regional versus zonal."
+    verso: "Regional: desconto com flexibilidade de zona e de tamanho dentro da família, sem garantia de capacidade. Zonal: garante capacidade naquela zona, sem flexibilidade."
+  - frente: "Savings Plans, em uma linha."
+    verso: "Compromisso de gastar um valor por hora, por 1 ou 3 anos. Compute Savings Plans é flexível entre famílias, regiões e até EC2, Fargate e Lambda; EC2 Instance Savings Plans prende a família e a região, com desconto maior."
+  - frente: "Savings Plans ou instância reservada?"
+    verso: "Savings Plans quando a carga pode mudar de família ou de serviço; reservada quando a configuração é estável e se quer eventualmente garantir capacidade (zonal)."
+  - frente: "Spot, em uma linha."
+    verso: "Capacidade ociosa com desconto alto, que a AWS pode retomar com dois minutos de aviso. Só para carga tolerante a interrupção e retomável."
+  - frente: "Cargas típicas de Spot na prova."
+    verso: "Processamento em lote, renderização, testes de CI, análise de dados, nós de trabalho de containers, tudo com pontos de retomada."
+  - frente: "O que é frota mista (Spot com sob demanda)?"
+    verso: "Grupo de Auto Scaling com uma base de capacidade sob demanda e o excedente em Spot. Combina resiliência e economia; é a resposta quando o enunciado quer economia sem risco de ficar sem capacidade."
+  - frente: "Host dedicado e instância dedicada."
+    verso: "Host dedicado: servidor físico só seu, com visibilidade de soquetes e núcleos, para licença que exige isso. Instância dedicada: hardware não compartilhado, sem a visibilidade do host. Os dois são caros."
+  - frente: "Quando host dedicado é a resposta?"
+    verso: "Somente quando o enunciado cita licença por soquete ou núcleo físico (traga sua própria licença) ou exigência de conformidade de hardware isolado."
+  - frente: "Savings Plans cobrem Lambda e Fargate?"
+    verso: "Sim, o Compute Savings Plans cobre EC2, Fargate e Lambda. Carga serverless previsível também merece compromisso."
+  - frente: "O que muda no preço entre regiões?"
+    verso: "O preço por hora varia por região; a mesma instância custa diferente em São Paulo e na Virgínia. Em cenários de custo, mudar de região é alternativa válida quando não há restrição de latência ou de dado."
+drills:
+  - titulo: "Qual modelo o padrão de uso pede?"
+    instrucao: "Para cada descrição, diga o modelo esperado."
+    opcoes: ["Sob demanda", "Savings Plans ou reservada", "Spot", "Host dedicado"]
+    itens:
+      - enunciado: "Ambiente de produção estável, ligado o ano inteiro."
+        resposta: "Savings Plans ou reservada"
+        explicacao: "Uso previsível e contínuo pede compromisso."
+      - enunciado: "Prova de conceito de duas semanas, com uso incerto depois."
+        resposta: "Sob demanda"
+        explicacao: "Sem compromisso, porque o futuro é incerto."
+      - enunciado: "Renderização noturna que pode ser refeita se for interrompida."
+        resposta: "Spot"
+        explicacao: "Tolerante a interrupção, com maior desconto."
+      - enunciado: "Banco com licença cobrada por núcleo físico do servidor."
+        resposta: "Host dedicado"
+        explicacao: "Licenciamento por hardware exige visibilidade do host."
+      - enunciado: "Fila de processamento que escala de 10 a 200 instâncias sem padrão."
+        resposta: "Spot"
+        explicacao: "Excedente elástico e retomável; a base pode ficar sob demanda ou com compromisso."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa executa uma aplicação estável em instâncias EC2, 24 horas por dia, e prevê mantê-la por três anos. A equipe quer reduzir o custo, mas pode precisar mudar a família de instância ao longo do período. Qual opção atende?"
+    alternativas:
+      - texto: "Compute Savings Plans de três anos."
+        correta: true
+        explicacao: "Compromisso de gasto por hora com flexibilidade entre famílias, tamanhos, regiões e até Fargate e Lambda. É a opção que concilia desconto de longo prazo com mudança de família."
+      - texto: "Instâncias reservadas zonais de três anos para a família atual."
+        correta: false
+        explicacao: "Dá desconto e capacidade, mas prende a configuração; mudar de família perderia o benefício."
+      - texto: "Instâncias Spot com frota diversificada."
+        correta: false
+        explicacao: "Aplicação contínua de produção não tolera a interrupção característica do Spot."
+      - texto: "Instâncias sob demanda com desligamento fora do horário comercial."
+        correta: false
+        explicacao: "A aplicação roda 24 horas; não há janela para desligar, e sob demanda é o mais caro por hora."
+  - tipo: multipla
+    enunciado: "Uma empresa processa um grande volume de vídeos em lote. O trabalho pode ser dividido, interrompido e retomado, e o prazo é flexível. A empresa quer o menor custo possível mantendo alguma garantia de progresso. Quais DUAS decisões atendem?"
+    alternativas:
+      - texto: "Usar instâncias Spot para a maior parte da capacidade, com a aplicação salvando pontos de retomada."
+        correta: true
+        explicacao: "Spot dá o maior desconto, e salvar progresso é o que torna a interrupção aceitável."
+      - texto: "Configurar o grupo de Auto Scaling com uma base sob demanda e o excedente em Spot, diversificando os tipos de instância."
+        correta: true
+        explicacao: "Frota mista garante progresso mínimo mesmo se a capacidade Spot for retomada, e a diversificação reduz a chance de interrupção simultânea."
+      - texto: "Comprar instâncias reservadas de três anos para toda a capacidade de pico."
+        correta: false
+        explicacao: "Compromisso pelo pico de uma carga intermitente desperdiça a maior parte do que foi comprado."
+      - texto: "Usar hosts dedicados para garantir desempenho constante."
+        correta: false
+        explicacao: "O modelo mais caro, sem exigência de licença ou isolamento no enunciado."
+      - texto: "Executar tudo em instâncias sob demanda no horário de menor movimento."
+        correta: false
+        explicacao: "Não há desconto por horário no sob demanda; o preço é o mesmo."
+  - tipo: unica
+    enunciado: "Uma empresa vai migrar um banco de dados comercial cuja licença é cobrada por núcleo físico do servidor e exige que o fornecedor possa auditar a infraestrutura. Qual opção de compra atende?"
+    alternativas:
+      - texto: "Hosts dedicados, que dão visibilidade de soquetes e núcleos físicos."
+        correta: true
+        explicacao: "Licenciamento por núcleo físico com auditoria é a única situação em que a prova espera host dedicado."
+      - texto: "Instâncias dedicadas."
+        correta: false
+        explicacao: "Isolam o hardware, mas não expõem soquetes e núcleos para o modelo de licenciamento."
+      - texto: "Instâncias reservadas padrão."
+        correta: false
+        explicacao: "Definem preço, não isolamento nem visibilidade de hardware."
+      - texto: "Instâncias Spot com licença flutuante."
+        correta: false
+        explicacao: "Interrupção e licenciamento por hardware são incompatíveis."
+  - tipo: unica
+    enunciado: "Uma startup vai lançar um produto novo e não sabe qual será o volume de uso nos primeiros meses, nem se a arquitetura vai mudar. Qual modelo de preço é o mais adequado nesse período?"
+    alternativas:
+      - texto: "Sob demanda, revendo os modelos de compra depois que o padrão de uso ficar claro."
+        correta: true
+        explicacao: "Sem previsibilidade, compromisso vira desperdício. Sob demanda é o modelo para incerteza, e a revisão posterior é a prática esperada."
+      - texto: "Savings Plans de três anos pelo maior desconto."
+        correta: false
+        explicacao: "Compromisso longo sobre uso desconhecido é o erro clássico de otimização prematura."
+      - texto: "Instâncias reservadas de um ano dimensionadas pelo pico esperado."
+        correta: false
+        explicacao: "Baseia o compromisso numa estimativa, não em uso observado."
+      - texto: "Spot para toda a produção."
+        correta: false
+        explicacao: "Produção de um lançamento não tolera interrupção arbitrária."
+---
+
+## Em uma frase
+
+O enunciado descreve o **padrão de uso** e a prova espera o modelo: incerto e
+curto é **sob demanda**; previsível por um a três anos é **Savings Plans ou
+reservada**; tolerante a interrupção é **Spot**; licença por hardware é **host
+dedicado**.
+
+## Os quatro modelos
+
+<Comparativo
+  colunas={["Modelo", "Compromisso", "Desconto", "Pista no enunciado"]}
+  linhas={[
+    ["Sob demanda", "Nenhum", "Nenhum", "Imprevisível, curto, prova de conceito, lançamento novo"],
+    ["Savings Plans", "Gasto por hora, 1 ou 3 anos", "Grande", "Uso contínuo e previsível, com possível mudança de família ou serviço"],
+    ["Instância reservada", "Configuração, 1 ou 3 anos", "Grande", "Uso estável na mesma família; zonal quando quer garantir capacidade"],
+    ["Spot", "Nenhum, mas pode ser retomada", "O maior", "Lote, renderização, teste, 'pode ser interrompido e retomado'"],
+    ["Host dedicado", "Hardware dedicado", "Negativo (custa mais)", "Licença por soquete ou núcleo físico, auditoria de hardware"]
+  ]}
+/>
+
+## Savings Plans ou instância reservada
+
+Os dois dão desconto por compromisso de um ou três anos. A diferença é **o que
+você trava**:
+
+- **Savings Plans**: um valor de **gasto por hora**. O *Compute Savings Plans*
+  é flexível entre famílias, tamanhos, regiões e até entre EC2, Fargate e
+  Lambda. O *EC2 Instance Savings Plans* prende família e região, com desconto
+  um pouco maior.
+- **Instância reservada**: uma **configuração** de instância. A variante
+  **regional** dá flexibilidade de zona e de tamanho dentro da família;
+  a **zonal** é a única que **garante capacidade** naquela zona.
+
+A frase que decide: "a família pode mudar" aponta Savings Plans; "precisamos
+garantir capacidade nesta zona" aponta reserva zonal.
+
+<Callout tipo="atencao" titulo="Reserva não é garantia de capacidade">
+Só a **zonal** garante. A regional é desconto com flexibilidade, e a prova usa
+essa distinção quando o cenário fala em assegurar capacidade para um evento.
+</Callout>
+
+## Spot: barato porque pode ser tirado
+
+<Termo nome="Spot">Capacidade ociosa vendida com desconto alto, que a AWS pode retomar avisando dois minutos antes. Serve carga que pode ser interrompida e retomada.</Termo>
+
+A pergunta que a questão faz sem escrever: **o que acontece se esta instância
+sumir agora?** Se a resposta for "o trabalho continua de onde parou", Spot é a
+escolha. Se for "o cliente vê erro", não é.
+
+O desenho que a prova gosta é a **frota mista**: base em sob demanda (ou com
+compromisso) e o excedente em Spot, com tipos de instância diversificados para
+reduzir a chance de perder tudo ao mesmo tempo. É a resposta para "economia
+sem arriscar o progresso".
+
+<Callout tipo="dica" titulo="Compromisso cobre serverless">
+O Compute Savings Plans também cobre **Fargate** e **Lambda**. Quando o cenário
+tem carga serverless previsível e alta, a alternativa que sugere compromisso
+não está errada por ser serverless.
+</Callout>
+
+## Como responder o cenário
+
+Leia três coisas: **por quanto tempo** (semanas é sob demanda, anos é
+compromisso), **se pode parar** (pode é Spot), e **se há licença por
+hardware** (há é host dedicado). Depois aplique a palavra de custo. E
+desconfie da alternativa que assume compromisso de três anos sobre uso que o
+próprio enunciado descreve como desconhecido: otimizar antes de medir é erro,
+não economia.

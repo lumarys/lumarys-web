@@ -30,10 +30,13 @@ test("o feed é Atom válido, com uma entrada por tema", async ({ request }) => 
   expect(xml).toContain('xmlns="http://www.w3.org/2005/Atom"');
   expect(xml).toContain("<updated>");
 
-  // 31 e não 47: os 16 temas que Analytics compartilha com Dados entram uma
-  // vez só, pela URL canônica.
+  // Tema compartilhado entra uma vez só, pela URL canônica, e o feed é
+  // limitado às 50 entradas mais recentes (LIMITE em scripts/gen-feed.mjs).
+  // Com 53 temas publicados, o teto é o que manda.
   const entradas = xml.match(/<entry>/g) ?? [];
-  expect(entradas.length).toBe(49);
+  expect(entradas.length).toBe(50);
+  const urls = [...xml.matchAll(/<id>([^<]+)<\/id>/g)].map((m) => m[1]!);
+  expect(new Set(urls).size).toBe(urls.length);
   // Todo id é uma URL do site, que é o que um leitor usa para deduplicar.
   const ids = [...xml.matchAll(/<id>([^<]+)<\/id>/g)].map((m) => m[1]!);
   expect(ids.every((id) => id.startsWith("https://lumarys.com.br/"))).toBe(true);

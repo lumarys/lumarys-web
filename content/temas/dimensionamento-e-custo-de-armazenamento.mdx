@@ -1,0 +1,242 @@
+---
+slug: dimensionamento-e-custo-de-armazenamento
+titulo: "Dimensionamento correto e custo de armazenamento"
+resumo: "Onde o dinheiro vaza sem ninguém notar: instância maior do que precisa, recurso ocioso que ninguém desligou, volume EBS órfão, snapshot antigo acumulando e objeto no S3 na classe errada. As ferramentas e as regras automáticas que a prova espera como resposta."
+minutos: 30
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "A prova separa dois tipos de economia: negociar preço (modelos de compra) e consumir menos (dimensionamento e ciclo de vida). Esta é a segunda, e ela tem respostas específicas — Compute Optimizer, regras de ciclo de vida, Intelligent-Tiering — que só valem ponto se você souber qual serve para qual desperdício."
+comoCai: "A conta cresceu e ninguém sabe por quê. Como identificar recursos superdimensionados e ociosos?"
+feynman: "Explique em um minuto por que trocar de plano é diferente de gastar menos, e por que uma empresa precisa das duas coisas."
+preRequisitos: ["modelos-de-preco-da-computacao", "armazenamento-por-caso-de-uso"]
+errosComuns:
+  - "Confundir dimensionamento com modelo de compra. Comprar mais barato e usar menos são economias diferentes e somáveis; a prova às vezes quer as duas na mesma questão."
+  - "Esquecer que apagar uma instância não apaga o volume EBS se a exclusão na terminação estiver desligada. Volume órfão continua cobrando."
+  - "Achar que snapshot só cobra o primeiro. Snapshots são incrementais, mas o conjunto cresce; sem política de retenção eles acumulam indefinidamente."
+  - "Propor análise manual quando existe Compute Optimizer. Ele recomenda tamanho com base em métricas reais, e é a resposta de menor esforço para superdimensionamento."
+  - "Usar Intelligent-Tiering para objeto pequeno e de vida curta. A taxa de monitoramento por objeto e os mínimos das camadas podem custar mais que a economia."
+  - "Deixar de usar o Trusted Advisor. Ele aponta recursos ociosos, volumes não anexados, IPs elásticos não associados e balanceadores sem alvo, que são as fontes clássicas de desperdício."
+preTeste:
+  - enunciado: "Uma empresa suspeita que muitas instâncias EC2 estão superdimensionadas. Ela quer recomendações baseadas no uso real, com o MENOR esforço. Qual serviço usar?"
+    alternativas:
+      - texto: "AWS Compute Optimizer."
+        correta: true
+        explicacao: "Analisa métricas de uso e recomenda tipo e tamanho adequados, incluindo para volumes EBS, funções Lambda e grupos de Auto Scaling."
+      - texto: "AWS Cost Explorer com relatório por serviço."
+        correta: false
+        explicacao: "Mostra quanto se gasta, não qual instância está grande demais para a carga."
+      - texto: "Analisar manualmente os gráficos do CloudWatch de cada instância."
+        correta: false
+        explicacao: "Funciona e é o oposto de menor esforço quando existe um serviço que faz isso."
+  - enunciado: "Depois de terminar várias instâncias EC2, a equipe percebe que o custo de EBS continuou igual. Qual é a causa mais provável?"
+    alternativas:
+      - texto: "Os volumes foram criados sem exclusão na terminação e continuam existindo, desanexados."
+        correta: true
+        explicacao: "Volume órfão continua sendo cobrado por GB provisionado até ser apagado."
+      - texto: "Os snapshots dos volumes foram apagados junto."
+        correta: false
+        explicacao: "Apagar snapshot reduziria o custo, não o manteria."
+      - texto: "O EBS cobra por instância, não por volume."
+        correta: false
+        explicacao: "A cobrança é pelo volume provisionado, independentemente de estar anexado."
+videos:
+  - id: VepHcS7obQY
+    publicadoEm: "2025-03-18"
+    titulo: "Como REDUZIR CUSTOS na AWS? 6 Dicas Práticas Para ECONOMIZAR"
+    canal: "Ar7 Technology"
+    duracao: 16
+    porQue: "Percorre as fontes de desperdício que a prova cobra: ocioso, superdimensionado, armazenamento na classe errada. Assista separando o que é 'comprar mais barato' do que é 'consumir menos'."
+  - id: E0mIIFWdlvw
+    publicadoEm: "2023-06-16"
+    titulo: "Reduzindo custos na AWS"
+    canal: "Journey Cloud Tech"
+    duracao: 22
+    porQue: "Complementar, com o ângulo de escolha de plano. Bom para fechar a distinção entre negociar preço e reduzir consumo, que é a organização deste tema."
+artigos:
+  - titulo: "What is AWS Compute Optimizer?"
+    url: "https://docs.aws.amazon.com/compute-optimizer/latest/ug/what-is-compute-optimizer.html"
+    fonte: "AWS"
+  - titulo: "Managing your storage lifecycle"
+    url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html"
+    fonte: "AWS"
+  - titulo: "AWS Trusted Advisor"
+    url: "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "As duas famílias de economia."
+    verso: "Comprar melhor (modelos de compra: Savings Plans, reservada, Spot) e consumir menos (dimensionamento, desligar ocioso, ciclo de vida). São somáveis."
+  - frente: "Compute Optimizer, em uma linha."
+    verso: "Recomenda tipo e tamanho com base em métricas reais de uso, para EC2, grupos de Auto Scaling, volumes EBS e funções Lambda."
+  - frente: "Trusted Advisor, no eixo de custo."
+    verso: "Aponta desperdício: instâncias ociosas, volumes EBS não anexados, IPs elásticos não associados, balanceadores sem alvo, reservas subutilizadas."
+  - frente: "Por que um volume EBS continua cobrando depois da instância morrer?"
+    verso: "Porque a cobrança é pelo volume provisionado. Se a exclusão na terminação estiver desligada, ele fica órfão e cobrando."
+  - frente: "Como snapshots acumulam custo?"
+    verso: "São incrementais, mas sem política de retenção o conjunto cresce indefinidamente. AWS Backup ou regras de ciclo de vida de snapshot resolvem."
+  - frente: "Regra de ciclo de vida no S3, em uma linha."
+    verso: "Move objetos entre classes por idade e os expira ao fim do prazo, sem intervenção. É a resposta para 'quente no começo, frio depois'."
+  - frente: "Quando Intelligent-Tiering compensa?"
+    verso: "Quando o padrão de acesso é desconhecido ou variável e os objetos são grandes o bastante para a economia superar a taxa de monitoramento por objeto."
+  - frente: "O que mais é cobrado no S3 além do armazenamento?"
+    verso: "Requisições (por mil), recuperação nas classes frias, transferência de saída e monitoramento no Intelligent-Tiering."
+  - frente: "Escala vertical ou horizontal, pelo custo."
+    verso: "Horizontal com Auto Scaling paga só o que está em uso e acompanha a demanda; vertical mantém a máquina grande o tempo todo. A prova prefere horizontal."
+  - frente: "O que é desligar por agendamento?"
+    verso: "Parar ambientes de desenvolvimento e homologação fora do horário comercial, por agendamento. Economia direta e comum em cenário de 'reduzir custo sem afetar produção'."
+  - frente: "Lambda: o que determina o custo?"
+    verso: "Número de invocações e duração multiplicada pela memória configurada. Ajustar a memória pode reduzir a duração e sair mais barato, o que o Compute Optimizer também recomenda."
+drills:
+  - titulo: "Qual desperdício e qual correção?"
+    instrucao: "Para cada situação, diga a correção esperada."
+    opcoes: ["Compute Optimizer", "Ciclo de vida no S3", "Apagar recurso órfão", "Desligar por agendamento", "Trusted Advisor"]
+    itens:
+      - enunciado: "Instâncias com 5% de CPU média há três meses."
+        resposta: "Compute Optimizer"
+        explicacao: "Superdimensionamento com recomendação baseada em métrica."
+      - enunciado: "Ambientes de desenvolvimento ligados 24 horas por dia, usados só em horário comercial."
+        resposta: "Desligar por agendamento"
+        explicacao: "Economia direta sem afetar produção."
+      - enunciado: "Dezenas de volumes EBS não anexados a nenhuma instância."
+        resposta: "Apagar recurso órfão"
+        explicacao: "Volume provisionado cobra mesmo desanexado."
+      - enunciado: "Logs no S3 Standard com um ano de idade e sem leitura."
+        resposta: "Ciclo de vida no S3"
+        explicacao: "Transição automática para classe de arquivamento."
+      - enunciado: "A empresa quer uma varredura geral do que está sendo desperdiçado na conta."
+        resposta: "Trusted Advisor"
+        explicacao: "Checagens prontas de otimização de custo."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa quer reduzir o custo dos ambientes de desenvolvimento e homologação, que rodam em instâncias EC2 e são usados apenas em horário comercial, sem afetar a produção. Qual ação traz economia imediata com o MENOR esforço?"
+    alternativas:
+      - texto: "Parar as instâncias fora do horário comercial por meio de uma ação agendada."
+        correta: true
+        explicacao: "Instância parada não cobra por hora de computação, e o agendamento é trivial de configurar. Economia direta sem tocar em produção."
+      - texto: "Comprar instâncias reservadas de três anos para esses ambientes."
+        correta: false
+        explicacao: "Compromisso de longo prazo para recursos usados um terço do tempo desperdiça o que foi comprado."
+      - texto: "Migrar os ambientes para instâncias Spot."
+        correta: false
+        explicacao: "Reduz o preço, mas a interrupção atrapalha o trabalho da equipe no horário de uso."
+      - texto: "Reduzir o tamanho dos volumes EBS associados."
+        correta: false
+        explicacao: "Economia pequena diante do custo de computação ligada o tempo todo."
+  - tipo: multipla
+    enunciado: "Uma auditoria de custos precisa identificar desperdício numa conta com centenas de recursos. Quais DUAS ferramentas apontam diretamente recursos ociosos ou superdimensionados?"
+    alternativas:
+      - texto: "AWS Compute Optimizer, com recomendações de tipo e tamanho baseadas em uso real."
+        correta: true
+        explicacao: "É o serviço de dimensionamento correto, para EC2, EBS, Lambda e grupos de Auto Scaling."
+      - texto: "AWS Trusted Advisor, com as checagens de otimização de custo."
+        correta: true
+        explicacao: "Aponta instâncias ociosas, volumes não anexados, IPs elásticos não associados e balanceadores sem alvo."
+      - texto: "AWS Cost Explorer, para ver o gasto por serviço."
+        correta: false
+        explicacao: "Mostra onde o dinheiro vai, sem dizer qual recurso está ocioso ou grande demais."
+      - texto: "AWS Budgets, com alertas de estouro."
+        correta: false
+        explicacao: "Avisa quando o gasto passa de um limite; não identifica o recurso desperdiçado."
+      - texto: "Amazon CloudWatch, com alarmes de faturamento."
+        correta: false
+        explicacao: "Alerta sobre o valor total, não sobre o dimensionamento de cada recurso."
+  - tipo: unica
+    enunciado: "Registros de aplicação são gravados no S3 Standard, consultados com frequência por 7 dias, raramente nos 3 meses seguintes e nunca depois disso, embora precisem ser retidos por 5 anos. Qual configuração oferece o MENOR custo?"
+    alternativas:
+      - texto: "Uma regra de ciclo de vida que faça transição para uma classe de acesso infrequente após 7 dias, para arquivamento profundo após 90 dias, e expire os objetos aos 5 anos."
+        correta: true
+        explicacao: "Acompanha o padrão de acesso descrito camada a camada e encerra a retenção no prazo, sem intervenção manual."
+      - texto: "Manter tudo em S3 Standard e apagar manualmente após 5 anos."
+        correta: false
+        explicacao: "Paga classe quente por dado que não é lido, durante quase todo o período."
+      - texto: "Gravar direto em arquivamento profundo desde o primeiro dia."
+        correta: false
+        explicacao: "Os 7 dias de consulta frequente pagariam recuperação e enfrentariam horas de espera."
+      - texto: "Usar Intelligent-Tiering sem regra de expiração."
+        correta: false
+        explicacao: "Resolve a transição, mas sem expiração os objetos ficam indefinidamente, pagando além dos 5 anos exigidos."
+  - tipo: unica
+    enunciado: "Depois de uma limpeza de instâncias EC2, o custo de computação caiu, mas a linha do Amazon EBS permaneceu igual. Qual é a explicação e a correção?"
+    alternativas:
+      - texto: "Os volumes não foram apagados junto com as instâncias e continuam provisionados; é preciso identificar e remover os volumes não anexados."
+        correta: true
+        explicacao: "EBS cobra pelo volume provisionado, anexado ou não. Volume órfão é uma das fontes de desperdício mais comuns."
+      - texto: "O EBS tem cobrança mínima mensal independentemente do uso."
+        correta: false
+        explicacao: "Não existe essa cobrança mínima; a conta segue o provisionado."
+      - texto: "Os snapshots passaram a cobrar mais depois que as instâncias foram removidas."
+        correta: false
+        explicacao: "A remoção de instâncias não altera a cobrança dos snapshots existentes."
+      - texto: "O custo de EBS é faturado com três meses de atraso."
+        correta: false
+        explicacao: "Não há esse atraso de faturamento."
+---
+
+## Em uma frase
+
+Há duas economias diferentes: **comprar melhor** (modelos de compra) e
+**consumir menos** (dimensionar certo, desligar ocioso, arquivar o frio). Este
+tema é a segunda, e cada tipo de desperdício tem um serviço que o aponta.
+
+## Onde o dinheiro vaza
+
+<Comparativo
+  colunas={["Desperdício", "Sintoma", "Correção esperada"]}
+  linhas={[
+    ["Superdimensionamento", "CPU e memória baixas há semanas", "Compute Optimizer e redimensionar"],
+    ["Ocioso", "Ambiente ligado fora do horário de uso", "Parar por agendamento"],
+    ["Órfão", "Volume EBS não anexado, IP elástico não associado, balanceador sem alvo", "Trusted Advisor e apagar"],
+    ["Snapshot acumulado", "Conjunto crescendo sem limite", "Política de retenção (AWS Backup ou ciclo de vida)"],
+    ["Classe errada no S3", "Dado frio em classe quente", "Regra de ciclo de vida ou Intelligent-Tiering"],
+    ["Escala vertical permanente", "Máquina grande o tempo todo para o pico", "Escala horizontal com Auto Scaling"]
+  ]}
+/>
+
+<Termo nome="Compute Optimizer">Serviço que analisa métricas reais de uso e recomenda tipo e tamanho para instâncias EC2, grupos de Auto Scaling, volumes EBS e funções Lambda.</Termo>
+
+<Termo nome="Trusted Advisor">Conjunto de checagens automáticas sobre a conta, entre elas as de otimização de custo, que apontam recursos ociosos e órfãos.</Termo>
+
+A distinção que a prova cobra: **Compute Optimizer** diz que a instância está
+**grande demais**; **Trusted Advisor** diz que ela está **parada sem uso** ou
+que existe um recurso pendurado. Cost Explorer e Budgets, que vêm no próximo
+tema, mostram o gasto e alertam sobre ele — mas não apontam o recurso.
+
+<Callout tipo="atencao" titulo="Recurso órfão continua cobrando">
+Um volume EBS existe independentemente da instância. Se a opção de excluir na
+terminação estiver desligada, ele fica lá, provisionado e faturado. O mesmo
+vale para IP elástico não associado e balanceador sem alvo. É o cenário de
+"apaguei as instâncias e a conta não caiu".
+</Callout>
+
+## Ciclo de vida: a economia que roda sozinha
+
+A regra que resolve quase todo cenário de custo de armazenamento tem três
+partes, e o enunciado costuma dar as três:
+
+<Passos itens={[
+  "Transição para uma classe de acesso infrequente quando o acesso frequente termina.",
+  "Transição para arquivamento quando o acesso vira exceção e a espera é tolerável.",
+  "Expiração no fim do prazo de retenção, para o dado não ficar cobrando para sempre."
+]} />
+
+Faltar a **expiração** é o erro sutil: a alternativa faz as transições certas e
+deixa o objeto vivo além do prazo exigido.
+
+**Intelligent-Tiering** substitui as duas primeiras partes quando o padrão é
+desconhecido — mas cobra uma taxa de monitoramento por objeto, o que o torna
+ruim para muitos objetos pequenos.
+
+<Callout tipo="dica" titulo="Parar não é terminar">
+Instância **parada** não paga computação, mas continua pagando o volume EBS.
+Instância **terminada** some, e o volume só some junto se a exclusão na
+terminação estiver ligada. Para ambiente de desenvolvimento, parar é o certo:
+o estado é preservado e a computação não é cobrada.
+</Callout>
+
+## Como responder o cenário
+
+Classifique o desperdício antes de olhar as ferramentas: **grande demais**
+(Compute Optimizer), **ligado sem uso** (agendamento), **pendurado**
+(Trusted Advisor e apagar), **frio na classe quente** (ciclo de vida). E
+confira se a alternativa de armazenamento inclui **expiração** quando o
+enunciado dá um prazo de retenção.

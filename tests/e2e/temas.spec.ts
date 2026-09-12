@@ -22,8 +22,8 @@ const rotas = [
   .filter((r) => !/\/(plano|glossario|resumo|checkpoint)\/$/.test(r))
   .sort();
 
-test("existem 49 temas", () => {
-  expect(rotas).toHaveLength(49);
+test("existem 53 temas", () => {
+  expect(rotas).toHaveLength(53);
 });
 
 for (const rota of rotas) {

@@ -45,6 +45,13 @@ Página: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/
 - [Qual banco para qual caso de uso](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/banco-de-dados-por-caso-de-uso/): O cenário em que a prova descreve o dado e pergunta o serviço: relacional gerenciado (RDS, Aurora), chave-valor de escala (DynamoDB), data warehouse (Redshift), busca e log (OpenSearch), grafo (Neptune), documento (DocumentDB), série temporal e ledger. A pista está na forma da consulta.
 - [Rede de alto desempenho e conectividade híbrida](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/rede-de-alto-desempenho/): As peças que a prova usa quando o gargalo é a rede: Global Accelerator para melhorar o trajeto de tráfego não cacheável, Direct Connect para ligação dedicada ao data center, VPN como alternativa barata, Transit Gateway para muitas VPCs, e os grupos de posicionamento dentro da zona.
 
+### Arquiteturas otimizadas em custo
+
+- [Modelos de preço: sob demanda, reservada, Savings Plans e Spot](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/modelos-de-preco-da-computacao/): A decisão de custo que mais cai: sob demanda para carga imprevisível e curta, Savings Plans ou instâncias reservadas para uso previsível de um a três anos, Spot para carga tolerante a interrupção, e host dedicado só quando a licença exige. O enunciado descreve o padrão de uso e espera o modelo.
+- [Custo de transferência de dados](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/custo-de-transferencia-de-dados/): A linha da fatura que ninguém prevê e a prova adora: entrada é grátis, saída para a internet é cobrada, tráfego entre zonas é cobrado nos dois sentidos, e o NAT Gateway cobra por GB além da hora. Endpoints, CloudFront e desenho por zona são as saídas.
+- [Dimensionamento correto e custo de armazenamento](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/dimensionamento-e-custo-de-armazenamento/): Onde o dinheiro vaza sem ninguém notar: instância maior do que precisa, recurso ocioso que ninguém desligou, volume EBS órfão, snapshot antigo acumulando e objeto no S3 na classe errada. As ferramentas e as regras automáticas que a prova espera como resposta.
+- [Ferramentas de custo e governança financeira](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/ferramentas-de-custo-e-governanca/): Como ver, prever e controlar a fatura: Cost Explorer para analisar, Budgets para alertar e agir, relatório de custo e uso para o detalhe fino, etiquetas de alocação para saber de quem é o gasto, e o faturamento consolidado do Organizations para somar e compartilhar descontos.
+
 ## Engenharia de Analytics
 
 A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.
@@ -2142,6 +2149,376 @@ aproximar, spread para separar.
 - Usar peering de VPC para muitas VPCs. Peering não é transitivo e o número de conexões cresce ao quadrado; a partir de algumas VPCs, a resposta é Transit Gateway.
 - Esquecer que uma única conexão Direct Connect é ponto único de falha. Alta disponibilidade exige duas conexões, idealmente em locais diferentes, ou uma VPN de contingência.
 - Misturar grupo de posicionamento cluster com spread. Cluster aproxima para latência mínima; spread separa para reduzir falha correlacionada. São objetivos opostos.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Modelos de preço: sob demanda, reservada, Savings Plans e Spot
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas otimizadas em custo
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/modelos-de-preco-da-computacao/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** A decisão de custo que mais cai: sob demanda para carga imprevisível e curta, Savings Plans ou instâncias reservadas para uso previsível de um a três anos, Spot para carga tolerante a interrupção, e host dedicado só quando a licença exige. O enunciado descreve o padrão de uso e espera o modelo.
+
+**Por que cai na prova.** É o coração do Domínio 4 e reaparece em cenários de desempenho. A prova descreve o padrão de uso — contínuo por um ano, com picos, tolerante a interrupção — e espera que você escolha o modelo. Errar aqui costuma ser escolher Spot para carga que não pode parar, ou sob demanda para uso constante.
+
+**Como o entrevistador pergunta.** "A carga roda 24 horas por dia durante pelo menos um ano e é previsível. Qual modelo de preço tem o MENOR custo?"
+
+## Em uma frase
+
+O enunciado descreve o **padrão de uso** e a prova espera o modelo: incerto e
+curto é **sob demanda**; previsível por um a três anos é **Savings Plans ou
+reservada**; tolerante a interrupção é **Spot**; licença por hardware é **host
+dedicado**.
+
+## Os quatro modelos
+
+<Comparativo
+  colunas={["Modelo", "Compromisso", "Desconto", "Pista no enunciado"]}
+  linhas={[
+    ["Sob demanda", "Nenhum", "Nenhum", "Imprevisível, curto, prova de conceito, lançamento novo"],
+    ["Savings Plans", "Gasto por hora, 1 ou 3 anos", "Grande", "Uso contínuo e previsível, com possível mudança de família ou serviço"],
+    ["Instância reservada", "Configuração, 1 ou 3 anos", "Grande", "Uso estável na mesma família; zonal quando quer garantir capacidade"],
+    ["Spot", "Nenhum, mas pode ser retomada", "O maior", "Lote, renderização, teste, 'pode ser interrompido e retomado'"],
+    ["Host dedicado", "Hardware dedicado", "Negativo (custa mais)", "Licença por soquete ou núcleo físico, auditoria de hardware"]
+  ]}
+/>
+
+## Savings Plans ou instância reservada
+
+Os dois dão desconto por compromisso de um ou três anos. A diferença é **o que
+você trava**:
+
+- **Savings Plans**: um valor de **gasto por hora**. O *Compute Savings Plans*
+  é flexível entre famílias, tamanhos, regiões e até entre EC2, Fargate e
+  Lambda. O *EC2 Instance Savings Plans* prende família e região, com desconto
+  um pouco maior.
+- **Instância reservada**: uma **configuração** de instância. A variante
+  **regional** dá flexibilidade de zona e de tamanho dentro da família;
+  a **zonal** é a única que **garante capacidade** naquela zona.
+
+A frase que decide: "a família pode mudar" aponta Savings Plans; "precisamos
+garantir capacidade nesta zona" aponta reserva zonal.
+
+<Callout tipo="atencao" titulo="Reserva não é garantia de capacidade">
+Só a **zonal** garante. A regional é desconto com flexibilidade, e a prova usa
+essa distinção quando o cenário fala em assegurar capacidade para um evento.
+</Callout>
+
+## Spot: barato porque pode ser tirado
+
+<Termo nome="Spot">Capacidade ociosa vendida com desconto alto, que a AWS pode retomar avisando dois minutos antes. Serve carga que pode ser interrompida e retomada.</Termo>
+
+A pergunta que a questão faz sem escrever: **o que acontece se esta instância
+sumir agora?** Se a resposta for "o trabalho continua de onde parou", Spot é a
+escolha. Se for "o cliente vê erro", não é.
+
+O desenho que a prova gosta é a **frota mista**: base em sob demanda (ou com
+compromisso) e o excedente em Spot, com tipos de instância diversificados para
+reduzir a chance de perder tudo ao mesmo tempo. É a resposta para "economia
+sem arriscar o progresso".
+
+<Callout tipo="dica" titulo="Compromisso cobre serverless">
+O Compute Savings Plans também cobre **Fargate** e **Lambda**. Quando o cenário
+tem carga serverless previsível e alta, a alternativa que sugere compromisso
+não está errada por ser serverless.
+</Callout>
+
+## Como responder o cenário
+
+Leia três coisas: **por quanto tempo** (semanas é sob demanda, anos é
+compromisso), **se pode parar** (pode é Spot), e **se há licença por
+hardware** (há é host dedicado). Depois aplique a palavra de custo. E
+desconfie da alternativa que assume compromisso de três anos sobre uso que o
+próprio enunciado descreve como desconhecido: otimizar antes de medir é erro,
+não economia.
+
+## Erros comuns
+
+- Escolher Spot para carga que não tolera interrupção. A AWS recupera a capacidade com dois minutos de aviso; carga crítica e contínua não é candidata, por mais barata que seja.
+- Usar sob demanda para carga contínua e previsível. É o modelo mais caro por hora; sem compromisso, paga-se o preço cheio o tempo todo.
+- Achar que instância reservada reserva capacidade sempre. Só a reserva zonal garante capacidade; a regional dá desconto e flexibilidade, sem garantia de capacidade.
+- Confundir Savings Plans com instância reservada. Savings Plans é compromisso de gasto por hora, flexível entre famílias e até serviços; reservada é compromisso por configuração de instância.
+- Propor host dedicado sem exigência de licença ou conformidade. É o modelo mais caro; só entra quando o enunciado cita licença por soquete ou por núcleo físico, ou isolamento de hardware exigido.
+- Esquecer que Savings Plans e reservadas também cobrem Fargate e Lambda (no plano de computação). Carga serverless previsível também aceita compromisso.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Custo de transferência de dados
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas otimizadas em custo
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/custo-de-transferencia-de-dados/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** A linha da fatura que ninguém prevê e a prova adora: entrada é grátis, saída para a internet é cobrada, tráfego entre zonas é cobrado nos dois sentidos, e o NAT Gateway cobra por GB além da hora. Endpoints, CloudFront e desenho por zona são as saídas.
+
+**Por que cai na prova.** É o custo invisível: não aparece ao escolher um serviço, aparece na fatura. A prova constrói cenários em que a arquitetura está certa e cara, e a resposta é mudar o caminho do tráfego, não o serviço. Quem vem de dados erra aqui com frequência, mandando terabytes ao S3 pelo NAT.
+
+**Como o entrevistador pergunta.** "A fatura do NAT Gateway cresceu e o tráfego é quase todo para o S3. O que fazer?"
+
+## Em uma frase
+
+Entrada é grátis, **saída custa**, e tudo que atravessa zona, região ou NAT é
+cobrado por GB. Em cenários de custo, a resposta costuma ser **mudar o caminho
+do tráfego**, não o serviço.
+
+## O mapa da cobrança
+
+<Comparativo
+  colunas={["Fluxo", "Cobrança"]}
+  linhas={[
+    ["Internet para a AWS (entrada)", "Grátis"],
+    ["AWS para a internet (saída)", "Por GB, com faixas decrescentes e uma franquia mensal"],
+    ["Entre zonas da mesma região", "Por GB, nos dois sentidos"],
+    ["Dentro da mesma zona, por IP privado", "Grátis"],
+    ["Dentro da mesma zona, por IP público ou elástico", "Cobrado: o tráfego sai e volta"],
+    ["Entre regiões", "Por GB"],
+    ["Através do NAT Gateway", "Por hora ligado MAIS por GB processado"],
+    ["Endpoint de gateway (S3, DynamoDB)", "Grátis"],
+    ["Endpoint de interface (PrivateLink)", "Por hora MAIS por GB"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O NAT é a armadilha favorita">
+Ele cobra **duas** vezes: a hora ligada e cada GB processado. Quando uma carga
+privada conversa muito com S3 ou DynamoDB, o volume passa pelo NAT sem
+necessidade. A correção é **endpoint de gateway**, que é uma rota na tabela e
+não custa nada. É a questão de custo mais repetida da prova.
+</Callout>
+
+## CloudFront como redutor de custo
+
+Costuma ser apresentado como melhoria de desempenho, e é também economia: a
+saída pelo **CloudFront** tem preço por GB menor que a saída direta do S3 ou de
+um balanceador, e o **cache** reduz o número de requisições que chegam à
+origem. Por isso, num cenário de "reduzir custo de saída e melhorar
+desempenho", ele responde aos dois de uma vez.
+
+## Resiliência custa transferência
+
+Multi-AZ, réplicas e balanceamento atravessam zonas — e isso é cobrado. A prova
+não considera isso um erro: é o preço da disponibilidade que o requisito pediu.
+O que ela cobra é **não desperdiçar**: manter conversas de alta frequência
+dentro da zona quando possível, usar IP privado em vez de público, e não
+atravessar região sem necessidade.
+
+<Callout tipo="dica" titulo="Quando a rede não dá conta">
+Volume muito grande com enlace insuficiente não se resolve com otimização de
+transferência: se resolve com **transporte físico**. A família **Snow** leva
+os dados em um dispositivo, e é a resposta quando o enunciado diz que a
+transferência pela rede levaria meses. **DataSync** otimiza o que passa pela
+rede, mas não cria banda.
+</Callout>
+
+## Como responder o cenário
+
+Ache **por onde o tráfego passa** hoje e pergunte se existe caminho mais curto:
+endpoint em vez de NAT, IP privado em vez de público, borda em vez de origem,
+mesma zona em vez de atravessar. Depois confira se o volume justifica mudar de
+meio: centenas de terabytes com rede insuficiente é Snow, não otimização.
+
+## Erros comuns
+
+- Esquecer que o NAT Gateway cobra por hora E por GB processado. É a fonte mais comum de fatura inesperada quando tráfego de S3 ou DynamoDB passa por ele.
+- Achar que tráfego entre zonas é grátis. É cobrado, e nos dois sentidos; arquiteturas que atravessam zonas sem necessidade pagam por isso o tempo todo.
+- Confundir entrada com saída. Entrada de dados na AWS é gratuita; o que custa é a saída para a internet e o tráfego entre zonas e regiões.
+- Propor endpoint de interface quando existe endpoint de gateway. Gateway (S3 e DynamoDB) não tem custo; interface cobra por hora e por GB.
+- Ignorar o CloudFront como redutor de custo. Saída pelo CloudFront costuma custar menos que saída direta do S3 ou do balanceador, além de reduzir requisições à origem.
+- Achar que tráfego dentro da mesma zona por IP público é grátis. Usar IP público ou elástico faz o tráfego sair e voltar, com cobrança; dentro da zona, use IP privado.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Dimensionamento correto e custo de armazenamento
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas otimizadas em custo
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/dimensionamento-e-custo-de-armazenamento/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** Onde o dinheiro vaza sem ninguém notar: instância maior do que precisa, recurso ocioso que ninguém desligou, volume EBS órfão, snapshot antigo acumulando e objeto no S3 na classe errada. As ferramentas e as regras automáticas que a prova espera como resposta.
+
+**Por que cai na prova.** A prova separa dois tipos de economia: negociar preço (modelos de compra) e consumir menos (dimensionamento e ciclo de vida). Esta é a segunda, e ela tem respostas específicas — Compute Optimizer, regras de ciclo de vida, Intelligent-Tiering — que só valem ponto se você souber qual serve para qual desperdício.
+
+**Como o entrevistador pergunta.** "A conta cresceu e ninguém sabe por quê. Como identificar recursos superdimensionados e ociosos?"
+
+## Em uma frase
+
+Há duas economias diferentes: **comprar melhor** (modelos de compra) e
+**consumir menos** (dimensionar certo, desligar ocioso, arquivar o frio). Este
+tema é a segunda, e cada tipo de desperdício tem um serviço que o aponta.
+
+## Onde o dinheiro vaza
+
+<Comparativo
+  colunas={["Desperdício", "Sintoma", "Correção esperada"]}
+  linhas={[
+    ["Superdimensionamento", "CPU e memória baixas há semanas", "Compute Optimizer e redimensionar"],
+    ["Ocioso", "Ambiente ligado fora do horário de uso", "Parar por agendamento"],
+    ["Órfão", "Volume EBS não anexado, IP elástico não associado, balanceador sem alvo", "Trusted Advisor e apagar"],
+    ["Snapshot acumulado", "Conjunto crescendo sem limite", "Política de retenção (AWS Backup ou ciclo de vida)"],
+    ["Classe errada no S3", "Dado frio em classe quente", "Regra de ciclo de vida ou Intelligent-Tiering"],
+    ["Escala vertical permanente", "Máquina grande o tempo todo para o pico", "Escala horizontal com Auto Scaling"]
+  ]}
+/>
+
+<Termo nome="Compute Optimizer">Serviço que analisa métricas reais de uso e recomenda tipo e tamanho para instâncias EC2, grupos de Auto Scaling, volumes EBS e funções Lambda.</Termo>
+
+<Termo nome="Trusted Advisor">Conjunto de checagens automáticas sobre a conta, entre elas as de otimização de custo, que apontam recursos ociosos e órfãos.</Termo>
+
+A distinção que a prova cobra: **Compute Optimizer** diz que a instância está
+**grande demais**; **Trusted Advisor** diz que ela está **parada sem uso** ou
+que existe um recurso pendurado. Cost Explorer e Budgets, que vêm no próximo
+tema, mostram o gasto e alertam sobre ele — mas não apontam o recurso.
+
+<Callout tipo="atencao" titulo="Recurso órfão continua cobrando">
+Um volume EBS existe independentemente da instância. Se a opção de excluir na
+terminação estiver desligada, ele fica lá, provisionado e faturado. O mesmo
+vale para IP elástico não associado e balanceador sem alvo. É o cenário de
+"apaguei as instâncias e a conta não caiu".
+</Callout>
+
+## Ciclo de vida: a economia que roda sozinha
+
+A regra que resolve quase todo cenário de custo de armazenamento tem três
+partes, e o enunciado costuma dar as três:
+
+<Passos itens={[
+  "Transição para uma classe de acesso infrequente quando o acesso frequente termina.",
+  "Transição para arquivamento quando o acesso vira exceção e a espera é tolerável.",
+  "Expiração no fim do prazo de retenção, para o dado não ficar cobrando para sempre."
+]} />
+
+Faltar a **expiração** é o erro sutil: a alternativa faz as transições certas e
+deixa o objeto vivo além do prazo exigido.
+
+**Intelligent-Tiering** substitui as duas primeiras partes quando o padrão é
+desconhecido — mas cobra uma taxa de monitoramento por objeto, o que o torna
+ruim para muitos objetos pequenos.
+
+<Callout tipo="dica" titulo="Parar não é terminar">
+Instância **parada** não paga computação, mas continua pagando o volume EBS.
+Instância **terminada** some, e o volume só some junto se a exclusão na
+terminação estiver ligada. Para ambiente de desenvolvimento, parar é o certo:
+o estado é preservado e a computação não é cobrada.
+</Callout>
+
+## Como responder o cenário
+
+Classifique o desperdício antes de olhar as ferramentas: **grande demais**
+(Compute Optimizer), **ligado sem uso** (agendamento), **pendurado**
+(Trusted Advisor e apagar), **frio na classe quente** (ciclo de vida). E
+confira se a alternativa de armazenamento inclui **expiração** quando o
+enunciado dá um prazo de retenção.
+
+## Erros comuns
+
+- Confundir dimensionamento com modelo de compra. Comprar mais barato e usar menos são economias diferentes e somáveis; a prova às vezes quer as duas na mesma questão.
+- Esquecer que apagar uma instância não apaga o volume EBS se a exclusão na terminação estiver desligada. Volume órfão continua cobrando.
+- Achar que snapshot só cobra o primeiro. Snapshots são incrementais, mas o conjunto cresce; sem política de retenção eles acumulam indefinidamente.
+- Propor análise manual quando existe Compute Optimizer. Ele recomenda tamanho com base em métricas reais, e é a resposta de menor esforço para superdimensionamento.
+- Usar Intelligent-Tiering para objeto pequeno e de vida curta. A taxa de monitoramento por objeto e os mínimos das camadas podem custar mais que a economia.
+- Deixar de usar o Trusted Advisor. Ele aponta recursos ociosos, volumes não anexados, IPs elásticos não associados e balanceadores sem alvo, que são as fontes clássicas de desperdício.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Ferramentas de custo e governança financeira
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas otimizadas em custo
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/custo/ferramentas-de-custo-e-governanca/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** Como ver, prever e controlar a fatura: Cost Explorer para analisar, Budgets para alertar e agir, relatório de custo e uso para o detalhe fino, etiquetas de alocação para saber de quem é o gasto, e o faturamento consolidado do Organizations para somar e compartilhar descontos.
+
+**Por que cai na prova.** Fecha o Domínio 4 e o exame. A prova monta cenários de governança — 'saber quanto cada equipe gasta', 'ser avisado antes de estourar', 'impedir que uma conta gaste demais' — e cada um tem um serviço específico. Confundir analisar com alertar e com impedir é o erro que a questão procura.
+
+**Como o entrevistador pergunta.** "A empresa quer saber quanto cada projeto gasta e ser avisada antes de estourar o orçamento. O que configurar?"
+
+## Em uma frase
+
+Três verbos diferentes, três serviços: **analisar** é Cost Explorer, **alertar**
+é Budgets, **impedir** é SCP. Etiquetas dizem de quem é o gasto, e o
+faturamento consolidado soma tudo para render desconto.
+
+## Analisar, alertar, impedir
+
+<Comparativo
+  colunas={["Pedido do enunciado", "Serviço", "O que ele faz"]}
+  linhas={[
+    ["'Entender para onde vai o dinheiro'", "Cost Explorer", "Filtra, agrupa, mostra histórico e projeção"],
+    ["'Ser avisado antes de estourar'", "AWS Budgets", "Limite, acompanhamento do realizado e do projetado, notificação"],
+    ["'Impedir que aconteça'", "SCP no Organizations", "Bloqueia a ação: tipo caro, região não aprovada"],
+    ["'Analisar num BI próprio, por hora e por recurso'", "Relatório de custo e uso", "Detalhe bruto entregue no S3"],
+    ["'Detectar gasto fora do padrão sem definir limite'", "Detector de anomalias", "Aprendizado de máquina sobre o histórico"],
+    ["'Estimar antes de construir'", "Calculadora de preços", "Planejamento, não acompanhamento"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Budgets não bloqueia sozinho">
+Ele **alerta**, e pode disparar uma **ação** que você configurou — aplicar uma
+política restritiva, parar instâncias. Mas a alternativa que diz "o Budgets
+impede o gasto" descreve algo que ele não faz por padrão. Impedir é papel da
+**SCP**.
+</Callout>
+
+## Etiquetas: o passo que se esquece
+
+Atribuir custo a equipes, projetos e ambientes depende de **etiquetas**, e o
+fluxo tem uma etapa que as questões testam:
+
+<Passos itens={[
+  "Etiquetar os recursos com um padrão combinado (equipe, projeto, ambiente).",
+  "ATIVAR essas etiquetas como etiquetas de alocação de custo no painel de faturamento. Sem esse passo, o custo não aparece separado por elas.",
+  "Analisar no Cost Explorer agrupando pela etiqueta, e criar orçamentos filtrados por ela.",
+  "Impor o padrão: SCP que barra a criação sem etiqueta, ou regra do Config que sinaliza o que estiver fora."
+]} />
+
+E uma limitação que vira distrator: a alocação **não é retroativa**. Ativar
+hoje não reclassifica o gasto do mês passado.
+
+## Organizations: consolidar rende dinheiro
+
+<Termo nome="faturamento consolidado">Uma fatura para toda a organização. Soma o uso de todas as contas, o que ajuda a alcançar faixas de preço menores, e compartilha instâncias reservadas e Savings Plans entre elas.</Termo>
+
+É por isso que a resposta para "30 contas querendo desconto por volume" é
+manter a consolidação, não comprar compromisso conta a conta — fragmentar
+perde as duas vantagens.
+
+A estrutura de contas também é uma escolha de governança: **conta por equipe**
+dá isolamento e limite naturais; **etiqueta por equipe** é mais simples e
+depende de disciplina. A prova aceita as duas, e prefere a conta separada
+quando o enunciado fala em isolamento ou limite rígido.
+
+<Callout tipo="dica" titulo="Fecha o exame">
+Este é o último tema da trilha. Os quatro domínios responderam, em ordem:
+quem pode fazer o quê (seguras), o que acontece quando algo cai (resilientes),
+como escolher para ir rápido (desempenho) e quanto isso custa (custo). A prova
+mistura os quatro num mesmo cenário — e a palavra do enunciado continua sendo
+o que decide.
+</Callout>
+
+## Como responder o cenário
+
+Pegue o verbo: **entender** (Cost Explorer), **avisar** (Budgets), **impedir**
+(SCP), **exportar em detalhe** (relatório de custo e uso), **somar entre
+contas** (consolidado). Se o cenário fala em separar por equipe ou projeto,
+confira se a alternativa menciona **ativar** as etiquetas — é o passo que
+distingue a resposta certa da quase certa.
+
+## Erros comuns
+
+- Usar Cost Explorer quando o pedido é alerta. Ele analisa e projeta; quem avisa ao ultrapassar um limite é o Budgets.
+- Achar que o Budgets impede o gasto. Ele alerta e pode disparar uma ação (aplicar política, parar instância), mas não bloqueia sozinho; impedir é SCP ou automação.
+- Esquecer que etiquetas precisam ser ativadas como etiquetas de alocação de custo no painel de faturamento. Etiquetar sem ativar não faz o custo aparecer separado.
+- Aplicar etiquetas só daqui para frente e esperar histórico. A alocação passa a valer a partir da ativação; o passado não é reclassificado.
+- Confundir faturamento consolidado com desconto automático por conta. O consolidado soma o uso de todas as contas, o que ajuda a atingir faixas de preço e compartilha reservas e Savings Plans.
+- Propor o relatório de custo e uso quando o Cost Explorer basta. O relatório é detalhe bruto para análise própria; a prova só o pede quando o cenário fala em granularidade máxima ou ferramenta externa.
 
 ## Perguntas de sabatina e respostas-modelo
 

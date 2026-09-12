@@ -1,0 +1,249 @@
+---
+slug: ferramentas-de-custo-e-governanca
+titulo: "Ferramentas de custo e governança financeira"
+resumo: "Como ver, prever e controlar a fatura: Cost Explorer para analisar, Budgets para alertar e agir, relatório de custo e uso para o detalhe fino, etiquetas de alocação para saber de quem é o gasto, e o faturamento consolidado do Organizations para somar e compartilhar descontos."
+minutos: 30
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Fecha o Domínio 4 e o exame. A prova monta cenários de governança — 'saber quanto cada equipe gasta', 'ser avisado antes de estourar', 'impedir que uma conta gaste demais' — e cada um tem um serviço específico. Confundir analisar com alertar e com impedir é o erro que a questão procura."
+comoCai: "A empresa quer saber quanto cada projeto gasta e ser avisada antes de estourar o orçamento. O que configurar?"
+feynman: "Explique em um minuto a diferença entre olhar o extrato, receber um aviso do banco e ter um limite no cartão."
+preRequisitos: ["dimensionamento-e-custo-de-armazenamento"]
+errosComuns:
+  - "Usar Cost Explorer quando o pedido é alerta. Ele analisa e projeta; quem avisa ao ultrapassar um limite é o Budgets."
+  - "Achar que o Budgets impede o gasto. Ele alerta e pode disparar uma ação (aplicar política, parar instância), mas não bloqueia sozinho; impedir é SCP ou automação."
+  - "Esquecer que etiquetas precisam ser ativadas como etiquetas de alocação de custo no painel de faturamento. Etiquetar sem ativar não faz o custo aparecer separado."
+  - "Aplicar etiquetas só daqui para frente e esperar histórico. A alocação passa a valer a partir da ativação; o passado não é reclassificado."
+  - "Confundir faturamento consolidado com desconto automático por conta. O consolidado soma o uso de todas as contas, o que ajuda a atingir faixas de preço e compartilha reservas e Savings Plans."
+  - "Propor o relatório de custo e uso quando o Cost Explorer basta. O relatório é detalhe bruto para análise própria; a prova só o pede quando o cenário fala em granularidade máxima ou ferramenta externa."
+preTeste:
+  - enunciado: "Uma empresa quer ser notificada quando o gasto mensal projetado ultrapassar um valor definido, por equipe. O que usar?"
+    alternativas:
+      - texto: "AWS Budgets, com orçamentos por etiqueta e alertas."
+        correta: true
+        explicacao: "Budgets define limites, acompanha o realizado e o projetado, e notifica ao cruzar o limiar. Filtrar por etiqueta separa as equipes."
+      - texto: "AWS Cost Explorer com relatórios agendados."
+        correta: false
+        explicacao: "Analisa e projeta, mas não é o mecanismo de alerta por limite."
+      - texto: "Relatório de custo e uso entregue no S3."
+        correta: false
+        explicacao: "Traz o detalhe bruto; alguém ainda teria de construir o alerta."
+  - enunciado: "Uma organização com 30 contas quer somar o uso para atingir faixas de preço melhores e compartilhar o benefício de Savings Plans. O que habilita isso?"
+    alternativas:
+      - texto: "Faturamento consolidado no AWS Organizations."
+        correta: true
+        explicacao: "Consolida o uso de todas as contas numa fatura, o que ajuda a alcançar faixas com preço menor e permite compartilhar reservas e Savings Plans."
+      - texto: "Uma SCP que limite o gasto de cada conta."
+        correta: false
+        explicacao: "SCP limita permissões, não custo, e não agrega uso."
+      - texto: "Um orçamento do Budgets por conta."
+        correta: false
+        explicacao: "Acompanha e alerta, sem qualquer efeito sobre preço ou agregação de uso."
+videos:
+  - id: tFnETIw_olE
+    publicadoEm: "2024-09-23"
+    titulo: "Analisando custos no Cost Explorer"
+    canal: "Iago Ferreira TI - Aprenda Cloud e DevOps do ZERO"
+    duracao: 9
+    porQue: "Nove minutos vendo a ferramenta de análise funcionando: filtros, agrupamento e projeção. Assista reparando no que ele consegue responder e no que precisaria de outro serviço."
+  - id: CX8XPVqCDu0
+    publicadoEm: "2020-09-18"
+    titulo: "Cost Explorer - Gestão avançada de custos na AWS"
+    canal: "Darede"
+    duracao: 62
+    porQue: "Complementar e longo: entra em granularidade por recurso, etiquetas e recomendações de Savings Plans. Use pelos trechos de alocação por etiqueta, que é o que a prova cobra."
+artigos:
+  - titulo: "Analyzing your costs with AWS Cost Explorer"
+    url: "https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html"
+    fonte: "AWS"
+  - titulo: "Managing your costs with AWS Budgets"
+    url: "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+    fonte: "AWS"
+  - titulo: "Using cost allocation tags"
+    url: "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html"
+    fonte: "AWS"
+  - titulo: "Consolidated billing for AWS Organizations"
+    url: "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Cost Explorer, em uma linha."
+    verso: "Painel de análise do gasto: filtra e agrupa por serviço, conta, etiqueta e região, mostra histórico e projeção, e recomenda Savings Plans e redimensionamento."
+  - frente: "AWS Budgets, em uma linha."
+    verso: "Define limites de custo, uso, cobertura ou utilização de reservas, acompanha o realizado e o projetado, notifica e pode disparar ações automáticas."
+  - frente: "Budgets impede o gasto?"
+    verso: "Não por si. Ele alerta e pode executar uma ação (aplicar uma política restritiva, parar instâncias) se você configurar. Impedir de verdade é SCP ou automação."
+  - frente: "Relatório de custo e uso (CUR), em uma linha."
+    verso: "O detalhe mais fino disponível, entregue no S3, por hora e por recurso, para análise em Athena, QuickSight ou ferramenta externa."
+  - frente: "Etiquetas de alocação de custo: o passo que se esquece."
+    verso: "Depois de etiquetar os recursos, é preciso ATIVAR a etiqueta como etiqueta de alocação no painel de faturamento. Sem isso, o custo não aparece separado por ela."
+  - frente: "Alocação retroativa funciona?"
+    verso: "Não. A separação por etiqueta vale a partir da ativação; o gasto anterior não é reclassificado."
+  - frente: "Faturamento consolidado, em uma linha."
+    verso: "Uma fatura para toda a organização: soma o uso (ajudando a atingir faixas de preço menores) e compartilha reservas e Savings Plans entre as contas."
+  - frente: "O que uma SCP faz no contexto de custo?"
+    verso: "Impede ações: criar tipos caros de instância, usar regiões não aprovadas, criar recursos sem etiqueta. É o mecanismo de impedir, não de medir."
+  - frente: "Detector de anomalias de custo."
+    verso: "Usa aprendizado de máquina para detectar gasto fora do padrão e alertar, sem precisar de um limite definido à mão."
+  - frente: "Calculadora de preços da AWS, quando aparece."
+    verso: "Estimativa antes de construir, para comparar arquiteturas ou justificar migração. É planejamento, não acompanhamento."
+  - frente: "Como separar custo por equipe numa conta única?"
+    verso: "Etiquetas de alocação ativadas, com padrão de nomenclatura imposto por SCP ou regra do Config. Alternativa mais forte: uma conta por equipe no Organizations."
+  - frente: "Conta por equipe ou etiqueta por equipe?"
+    verso: "Conta separada dá isolamento e limite naturais; etiqueta é mais simples e depende de disciplina. A prova aceita as duas, e prefere conta quando o cenário fala em isolamento ou limite rígido."
+drills:
+  - titulo: "Analisar, alertar ou impedir?"
+    instrucao: "Para cada pedido, diga o serviço esperado."
+    opcoes: ["Cost Explorer", "Budgets", "CUR", "SCP", "Faturamento consolidado"]
+    itens:
+      - enunciado: "Ver a evolução do gasto por serviço nos últimos 12 meses."
+        resposta: "Cost Explorer"
+        explicacao: "Análise e histórico."
+      - enunciado: "Receber e-mail quando o gasto projetado passar de um valor."
+        resposta: "Budgets"
+        explicacao: "Limite com alerta."
+      - enunciado: "Impedir que qualquer conta crie instâncias de um tipo muito caro."
+        resposta: "SCP"
+        explicacao: "Bloqueio de ação, não medição."
+      - enunciado: "Exportar cada linha de uso por hora para analisar num BI externo."
+        resposta: "CUR"
+        explicacao: "Detalhe bruto no S3."
+      - enunciado: "Somar o uso de 30 contas para alcançar faixas de preço menores."
+        resposta: "Faturamento consolidado"
+        explicacao: "Agregação de uso na organização."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa opera várias equipes em uma única conta AWS e precisa saber quanto cada equipe consome, para repassar os custos internamente. Qual abordagem atende?"
+    alternativas:
+      - texto: "Etiquetar os recursos por equipe, ativar essas etiquetas como etiquetas de alocação de custo e analisar o gasto agrupado por elas no Cost Explorer."
+        correta: true
+        explicacao: "Etiqueta é o mecanismo de atribuição de custo dentro de uma conta, e a ativação no painel de faturamento é o passo que faz o custo aparecer separado."
+      - texto: "Criar um orçamento no AWS Budgets para cada equipe."
+        correta: false
+        explicacao: "Orçamento acompanha e alerta, mas primeiro é preciso saber atribuir o gasto a cada equipe, o que vem das etiquetas."
+      - texto: "Ler a fatura mensal e dividir proporcionalmente pelo número de pessoas."
+        correta: false
+        explicacao: "Rateio arbitrário, sem relação com o consumo real."
+      - texto: "Habilitar o relatório de custo e uso e enviá-lo às equipes."
+        correta: false
+        explicacao: "Traz o detalhe bruto, mas sem etiquetas ativadas não há como separar por equipe."
+  - tipo: multipla
+    enunciado: "Uma organização quer garantir que nenhuma conta ultrapasse um teto de gasto e quer ser avisada quando o consumo se aproximar dele. Quais DUAS medidas compõem a solução?"
+    alternativas:
+      - texto: "Criar orçamentos no AWS Budgets com alertas em percentuais do limite, incluindo o valor projetado."
+        correta: true
+        explicacao: "É o mecanismo de acompanhamento e aviso antes do estouro, inclusive por projeção."
+      - texto: "Aplicar SCPs que impeçam ações caras, como criar tipos de instância fora da lista aprovada ou usar regiões não permitidas."
+        correta: true
+        explicacao: "Budgets não bloqueia; impedir a ação é papel da SCP, que é o controle preventivo."
+      - texto: "Usar o Cost Explorer para revisar o gasto no fim do mês."
+        correta: false
+        explicacao: "Análise posterior não evita o estouro nem avisa antes."
+      - texto: "Habilitar o faturamento consolidado."
+        correta: false
+        explicacao: "Agrega e pode gerar desconto, mas não impõe teto nem alerta."
+      - texto: "Configurar o detector de anomalias para substituir os orçamentos."
+        correta: false
+        explicacao: "Detecta desvio de padrão, o que é complementar; não substitui um teto definido."
+  - tipo: unica
+    enunciado: "Um time de finanças precisa analisar o custo com granularidade por hora e por recurso, cruzando com dados internos numa ferramenta de BI própria. Qual fonte de dados deve ser usada?"
+    alternativas:
+      - texto: "O relatório de custo e uso da AWS, entregue em um bucket S3."
+        correta: true
+        explicacao: "É a fonte mais detalhada, por hora e por recurso, pensada para análise externa em Athena, QuickSight ou BI próprio."
+      - texto: "Exportar as telas do Cost Explorer em CSV."
+        correta: false
+        explicacao: "Granularidade e histórico limitados em comparação com o relatório completo."
+      - texto: "Os alertas do AWS Budgets."
+        correta: false
+        explicacao: "São notificações de limite, não uma base analítica."
+      - texto: "A fatura mensal em PDF."
+        correta: false
+        explicacao: "Consolidada e sem granularidade por recurso ou por hora."
+  - tipo: unica
+    enunciado: "Uma empresa criou 30 contas no AWS Organizations, uma por equipe, e quer aproveitar descontos por volume e compartilhar os Savings Plans já adquiridos. O que deve ser feito?"
+    alternativas:
+      - texto: "Manter o faturamento consolidado da organização, que agrega o uso e compartilha reservas e Savings Plans entre as contas."
+        correta: true
+        explicacao: "Consolidação soma o uso, ajudando a alcançar faixas de preço, e permite que o benefício do compromisso cubra qualquer conta da organização."
+      - texto: "Comprar Savings Plans separadamente em cada conta."
+        correta: false
+        explicacao: "Fragmenta o compromisso e perde a agregação de uso que gera desconto por volume."
+      - texto: "Aplicar uma SCP que force o uso de instâncias reservadas."
+        correta: false
+        explicacao: "SCP controla permissões, não modelo de compra."
+      - texto: "Migrar todas as equipes de volta para uma conta única."
+        correta: false
+        explicacao: "Abre mão do isolamento entre equipes quando a consolidação já entrega o benefício financeiro."
+---
+
+## Em uma frase
+
+Três verbos diferentes, três serviços: **analisar** é Cost Explorer, **alertar**
+é Budgets, **impedir** é SCP. Etiquetas dizem de quem é o gasto, e o
+faturamento consolidado soma tudo para render desconto.
+
+## Analisar, alertar, impedir
+
+<Comparativo
+  colunas={["Pedido do enunciado", "Serviço", "O que ele faz"]}
+  linhas={[
+    ["'Entender para onde vai o dinheiro'", "Cost Explorer", "Filtra, agrupa, mostra histórico e projeção"],
+    ["'Ser avisado antes de estourar'", "AWS Budgets", "Limite, acompanhamento do realizado e do projetado, notificação"],
+    ["'Impedir que aconteça'", "SCP no Organizations", "Bloqueia a ação: tipo caro, região não aprovada"],
+    ["'Analisar num BI próprio, por hora e por recurso'", "Relatório de custo e uso", "Detalhe bruto entregue no S3"],
+    ["'Detectar gasto fora do padrão sem definir limite'", "Detector de anomalias", "Aprendizado de máquina sobre o histórico"],
+    ["'Estimar antes de construir'", "Calculadora de preços", "Planejamento, não acompanhamento"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Budgets não bloqueia sozinho">
+Ele **alerta**, e pode disparar uma **ação** que você configurou — aplicar uma
+política restritiva, parar instâncias. Mas a alternativa que diz "o Budgets
+impede o gasto" descreve algo que ele não faz por padrão. Impedir é papel da
+**SCP**.
+</Callout>
+
+## Etiquetas: o passo que se esquece
+
+Atribuir custo a equipes, projetos e ambientes depende de **etiquetas**, e o
+fluxo tem uma etapa que as questões testam:
+
+<Passos itens={[
+  "Etiquetar os recursos com um padrão combinado (equipe, projeto, ambiente).",
+  "ATIVAR essas etiquetas como etiquetas de alocação de custo no painel de faturamento. Sem esse passo, o custo não aparece separado por elas.",
+  "Analisar no Cost Explorer agrupando pela etiqueta, e criar orçamentos filtrados por ela.",
+  "Impor o padrão: SCP que barra a criação sem etiqueta, ou regra do Config que sinaliza o que estiver fora."
+]} />
+
+E uma limitação que vira distrator: a alocação **não é retroativa**. Ativar
+hoje não reclassifica o gasto do mês passado.
+
+## Organizations: consolidar rende dinheiro
+
+<Termo nome="faturamento consolidado">Uma fatura para toda a organização. Soma o uso de todas as contas, o que ajuda a alcançar faixas de preço menores, e compartilha instâncias reservadas e Savings Plans entre elas.</Termo>
+
+É por isso que a resposta para "30 contas querendo desconto por volume" é
+manter a consolidação, não comprar compromisso conta a conta — fragmentar
+perde as duas vantagens.
+
+A estrutura de contas também é uma escolha de governança: **conta por equipe**
+dá isolamento e limite naturais; **etiqueta por equipe** é mais simples e
+depende de disciplina. A prova aceita as duas, e prefere a conta separada
+quando o enunciado fala em isolamento ou limite rígido.
+
+<Callout tipo="dica" titulo="Fecha o exame">
+Este é o último tema da trilha. Os quatro domínios responderam, em ordem:
+quem pode fazer o quê (seguras), o que acontece quando algo cai (resilientes),
+como escolher para ir rápido (desempenho) e quanto isso custa (custo). A prova
+mistura os quatro num mesmo cenário — e a palavra do enunciado continua sendo
+o que decide.
+</Callout>
+
+## Como responder o cenário
+
+Pegue o verbo: **entender** (Cost Explorer), **avisar** (Budgets), **impedir**
+(SCP), **exportar em detalhe** (relatório de custo e uso), **somar entre
+contas** (consolidado). Se o cenário fala em separar por equipe ou projeto,
+confira se a alternativa menciona **ativar** as etiquetas — é o passo que
+distingue a resposta certa da quase certa.

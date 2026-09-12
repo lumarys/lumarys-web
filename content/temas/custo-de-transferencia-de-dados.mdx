@@ -1,0 +1,235 @@
+---
+slug: custo-de-transferencia-de-dados
+titulo: "Custo de transferência de dados"
+resumo: "A linha da fatura que ninguém prevê e a prova adora: entrada é grátis, saída para a internet é cobrada, tráfego entre zonas é cobrado nos dois sentidos, e o NAT Gateway cobra por GB além da hora. Endpoints, CloudFront e desenho por zona são as saídas."
+minutos: 30
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É o custo invisível: não aparece ao escolher um serviço, aparece na fatura. A prova constrói cenários em que a arquitetura está certa e cara, e a resposta é mudar o caminho do tráfego, não o serviço. Quem vem de dados erra aqui com frequência, mandando terabytes ao S3 pelo NAT."
+comoCai: "A fatura do NAT Gateway cresceu e o tráfego é quase todo para o S3. O que fazer?"
+feynman: "Explique em um minuto por que subir dados para a nuvem é de graça e baixar custa, e o que isso significa para quem desenha uma arquitetura."
+preRequisitos: ["seguranca-de-rede-na-vpc"]
+errosComuns:
+  - "Esquecer que o NAT Gateway cobra por hora E por GB processado. É a fonte mais comum de fatura inesperada quando tráfego de S3 ou DynamoDB passa por ele."
+  - "Achar que tráfego entre zonas é grátis. É cobrado, e nos dois sentidos; arquiteturas que atravessam zonas sem necessidade pagam por isso o tempo todo."
+  - "Confundir entrada com saída. Entrada de dados na AWS é gratuita; o que custa é a saída para a internet e o tráfego entre zonas e regiões."
+  - "Propor endpoint de interface quando existe endpoint de gateway. Gateway (S3 e DynamoDB) não tem custo; interface cobra por hora e por GB."
+  - "Ignorar o CloudFront como redutor de custo. Saída pelo CloudFront costuma custar menos que saída direta do S3 ou do balanceador, além de reduzir requisições à origem."
+  - "Achar que tráfego dentro da mesma zona por IP público é grátis. Usar IP público ou elástico faz o tráfego sair e voltar, com cobrança; dentro da zona, use IP privado."
+preTeste:
+  - enunciado: "Instâncias em sub-rede privada transferem terabytes por mês para o Amazon S3 através de um NAT Gateway. A empresa quer reduzir o custo mantendo o tráfego privado. O que fazer?"
+    alternativas:
+      - texto: "Criar um endpoint de gateway para o S3 e rotear o tráfego por ele."
+        correta: true
+        explicacao: "Endpoint de gateway não tem custo e tira o tráfego do NAT, que cobra por GB processado."
+      - texto: "Aumentar a quantidade de NAT Gateways para distribuir o tráfego."
+        correta: false
+        explicacao: "Multiplicaria o custo por hora e continuaria pagando por GB."
+      - texto: "Dar IP público às instâncias e acessar o S3 pela internet."
+        correta: false
+        explicacao: "Expõe as instâncias e continua pagando saída para a internet."
+  - enunciado: "Qual dos seguintes tipos de transferência de dados NÃO é cobrado pela AWS?"
+    alternativas:
+      - texto: "Entrada de dados da internet para a AWS."
+        correta: true
+        explicacao: "A entrada é gratuita; a AWS cobra a saída e o tráfego entre zonas e regiões."
+      - texto: "Saída de dados da AWS para a internet."
+        correta: false
+        explicacao: "É a linha de transferência mais cobrada."
+      - texto: "Tráfego entre zonas de disponibilidade da mesma região."
+        correta: false
+        explicacao: "É cobrado, e nos dois sentidos."
+videos:
+  - id: jWQXOsJ_HMw
+    publicadoEm: "2026-05-18"
+    titulo: "O NAT Gateway pode destruir sua fatura AWS | Arquiteturas AWS que Custam Caro"
+    canal: "Phil Tecnologia"
+    duracao: 9
+    porQue: "Nove minutos sobre o cenário exato que a prova descreve: carga privada acessando o S3 pelo NAT. Assista até a proposta de correção; é a alternativa certa da questão."
+  - id: 4JWaCk-B9yw
+    publicadoEm: "2021-07-13"
+    titulo: "Data Transfer: transferência de dados, custos, latência e performance"
+    canal: "Darede"
+    duracao: 45
+    porQue: "Complementar e mais amplo: percorre os caminhos de transferência e o que cada um custa. Longo; use pelos trechos de saída para a internet e de tráfego entre zonas."
+artigos:
+  - titulo: "Amazon EC2 On-Demand pricing - Data transfer"
+    url: "https://aws.amazon.com/ec2/pricing/on-demand/"
+    fonte: "AWS"
+  - titulo: "Gateway endpoints for Amazon S3"
+    url: "https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints-s3.html"
+    fonte: "AWS"
+  - titulo: "NAT gateway pricing"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "A regra básica de transferência."
+    verso: "Entrada na AWS é gratuita. Saída para a internet é cobrada por GB. Entre zonas da mesma região é cobrado nos dois sentidos. Entre regiões é cobrado."
+  - frente: "Como o NAT Gateway cobra?"
+    verso: "Por hora ligado e por GB processado. Tráfego grande passando pelo NAT é a causa clássica de fatura inesperada."
+  - frente: "Endpoint de gateway versus de interface, no custo."
+    verso: "Gateway (S3 e DynamoDB): sem custo, é uma rota. Interface (PrivateLink, demais serviços): cobra por hora e por GB, mas ainda costuma ser mais barato que o NAT."
+  - frente: "Tráfego dentro da mesma zona é grátis?"
+    verso: "Por IP privado, sim. Se as instâncias conversarem por IP público ou elástico, o tráfego sai e volta, e é cobrado."
+  - frente: "Como o CloudFront reduz custo?"
+    verso: "A saída pelo CloudFront costuma ter preço por GB menor que a saída direta do S3 ou do balanceador, e o cache reduz as requisições à origem."
+  - frente: "Transferência entre regiões: quando ela aparece?"
+    verso: "Replicação entre regiões (S3, Aurora Global, tabelas globais), DR multirregião e arquitetura ativa em duas regiões. É custo permanente, não eventual."
+  - frente: "O que é o AWS Free Tier de saída?"
+    verso: "Há uma franquia mensal de saída gratuita para a internet, agregada na conta. Acima dela, cobra-se por GB, com preço decrescente por faixa."
+  - frente: "Snowball e DataSync, no contexto de custo."
+    verso: "Para mover volumes muito grandes uma vez, o dispositivo físico (Snow) pode sair mais barato e rápido que a rede. DataSync otimiza a transferência contínua pela rede."
+  - frente: "Por que arquitetura Multi-AZ tem custo de transferência?"
+    verso: "Porque réplicas, balanceamento e chamadas entre camadas atravessam zonas. Resiliência custa, e a prova aceita esse custo quando o requisito pede disponibilidade."
+  - frente: "Como reduzir custo de transferência sem perder resiliência?"
+    verso: "Manter conversas de alta frequência dentro da zona quando possível, usar endpoints, cachear na borda e evitar atravessar zona ou região sem necessidade."
+drills:
+  - titulo: "Isso é cobrado?"
+    instrucao: "Para cada fluxo, diga se a AWS cobra a transferência."
+    opcoes: ["Grátis", "Cobrado"]
+    itens:
+      - enunciado: "Upload de 5 TB do data center para o S3."
+        resposta: "Grátis"
+        explicacao: "Entrada de dados na AWS não é cobrada."
+      - enunciado: "Download de 5 TB do S3 para usuários na internet."
+        resposta: "Cobrado"
+        explicacao: "Saída para a internet é a principal linha de transferência."
+      - enunciado: "Instância na zona A gravando numa réplica na zona B."
+        resposta: "Cobrado"
+        explicacao: "Entre zonas, cobrado nos dois sentidos."
+      - enunciado: "Duas instâncias na mesma zona conversando por IP privado."
+        resposta: "Grátis"
+        explicacao: "Dentro da zona e por IP privado, sem cobrança."
+      - enunciado: "Instância privada baixando 1 TB do S3 por endpoint de gateway."
+        resposta: "Grátis"
+        explicacao: "Endpoint de gateway não cobra, e o tráfego não sai da rede da AWS."
+      - enunciado: "Instância privada baixando 1 TB do S3 pelo NAT Gateway."
+        resposta: "Cobrado"
+        explicacao: "O NAT cobra por GB processado, além da hora."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa nota que o custo do NAT Gateway representa uma parcela grande da fatura. A análise mostra que a maior parte do tráfego vem de instâncias privadas lendo e gravando no Amazon S3 e consultando o DynamoDB. Qual mudança reduz o custo mantendo o tráfego fora da internet?"
+    alternativas:
+      - texto: "Criar endpoints de gateway para S3 e DynamoDB e adicionar as rotas nas tabelas das sub-redes privadas."
+        correta: true
+        explicacao: "Endpoint de gateway é gratuito e retira do NAT justamente o tráfego desses dois serviços, que é o que está gerando a cobrança por GB."
+      - texto: "Substituir o NAT Gateway por instâncias NAT menores."
+        correta: false
+        explicacao: "Reduz um pouco o custo por hora, adiciona operação e ponto de falha, e mantém o volume trafegando pelo mesmo caminho."
+      - texto: "Criar endpoints de interface para S3 e DynamoDB."
+        correta: false
+        explicacao: "Funciona, mas cobra por hora e por GB quando existe a opção de gateway, que é gratuita para esses dois serviços."
+      - texto: "Mover as instâncias para sub-redes públicas com IPs públicos."
+        correta: false
+        explicacao: "Elimina o NAT expondo as instâncias e mantém o tráfego saindo pela internet."
+  - tipo: unica
+    enunciado: "Um site com grande volume de mídia serve arquivos diretamente de um bucket S3 para usuários no mundo todo. A equipe quer reduzir o custo de saída de dados e melhorar o desempenho. Qual solução atende aos DOIS objetivos?"
+    alternativas:
+      - texto: "Colocar o Amazon CloudFront na frente do bucket."
+        correta: true
+        explicacao: "O cache reduz as requisições à origem e o preço por GB de saída pelo CloudFront costuma ser menor que a saída direta do S3, melhorando latência ao mesmo tempo."
+      - texto: "Migrar os arquivos para uma classe de armazenamento mais fria."
+        correta: false
+        explicacao: "Reduz o custo de armazenamento, não o de saída, e pioraria o desempenho de conteúdo acessado com frequência."
+      - texto: "Replicar o bucket para várias regiões e usar Route 53 por latência."
+        correta: false
+        explicacao: "Melhora latência com custo maior de armazenamento e de replicação; não reduz a saída."
+      - texto: "Compactar os arquivos no servidor de origem."
+        correta: false
+        explicacao: "Ajuda marginalmente em alguns formatos, mas mídia já costuma estar comprimida e o problema é o caminho, não o tamanho."
+  - tipo: multipla
+    enunciado: "Uma arquitetura distribuída em três zonas apresenta custo de transferência elevado entre instâncias. Quais DUAS práticas reduzem esse custo sem abrir mão da resiliência?"
+    alternativas:
+      - texto: "Fazer com que as chamadas de alta frequência entre camadas fiquem dentro da mesma zona sempre que possível, mantendo a redundância entre zonas no conjunto."
+        correta: true
+        explicacao: "Reduz o tráfego cobrado entre zonas mantendo capacidade em mais de uma; é o desenho que concilia os dois objetivos."
+      - texto: "Garantir que as instâncias se comuniquem por endereços IP privados, e não por IPs públicos ou elásticos."
+        correta: true
+        explicacao: "Tráfego por IP público sai e volta pela borda, sendo cobrado mesmo dentro da mesma zona."
+      - texto: "Concentrar toda a aplicação em uma única zona de disponibilidade."
+        correta: false
+        explicacao: "Elimina o custo e também a resiliência, que o enunciado exige preservar."
+      - texto: "Substituir a comunicação interna por chamadas através de um NAT Gateway."
+        correta: false
+        explicacao: "Acrescenta custo por GB a tráfego que hoje nem passa por lá."
+      - texto: "Usar endereços IP elásticos em todas as instâncias para simplificar o roteamento."
+        correta: false
+        explicacao: "É exatamente o que faz o tráfego interno passar a ser cobrado."
+  - tipo: unica
+    enunciado: "Uma empresa precisa migrar 300 TB do data center para a AWS em poucas semanas. O enlace de internet disponível levaria meses para transferir esse volume. Qual solução é mais adequada?"
+    alternativas:
+      - texto: "Usar um dispositivo da família AWS Snow para transferir os dados fisicamente."
+        correta: true
+        explicacao: "Para volumes muito grandes com rede insuficiente, o transporte físico é mais rápido e costuma sair mais barato que ampliar o enlace."
+      - texto: "Contratar um AWS Direct Connect e transferir pela rede."
+        correta: false
+        explicacao: "O enlace leva semanas ou meses para ser provisionado, e a transferência ainda consumiria tempo adicional."
+      - texto: "Transferir pela internet com o AWS DataSync em paralelo."
+        correta: false
+        explicacao: "DataSync otimiza a transferência, mas não cria banda que o enlace não tem."
+      - texto: "Compactar os dados e enviar por VPN site a site."
+        correta: false
+        explicacao: "A VPN usa o mesmo enlace de internet insuficiente."
+---
+
+## Em uma frase
+
+Entrada é grátis, **saída custa**, e tudo que atravessa zona, região ou NAT é
+cobrado por GB. Em cenários de custo, a resposta costuma ser **mudar o caminho
+do tráfego**, não o serviço.
+
+## O mapa da cobrança
+
+<Comparativo
+  colunas={["Fluxo", "Cobrança"]}
+  linhas={[
+    ["Internet para a AWS (entrada)", "Grátis"],
+    ["AWS para a internet (saída)", "Por GB, com faixas decrescentes e uma franquia mensal"],
+    ["Entre zonas da mesma região", "Por GB, nos dois sentidos"],
+    ["Dentro da mesma zona, por IP privado", "Grátis"],
+    ["Dentro da mesma zona, por IP público ou elástico", "Cobrado: o tráfego sai e volta"],
+    ["Entre regiões", "Por GB"],
+    ["Através do NAT Gateway", "Por hora ligado MAIS por GB processado"],
+    ["Endpoint de gateway (S3, DynamoDB)", "Grátis"],
+    ["Endpoint de interface (PrivateLink)", "Por hora MAIS por GB"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O NAT é a armadilha favorita">
+Ele cobra **duas** vezes: a hora ligada e cada GB processado. Quando uma carga
+privada conversa muito com S3 ou DynamoDB, o volume passa pelo NAT sem
+necessidade. A correção é **endpoint de gateway**, que é uma rota na tabela e
+não custa nada. É a questão de custo mais repetida da prova.
+</Callout>
+
+## CloudFront como redutor de custo
+
+Costuma ser apresentado como melhoria de desempenho, e é também economia: a
+saída pelo **CloudFront** tem preço por GB menor que a saída direta do S3 ou de
+um balanceador, e o **cache** reduz o número de requisições que chegam à
+origem. Por isso, num cenário de "reduzir custo de saída e melhorar
+desempenho", ele responde aos dois de uma vez.
+
+## Resiliência custa transferência
+
+Multi-AZ, réplicas e balanceamento atravessam zonas — e isso é cobrado. A prova
+não considera isso um erro: é o preço da disponibilidade que o requisito pediu.
+O que ela cobra é **não desperdiçar**: manter conversas de alta frequência
+dentro da zona quando possível, usar IP privado em vez de público, e não
+atravessar região sem necessidade.
+
+<Callout tipo="dica" titulo="Quando a rede não dá conta">
+Volume muito grande com enlace insuficiente não se resolve com otimização de
+transferência: se resolve com **transporte físico**. A família **Snow** leva
+os dados em um dispositivo, e é a resposta quando o enunciado diz que a
+transferência pela rede levaria meses. **DataSync** otimiza o que passa pela
+rede, mas não cria banda.
+</Callout>
+
+## Como responder o cenário
+
+Ache **por onde o tráfego passa** hoje e pergunte se existe caminho mais curto:
+endpoint em vez de NAT, IP privado em vez de público, borda em vez de origem,
+mesma zona em vez de atravessar. Depois confira se o volume justifica mudar de
+meio: centenas de terabytes com rede insuficiente é Snow, não otimização.
