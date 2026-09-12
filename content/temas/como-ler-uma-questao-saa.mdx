@@ -1,0 +1,256 @@
+---
+slug: como-ler-uma-questao-saa
+titulo: "Como ler uma questão da SAA"
+resumo: "A prova SAA-C03 não pergunta o que um serviço faz; descreve um cenário e pede a melhor arquitetura para ele. Este tema é o formato do exame, a pontuação, os dois tipos de questão e o método para ler o enunciado antes de olhar as alternativas."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Metade dos erros na SAA é de leitura, não de conhecimento. O candidato sabe o que é um NAT Gateway e erra porque não viu que o enunciado pedia 'menor custo' e não 'menor esforço operacional'. Aprender a ler a questão antes de aprender os serviços é o que mais sobe a nota por hora de estudo."
+comoCai: "Uma empresa precisa de X com o MENOR custo operacional. Qual solução atende ao requisito?"
+feynman: "Explique em um minuto para um colega por que duas alternativas tecnicamente corretas podem ter uma só resposta certa na prova."
+preRequisitos: []
+errosComuns:
+  - "Ler as alternativas antes de terminar o enunciado. As alternativas são escritas para parecerem plausíveis; quem chega nelas sem ter fixado o requisito escolhe a que soa mais familiar."
+  - "Ignorar a palavra que define a resposta: MAIS barato, MENOS esforço operacional, MAIS resiliente, MAIS rápido de implementar. Cada uma dessas aponta para uma alternativa diferente entre as corretas."
+  - "Tratar 'múltipla resposta' como 'marque o que achar certo'. A prova diz quantas escolher e só dá o ponto com o conjunto exato; marcar três quando pede duas zera a questão."
+  - "Deixar questão em branco. Não há penalidade por erro; branco é a única forma garantida de perder o ponto."
+  - "Gastar cinco minutos numa questão difícil no início. São 130 minutos para 65 questões, dois minutos por questão; marque para revisar e siga."
+  - "Achar que a nota é a porcentagem de acertos. A escala vai de 100 a 1000, equalizada entre versões da prova; 720 é o corte, e 15 das 65 questões nem pontuam."
+preTeste:
+  - enunciado: "Uma questão da SAA descreve uma aplicação que precisa 'minimizar o esforço operacional'. Duas alternativas resolvem o problema: uma com EC2 e scripts de manutenção, outra com um serviço gerenciado equivalente. Qual está certa?"
+    alternativas:
+      - texto: "A do serviço gerenciado, porque 'menor esforço operacional' é o requisito que decide entre alternativas tecnicamente válidas."
+        correta: true
+        explicacao: "É o padrão da prova: quando mais de uma alternativa funciona, a palavra-chave do enunciado escolhe. Gerenciado reduz operação; é a resposta."
+      - texto: "A com EC2, porque dá mais controle e a AWS valoriza flexibilidade."
+        correta: false
+        explicacao: "Controle não foi pedido. Responder ao requisito que você acha importante em vez do que o enunciado pediu é o erro de leitura mais comum."
+      - texto: "Qualquer uma, porque as duas funcionam e a banca aceita ambas."
+        correta: false
+        explicacao: "A prova tem uma resposta por questão. 'Funciona' é condição necessária, não suficiente."
+  - enunciado: "Uma questão de múltipla resposta pede 'Escolha DUAS'. O candidato tem certeza de duas e acha uma terceira plausível. O que fazer?"
+    alternativas:
+      - texto: "Marcar exatamente duas. Marcar três zera a questão, mesmo que as duas certas estejam entre elas."
+        correta: true
+        explicacao: "A correção é pelo conjunto exato, sem crédito parcial. O número pedido é parte da questão."
+      - texto: "Marcar as três, para garantir que as certas estejam incluídas."
+        correta: false
+        explicacao: "Não há crédito parcial. Três marcadas quando se pedem duas é resposta errada."
+      - texto: "Deixar em branco e voltar depois, para não arriscar."
+        correta: false
+        explicacao: "Branco conta como errada. Marque as duas de que tem certeza e siga; se sobrar tempo, revise."
+videos:
+  - id: K_d7WZg0cmU
+    publicadoEm: "2025-07-08"
+    titulo: "Passe no exame AWS Solutions Architect – Associate"
+    canal: "EdsInfoBR - Tecnologia e Informação"
+    duracao: 23
+    porQue: "Visão geral da prova e do que ela cobra, em português, por alguém que fez. Preste atenção na parte sobre os domínios e o peso de cada um: é o mapa do que estudar mais."
+  - id: KF_EsuB_SAo
+    publicadoEm: "2024-02-07"
+    titulo: "Conquiste sua Certificação AWS: Guia Completo Solutions Architect SAA-C03"
+    canal: "Jean Diogo"
+    duracao: 16
+    porQue: "Complementar. O foco aqui é o formato e a estratégia de prova; observe como ele descreve o tipo de questão de cenário, que é o que este tema ensina a ler."
+artigos:
+  - titulo: "Guia do exame SAA-C03"
+    url: "https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/solutions-architect-associate-03.html"
+    fonte: "AWS"
+  - titulo: "AWS Certified Solutions Architect – Associate"
+    url: "https://aws.amazon.com/certification/certified-solutions-architect-associate/"
+    fonte: "AWS"
+  - titulo: "AWS Well-Architected Framework"
+    url: "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Formato da SAA-C03, em uma linha."
+    verso: "65 questões em 130 minutos, escolha única (1 de 4) ou múltipla resposta (2 ou mais de 5 ou mais). 50 pontuam; 15 são experimentais e não identificadas."
+  - frente: "Como a nota é reportada e qual é o corte?"
+    verso: "Escala de 100 a 1000, equalizada entre versões da prova. Aprova com 720. Não é porcentagem de acertos, mas 720 fica perto de 70%."
+  - frente: "Há penalidade por errar?"
+    verso: "Não. Questão em branco conta como errada, então nunca deixe em branco: na dúvida, marque."
+  - frente: "Como é corrigida a múltipla resposta?"
+    verso: "Pelo conjunto exato. Marcar a mais ou a menos zera a questão; não há crédito parcial."
+  - frente: "Os quatro domínios e os pesos."
+    verso: "Arquiteturas seguras 30%, resilientes 26%, de alto desempenho 24%, otimizadas em custo 20%. O peso decide quantas questões cada domínio tem."
+  - frente: "A pontuação é compensatória. O que isso significa?"
+    verso: "Você precisa passar no total, não em cada domínio. Um domínio fraco pode ser compensado por outro forte."
+  - frente: "Qual é a primeira coisa a fazer numa questão de cenário?"
+    verso: "Achar a palavra que define a resposta: menor custo, menor esforço operacional, mais resiliente, mais rápido de implementar. Ela desempata entre alternativas que funcionam."
+  - frente: "'Menor esforço operacional' aponta para que tipo de alternativa?"
+    verso: "Serviço gerenciado ou serverless no lugar de algo que você mesmo opera. Menos servidor para cuidar, menos patch, menos script."
+  - frente: "'Menor custo' aponta para que tipo de alternativa?"
+    verso: "A que evita recurso ocioso e transferência cara: Spot, Savings Plans, classes de armazenamento mais frias, endpoint em vez de NAT, uma AZ quando resiliência não foi pedida."
+  - frente: "'Mais resiliente' ou 'alta disponibilidade' aponta para o quê?"
+    verso: "Mais de uma zona de disponibilidade, e às vezes mais de uma região: Multi-AZ, Auto Scaling em várias AZs, réplicas, failover no Route 53."
+  - frente: "Ritmo de prova."
+    verso: "Dois minutos por questão. Questão que passou disso: marque para revisar e siga. O tempo que sobra no fim é para elas."
+  - frente: "O que fazer com uma alternativa que cita um serviço que você nunca ouviu falar?"
+    verso: "Desconfiar. As alternativas plausíveis e erradas costumam usar o serviço certo para o problema errado; um serviço desconhecido raramente é a resposta."
+drills:
+  - titulo: "Qual palavra decide?"
+    instrucao: "Para cada trecho de enunciado, diga qual critério vai desempatar entre alternativas que funcionam."
+    opcoes: ["Menor custo", "Menor esforço operacional", "Mais resiliente", "Mais rápido de implementar"]
+    itens:
+      - enunciado: "'A empresa tem uma equipe pequena e quer que a solução exija o mínimo de manutenção.'"
+        resposta: "Menor esforço operacional"
+        explicacao: "Equipe pequena e mínimo de manutenção são os sinais de serviço gerenciado."
+      - enunciado: "'A aplicação deve continuar disponível se uma zona de disponibilidade inteira falhar.'"
+        resposta: "Mais resiliente"
+        explicacao: "Falha de AZ é o gatilho de Multi-AZ."
+      - enunciado: "'Os dados são acessados uma vez por trimestre e o orçamento é limitado.'"
+        resposta: "Menor custo"
+        explicacao: "Acesso raro e orçamento limitado apontam para classe de armazenamento fria."
+      - enunciado: "'A solução precisa estar em produção em dois dias, com a menor mudança possível no código atual.'"
+        resposta: "Mais rápido de implementar"
+        explicacao: "Prazo curto e mudança mínima apontam para a alternativa que reaproveita o que existe."
+      - enunciado: "'A empresa quer reduzir a fatura mensal sem alterar a arquitetura.'"
+        resposta: "Menor custo"
+        explicacao: "Sem alterar a arquitetura elimina redesign; sobra modelo de preço, como Savings Plans ou Reserved."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa executa uma aplicação em instâncias EC2 atrás de um Application Load Balancer numa única zona de disponibilidade. A equipe quer que a aplicação continue disponível durante a falha de uma zona, com o MENOR esforço operacional. O que um arquiteto deve recomendar?"
+    alternativas:
+      - texto: "Criar um grupo de Auto Scaling que distribua as instâncias por várias zonas de disponibilidade e registrá-lo no balanceador."
+        correta: true
+        explicacao: "Atende ao requisito de disponibilidade (várias AZs) com o menor esforço: o Auto Scaling repõe instâncias sozinho e o balanceador já distribui o tráfego."
+      - texto: "Configurar uma instância EC2 de reserva numa segunda zona e um script que a inicie quando a primeira falhar."
+        correta: false
+        explicacao: "Funciona, mas é operação manual e script próprio: o oposto de 'menor esforço operacional'."
+      - texto: "Migrar a aplicação para uma segunda região e usar o Route 53 com failover."
+        correta: false
+        explicacao: "Resolve falha de região, que não foi pedida, com muito mais esforço e custo. A prova pune resposta acima do requisito."
+      - texto: "Aumentar o tamanho da instância para que ela suporte mais carga durante a falha."
+        correta: false
+        explicacao: "Escalar verticalmente não protege contra falha da zona onde a instância está."
+  - tipo: unica
+    enunciado: "Uma aplicação precisa armazenar arquivos de log que são consultados com frequência nos primeiros 30 dias e raramente depois, mas precisam ficar disponíveis para auditoria por 7 anos. Qual solução tem o MENOR custo?"
+    alternativas:
+      - texto: "Armazenar no S3 Standard e usar uma regra de ciclo de vida para mover para uma classe de arquivamento após 30 dias."
+        correta: true
+        explicacao: "Paga o Standard só enquanto o acesso é frequente e arquiva o resto, sem intervenção manual. É o desenho que 'menor custo' pede."
+      - texto: "Armazenar tudo no S3 Standard por 7 anos, para garantir disponibilidade imediata."
+        correta: false
+        explicacao: "Disponibilidade imediata não foi pedida para os 7 anos; pagar Standard por dado raramente lido é o desperdício que a questão testa."
+      - texto: "Armazenar em volumes EBS anexados a uma instância EC2 sempre ligada."
+        correta: false
+        explicacao: "EBS custa mais por GB que o S3 e exige uma instância ligada. Arquivo de log não precisa de disco de bloco."
+      - texto: "Armazenar numa classe de arquivamento desde o primeiro dia."
+        correta: false
+        explicacao: "Os 30 dias de consulta frequente pagariam recuperação a cada leitura. A classe certa muda com o padrão de acesso, e é para isso que existe ciclo de vida."
+  - tipo: multipla
+    enunciado: "Um candidato quer melhorar a nota na SAA-C03 sem estudar mais conteúdo. Quais DUAS práticas de prova têm efeito direto na pontuação?"
+    alternativas:
+      - texto: "Nunca deixar questão em branco, porque não há penalidade por erro."
+        correta: true
+        explicacao: "Branco é errada garantida; chute tem chance. É ganho puro."
+      - texto: "Em múltipla resposta, marcar exatamente o número pedido."
+        correta: true
+        explicacao: "Marcar a mais zera a questão mesmo com as certas dentro."
+      - texto: "Responder primeiro as questões do domínio de maior peso."
+        correta: false
+        explicacao: "A prova não mostra o domínio da questão, e a ordem não muda a nota."
+      - texto: "Gastar mais tempo nas questões experimentais, que valem mais."
+        correta: false
+        explicacao: "As 15 experimentais não pontuam e não são identificadas. Não há como tratá-las diferente."
+      - texto: "Marcar sempre a alternativa mais longa, que costuma ser a certa."
+        correta: false
+        explicacao: "Não há esse padrão. A alternativa certa é a que atende ao requisito do enunciado."
+  - tipo: unica
+    enunciado: "Uma questão pede a solução 'MAIS econômica' para uma carga de trabalho que roda 24 horas por dia, 7 dias por semana, por pelo menos um ano, com uso previsível. Qual alternativa atende?"
+    alternativas:
+      - texto: "Instâncias reservadas ou Savings Plans de um ano para a capacidade previsível."
+        correta: true
+        explicacao: "Uso contínuo e previsível por um ano é exatamente o caso de compromisso com desconto. É o que 'mais econômica' aponta aqui."
+      - texto: "Instâncias Spot, que são as mais baratas."
+        correta: false
+        explicacao: "Spot pode ser interrompida; carga 24x7 que não tolera interrupção não é candidata, por mais barata que seja."
+      - texto: "Instâncias sob demanda, para não assumir compromisso."
+        correta: false
+        explicacao: "Sob demanda é o modelo mais caro para uso contínuo; serve para carga imprevisível ou curta."
+      - texto: "Hosts dedicados, para ter controle total do hardware."
+        correta: false
+        explicacao: "Controle de hardware não foi pedido e custa mais. Responde ao que você acha importante, não ao enunciado."
+---
+
+## Em uma frase
+
+A SAA-C03 descreve um cenário e pede a **melhor** arquitetura para ele; "melhor"
+é definido por uma palavra do enunciado (menor custo, menor esforço operacional,
+mais resiliente), e ler essa palavra antes das alternativas é metade da prova.
+
+## O formato, para não ser surpresa
+
+<Comparativo
+  colunas={["", "Como é"]}
+  linhas={[
+    ["Questões", "65, das quais 50 pontuam; 15 são experimentais e não identificadas"],
+    ["Tempo", "130 minutos, dois por questão"],
+    ["Tipos", "Escolha única (1 de 4) e múltipla resposta (2 ou mais de 5 ou mais)"],
+    ["Nota", "Escala de 100 a 1000, equalizada entre versões; aprova com 720"],
+    ["Penalidade", "Nenhuma por erro; branco conta como errada"],
+    ["Domínios", "Seguras 30% · Resilientes 26% · Alto desempenho 24% · Custo 20%"]
+  ]}
+/>
+
+A pontuação é **compensatória**: você precisa passar no total, não em cada
+domínio. Um domínio fraco não reprova sozinho, e é por isso que o peso importa
+na hora de decidir onde investir a última semana.
+
+## O que a questão realmente pergunta
+
+Uma questão da SAA quase nunca é "o que faz o serviço X". Ela é um parágrafo:
+uma empresa, uma aplicação, uma restrição, e um pedido. Entre as alternativas,
+duas ou três **funcionam**. Só uma atende ao pedido do jeito que ele foi feito.
+
+O pedido está numa palavra, geralmente em maiúsculas na prova real:
+
+<Comparativo
+  colunas={["Palavra", "Aponta para", "Descarta"]}
+  linhas={[
+    ["MENOR esforço operacional", "Serviço gerenciado, serverless", "EC2 com script, banco auto-hospedado"],
+    ["MENOR custo", "Spot, Savings Plans, classe fria, endpoint em vez de NAT", "Sob demanda 24x7, Standard para arquivo, multi-região sem pedido"],
+    ["MAIS resiliente / alta disponibilidade", "Multi-AZ, Auto Scaling em várias AZs, failover", "Uma AZ, instância única"],
+    ["MAIS rápido de implementar", "Reaproveitar o que existe, migração com mudança mínima", "Redesenho completo"],
+    ["MAIS seguro", "Menor privilégio, criptografia, endpoint privado", "Chave no código, bucket público, tráfego pela internet"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="A pegadinha mais comum">
+A prova pune resposta **acima** do requisito tanto quanto abaixo. Se o enunciado
+pede tolerância à falha de uma zona, a alternativa multirregião está errada:
+custa mais e faz mais do que foi pedido. "Melhor" na SAA é "exatamente o que
+foi pedido, do jeito mais barato ou mais simples".
+</Callout>
+
+## O método, em quatro passos
+
+<Passos itens={[
+  "Leia o enunciado inteiro antes de olhar qualquer alternativa. As alternativas foram escritas para parecerem certas a quem chega nelas sem o requisito fixado.",
+  "Sublinhe mentalmente a palavra que define a resposta e o número pedido em múltipla resposta. Sem isso você vai escolher a alternativa mais familiar, não a certa.",
+  "Elimine o que não funciona. Depois, entre as que funcionam, escolha pela palavra. Duas alternativas corretas com uma resposta certa é o desenho normal da questão.",
+  "Passou de dois minutos: marque para revisar e siga. Nunca deixe em branco; se o tempo acabar, chute vale mais que vazio."
+]} />
+
+## Múltipla resposta é onde se perde ponto bobo
+
+A questão diz "Escolha DUAS" ou "Escolha TRÊS". A correção é pelo conjunto
+exato: marcar três quando pede duas zera a questão, mesmo que as duas certas
+estejam entre as três. Não há crédito parcial. Se você tem certeza de duas e
+uma terceira parece plausível, a terceira é o distrator: ela está lá para isso.
+
+<Callout tipo="dica" titulo="Serviço que você nunca ouviu falar">
+Quando uma alternativa cita um serviço desconhecido, desconfie. O distrator
+típico da SAA usa um serviço **real** para o problema **errado** (Kinesis para
+fila simples, Redshift para transação). Um serviço que você nunca viu no
+estudo raramente é a resposta; ele está ali para atrair quem chuta pelo nome.
+</Callout>
+
+## O que este tema muda no resto da trilha
+
+Cada tema desta trilha termina com cenários no estilo da prova, e cada
+alternativa vem com o porquê de estar certa ou errada. Ao responder, faça o
+exercício ao contrário: antes de ver a explicação, diga qual palavra do
+enunciado decidiu. Se você acertou a questão mas não sabe qual palavra
+decidiu, acertou por sorte, e sorte não sobrevive a 65 questões.

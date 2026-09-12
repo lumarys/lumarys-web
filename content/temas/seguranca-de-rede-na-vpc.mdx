@@ -1,0 +1,254 @@
+---
+slug: seguranca-de-rede-na-vpc
+titulo: "Segurança de rede na VPC"
+resumo: "O perímetro que a prova cobra em quase todo cenário de rede: grupos de segurança e NACLs, sub-redes públicas e privadas, NAT Gateway, VPC endpoints de gateway e de interface (PrivateLink), e o custo de cada escolha. Quem vem de dados erra aqui; é o módulo que mais vale estudar de propósito."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Rede é onde quem vem de desenvolvimento ou de dados perde ponto na SAA: a diferença entre grupo de segurança e NACL, por que uma instância privada não alcança a internet, e por que o tráfego para o S3 sai caro pelo NAT. A prova repete esses três cenários com roupas diferentes."
+comoCai: "Instâncias em sub-rede privada precisam acessar o S3 sem passar pela internet e com o MENOR custo. O que fazer?"
+feynman: "Explique em um minuto para alguém de negócio por que 'a instância não tem IP público' não significa que ela está protegida, e o que de fato protege."
+preRequisitos: ["iam-avancado"]
+errosComuns:
+  - "Confundir grupo de segurança com NACL. O grupo de segurança é da instância, tem estado (a resposta volta sozinha) e só tem regras de permitir. A NACL é da sub-rede, não tem estado (a resposta precisa de regra própria) e tem permitir e negar, avaliados em ordem."
+  - "Esquecer as portas efêmeras na NACL. Como ela não tem estado, o tráfego de resposta sai por uma porta alta aleatória; sem regra de saída para 1024–65535, a conexão abre e a resposta não volta."
+  - "Colocar o NAT Gateway numa sub-rede privada. Ele precisa estar numa sub-rede pública, com rota para o Internet Gateway; a sub-rede privada aponta a rota padrão para ele."
+  - "Um NAT Gateway só para várias zonas. Se a zona dele cair, todas as sub-redes privadas perdem saída. Resiliência é um NAT por zona, e a prova cobra isso."
+  - "Mandar tráfego de S3 e DynamoDB pelo NAT. Os dois têm endpoint de gateway, sem custo, que mantém o tráfego dentro da AWS. O NAT cobra por hora e por GB; é o custo escondido clássico."
+  - "Usar NACL para bloquear um IP quando a pergunta é 'de forma mais simples'. Bloquear IP específico é caso de NACL, sim, porque grupo de segurança não nega; mas para permitir acesso entre camadas, referenciar um grupo de segurança em outro é mais simples e mais seguro que faixa de IP."
+preTeste:
+  - enunciado: "Uma instância EC2 numa sub-rede privada precisa baixar atualizações da internet. Ela tem um grupo de segurança que permite saída para qualquer destino, mas não consegue conectar. Qual é a causa mais provável?"
+    alternativas:
+      - texto: "A tabela de rotas da sub-rede não tem rota padrão para um NAT Gateway em sub-rede pública."
+        correta: true
+        explicacao: "Sub-rede privada não tem caminho para a internet por si; precisa de rota para o NAT, que por sua vez precisa estar numa sub-rede pública com rota para o Internet Gateway."
+      - texto: "O grupo de segurança precisa de uma regra de entrada para a resposta."
+        correta: false
+        explicacao: "Grupo de segurança tem estado: a resposta de uma conexão de saída volta sem regra de entrada."
+      - texto: "A instância precisa de um IP elástico."
+        correta: false
+        explicacao: "IP elástico sozinho, sem rota para um Internet Gateway, não dá saída; e uma instância privada por desenho não deveria ter IP público."
+  - enunciado: "Uma aplicação em sub-rede privada faz milhares de chamadas por hora ao S3 através de um NAT Gateway, e a fatura do NAT cresceu. Qual mudança reduz o custo mantendo o tráfego privado?"
+    alternativas:
+      - texto: "Criar um endpoint de gateway para o S3 e adicionar a rota na tabela da sub-rede."
+        correta: true
+        explicacao: "Endpoint de gateway para S3 não tem custo e tira o tráfego do NAT, que cobra por GB. Fica tudo dentro da rede da AWS."
+      - texto: "Trocar o NAT Gateway por uma instância NAT menor."
+        correta: false
+        explicacao: "Reduz um pouco o custo por hora e adiciona operação e um ponto único de falha. Não resolve o custo por GB do tráfego."
+      - texto: "Dar IP público às instâncias e usar o Internet Gateway."
+        correta: false
+        explicacao: "Tira o custo do NAT expondo as instâncias; viola 'tráfego privado'."
+videos:
+  - id: eMKczUJRi9I
+    publicadoEm: "2020-11-06"
+    titulo: "Aula 21 - Curso Completo AWS - Segurança VPC"
+    canal: "Mundo da Cloud"
+    duracao: 14
+    porQue: "A base em português de como a segurança de rede funciona na VPC. Assista com uma pergunta na cabeça: em cada mecanismo, ele é da instância ou da sub-rede, e tem ou não tem estado? É a distinção que decide metade das questões deste tema."
+artigos:
+  - titulo: "Control traffic to your AWS resources using security groups"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html"
+    fonte: "AWS"
+  - titulo: "Control subnet traffic with network access control lists"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+    fonte: "AWS"
+  - titulo: "NAT gateways"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html"
+    fonte: "AWS"
+  - titulo: "What is AWS PrivateLink?"
+    url: "https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Grupo de segurança versus NACL, em uma linha."
+    verso: "SG: da instância, com estado, só permite, todas as regras avaliadas. NACL: da sub-rede, sem estado, permite e nega, regras avaliadas em ordem numérica até a primeira que casa."
+  - frente: "O que 'com estado' significa na prática?"
+    verso: "A resposta de uma conexão permitida volta sozinha. No grupo de segurança, liberar saída na porta 443 basta; na NACL, é preciso liberar também a entrada nas portas efêmeras."
+  - frente: "Portas efêmeras."
+    verso: "A faixa alta (1024 a 65535) que o cliente usa para receber a resposta. Toda NACL que permite tráfego de saída precisa de regra de entrada para essa faixa, e vice-versa."
+  - frente: "O que torna uma sub-rede pública?"
+    verso: "Uma rota na tabela de rotas dela para um Internet Gateway. Não é o nome nem o IP público das instâncias; é a rota."
+  - frente: "Como uma sub-rede privada acessa a internet?"
+    verso: "Rota padrão para um NAT Gateway, que fica numa sub-rede pública. A conexão só sai; ninguém de fora inicia conexão para dentro."
+  - frente: "NAT Gateway e resiliência."
+    verso: "É por zona de disponibilidade. Um NAT para todas as zonas é ponto único de falha; o desenho resiliente é um NAT por zona, com cada sub-rede privada apontando para o da própria zona."
+  - frente: "Como o NAT Gateway cobra?"
+    verso: "Por hora ligado e por GB processado. É por isso que mandar tráfego de S3 pelo NAT é o custo escondido mais cobrado na prova."
+  - frente: "Endpoint de gateway versus endpoint de interface."
+    verso: "Gateway: só S3 e DynamoDB, é uma rota na tabela, sem custo. Interface (PrivateLink): uma ENI com IP privado na sua sub-rede para quase todos os outros serviços, cobra por hora e por GB."
+  - frente: "Como restringir um bucket ao tráfego que vem do endpoint?"
+    verso: "Bucket policy com condição aws:SourceVpce igual ao id do endpoint. Junta rede e IAM no mesmo controle."
+  - frente: "Como permitir que a camada web fale com a camada de banco sem faixa de IP?"
+    verso: "Regra de entrada no grupo de segurança do banco que referencia o grupo de segurança da camada web como origem. Sobrevive a mudança de IP e a Auto Scaling."
+  - frente: "Como acessar uma instância privada para administração sem bastion?"
+    verso: "Systems Manager Session Manager: sem porta 22 aberta, sem IP público, com registro da sessão. É a resposta de 'menor esforço' e 'mais seguro' para acesso administrativo."
+  - frente: "Peering de VPC é transitivo?"
+    verso: "Não. A liga a B e B liga a C não faz A falar com C. Para muitas VPCs, o desenho é Transit Gateway."
+  - frente: "Como ver o que está sendo bloqueado na rede?"
+    verso: "VPC Flow Logs: registram aceito e rejeitado por ENI, sub-rede ou VPC, para o CloudWatch Logs ou S3."
+drills:
+  - titulo: "Grupo de segurança ou NACL?"
+    instrucao: "Para cada situação, diga qual mecanismo é a resposta esperada na prova."
+    opcoes: ["Grupo de segurança", "NACL", "Os dois"]
+    itens:
+      - enunciado: "Bloquear um endereço IP específico que está atacando a aplicação."
+        resposta: "NACL"
+        explicacao: "Grupo de segurança não tem regra de negar; bloquear IP é NACL."
+      - enunciado: "Permitir que só as instâncias da camada web conectem ao banco na porta 3306."
+        resposta: "Grupo de segurança"
+        explicacao: "Referenciar o grupo da camada web como origem é o desenho padrão; NACL trabalharia com faixas de IP."
+      - enunciado: "A regra de saída foi criada, a conexão abre e a resposta não volta."
+        resposta: "NACL"
+        explicacao: "Sintoma de falta de regra para portas efêmeras: só a NACL, sem estado, tem esse problema."
+      - enunciado: "Defesa em profundidade: controle na sub-rede e na instância."
+        resposta: "Os dois"
+        explicacao: "A prova aceita os dois juntos quando pede camadas; o grupo de segurança sozinho é a resposta comum, mas 'defesa em profundidade' pede a NACL também."
+      - enunciado: "Uma regra deve valer para todas as instâncias de uma sub-rede, inclusive as que ainda serão criadas."
+        resposta: "NACL"
+        explicacao: "NACL é por sub-rede; grupo de segurança precisa ser anexado a cada instância."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa executa instâncias EC2 em sub-redes privadas em três zonas de disponibilidade. As instâncias precisam baixar pacotes da internet, e a solução deve continuar funcionando se uma zona falhar. Qual desenho atende?"
+    alternativas:
+      - texto: "Um NAT Gateway em uma sub-rede pública de cada zona, com a tabela de rotas de cada sub-rede privada apontando para o NAT da própria zona."
+        correta: true
+        explicacao: "NAT Gateway é recurso de zona. Um por zona, com rota local, é o único desenho em que a falha de uma zona não derruba a saída das outras."
+      - texto: "Um único NAT Gateway numa sub-rede pública, com todas as sub-redes privadas apontando para ele."
+        correta: false
+        explicacao: "Funciona até a zona do NAT cair; aí as três perdem saída. Falha exatamente no requisito de resiliência."
+      - texto: "Um Internet Gateway por zona, com rota nas sub-redes privadas."
+        correta: false
+        explicacao: "O Internet Gateway é um por VPC e não dá saída a instância sem IP público; sub-rede privada com rota para ele vira pública."
+      - texto: "Um endpoint de interface para a internet em cada zona."
+        correta: false
+        explicacao: "Endpoint de interface conecta a serviços da AWS ou a serviços via PrivateLink, não à internet aberta."
+  - tipo: unica
+    enunciado: "Uma aplicação em sub-rede privada grava arquivos no S3 e lê tabelas no DynamoDB. A política de segurança exige que esse tráfego não passe pela internet, e a equipe quer o MENOR custo. O que um arquiteto deve recomendar?"
+    alternativas:
+      - texto: "Endpoints de gateway para S3 e DynamoDB, com as rotas adicionadas à tabela da sub-rede privada."
+        correta: true
+        explicacao: "Os dois serviços têm endpoint de gateway, sem custo, que mantém o tráfego na rede da AWS. É o menor custo que cumpre o requisito."
+      - texto: "Endpoints de interface (PrivateLink) para S3 e DynamoDB."
+        correta: false
+        explicacao: "Mantém o tráfego privado, mas cobra por hora e por GB. Existe endpoint de gateway sem custo para os dois; a alternativa cara está errada quando a pergunta é custo."
+      - texto: "Um NAT Gateway numa sub-rede pública."
+        correta: false
+        explicacao: "O tráfego sairia pela internet pública e ainda pagaria por GB. Falha nos dois requisitos."
+      - texto: "Uma conexão Direct Connect até a região."
+        correta: false
+        explicacao: "Direct Connect liga o data center da empresa à AWS; não tem relação com tráfego entre uma VPC e o S3."
+  - tipo: multipla
+    enunciado: "Uma equipe criou uma NACL personalizada para uma sub-rede e permitiu entrada na porta 443 de qualquer origem. As instâncias recebem a conexão, mas os clientes não recebem resposta. Quais DUAS afirmações explicam e resolvem o problema?"
+    alternativas:
+      - texto: "NACLs não têm estado, então o tráfego de resposta precisa de uma regra de saída própria."
+        correta: true
+        explicacao: "É a natureza da NACL: cada direção é avaliada isoladamente."
+      - texto: "É preciso adicionar uma regra de saída permitindo a faixa de portas efêmeras (1024 a 65535)."
+        correta: true
+        explicacao: "A resposta vai para a porta alta que o cliente escolheu; sem essa regra de saída, ela é descartada."
+      - texto: "O grupo de segurança das instâncias precisa de uma regra de saída para a porta 443."
+        correta: false
+        explicacao: "Grupo de segurança tem estado: a resposta de uma conexão de entrada permitida sai sem regra."
+      - texto: "A NACL precisa de uma regra de negar tudo no final."
+        correta: false
+        explicacao: "A NACL já termina com a regra implícita de negar tudo; adicionar outra não muda nada."
+      - texto: "As instâncias precisam de IP elástico para responder."
+        correta: false
+        explicacao: "A resposta sai pelo mesmo caminho por onde a conexão chegou; IP elástico não tem relação."
+  - tipo: unica
+    enunciado: "Um arquiteto precisa permitir que administradores acessem instâncias EC2 em sub-redes privadas para diagnóstico, com o MENOR risco e sem abrir a porta 22 para a internet. Qual solução atende?"
+    alternativas:
+      - texto: "Usar o AWS Systems Manager Session Manager, com a role de instância apropriada."
+        correta: true
+        explicacao: "Sem porta aberta, sem IP público, sem bastion para manter, e com registro das sessões. É a resposta de menor risco e menor esforço."
+      - texto: "Criar um bastion host numa sub-rede pública com a porta 22 aberta para qualquer origem."
+        correta: false
+        explicacao: "Porta 22 aberta ao mundo é o que a questão pede para evitar; e o bastion é mais uma máquina para manter."
+      - texto: "Atribuir IPs públicos às instâncias e restringir a porta 22 por grupo de segurança ao IP do escritório."
+        correta: false
+        explicacao: "Expõe instâncias que deveriam ser privadas. Restringir por IP reduz, mas não elimina, a exposição."
+      - texto: "Configurar uma NACL que permita a porta 22 só do IP do escritório."
+        correta: false
+        explicacao: "Instância privada continua sem caminho de entrada da internet; a NACL não cria o acesso, e a porta 22 continuaria sendo o vetor."
+---
+
+## Em uma frase
+
+Na VPC, a prova cobra três decisões: **quem filtra** (grupo de segurança na
+instância, com estado; NACL na sub-rede, sem estado), **por onde sai** (Internet
+Gateway para pública, NAT Gateway para privada, um por zona) e **como chega aos
+serviços da AWS sem internet** (endpoint de gateway para S3 e DynamoDB, de
+graça; endpoint de interface para o resto, pago).
+
+## Grupo de segurança e NACL
+
+<Termo nome="grupo de segurança">Firewall da instância (na verdade, da interface de rede): só regras de permitir, com estado, todas as regras avaliadas. É o controle padrão da prova.</Termo>
+
+<Termo nome="NACL">Network ACL: firewall da sub-rede, sem estado, com regras de permitir e negar avaliadas em ordem numérica. É a resposta para bloquear IP e para defesa em profundidade.</Termo>
+
+<Comparativo
+  colunas={["", "Grupo de segurança", "NACL"]}
+  linhas={[
+    ["Onde atua", "Instância (ENI)", "Sub-rede"],
+    ["Estado", "Com estado: resposta volta sozinha", "Sem estado: resposta precisa de regra"],
+    ["Regras", "Só permitir", "Permitir e negar"],
+    ["Avaliação", "Todas, qualquer uma que permita basta", "Em ordem, para na primeira que casa"],
+    ["Origem por referência", "Sim: outro grupo de segurança", "Não: só CIDR"],
+    ["Padrão", "Nega entrada, permite saída", "A padrão permite tudo; a personalizada nega tudo"]
+  ]}
+/>
+
+A pegadinha que decide questão: **portas efêmeras**. Como a NACL não tem
+estado, uma conexão que entra na 443 responde por uma porta alta aleatória.
+Sem regra de saída para 1024–65535, a conexão abre e a resposta morre. O
+grupo de segurança não tem esse problema.
+
+<Callout tipo="dica" titulo="Referenciar grupo, não IP">
+Para "a camada web pode falar com o banco", a resposta é uma regra no grupo do
+banco cuja origem é o **grupo da camada web**. Não é faixa de IP. Sobrevive a
+Auto Scaling e a troca de instância, e é o desenho que a prova espera.
+</Callout>
+
+## Pública, privada e por onde o tráfego sai
+
+O que torna uma sub-rede pública não é o nome: é uma rota na tabela dela para
+um **Internet Gateway**. Sub-rede sem essa rota é privada, e instância privada
+não alcança a internet por si.
+
+<Passos itens={[
+  "Sub-rede pública: rota 0.0.0.0/0 para o Internet Gateway. Instâncias com IP público entram e saem.",
+  "Sub-rede privada: rota 0.0.0.0/0 para um NAT Gateway. Instâncias saem (atualização, API externa) e ninguém de fora entra.",
+  "O NAT Gateway mora numa sub-rede PÚBLICA, é por zona de disponibilidade e cobra por hora e por GB.",
+  "Resiliência: um NAT por zona, cada sub-rede privada apontando para o da própria zona. Um NAT só é ponto único de falha."
+]} />
+
+<Callout tipo="atencao" titulo="O custo escondido do NAT">
+Tráfego para o **S3** e o **DynamoDB** não deveria passar pelo NAT: os dois
+têm **endpoint de gateway**, sem custo, que é uma rota na tabela da sub-rede.
+A questão "a fatura do NAT cresceu" tem sempre essa resposta. Para os outros
+serviços, o **endpoint de interface** (PrivateLink) resolve o "sem internet",
+mas cobra por hora e por GB — é a alternativa certa quando o requisito é
+privacidade e errada quando é só custo.
+</Callout>
+
+## Acesso administrativo e observação
+
+- **Session Manager** substitui o bastion: acesso à instância privada sem
+  porta 22, sem IP público, com sessão registrada. É a resposta de "menor
+  risco" e "menor esforço" para administração.
+- **VPC Flow Logs** mostram o que foi aceito e rejeitado por interface,
+  sub-rede ou VPC. É por onde se descobre uma NACL sem regra de efêmeras.
+- **Peering** não é transitivo: para várias VPCs, **Transit Gateway**.
+- **WAF** protege aplicação (camada 7, em ALB, CloudFront, API Gateway);
+  **Shield** protege contra DDoS na borda. Nenhum dos dois substitui grupo
+  de segurança.
+
+## Como responder o cenário
+
+Pergunte ao enunciado: o problema é **filtro** (SG ou NACL — com estado ou
+sem?), **saída** (pública com IGW, privada com NAT por zona) ou **acesso a
+serviço da AWS** (gateway grátis para S3 e DynamoDB, interface pago para o
+resto)? Depois aplique a palavra: **menor custo** favorece endpoint de gateway
+e evita NAT; **mais resiliente** exige um NAT por zona; **mais seguro** tira o
+IP público e a porta 22.

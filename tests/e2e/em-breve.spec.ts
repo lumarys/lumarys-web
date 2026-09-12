@@ -34,5 +34,5 @@ test("o pedido nomeia a trilha, para chegar classificado", async ({ page }) => {
   // A outra existe fechada: o pedido é por trilha, não um só no fim da lista,
   // para o assunto do e-mail dizer qual delas. (Eram três; Analytics saiu do
   // "em breve" e virou trilha.)
-  await expect(page.locator("details button", { hasText: "Quero esta trilha" })).toHaveCount(2);
+  await expect(page.locator("details button", { hasText: "Quero esta trilha" })).toHaveCount(1);
 });

@@ -22,8 +22,8 @@ const rotas = [
   .filter((r) => !/\/(plano|glossario|resumo|checkpoint)\/$/.test(r))
   .sort();
 
-test("existem 31 temas", () => {
-  expect(rotas).toHaveLength(31);
+test("existem 35 temas", () => {
+  expect(rotas).toHaveLength(35);
 });
 
 for (const rota of rotas) {
@@ -42,7 +42,9 @@ for (const rota of rotas) {
     await expect(page.getByText(/^Pré-teste · 1 de/)).toBeVisible();
     await expect(page.getByRole("button", { name: /^assistir:/i }).first()).toBeVisible();
     await expect(page.getByText(/^Card 1 de \d+/)).toBeVisible();
-    await expect(page.getByText("Perguntas de sabatina deste tema")).toBeVisible();
+    // Tema de carreira tem perguntas orais; tema de certificação (formato:
+    // prova) tem só cenários objetivos. Os dois têm o quiz.
+    await expect(page.locator("#quiz")).toBeVisible();
     await expect(page.getByRole("button", { name: /concluir tema/i })).toBeVisible();
 
     const relevantes = erros.filter((e) => !/favicon/i.test(e));

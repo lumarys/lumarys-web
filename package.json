@@ -16,6 +16,7 @@
     "test:watch": "vitest",
     "verify:videos": "node scripts/verify-videos.mjs",
     "verify:links": "node scripts/verify-links.mjs",
+    "verify:exames": "node scripts/verify-exames.mjs",
     "content:lint": "node scripts/content-lint.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run content:lint",
     "prebuild": "npm run generate",

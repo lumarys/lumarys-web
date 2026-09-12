@@ -79,10 +79,17 @@ for (const { arquivo, dados, corpo } of temas) {
   vistos.add(dados.slug);
 
   const orais = (dados.perguntas ?? []).filter((p) => p.tipo === "oral").length;
-  if (orais < 2) erros.push(`${arquivo}: precisa de ao menos 2 perguntas orais com rubrica.`);
-
   const objetivas = (dados.perguntas ?? []).filter((p) => p.tipo !== "oral");
-  if (objetivas.length < 1) erros.push(`${arquivo}: precisa de ao menos 1 pergunta objetiva.`);
+  if (dados.formato === "prova") {
+    // Certificação: a prova é objetiva. Três cenários no estilo do exame é o
+    // mínimo para o tema alimentar a prova simulada sem repetir pergunta.
+    if (objetivas.length < 3) {
+      erros.push(`${arquivo}: tema de prova precisa de ao menos 3 perguntas objetivas de cenário.`);
+    }
+  } else {
+    if (orais < 2) erros.push(`${arquivo}: precisa de ao menos 2 perguntas orais com rubrica.`);
+    if (objetivas.length < 1) erros.push(`${arquivo}: precisa de ao menos 1 pergunta objetiva.`);
+  }
   for (const p of objetivas) {
     const corretas = (p.alternativas ?? []).filter((a) => a.correta).length;
     if (p.tipo === "unica" && corretas !== 1) {

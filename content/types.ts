@@ -112,6 +112,14 @@ export const temaFrontmatterSchema = z.object({
   /** Temas que convém estudar antes deste. */
   preRequisitos: z.array(slugSchema).default([]),
   /**
+   * "sabatina" (padrão) é o tema de carreira: a prova é oral, e o lint exige
+   * duas perguntas orais com rubrica. "prova" é o tema de certificação: a
+   * prova é objetiva, e o lint exige três cenários no estilo do exame, com o
+   * porquê de cada alternativa; orais ficam opcionais. Escrever oral que
+   * ninguém vai usar é tempo jogado fora.
+   */
+  formato: z.enum(["sabatina", "prova"]).default("sabatina"),
+  /**
    * AAAA-MM-DD de publicação, para o feed. Opcional porque os 30 primeiros
    * temas entraram todos no mesmo dia: sem o campo, o feed usa a data de
    * lançamento do site, que é a verdade sobre eles. Tema novo deve trazer a
@@ -168,11 +176,15 @@ export type DiaPlano = {
 };
 
 export type Exame = {
+  /** Código da versão vigente, como "SAA-C03". O verify-exames confere no índice oficial. */
   codigo: string;
   minutos: number;
   questoes: number;
+  /** Nota mínima na escala de 100 a 1000. */
   notaCorte: number;
   precoUSD: number;
+  /** Guia oficial do exame, para a trilha apontar a fonte da ementa. */
+  guiaUrl: string;
 };
 
 export type Trilha = {

@@ -1,0 +1,275 @@
+---
+slug: iam-avancado
+titulo: "IAM além do básico"
+resumo: "Como o IAM decide se uma chamada passa: a lógica de avaliação com negação explícita, políticas de identidade e de recurso, condições, roles entre contas, limites de permissão, SCPs do Organizations e federação com o Identity Center. É o que a SAA cobra em quase todo cenário de segurança."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "IAM está em todo cenário do Domínio 1, que vale 30% da prova, e aparece escondido nos outros três: acesso entre contas, permissão de uma Lambda a um bucket, quem pode assumir o quê. A prova não pede a sintaxe da política; pede que você saiba qual mecanismo resolve cada cenário e o que uma negação explícita faz com todo o resto."
+comoCai: "Uma aplicação na conta A precisa ler um bucket na conta B com o menor privilégio. Qual é a solução?"
+feynman: "Explique em um minuto para alguém de negócio por que um usuário com 'AdministratorAccess' pode, ainda assim, ser barrado de um serviço."
+preRequisitos: ["como-ler-uma-questao-saa"]
+errosComuns:
+  - "Achar que Allow numa política vence Deny em outra. Uma negação explícita vence qualquer permissão, em qualquer política: é a primeira regra da lógica de avaliação."
+  - "Tratar SCP como se concedesse permissão. SCP só limita o teto do que a conta pode fazer; a permissão em si vem das políticas de IAM dentro da conta."
+  - "Criar usuário IAM com chave de acesso para uma aplicação em EC2. O mecanismo certo é role de instância: credencial temporária, rotacionada pela AWS, sem chave no código."
+  - "Copiar credenciais entre contas para acesso cross-account. O desenho é uma role na conta de destino com política de confiança para a conta de origem, e AssumeRole via STS."
+  - "Confundir limite de permissão com política de identidade. O boundary define o máximo que a identidade pode receber; não dá permissão nenhuma sozinho."
+  - "Usar usuários IAM para pessoas quando a empresa tem um diretório. Para pessoas, a prova espera federação com o IAM Identity Center; usuário IAM é para exceções."
+preTeste:
+  - enunciado: "Um usuário tem a política gerenciada AdministratorAccess. Uma segunda política, anexada ao grupo dele, contém um Deny explícito para s3:DeleteObject. Ele consegue apagar objetos no S3?"
+    alternativas:
+      - texto: "Não. Negação explícita vence qualquer permissão, inclusive AdministratorAccess."
+        correta: true
+        explicacao: "A avaliação começa procurando Deny explícito em todas as políticas aplicáveis; se achar, para ali."
+      - texto: "Sim, porque AdministratorAccess é a política mais permissiva e prevalece."
+        correta: false
+        explicacao: "Não existe 'prevalece' por amplitude. Deny explícito é absoluto."
+      - texto: "Depende de qual política foi anexada por último."
+        correta: false
+        explicacao: "A ordem de anexação não entra na avaliação."
+  - enunciado: "Uma aplicação em EC2 na conta de desenvolvimento precisa gravar num bucket da conta de produção. Qual é o desenho de menor privilégio?"
+    alternativas:
+      - texto: "Uma role na conta de produção com a permissão de gravar e uma política de confiança que permite à role da instância assumi-la."
+        correta: true
+        explicacao: "Cross-account é isso: a conta dona do recurso concede, por role, à identidade de fora. Credencial temporária, sem chave."
+      - texto: "Um usuário IAM na conta de produção, com a chave de acesso guardada na instância."
+        correta: false
+        explicacao: "Chave de longa duração numa instância é o que a prova considera errado por padrão."
+      - texto: "Tornar o bucket público para gravação e restringir por IP."
+        correta: false
+        explicacao: "Público com filtro de IP não é menor privilégio; é exposição com remendo."
+videos:
+  - id: sHpGMGsgua8
+    publicadoEm: "2026-06-06"
+    titulo: "AWS Aula 2 - IAM Básico"
+    canal: "The Luminance"
+    duracao: 11
+    porQue: "A base em português: usuários, grupos, roles e políticas, e como se combinam. Assista antes de ler; o tema começa onde este vídeo termina, na lógica de avaliação e no acesso entre contas."
+  - id: VAkSuG8MCzg
+    publicadoEm: "2024-12-27"
+    titulo: "Como fazer acessos entre contas (cross account) na AWS"
+    canal: "AprendaAWS"
+    duracao: 7
+    porQue: "Complementar e curto: mostra na prática a role com política de confiança e o AssumeRole, que é o cenário cross-account que a prova mais repete."
+artigos:
+  - titulo: "Policy evaluation logic"
+    url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html"
+    fonte: "AWS"
+  - titulo: "IAM roles"
+    url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html"
+    fonte: "AWS"
+  - titulo: "Tutorial: Delegate access across AWS accounts using IAM roles"
+    url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html"
+    fonte: "AWS"
+  - titulo: "Service control policies (SCPs)"
+    url: "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "A regra número um da avaliação de políticas."
+    verso: "Negação explícita vence tudo. Depois, é preciso haver um Allow explícito; sem ele, a resposta padrão é negar."
+  - frente: "Política de identidade versus política de recurso."
+    verso: "Identidade: anexada a usuário, grupo ou role, diz o que ELE pode fazer. Recurso: anexada ao bucket, à fila, ao tópico, diz QUEM pode fazer o quê nele. Cross-account exige que as duas permitam."
+  - frente: "O que é uma role e quando usar em vez de usuário?"
+    verso: "Identidade que se assume, com credencial temporária. Para serviços da AWS (EC2, Lambda), para acesso entre contas e para federação. Usuário IAM é para o que não pode assumir role."
+  - frente: "O que é política de confiança?"
+    verso: "A parte da role que diz quem pode assumi-la: uma conta, um serviço, um provedor de identidade. Sem ela, a role não é assumível por ninguém."
+  - frente: "Como funciona o acesso cross-account por role?"
+    verso: "Conta B cria a role com as permissões e confia na conta A. A identidade na conta A tem permissão de sts:AssumeRole naquela role. STS devolve credencial temporária."
+  - frente: "O que uma SCP faz e não faz?"
+    verso: "Faz: limita o máximo que qualquer identidade da conta pode fazer, inclusive o root. Não faz: conceder permissão. Não afeta a conta de gerenciamento."
+  - frente: "O que é limite de permissão (permissions boundary)?"
+    verso: "Uma política que define o teto de permissões que uma identidade pode ter. A permissão efetiva é a interseção entre boundary e política de identidade. Serve para delegar criação de usuários sem risco de escalada."
+  - frente: "Chave de condição mais cobrada em bucket policy."
+    verso: "aws:SourceVpce ou aws:SourceVpc, para permitir acesso só de dentro da VPC via endpoint. Também aws:SecureTransport para exigir HTTPS."
+  - frente: "Como dar a uma instância EC2 acesso a um serviço?"
+    verso: "Perfil de instância com uma role. Nada de chave de acesso na máquina: a credencial temporária é entregue e rotacionada pelo serviço de metadados."
+  - frente: "Para que serve o IAM Identity Center?"
+    verso: "Acesso de pessoas com login único: conecta o diretório corporativo e concede conjuntos de permissão em várias contas do Organizations. É a resposta da prova para 'funcionários acessam várias contas'."
+  - frente: "Como uma aplicação móvel obtém credenciais temporárias?"
+    verso: "Federação de identidade web via Cognito Identity Pools ou STS, trocando o token do provedor por credenciais temporárias com uma role. Nunca chave de IAM embutida no app."
+  - frente: "O que é o princípio do menor privilégio na prova?"
+    verso: "A permissão mínima para a tarefa, no recurso específico, pelo tempo necessário. Alternativas com '*' em ação ou recurso quase sempre são o distrator."
+drills:
+  - titulo: "Qual mecanismo resolve?"
+    instrucao: "Para cada cenário, diga qual mecanismo do IAM ou do Organizations é a resposta esperada."
+    opcoes: ["Role cross-account", "SCP", "Limite de permissão", "Identity Center", "Política de recurso"]
+    itens:
+      - enunciado: "Impedir que qualquer conta da unidade organizacional 'sandbox' crie recursos fora de uma região."
+        resposta: "SCP"
+        explicacao: "Teto para contas inteiras é SCP; política de identidade teria de ser repetida em cada conta."
+      - enunciado: "Uma Lambda na conta A precisa publicar num tópico SNS da conta B."
+        resposta: "Role cross-account"
+        explicacao: "A Lambda assume uma role na conta B que confia na conta A; alternativamente, política de recurso no tópico, mas a role é o padrão da prova para acesso de identidade."
+      - enunciado: "Funcionários do diretório corporativo devem acessar cinco contas com login único."
+        resposta: "Identity Center"
+        explicacao: "Pessoas mais várias contas é o caso exato do Identity Center."
+      - enunciado: "Desenvolvedores podem criar roles, mas nenhuma role criada por eles pode ter mais permissão do que um conjunto definido."
+        resposta: "Limite de permissão"
+        explicacao: "O boundary é o teto anexado à identidade criada; é o único mecanismo que resolve escalada por criação de roles."
+      - enunciado: "Permitir que um serviço da AWS de outra conta leia um bucket, sem criar role para ele."
+        resposta: "Política de recurso"
+        explicacao: "A bucket policy concede diretamente a um principal de fora; é o outro lado do cross-account."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa usa AWS Organizations com várias contas. A equipe de segurança quer garantir que nenhuma conta, incluindo usuários administradores, consiga desativar o CloudTrail. Qual solução atende com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Anexar uma SCP à raiz da organização negando cloudtrail:StopLogging e cloudtrail:DeleteTrail."
+        correta: true
+        explicacao: "SCP é o único mecanismo que limita até administradores de todas as contas de uma vez; um Deny na raiz vale para toda a organização."
+      - texto: "Anexar uma política de Deny a cada usuário administrador em cada conta."
+        correta: false
+        explicacao: "Funciona até alguém criar um administrador novo. É repetição manual, o oposto de menor esforço, e não cobre o root."
+      - texto: "Habilitar o MFA para todos os usuários administradores."
+        correta: false
+        explicacao: "MFA protege o login, não impede uma ação de quem já está logado."
+      - texto: "Configurar um alarme no CloudWatch que reative o CloudTrail quando ele for parado."
+        correta: false
+        explicacao: "Reage depois do fato e deixa uma janela sem log. A questão pede impedir, não remediar."
+  - tipo: unica
+    enunciado: "Uma aplicação em instâncias EC2 precisa ler objetos de um bucket S3. Um arquiteto revisa a solução atual e encontra chaves de acesso de um usuário IAM gravadas no código. O que ele deve recomendar para atender ao princípio do menor privilégio?"
+    alternativas:
+      - texto: "Criar uma role com permissão de leitura no bucket e anexá-la às instâncias por um perfil de instância; remover as chaves do código."
+        correta: true
+        explicacao: "Role de instância entrega credencial temporária e rotacionada; a permissão fica restrita ao bucket. É a resposta padrão da prova para EC2 acessando serviço."
+      - texto: "Mover as chaves de acesso do código para variáveis de ambiente."
+        correta: false
+        explicacao: "Continua sendo chave de longa duração na máquina. Muda o lugar, não o risco."
+      - texto: "Rotacionar as chaves do usuário IAM a cada 30 dias."
+        correta: false
+        explicacao: "Reduz o dano de vazamento, mas o desenho continua errado: EC2 não deveria ter chave nenhuma."
+      - texto: "Tornar o bucket público para leitura, eliminando a necessidade de credencial."
+        correta: false
+        explicacao: "Troca uma credencial mal guardada por exposição total. Nunca é a resposta."
+  - tipo: multipla
+    enunciado: "Uma empresa quer que uma aplicação na conta Dev leia um bucket S3 da conta Prod usando uma role. Quais DUAS configurações são necessárias?"
+    alternativas:
+      - texto: "Uma role na conta Prod com permissão de leitura no bucket e política de confiança para a conta Dev."
+        correta: true
+        explicacao: "A role mora onde o recurso mora, e confia na conta de origem. É metade do desenho cross-account."
+      - texto: "Permissão de sts:AssumeRole para a identidade da aplicação na conta Dev, apontando para a role da conta Prod."
+        correta: true
+        explicacao: "A outra metade: quem assume precisa ter permissão de assumir. Sem isso, a confiança da role não basta."
+      - texto: "Um usuário IAM na conta Prod com chave de acesso compartilhada com a conta Dev."
+        correta: false
+        explicacao: "Compartilhar chave entre contas é o antipadrão que a role existe para evitar."
+      - texto: "Uma SCP na conta Dev permitindo acesso ao bucket da conta Prod."
+        correta: false
+        explicacao: "SCP não concede permissão; só limita. Não tem papel aqui."
+      - texto: "Tornar o bucket público e filtrar por endereço IP da conta Dev."
+        correta: false
+        explicacao: "Público com filtro não é controle de identidade. Distrator clássico."
+  - tipo: unica
+    enunciado: "Uma empresa tem 300 funcionários num diretório Active Directory local e quer que eles acessem o console da AWS em várias contas com o login corporativo, sem criar usuários IAM. Qual solução um arquiteto deve recomendar?"
+    alternativas:
+      - texto: "Configurar o IAM Identity Center integrado ao Active Directory e atribuir conjuntos de permissão por conta."
+        correta: true
+        explicacao: "Pessoas, diretório corporativo e várias contas é o caso exato do Identity Center: login único, permissão por conjunto, sem usuário IAM."
+      - texto: "Criar um usuário IAM por funcionário em cada conta e sincronizar as senhas por script."
+        correta: false
+        explicacao: "300 usuários vezes N contas, com sincronização caseira: o oposto do que a prova espera, e viola o 'sem usuários IAM'."
+      - texto: "Compartilhar as credenciais do usuário root de cada conta com os funcionários."
+        correta: false
+        explicacao: "O root nunca é usado para acesso do dia a dia. Alternativa de eliminação imediata."
+      - texto: "Criar chaves de acesso de um usuário administrador e distribuí-las pelo diretório."
+        correta: false
+        explicacao: "Chave compartilhada elimina rastreabilidade e viola menor privilégio."
+  - tipo: unica
+    enunciado: "Uma bucket policy permite s3:GetObject para todos os principais. Uma política de identidade anexada a um usuário nega s3:GetObject nesse bucket. O usuário tenta ler um objeto. O que acontece?"
+    alternativas:
+      - texto: "Acesso negado, porque a negação explícita na política de identidade vence a permissão da bucket policy."
+        correta: true
+        explicacao: "A regra vale entre tipos de política: qualquer Deny explícito aplicável encerra a avaliação com negação."
+      - texto: "Acesso permitido, porque a bucket policy é avaliada primeiro."
+        correta: false
+        explicacao: "Não há ordem que faça Allow vencer Deny."
+      - texto: "Acesso permitido, porque política de recurso prevalece sobre política de identidade."
+        correta: false
+        explicacao: "Não há hierarquia entre os tipos; há a regra do Deny explícito."
+      - texto: "Depende de o usuário estar na mesma conta do bucket."
+        correta: false
+        explicacao: "Na mesma conta ou não, o Deny explícito vence."
+---
+
+## Em uma frase
+
+O IAM decide cada chamada assim: **negação explícita vence tudo**; sem ela, é
+preciso um Allow explícito; sem Allow, nega. Todo cenário de segurança da
+prova é uma variação de quem concede, quem limita e por qual mecanismo.
+
+## A lógica de avaliação, que resolve metade das questões
+
+Quando uma chamada chega, a AWS junta todas as políticas aplicáveis — de
+identidade, de recurso, SCPs, limites de permissão, políticas de sessão — e
+avalia:
+
+<Passos itens={[
+  "Há um Deny explícito em qualquer uma delas? Então nega, e acabou. Não importa quantos Allow existam.",
+  "Não há Deny. Há um Allow explícito que cubra a ação e o recurso? Então permite.",
+  "Não há Allow. Nega, por padrão. É o 'implicit deny': tudo que não foi permitido está proibido."
+]} />
+
+Isso explica o cenário favorito da prova: um administrador com
+AdministratorAccess barrado de um serviço por um Deny numa SCP ou numa
+política de grupo. Não é bug; é a regra.
+
+## Quem concede e quem limita
+
+<Comparativo
+  colunas={["Mecanismo", "Concede?", "Limita?", "Onde mora"]}
+  linhas={[
+    ["Política de identidade", "Sim", "Sim (com Deny)", "Usuário, grupo, role"],
+    ["Política de recurso", "Sim", "Sim (com Deny)", "Bucket, fila, tópico, chave KMS"],
+    ["SCP", "Não", "Sim", "Organizations: raiz, OU, conta"],
+    ["Limite de permissão", "Não", "Sim", "Usuário ou role"],
+    ["Política de sessão", "Não", "Sim", "A sessão de uma role assumida"]
+  ]}
+/>
+
+A coluna "Concede?" é a que a prova testa. A alternativa que usa SCP para
+**dar** acesso está sempre errada. A alternativa que usa boundary para dar
+acesso também. Esses dois só definem tetos.
+
+<Termo nome="SCP">Service control policy: política do Organizations que define o máximo que qualquer identidade de uma conta pode fazer, inclusive o root. Não concede nada; só limita.</Termo>
+
+<Termo nome="limite de permissão">Permissions boundary: política anexada a um usuário ou role que define o teto do que ele pode receber. A permissão efetiva é a interseção com a política de identidade.</Termo>
+
+## Roles: o mecanismo que a prova mais espera
+
+Uma role é uma identidade que se **assume**, com credencial temporária. É a
+resposta para três famílias de cenário:
+
+- **Serviço da AWS agindo por você.** EC2, Lambda, ECS acessando S3, DynamoDB,
+  SQS. A role é anexada ao serviço (perfil de instância no EC2). Nunca chave
+  de acesso no código: esse é o distrator mais repetido da SAA.
+- **Acesso entre contas.** A conta dona do recurso cria a role com as
+  permissões e uma **política de confiança** para a conta de origem. A
+  identidade de origem precisa de `sts:AssumeRole`. Duas metades; a prova
+  costuma perguntar as duas.
+- **Federação.** Pessoas de um diretório corporativo entram via IAM Identity
+  Center; usuários de app entram via Cognito. Ninguém vira usuário IAM.
+
+<Callout tipo="atencao" titulo="Role ou política de recurso?">
+Para acesso cross-account em S3, SNS, SQS e KMS, a política de recurso também
+resolve: o bucket concede direto ao principal da outra conta. A prova aceita
+os dois desenhos; o que ela não aceita é usuário IAM com chave compartilhada.
+Quando o enunciado fala em "aplicação" ou "instância" acessando, a role é a
+resposta esperada.
+</Callout>
+
+## Condições: onde o menor privilégio fica preciso
+
+A prova cobra três chaves de condição com nome:
+
+- `aws:SourceVpce` e `aws:SourceVpc`: bucket policy que só permite acesso
+  vindo do endpoint da VPC. É o par de "tráfego privado para o S3".
+- `aws:SecureTransport`: negar quando for `false`, para exigir HTTPS.
+- `aws:MultiFactorAuthPresent`: exigir MFA para ações destrutivas.
+
+<Callout tipo="dica" titulo="Como responder o cenário de dois números">
+A questão descreve o cenário e pergunta "o que fazer". Antes de olhar as
+alternativas, classifique: é **conceder** (role, política de recurso) ou
+**limitar** (SCP, boundary, Deny)? É **serviço**, **conta** ou **pessoa**
+acessando? Com essas duas respostas, três alternativas caem sozinhas.
+</Callout>

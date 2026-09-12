@@ -70,6 +70,9 @@ jobs:
       - name: artigos ainda respondem
         run: npm run verify:links
 
+      - name: versões dos exames ainda vigentes
+        run: npm run verify:exames
+
   seguranca:
     name: segredos e dependências
     runs-on: ubuntu-latest

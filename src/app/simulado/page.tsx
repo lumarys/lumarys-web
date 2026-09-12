@@ -10,6 +10,7 @@ import { AmostraPublica, type PerguntaDeAmostra } from "@/features/simulado/Amos
 import { SimuladoComEscopo, type TrilhaDeSimulado } from "@/features/simulado/SimuladoComEscopo";
 import { listarTrilhas, temasDoModulo } from "@/lib/content";
 import type { PerguntaSimulado } from "@/features/simulado/Simulado";
+import type { QuestaoDeProva } from "@/lib/prova";
 import { alternativas, JsonLd, jsonLdBreadcrumb, jsonLdFaq } from "@/lib/seo";
 import type { Trilha } from "@content/types";
 
@@ -40,6 +41,27 @@ function perguntasDe(trilha: Trilha): PerguntaSimulado[] {
   );
 }
 
+/** O banco objetivo de uma certificação: toda questão de cenário dos temas. */
+function bancoDe(trilha: Trilha): QuestaoDeProva[] {
+  return trilha.modulos.flatMap((modulo) =>
+    temasDoModulo(modulo).flatMap((tema) =>
+      tema.perguntas
+        .filter((p): p is Extract<typeof p, { tipo: "unica" | "multipla" }> => p.tipo !== "oral")
+        .map((p, i) => ({
+          id: `${tema.slug}#obj#${i}`,
+          moduloSlug: modulo.slug,
+          moduloTitulo: modulo.titulo,
+          temaSlug: tema.slug,
+          temaTitulo: tema.titulo,
+          href: `/trilhas/${trilha.slug}/${modulo.slug}/${tema.slug}/`,
+          tipo: p.tipo,
+          enunciado: p.enunciado,
+          alternativas: p.alternativas,
+        })),
+    ),
+  );
+}
+
 function promptDe(trilha: Trilha): string | null {
   const caminho = join(process.cwd(), "content", "prompts", `${trilha.slug}.md`);
   return existsSync(caminho) ? readFileSync(caminho, "utf8").trim() : null;
@@ -53,8 +75,20 @@ export default function PaginaSimulado() {
   const porTrilha: TrilhaDeSimulado[] = trilhas.map((t) => ({
     slug: t.slug,
     titulo: t.titulo,
+    tipo: t.tipo,
     perguntas: perguntasDe(t),
     prompt: promptDe(t),
+    ...(t.tipo === "certificacao" && t.exame
+      ? {
+          exame: t.exame,
+          // Só os domínios do exame: o módulo "como funciona a prova" não
+          // tem peso e não entra no sorteio.
+          dominios: t.modulos
+            .filter((m) => m.pesoExame)
+            .map((m) => ({ slug: m.slug, titulo: m.titulo, peso: m.pesoExame ?? 0 })),
+          banco: bancoDe(t),
+        }
+      : {}),
   }));
 
   // A amostra pública é da primeira trilha do catálogo: é o HTML que o

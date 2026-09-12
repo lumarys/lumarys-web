@@ -1,4 +1,5 @@
 import type { Trilha } from "../types";
+import { awsSolutionsArchitectAssociate } from "./aws-solutions-architect-associate";
 import { engenhariaDeAnalytics } from "./engenharia-de-analytics";
 import { engenhariaDeDados } from "./engenharia-de-dados";
 
@@ -9,7 +10,11 @@ import { engenhariaDeDados } from "./engenharia-de-dados";
  * trilha que o contém é a que o buscador indexa. Dados vem antes de Analytics
  * porque foi onde os temas nasceram.
  */
-export const trilhas: Trilha[] = [engenhariaDeDados, engenhariaDeAnalytics];
+export const trilhas: Trilha[] = [
+  engenhariaDeDados,
+  engenhariaDeAnalytics,
+  awsSolutionsArchitectAssociate,
+];
 
 export const trilhasPorSlug = new Map(trilhas.map((t) => [t.slug, t]));
 
@@ -20,11 +25,5 @@ export const trilhasEmBreve = [
     titulo: "AWS Cloud Practitioner",
     origem: "AWS · CLF-C02",
     resumo: "Conceitos de nuvem, segurança, serviços e cobrança, no peso de cada domínio da prova.",
-  },
-  {
-    slug: "aws-solutions-architect-associate",
-    titulo: "AWS Solutions Architect Associate",
-    origem: "AWS · SAA-C03",
-    resumo: "Arquiteturas seguras, resilientes, de alto desempenho e otimizadas em custo.",
   },
 ] as const;

@@ -53,6 +53,7 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
     resumo: m.resumo,
     oficial: m.oficial,
     status: m.status,
+    pesoExame: m.pesoExame,
     temas: temasDoModulo(m).map((t) => ({ slug: t.slug, titulo: t.titulo, minutos: t.minutos })),
   }));
   const total = contarTemas(trilha);
@@ -78,12 +79,33 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
           {trilha.titulo}
         </h1>
         <div className="mt-2.5 flex flex-wrap gap-2">
-          <Etiqueta>{trilha.formatoProva}</Etiqueta>
+          {trilha.exame ? (
+            <>
+              <Etiqueta>
+                {trilha.exame.questoes} questões · {trilha.exame.minutos} min
+              </Etiqueta>
+              <Etiqueta>Corte {trilha.exame.notaCorte}/1000</Etiqueta>
+            </>
+          ) : (
+            <Etiqueta>{trilha.formatoProva}</Etiqueta>
+          )}
           <Etiqueta>
             {total} temas · {formatarMinutos(minutosDaTrilha(trilha))}
           </Etiqueta>
           <Etiqueta>Plano de {trilha.prazoSugeridoDias} dias</Etiqueta>
         </div>
+        {trilha.exame ? (
+          // A versão importa: a AWS aposenta exames com data marcada, e o
+          // verify-exames confere a cada build que este código ainda vigora.
+          <p className="mt-2 text-[13px] text-[var(--muted)]">
+            Ementa: guia oficial do exame{" "}
+            <a href={trilha.exame.guiaUrl} rel="noopener" target="_blank">
+              {trilha.exame.codigo}
+            </a>
+            , versão vigente conferida a cada publicação. Prova em centro Pearson VUE ou online, US${" "}
+            {trilha.exame.precoUSD}.
+          </p>
+        ) : null}
 
         <div className="mt-5">
           <ResumoProgresso
@@ -100,9 +122,37 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-2 min-[420px]:grid-cols-3">
-          <Bloco titulo="O quê" texto="A ementa oficial da carreira, mais o que ela não cobre." />
-          <Bloco titulo="Por quê" texto="A sabatina cobra raciocínio e trade-off, não definição." />
-          <Bloco titulo="Como" texto="Recall antes do vídeo, cards espaçados e simulado oral." />
+          {trilha.tipo === "certificacao" ? (
+            <>
+              <Bloco
+                titulo="O quê"
+                texto="O guia oficial do exame, domínio a domínio, no peso de cada um."
+              />
+              <Bloco
+                titulo="Por quê"
+                texto="A prova cobra escolher o serviço certo para o cenário, não decorar serviço."
+              />
+              <Bloco
+                titulo="Como"
+                texto="Recall antes do vídeo, cards de limites e prova cronometrada."
+              />
+            </>
+          ) : (
+            <>
+              <Bloco
+                titulo="O quê"
+                texto="A ementa oficial da carreira, mais o que ela não cobre."
+              />
+              <Bloco
+                titulo="Por quê"
+                texto="A sabatina cobra raciocínio e trade-off, não definição."
+              />
+              <Bloco
+                titulo="Como"
+                texto="Recall antes do vídeo, cards espaçados e simulado oral."
+              />
+            </>
+          )}
         </div>
 
         <p className="mt-4 text-sm leading-relaxed text-[var(--text-2)]">{trilha.objetivo}</p>
@@ -120,7 +170,7 @@ export default async function PaginaTrilha({ params }: { params: Promise<Params>
             variante="secundario"
             className="flex-1"
           >
-            Simulado
+            {trilha.tipo === "certificacao" ? "Prova simulada" : "Simulado"}
           </BotaoLink>
         </div>
 

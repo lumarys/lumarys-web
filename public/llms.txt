@@ -8,6 +8,23 @@
 Conteúdo em português do Brasil. Licença do conteúdo: CC BY-NC-SA 4.0.
 Ao citar, atribua a Lumarys e linke a página do tema.
 
+## AWS Solutions Architect Associate
+
+O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.
+
+Origem da ementa: AWS · SAA-C03
+Página: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/
+
+### Como funciona a prova
+
+- [Como ler uma questão da SAA](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/como-funciona-a-prova/como-ler-uma-questao-saa/): A prova SAA-C03 não pergunta o que um serviço faz; descreve um cenário e pede a melhor arquitetura para ele. Este tema é o formato do exame, a pontuação, os dois tipos de questão e o método para ler o enunciado antes de olhar as alternativas.
+
+### Arquiteturas seguras
+
+- [IAM além do básico](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/iam-avancado/): Como o IAM decide se uma chamada passa: a lógica de avaliação com negação explícita, políticas de identidade e de recurso, condições, roles entre contas, limites de permissão, SCPs do Organizations e federação com o Identity Center. É o que a SAA cobra em quase todo cenário de segurança.
+- [Segurança de rede na VPC](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/seguranca-de-rede-na-vpc/): O perímetro que a prova cobra em quase todo cenário de rede: grupos de segurança e NACLs, sub-redes públicas e privadas, NAT Gateway, VPC endpoints de gateway e de interface (PrivateLink), e o custo de cada escolha. Quem vem de dados erra aqui; é o módulo que mais vale estudar de propósito.
+- [Proteção de dados: KMS, criptografia e segredos](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/protecao-de-dados-na-aws/): Criptografia em repouso e em trânsito na AWS como a prova cobra: os tipos de chave do KMS, as opções de criptografia do S3, EBS e RDS, Secrets Manager contra Parameter Store, certificados no ACM e descoberta de dados sensíveis com o Macie.
+
 ## Engenharia de Analytics
 
 A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.

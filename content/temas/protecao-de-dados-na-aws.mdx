@@ -1,0 +1,282 @@
+---
+slug: protecao-de-dados-na-aws
+titulo: "Proteção de dados: KMS, criptografia e segredos"
+resumo: "Criptografia em repouso e em trânsito na AWS como a prova cobra: os tipos de chave do KMS, as opções de criptografia do S3, EBS e RDS, Secrets Manager contra Parameter Store, certificados no ACM e descoberta de dados sensíveis com o Macie."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Quase todo cenário do Domínio 1 termina com 'os dados devem ser criptografados' ou 'a chave deve ser controlada pela empresa'. A prova não pede algoritmo; pede que você escolha entre SSE-S3, SSE-KMS e SSE-C, saiba qual tipo de chave do KMS dá auditoria e rotação, e não confunda Secrets Manager com Parameter Store."
+comoCai: "Uma empresa exige que as chaves de criptografia do S3 sejam gerenciadas por ela e que cada uso seja auditado. Qual opção atende?"
+feynman: "Explique em um minuto para alguém de negócio a diferença entre 'a AWS criptografa para mim' e 'eu controlo a chave', e por que a segunda custa mais."
+preRequisitos: ["iam-avancado"]
+errosComuns:
+  - "Achar que SSE-S3 dá controle da chave. Dá criptografia, mas a chave é da AWS e você não a audita nem a rotaciona. Controle e auditoria por uso é SSE-KMS com chave gerenciada pelo cliente."
+  - "Confundir chave gerenciada pela AWS com chave gerenciada pelo cliente no KMS. As duas moram no KMS; só a do cliente tem política de chave editável, rotação configurável e pode ser desabilitada ou compartilhada entre contas."
+  - "Usar Parameter Store quando o cenário pede rotação automática de credencial de banco. Rotação integrada com RDS é do Secrets Manager; o Parameter Store guarda, mas não rotaciona sozinho."
+  - "Achar que dá para ligar criptografia num volume EBS ou numa instância RDS existente. Não dá: cria-se um snapshot, copia-se com criptografia e restaura-se. A prova adora esse detalhe."
+  - "Esquecer que o Macie descobre dados sensíveis, não os criptografa nem os protege. Ele classifica o que está no S3; a ação é sua."
+  - "Escolher CloudHSM sem o enunciado pedir. CloudHSM só é a resposta com exigência explícita de hardware dedicado ou de nível de conformidade que o KMS não cobre; fora isso, é o distrator caro."
+preTeste:
+  - enunciado: "Uma empresa exige que os objetos no S3 sejam criptografados com uma chave que ela controle, com registro de cada uso da chave no CloudTrail. Qual opção atende?"
+    alternativas:
+      - texto: "SSE-KMS com uma chave gerenciada pelo cliente."
+        correta: true
+        explicacao: "Chave do cliente no KMS: política própria, rotação configurável e cada operação criptográfica registrada no CloudTrail."
+      - texto: "SSE-S3, porque é o padrão e já criptografa tudo."
+        correta: false
+        explicacao: "Criptografa, mas a chave é da AWS: sem controle, sem auditoria por uso."
+      - texto: "SSE-C, enviando a chave em cada requisição."
+        correta: false
+        explicacao: "A empresa controla a chave, mas a AWS não a guarda nem registra uso no KMS; auditoria por uso não existe."
+  - enunciado: "Uma aplicação precisa da senha do banco RDS e a política exige troca automática a cada 30 dias sem parar a aplicação. Qual serviço usar?"
+    alternativas:
+      - texto: "Secrets Manager, com rotação automática integrada ao RDS."
+        correta: true
+        explicacao: "Rotação automática de credencial de banco é a função que diferencia o Secrets Manager."
+      - texto: "Parameter Store com um parâmetro SecureString."
+        correta: false
+        explicacao: "Guarda criptografado, mas não rotaciona sozinho; você teria de escrever a rotação."
+      - texto: "Uma variável de ambiente na instância, criptografada com KMS."
+        correta: false
+        explicacao: "Não rotaciona, não centraliza, e a rotação exigiria reimplantar."
+videos:
+  - id: bSLMDAwD798
+    publicadoEm: "2025-05-12"
+    titulo: "Módulo 26: AWS Security & Encryption: KMS, Secrets Manager, Parameter Store e mais"
+    canal: "Jean Diogo"
+    duracao: 11
+    porQue: "Feito para a prova, em português: cobre exatamente a comparação que a SAA pede entre KMS, Secrets Manager e Parameter Store. Anote os critérios de escolha; são as alternativas da questão."
+  - id: rmzvkRwbBDk
+    publicadoEm: "2025-07-25"
+    titulo: "Criptografia na AWS: Entenda como proteger seus dados com KMS, S3 e EBS"
+    canal: "Fast Lane Brasil"
+    duracao: 5
+    porQue: "Complementar e curto: a visão de por onde começar a criptografar S3 e EBS. Repare que criptografia de EBS é decidida na criação do volume, detalhe que a prova cobra."
+artigos:
+  - titulo: "AWS Key Management Service concepts"
+    url: "https://docs.aws.amazon.com/kms/latest/developerguide/overview.html"
+    fonte: "AWS"
+  - titulo: "Protecting data with server-side encryption (S3)"
+    url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/serv-side-encryption.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Secrets Manager?"
+    url: "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Certificate Manager?"
+    url: "https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Macie?"
+    url: "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Os três tipos de chave no KMS."
+    verso: "Gerenciada pelo cliente (você cria, controla a política, rotaciona, pode desabilitar e compartilhar); gerenciada pela AWS (criada pelo serviço, uso auditado, sem controle da política); de propriedade da AWS (nem aparece na sua conta)."
+  - frente: "SSE-S3, SSE-KMS e SSE-C, em uma linha cada."
+    verso: "SSE-S3: chave da AWS, sem controle. SSE-KMS: chave no KMS, com política, rotação e CloudTrail por uso. SSE-C: você envia a chave a cada chamada, a AWS não a guarda."
+  - frente: "O que é criptografia de envelope?"
+    verso: "A chave do KMS não criptografa o dado; criptografa uma chave de dados que criptografa o dado. O KMS só vê chaves pequenas, e o dado grande nunca sai do serviço que o guarda."
+  - frente: "Como reduzir o custo de KMS num bucket com milhões de objetos?"
+    verso: "S3 Bucket Keys: uma chave por bucket derivada da chave do KMS, que reduz as chamadas ao KMS e portanto a fatura."
+  - frente: "Rotação automática de chave gerenciada pelo cliente."
+    verso: "Opcional, anual por padrão quando habilitada; o material antigo fica guardado para decriptar o que foi cifrado com ele. Chave gerenciada pela AWS rotaciona sozinha."
+  - frente: "Dá para criptografar um volume EBS já existente?"
+    verso: "Não diretamente. Snapshot, cópia do snapshot com criptografia, novo volume a partir da cópia. Mesmo raciocínio para RDS: criptografia é decidida na criação."
+  - frente: "Secrets Manager versus Parameter Store."
+    verso: "Secrets Manager: rotação automática integrada (RDS, Redshift, DocumentDB), mais caro por segredo. Parameter Store: configuração e segredos com SecureString, sem rotação nativa, nível padrão sem custo."
+  - frente: "Para que serve o ACM?"
+    verso: "Emitir e renovar certificados TLS para usar em ELB, CloudFront e API Gateway. Certificado público do ACM é gratuito e renova sozinho; não dá para exportar a chave privada."
+  - frente: "O que o Macie faz?"
+    verso: "Descobre e classifica dados sensíveis (PII, credenciais) em buckets S3 usando aprendizado de máquina. Descobre; não criptografa nem bloqueia."
+  - frente: "Quando o CloudHSM é a resposta?"
+    verso: "Quando o enunciado exige hardware dedicado e de uso exclusivo, ou conformidade que o KMS padrão não cobre. Sem essa exigência explícita, é o distrator caro."
+  - frente: "Como exigir HTTPS num bucket?"
+    verso: "Bucket policy com Deny quando aws:SecureTransport for false. Criptografia em trânsito é política, não configuração do bucket."
+  - frente: "Chave do KMS pode ser usada por outra conta?"
+    verso: "Sim, chave gerenciada pelo cliente com política de chave que permita o principal da outra conta, mais permissão de IAM do lado de lá. Chave gerenciada pela AWS, não."
+drills:
+  - titulo: "Qual opção o cenário pede?"
+    instrucao: "Para cada exigência, diga a opção de criptografia ou o serviço que atende com o menor custo que ainda cumpre o requisito."
+    opcoes: ["SSE-S3", "SSE-KMS com chave do cliente", "SSE-C", "Secrets Manager", "Parameter Store", "CloudHSM"]
+    itens:
+      - enunciado: "Criptografar objetos no S3 sem nenhuma exigência de controle ou auditoria da chave."
+        resposta: "SSE-S3"
+        explicacao: "Sem exigência de controle, o mais simples e sem custo de KMS."
+      - enunciado: "Cada acesso a objeto deve gerar um registro do uso da chave no CloudTrail."
+        resposta: "SSE-KMS com chave do cliente"
+        explicacao: "Auditoria por uso é exclusiva do KMS."
+      - enunciado: "A empresa não aceita que a AWS armazene a chave em lugar nenhum."
+        resposta: "SSE-C"
+        explicacao: "A chave viaja em cada requisição e não é guardada."
+      - enunciado: "Credencial de banco com troca automática a cada 30 dias."
+        resposta: "Secrets Manager"
+        explicacao: "Rotação integrada é a função dele."
+      - enunciado: "Guardar uma string de configuração não sensível, lida por várias instâncias, sem custo."
+        resposta: "Parameter Store"
+        explicacao: "Configuração simples no nível padrão, sem custo."
+      - enunciado: "Exigência contratual de módulo de hardware dedicado e de uso exclusivo da empresa."
+        resposta: "CloudHSM"
+        explicacao: "A única exigência que justifica o CloudHSM sobre o KMS."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa do setor financeiro armazena documentos no S3 e precisa provar à auditoria que controla as chaves de criptografia, que pode revogá-las e que cada decriptação é registrada. Qual solução atende ao requisito?"
+    alternativas:
+      - texto: "SSE-KMS com uma chave gerenciada pelo cliente e registro das operações no CloudTrail."
+        correta: true
+        explicacao: "Chave do cliente: política própria, pode ser desabilitada (revogação), e cada Decrypt vai para o CloudTrail. É o conjunto completo do requisito."
+      - texto: "SSE-S3, que já criptografa por padrão."
+        correta: false
+        explicacao: "Sem controle da chave, sem revogação, sem registro por uso. Cumpre só 'criptografado'."
+      - texto: "SSE-KMS com a chave gerenciada pela AWS para o S3."
+        correta: false
+        explicacao: "Registra uso, mas a política da chave não é sua e você não pode desabilitá-la. Falha em 'controla e revoga'."
+      - texto: "Criptografar no cliente antes de enviar e guardar a chave numa instância EC2."
+        correta: false
+        explicacao: "Controle existe, mas auditoria por uso e revogação centralizada não. E chave numa instância é o antipadrão da prova."
+  - tipo: unica
+    enunciado: "Uma equipe descobre que um volume EBS de produção com dados sensíveis não está criptografado. A política exige criptografia em repouso. Qual é a forma de atender?"
+    alternativas:
+      - texto: "Criar um snapshot do volume, copiá-lo habilitando criptografia e criar um novo volume a partir da cópia."
+        correta: true
+        explicacao: "Criptografia de EBS é decidida na criação. O caminho para um volume existente é snapshot, cópia criptografada e novo volume."
+      - texto: "Habilitar a criptografia nas configurações do volume existente."
+        correta: false
+        explicacao: "Não existe essa opção para volume já criado. É o detalhe que a questão testa."
+      - texto: "Anexar o volume a uma instância com criptografia habilitada."
+        correta: false
+        explicacao: "A criptografia é do volume, não da instância."
+      - texto: "Mover os dados para o S3 com SSE-S3."
+        correta: false
+        explicacao: "Muda o serviço em vez de resolver o requisito; o volume continua existindo sem criptografia."
+  - tipo: multipla
+    enunciado: "Uma aplicação web precisa de TLS no balanceador de carga e de acesso seguro à senha do banco, com troca automática da senha. Quais DUAS ações atendem com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Emitir um certificado público no ACM e associá-lo ao balanceador."
+        correta: true
+        explicacao: "Gratuito, emitido e renovado pela AWS, integrado ao ELB. Zero esforço de renovação."
+      - texto: "Guardar a senha no Secrets Manager com rotação automática habilitada."
+        correta: true
+        explicacao: "Rotação integrada com o banco, sem código próprio."
+      - texto: "Comprar um certificado de uma autoridade externa e renová-lo manualmente todo ano."
+        correta: false
+        explicacao: "Funciona, mas é esforço operacional recorrente que o ACM elimina."
+      - texto: "Guardar a senha no Parameter Store e escrever uma Lambda que a troque mensalmente."
+        correta: false
+        explicacao: "Rotação caseira é código para manter; o Secrets Manager já faz isso."
+      - texto: "Colocar a senha numa variável de ambiente criptografada com KMS."
+        correta: false
+        explicacao: "Sem rotação e sem centralização; trocar a senha exige reimplantar."
+  - tipo: unica
+    enunciado: "Uma empresa tem centenas de buckets S3 e precisa identificar quais contêm dados pessoais para aplicar controles adicionais. Qual serviço deve ser usado?"
+    alternativas:
+      - texto: "Amazon Macie."
+        correta: true
+        explicacao: "Descoberta e classificação de dados sensíveis em S3 é exatamente o que o Macie faz."
+      - texto: "AWS KMS."
+        correta: false
+        explicacao: "KMS gerencia chaves; não inspeciona conteúdo."
+      - texto: "Amazon GuardDuty."
+        correta: false
+        explicacao: "GuardDuty detecta ameaças e atividade anômala; não classifica dados."
+      - texto: "AWS Config."
+        correta: false
+        explicacao: "Config avalia configuração de recursos, como 'bucket público'; não lê o conteúdo dos objetos."
+---
+
+## Em uma frase
+
+Na prova, "proteger dados" é escolher **quem controla a chave** (a AWS, o KMS
+com chave sua, ou você fora da AWS), garantir criptografia em repouso e em
+trânsito, e guardar segredo em serviço de segredo — com o mínimo de esforço que
+ainda cumpre o requisito.
+
+## O KMS e os três tipos de chave
+
+<Termo nome="KMS">AWS Key Management Service: cria e guarda chaves de criptografia e registra cada uso delas. Os serviços da AWS usam o KMS para criptografar em repouso.</Termo>
+
+O que a prova cobra não é o KMS em si, e sim **qual tipo de chave** atende ao
+cenário:
+
+<Comparativo
+  colunas={["Tipo", "Quem controla a política", "Rotação", "Auditoria por uso", "Uso entre contas"]}
+  linhas={[
+    ["Gerenciada pelo cliente", "Você", "Configurável; pode desabilitar a chave", "Sim, no CloudTrail", "Sim"],
+    ["Gerenciada pela AWS", "O serviço da AWS", "Automática", "Sim, no CloudTrail", "Não"],
+    ["De propriedade da AWS", "A AWS, invisível para você", "Automática", "Não aparece na sua conta", "Não"]
+  ]}
+/>
+
+A regra de leitura: "a empresa controla", "pode revogar", "compartilha com
+outra conta" apontam para chave gerenciada pelo cliente. "Só precisa estar
+criptografado" aceita qualquer uma, e a mais simples ganha.
+
+<Termo nome="criptografia de envelope">A chave do KMS não cifra o dado; cifra uma chave de dados, que cifra o dado. O KMS só manipula chaves pequenas, e o dado grande nunca sai do serviço onde está.</Termo>
+
+## S3: as opções de criptografia no servidor
+
+<Comparativo
+  colunas={["Opção", "Chave", "Controle e auditoria", "Quando é a resposta"]}
+  linhas={[
+    ["SSE-S3", "Da AWS", "Nenhum; é o padrão", "Sem exigência de controle de chave"],
+    ["SSE-KMS", "No KMS", "Política, rotação, CloudTrail por uso", "Controle, auditoria, revogação, acesso entre contas"],
+    ["SSE-C", "Sua, enviada a cada chamada", "A AWS não guarda a chave", "Exigência de que a AWS nunca armazene a chave"],
+    ["Cliente", "Sua, fora da AWS", "Total, e todo o trabalho é seu", "Dado precisa chegar já cifrado à AWS"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="O custo escondido do SSE-KMS">
+Cada leitura e gravação chama o KMS, e o KMS cobra por chamada. Num bucket com
+milhões de objetos pequenos, a fatura do KMS supera a do S3. A resposta da
+prova para "SSE-KMS com menor custo" é **S3 Bucket Keys**, que deriva uma chave
+por bucket e corta a maior parte das chamadas.
+</Callout>
+
+Em trânsito, a prova cobra uma coisa só: bucket policy com Deny quando
+`aws:SecureTransport` é `false`. Criptografia em trânsito no S3 é política, não
+configuração.
+
+## EBS e RDS: a decisão é na criação
+
+Criptografia de volume EBS e de instância RDS é escolhida quando o recurso
+nasce. Não existe "ligar depois". Para um recurso existente, o caminho é
+sempre o mesmo: snapshot, cópia do snapshot com criptografia habilitada, novo
+recurso a partir da cópia. A prova gosta de oferecer a alternativa "habilitar
+nas configurações do volume", que não existe.
+
+## Segredos: Secrets Manager ou Parameter Store
+
+Os dois guardam valores criptografados com o KMS. A diferença que decide a
+questão é **rotação**:
+
+- **Secrets Manager**: rotação automática integrada com RDS, Redshift e
+  DocumentDB, e rotação por Lambda para o resto. Custa por segredo. É a
+  resposta para "credencial de banco com troca automática".
+- **Parameter Store**: configuração e segredos (SecureString), hierárquico, sem
+  rotação nativa, nível padrão sem custo. É a resposta para "configuração
+  compartilhada" e para "menor custo" quando rotação não foi pedida.
+
+<Callout tipo="atencao" titulo="A alternativa que parece certa">
+"Parameter Store com uma Lambda que rotaciona" funciona. Mas é código seu para
+manter, e o enunciado que pede rotação quase sempre pede também "menor esforço
+operacional". O Secrets Manager já faz; a alternativa com Lambda é o distrator.
+</Callout>
+
+## Certificados e descoberta
+
+- **ACM** emite e renova certificados TLS públicos de graça, para usar em ELB,
+  CloudFront e API Gateway. Não dá para exportar a chave privada de
+  certificado público; se o cenário exige o certificado numa instância EC2, o
+  ACM público não serve.
+- **Macie** descobre e classifica dados sensíveis em buckets S3. Ele diz *onde*
+  há PII; não criptografa, não bloqueia, não move. A ação depois é sua.
+- **CloudHSM** é hardware dedicado. Só é a resposta quando o enunciado exige
+  isso explicitamente; do contrário, é o distrator caro que faz mais do que
+  foi pedido.
+
+## Como responder o cenário
+
+Classifique o pedido em três perguntas: **quem controla a chave** (AWS, KMS
+com chave sua, você fora), **precisa auditar ou revogar** (então KMS com chave
+do cliente), **é segredo com rotação** (Secrets Manager) ou **configuração**
+(Parameter Store). Com isso, sobra uma alternativa — e ela costuma ser a mais
+simples que ainda cumpre o requisito.

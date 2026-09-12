@@ -16,6 +16,8 @@ export type ModuloResumo = {
   oficial: boolean;
   /** "em-breve" é um módulo que a ementa nomeia e ainda não tem tema. */
   status?: "disponivel" | "em-breve";
+  /** Peso do domínio no exame, em trilha de certificação. */
+  pesoExame?: number;
   temas: { slug: string; titulo: string; minutos: number }[];
 };
 
@@ -100,7 +102,11 @@ export function ListaModulos({
                     <span className="text-sm font-medium text-[var(--text-2)]">
                       {modulo.titulo}
                     </span>
-                    {!modulo.oficial ? (
+                    {modulo.pesoExame ? (
+                      <span className="text-[11px] text-[var(--muted)]">
+                        {modulo.pesoExame}% da prova
+                      </span>
+                    ) : !modulo.oficial ? (
                       <span className="text-[11px] text-[var(--muted)]">
                         além da ementa oficial
                       </span>
@@ -166,7 +172,11 @@ export function ListaModulos({
                     >
                       {modulo.titulo}
                     </span>
-                    {!modulo.oficial ? (
+                    {modulo.pesoExame ? (
+                      <span className="text-[11px] text-[var(--muted)]">
+                        {modulo.pesoExame}% da prova
+                      </span>
+                    ) : !modulo.oficial ? (
                       <span className="text-[11px] text-[var(--muted)]">
                         além da ementa oficial
                       </span>

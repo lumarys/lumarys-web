@@ -113,7 +113,7 @@ test("o Hoje é da trilha em que a pessoa mexeu por último", async ({ page }) =
 
   // Com duas trilhas, dá para trocar; a pedida na URL vence o progresso.
   const seletor = page.getByRole("navigation", { name: "Trilha" });
-  await expect(seletor.getByRole("link")).toHaveCount(2);
+  await expect(seletor.getByRole("link")).toHaveCount(3);
   await page.goto("/hoje/?trilha=engenharia-de-dados");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Engenharia de Dados");
 });

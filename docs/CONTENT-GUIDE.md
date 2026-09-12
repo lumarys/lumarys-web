@@ -27,24 +27,25 @@ fora do formato derruba o build apontando o arquivo. Rode
 
 ## Frontmatter, campo a campo
 
-| Campo | Regra |
-| --- | --- |
-| `slug` | kebab-case sem acento, igual ao nome do arquivo |
-| `titulo` | como aparece no topo da página |
-| `resumo` | 40 a 320 caracteres, uma frase que responde "o que é isso". Vai para a meta description e para o `llms.txt` |
-| `minutos` | tempo realista de vídeo + leitura + prática (20 a 40 costuma ser o certo) |
-| `nivel` | `fundamental`, `intermediario` ou `avancado` |
-| `porQue` | metaaprendizado: por que este tema cai na sabatina |
-| `comoCai` | uma frase entre aspas, no jeito que o entrevistador pergunta |
-| `feynman` | desafio de explicar para alguém de negócio em 1 minuto |
-| `preRequisitos` | slugs de temas que convém ver antes (pode ser vazio) |
-| `errosComuns` | 2 a 8 itens; cada um é o erro **e** por que ele é erro |
-| `preTeste` | 1 a 3 perguntas, **exatamente uma alternativa correta cada**, com explicação em todas as alternativas |
-| `videos` | 1 principal + até 1 complementar, **só em português** |
-| `artigos` | 1 a 5, domínio precisa estar na allowlist de `scripts/verify-links.mjs` |
-| `flashcards` | 8 a 14 pares frente/verso |
-| `drills` | 1 a 2, cada um com 3+ itens |
-| `perguntas` | 3 a 10, com **pelo menos 2 orais** e **pelo menos 1 objetiva** |
+| Campo           | Regra                                                                                                                                                           |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `slug`          | kebab-case sem acento, igual ao nome do arquivo                                                                                                                 |
+| `titulo`        | como aparece no topo da página                                                                                                                                  |
+| `resumo`        | 40 a 320 caracteres, uma frase que responde "o que é isso". Vai para a meta description e para o `llms.txt`                                                     |
+| `minutos`       | tempo realista de vídeo + leitura + prática (20 a 40 costuma ser o certo)                                                                                       |
+| `nivel`         | `fundamental`, `intermediario` ou `avancado`                                                                                                                    |
+| `porQue`        | metaaprendizado: por que este tema cai na sabatina                                                                                                              |
+| `comoCai`       | uma frase entre aspas, no jeito que o entrevistador pergunta                                                                                                    |
+| `feynman`       | desafio de explicar para alguém de negócio em 1 minuto                                                                                                          |
+| `preRequisitos` | slugs de temas que convém ver antes (pode ser vazio)                                                                                                            |
+| `formato`       | `sabatina` (padrão, trilha de carreira) ou `prova` (trilha de certificação). Muda o que o lint exige em `perguntas`, abaixo                                     |
+| `errosComuns`   | 2 a 8 itens; cada um é o erro **e** por que ele é erro                                                                                                          |
+| `preTeste`      | 1 a 3 perguntas, **exatamente uma alternativa correta cada**, com explicação em todas as alternativas                                                           |
+| `videos`        | 1 principal + até 1 complementar, **só em português**                                                                                                           |
+| `artigos`       | 1 a 5, domínio precisa estar na allowlist de `scripts/verify-links.mjs`                                                                                         |
+| `flashcards`    | 8 a 14 pares frente/verso                                                                                                                                       |
+| `drills`        | 1 a 2, cada um com 3+ itens                                                                                                                                     |
+| `perguntas`     | 3 a 10. Em `formato: sabatina`: **pelo menos 2 orais** e **pelo menos 1 objetiva**. Em `formato: prova`: **pelo menos 3 objetivas de cenário**, orais opcionais |
 
 ### Vídeos: só entram depois de verificados
 
@@ -58,6 +59,16 @@ Nenhum vídeo entra por memória. O processo é:
 
 O campo `porQue` do vídeo diz **por que aquele vídeo** e o que observar nele —
 não repita o título.
+
+### Cenários de prova (`formato: prova`)
+
+Tema de certificação alimenta a prova simulada, que é objetiva e cronometrada.
+Cada questão é um parágrafo de cenário no estilo da AWS — empresa, aplicação,
+restrição e um pedido (MENOR custo, MENOR esforço operacional, MAIS
+resiliente) — e **toda alternativa** traz `explicacao`: por que a certa atende
+ao pedido do enunciado e por que cada errada não atende (serviço certo para o
+problema errado, ou acima/abaixo do requisito). Múltipla resposta diz quantas
+escolher no enunciado. Sem dumps: as questões são originais.
 
 ### Perguntas orais
 
@@ -87,12 +98,15 @@ Componentes permitidos (allowlist do lint, qualquer outro derruba o build):
 
 ```mdx
 <Callout tipo="dica|atencao|erro" titulo="Título curto">
-Texto do aviso.
+  Texto do aviso.
 </Callout>
 
 <Comparativo
   colunas={["A", "B", "C"]}
-  linhas={[["1", "2", "3"], ["4", "5", "6"]]}
+  linhas={[
+    ["1", "2", "3"],
+    ["4", "5", "6"],
+  ]}
 />
 
 <Passos itens={["Primeiro", "Segundo", "Terceiro"]} />
