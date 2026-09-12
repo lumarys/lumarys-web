@@ -1,0 +1,272 @@
+---
+slug: armazenamento-por-caso-de-uso
+titulo: "Armazenamento por caso de uso: S3, EBS, EFS e FSx"
+resumo: "A primeira decisão do Domínio 3: objeto, bloco ou arquivo. S3 para objeto e suas classes por padrão de acesso, EBS para disco de uma instância e seus tipos, EFS para arquivo compartilhado entre Linux, FSx para Windows e para cargas de alto desempenho."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Quase todo cenário de desempenho começa escolhendo onde o dado mora, e a prova monta as alternativas com os quatro serviços para ver se você sabe a diferença entre bloco, arquivo e objeto. Depois vem a segunda camada: qual classe do S3 e qual tipo de EBS, que é onde entra o custo."
+comoCai: "Várias instâncias precisam ler e gravar nos mesmos arquivos ao mesmo tempo. Qual serviço de armazenamento usar?"
+feynman: "Explique em um minuto a diferença entre um disco, uma pasta de rede e um balde de objetos, usando exemplos do dia a dia."
+preRequisitos: ["como-ler-uma-questao-saa"]
+errosComuns:
+  - "Propor EBS para compartilhar arquivos entre instâncias. Um volume EBS comum anexa a uma instância por vez; compartilhamento entre várias é EFS (Linux) ou FSx (Windows)."
+  - "Achar que S3 é sistema de arquivos. É armazenamento de objetos, acessado por API: não dá para montar e fazer a aplicação legada gravar nele como se fosse disco sem uma camada no meio."
+  - "Escolher classe de arquivamento para dado acessado com frequência. Glacier cobra recuperação e tem tempo de espera; economia de armazenamento vira custo de acesso."
+  - "Esquecer o mínimo de armazenamento das classes frias. Standard-IA e One Zone-IA cobram 30 dias mínimos e por objeto de 128 KB; para dado que muda toda hora, saem mais caras que a Standard."
+  - "Usar One Zone-IA para dado que não pode ser perdido. Ela vive em uma única zona: se a zona se perde, o dado se perde."
+  - "Trocar gp3 por io2 sem o enunciado pedir IOPS muito alta ou durabilidade de nível de banco crítico. gp3 já entrega IOPS e vazão configuráveis, e é mais barato."
+preTeste:
+  - enunciado: "Uma aplicação Linux roda em várias instâncias EC2 que precisam ler e gravar nos mesmos arquivos simultaneamente. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon EFS, montado em todas as instâncias."
+        correta: true
+        explicacao: "EFS é sistema de arquivos compartilhado via NFS, acessível por várias instâncias ao mesmo tempo e em várias zonas."
+      - texto: "Um volume EBS anexado às instâncias."
+        correta: false
+        explicacao: "Volume EBS comum anexa a uma instância por vez; não é o mecanismo de compartilhamento."
+      - texto: "Um bucket S3 montado como disco."
+        correta: false
+        explicacao: "S3 é armazenamento de objetos por API, não sistema de arquivos com semântica POSIX."
+  - enunciado: "Documentos precisam ficar disponíveis para acesso imediato nos primeiros 30 dias e depois raramente, mas devem ser guardados por 5 anos com o MENOR custo. Qual configuração atende?"
+    alternativas:
+      - texto: "S3 Standard com regra de ciclo de vida que move para uma classe de arquivamento após 30 dias."
+        correta: true
+        explicacao: "Paga o acesso frequente só enquanto ele existe e arquiva o resto automaticamente."
+      - texto: "S3 Standard durante os 5 anos."
+        correta: false
+        explicacao: "Paga acesso frequente por dado que quase ninguém lê."
+      - texto: "S3 Glacier Deep Archive desde o primeiro dia."
+        correta: false
+        explicacao: "Os 30 dias de acesso imediato pagariam recuperação a cada leitura e enfrentariam horas de espera."
+videos:
+  - id: K-XoBSdtiWo
+    publicadoEm: "2026-08-30"
+    titulo: "EBS vs EFS: Qual Escolher na AWS? | Armazenamento para SAA-C03"
+    canal: "Biano da TI"
+    duracao: 10
+    porQue: "Dez minutos sobre a comparação que a prova mais cobra, e já no recorte da SAA. Assista fixando uma frase: quantas instâncias podem usar cada um ao mesmo tempo."
+  - id: bJqpR8RpzIg
+    publicadoEm: "2026-08-04"
+    titulo: "Aula 09 - Armazenamento na AWS: Amazon S3, EBS, EFS e FSx"
+    canal: "Ka Solution Oficial"
+    duracao: 53
+    porQue: "Complementar e completo: entra também em S3 e FSx, que o primeiro vídeo não cobre. Longo; vale pelos trechos de classes do S3 e de quando FSx substitui EFS."
+artigos:
+  - titulo: "Amazon S3 storage classes"
+    url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+    fonte: "AWS"
+  - titulo: "Amazon EBS volume types"
+    url: "https://docs.aws.amazon.com/ebs/latest/userguide/ebs-volume-types.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Elastic File System?"
+    url: "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon FSx?"
+    url: "https://docs.aws.amazon.com/fsx/latest/WindowsGuide/what-is.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Bloco, arquivo e objeto, em uma linha cada."
+    verso: "Bloco (EBS): disco de uma instância, com sistema de arquivos por cima. Arquivo (EFS, FSx): pasta compartilhada por rede, várias instâncias ao mesmo tempo. Objeto (S3): chave e valor por API, com metadados, sem hierarquia real."
+  - frente: "EBS: quantas instâncias por volume?"
+    verso: "Uma, no caso comum. Multi-Attach existe para io1 e io2 com sistema de arquivos em cluster, e é exceção, não a resposta padrão."
+  - frente: "Os tipos de EBS que caem."
+    verso: "gp3 (SSD de uso geral, IOPS e vazão configuráveis à parte do tamanho), io1 e io2 (SSD de IOPS provisionada, para banco crítico), st1 (HDD de vazão, para log e big data sequencial), sc1 (HDD frio, o mais barato)."
+  - frente: "Por que gp3 costuma ser a resposta antes de io2?"
+    verso: "Porque entrega IOPS e vazão configuráveis sem depender do tamanho do volume, mais barato. io2 entra quando o enunciado pede IOPS muito alta ou durabilidade de nível de banco crítico."
+  - frente: "EFS, em uma linha."
+    verso: "Sistema de arquivos NFS gerenciado para Linux, elástico, acessível por várias instâncias e de várias zonas. Classes Standard e Infrequent Access, com ciclo de vida entre elas."
+  - frente: "FSx: as variantes e quando cada uma."
+    verso: "FSx for Windows File Server (SMB, Active Directory); FSx for Lustre (alto desempenho, HPC e aprendizado de máquina, integra com S3); FSx for NetApp ONTAP e OpenZFS para recursos específicos."
+  - frente: "A pista de FSx for Windows na prova."
+    verso: "Menção a SMB, a Active Directory ou a aplicação Windows. EFS não fala SMB."
+  - frente: "Classes do S3 por padrão de acesso."
+    verso: "Standard (frequente), Intelligent-Tiering (padrão desconhecido ou variável), Standard-IA (raro, mas imediato), One Zone-IA (raro e recriável), Glacier Instant, Flexible e Deep Archive (arquivamento, do mais rápido ao mais barato)."
+  - frente: "Quando Intelligent-Tiering é a resposta?"
+    verso: "Quando o padrão de acesso é desconhecido ou muda, e o enunciado não quer gestão manual. Ele move entre camadas sozinho, cobrando uma pequena taxa de monitoramento."
+  - frente: "As pegadinhas de custo das classes frias."
+    verso: "Mínimo de 30 dias de cobrança (90 e 180 nas de arquivamento), tamanho mínimo faturável por objeto e custo de recuperação. Dado pequeno e volátil fica mais caro na classe fria."
+  - frente: "Regra de ciclo de vida, em uma linha."
+    verso: "Move ou expira objetos por idade, sem intervenção. É a resposta padrão para 'acesso frequente no início e raro depois'."
+  - frente: "S3 é regional ou de zona?"
+    verso: "Regional: replica entre pelo menos três zonas por desenho. A exceção é One Zone-IA, que fica em uma só."
+  - frente: "Como ler um objeto do S3 sem sair da rede da AWS?"
+    verso: "Endpoint de gateway na VPC, sem custo. Ligado ao tema de rede: evita o NAT e a internet."
+  - frente: "Qual armazenamento para banco de dados em instância EC2?"
+    verso: "EBS, e o tipo depende da IOPS exigida: gp3 na maioria, io2 para crítico. Nunca EFS ou S3 como disco de banco."
+drills:
+  - titulo: "Bloco, arquivo ou objeto?"
+    instrucao: "Para cada necessidade, diga o serviço esperado na prova."
+    opcoes: ["S3", "EBS", "EFS", "FSx for Windows", "FSx for Lustre"]
+    itens:
+      - enunciado: "Disco de sistema operacional de uma instância EC2."
+        resposta: "EBS"
+        explicacao: "Bloco anexado a uma instância."
+      - enunciado: "Vinte instâncias Linux gravando no mesmo diretório ao mesmo tempo."
+        resposta: "EFS"
+        explicacao: "Arquivo compartilhado por NFS."
+      - enunciado: "Aplicação Windows legada que precisa de compartilhamento SMB integrado ao Active Directory."
+        resposta: "FSx for Windows"
+        explicacao: "SMB e AD são a assinatura do FSx for Windows."
+      - enunciado: "Guardar imagens de um site, servidas por CDN, com custo baixo."
+        resposta: "S3"
+        explicacao: "Objeto, com CloudFront na frente."
+      - enunciado: "Treinamento de modelo que lê terabytes do S3 com vazão altíssima."
+        resposta: "FSx for Lustre"
+        explicacao: "Sistema de arquivos de alto desempenho integrado ao S3."
+      - enunciado: "Log sequencial de grande volume, lido em varredura, com custo por GB baixo."
+        resposta: "EBS"
+        explicacao: "Volume st1, HDD otimizado para vazão sequencial."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa migra uma aplicação Windows legada para a AWS. A aplicação exige um compartilhamento de arquivos SMB integrado ao Active Directory corporativo, acessado por várias instâncias. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon FSx for Windows File Server."
+        correta: true
+        explicacao: "É o serviço de arquivos SMB gerenciado com integração nativa ao Active Directory. SMB e AD juntos são sua assinatura na prova."
+      - texto: "Amazon EFS montado nas instâncias."
+        correta: false
+        explicacao: "EFS fala NFS, para Linux; não atende clientes SMB do Windows."
+      - texto: "Volumes EBS anexados a cada instância."
+        correta: false
+        explicacao: "Cada instância teria o próprio disco, sem compartilhamento."
+      - texto: "Um bucket S3 com acesso por API."
+        correta: false
+        explicacao: "A aplicação legada espera um sistema de arquivos, não chamadas de API de objeto."
+  - tipo: unica
+    enunciado: "Uma equipe armazena registros no S3 cujo padrão de acesso é imprevisível: alguns objetos são lidos por meses, outros nunca mais. A empresa quer reduzir custo sem criar regras nem monitorar acessos. Qual classe de armazenamento atende?"
+    alternativas:
+      - texto: "S3 Intelligent-Tiering."
+        correta: true
+        explicacao: "Move objetos entre camadas de acesso automaticamente conforme o uso observado, que é exatamente o caso de padrão imprevisível sem gestão manual."
+      - texto: "S3 Standard-IA para todos os objetos."
+        correta: false
+        explicacao: "Os objetos lidos com frequência pagariam taxa de recuperação, e há mínimo de 30 dias."
+      - texto: "S3 Glacier Flexible Retrieval com restauração sob demanda."
+        correta: false
+        explicacao: "Introduz espera de minutos a horas para objetos que ainda são lidos com frequência."
+      - texto: "S3 One Zone-IA com uma regra de ciclo de vida por idade."
+        correta: false
+        explicacao: "Regra por idade não resolve padrão imprevisível, e One Zone reduz a durabilidade a uma zona."
+  - tipo: multipla
+    enunciado: "Um banco de dados autogerenciado em uma instância EC2 exige 40.000 IOPS sustentadas e latência consistente. Quais DUAS decisões de armazenamento são adequadas?"
+    alternativas:
+      - texto: "Usar um volume io2 com IOPS provisionadas para atender ao requisito de IOPS sustentadas."
+        correta: true
+        explicacao: "IOPS provisionada é o tipo desenhado para carga de banco exigente com latência previsível."
+      - texto: "Escolher um tipo de instância EC2 otimizado para EBS, para que a banda até o volume não seja o gargalo."
+        correta: true
+        explicacao: "O volume entrega a IOPS, mas a instância precisa ter vazão dedicada até o EBS; sem isso o gargalo muda de lugar."
+      - texto: "Armazenar os arquivos de dados em um sistema de arquivos EFS."
+        correta: false
+        explicacao: "EFS é arquivo compartilhado por rede; não é armazenamento adequado para arquivos de banco com essa exigência."
+      - texto: "Guardar os arquivos de dados em um bucket S3 e montá-lo como disco."
+        correta: false
+        explicacao: "S3 é objeto e não oferece semântica nem latência de bloco para banco."
+      - texto: "Usar um volume sc1 pelo custo por GB mais baixo."
+        correta: false
+        explicacao: "HDD frio tem IOPS baixa; falharia no requisito principal."
+  - tipo: unica
+    enunciado: "Arquivos de auditoria precisam ser guardados por 7 anos, praticamente nunca são lidos, e quando forem, a empresa aceita esperar até 12 horas pela recuperação. Qual classe oferece o MENOR custo de armazenamento?"
+    alternativas:
+      - texto: "S3 Glacier Deep Archive."
+        correta: true
+        explicacao: "É a classe de menor custo por GB, e a tolerância de horas na recuperação é exatamente o que ela pede em troca."
+      - texto: "S3 Glacier Instant Retrieval."
+        correta: false
+        explicacao: "Custa mais por GB, e a recuperação em milissegundos não foi exigida."
+      - texto: "S3 Standard-IA."
+        correta: false
+        explicacao: "Pensada para acesso raro mas imediato; mais cara por GB que as de arquivamento."
+      - texto: "S3 One Zone-IA."
+        correta: false
+        explicacao: "Mais barata que Standard-IA, mas ainda longe das de arquivamento, e reduz a durabilidade a uma zona, o que é ruim para auditoria."
+---
+
+## Em uma frase
+
+Antes de falar de desempenho, a prova pergunta **que tipo de armazenamento**:
+bloco (EBS) para o disco de uma instância, arquivo (EFS, FSx) para várias
+instâncias ao mesmo tempo, objeto (S3) para dado acessado por API. Depois vem a
+segunda camada: qual classe e qual tipo.
+
+## Os três tipos, e o que os separa
+
+<Comparativo
+  colunas={["", "Bloco (EBS)", "Arquivo (EFS, FSx)", "Objeto (S3)"]}
+  linhas={[
+    ["Como é acessado", "Disco cru, com sistema de arquivos por cima", "Montado por NFS ou SMB", "API por chave"],
+    ["Quantas instâncias", "Uma (Multi-Attach é exceção)", "Muitas, simultâneas", "Ilimitadas, por rede"],
+    ["Escopo", "Zona", "Região (EFS atravessa zonas)", "Região"],
+    ["Cresce sozinho?", "Não: você redimensiona", "Sim, elástico", "Sim, sem limite prático"],
+    ["Caso típico", "Disco de sistema, banco em EC2", "Diretório compartilhado, conteúdo de aplicação", "Mídia, backup, data lake, site estático"]
+  ]}
+/>
+
+A pergunta que resolve a maioria dos cenários: **quantas instâncias precisam
+escrever ao mesmo tempo?** Uma, é EBS. Várias, é EFS (Linux) ou FSx (Windows).
+Nenhuma, porque o acesso é por API, é S3.
+
+<Callout tipo="atencao" titulo="A pista de SMB e Active Directory">
+EFS fala **NFS**, ou seja, Linux. Quando o enunciado cita **SMB**, **Windows**
+ou **Active Directory**, a resposta é **FSx for Windows File Server**, e a
+alternativa com EFS é o distrator. Para alto desempenho de HPC e aprendizado
+de máquina com dados no S3, é **FSx for Lustre**.
+</Callout>
+
+## EBS: escolher o tipo pelo que o enunciado exige
+
+<Comparativo
+  colunas={["Tipo", "Mídia", "Para que", "Pista no enunciado"]}
+  linhas={[
+    ["gp3", "SSD", "Uso geral, com IOPS e vazão configuráveis", "Padrão; 'bom desempenho com custo equilibrado'"],
+    ["io1 e io2", "SSD", "IOPS provisionada alta e latência consistente", "'IOPS sustentadas', banco crítico, durabilidade maior"],
+    ["st1", "HDD", "Vazão sequencial", "Log, big data, varredura, custo por GB baixo"],
+    ["sc1", "HDD", "Acesso raro, o mais barato", "'Dado frio em bloco'"]
+  ]}
+/>
+
+O erro comum é subir para io2 sem necessidade: o **gp3** já permite configurar
+IOPS e vazão **independentes do tamanho** do volume, o que resolve a maioria
+dos casos por menos dinheiro. io2 entra quando o número exigido é alto demais
+ou quando o enunciado fala em durabilidade de banco crítico.
+
+<Callout tipo="dica" titulo="O gargalo que muda de lugar">
+Um volume io2 com 40.000 IOPS não entrega nada se a instância não tiver banda
+até o EBS. Cenários de banco exigente pedem **as duas coisas**: o tipo de
+volume certo e um tipo de instância otimizado para EBS. Em múltipla resposta,
+essa é a segunda alternativa correta.
+</Callout>
+
+## S3: a classe segue o padrão de acesso
+
+<Comparativo
+  colunas={["Classe", "Acesso", "Custo de armazenamento", "Quando é a resposta"]}
+  linhas={[
+    ["Standard", "Frequente, imediato", "Maior", "Dado quente"],
+    ["Intelligent-Tiering", "Automático", "Standard, com taxa de monitoramento", "Padrão desconhecido ou variável, sem gestão manual"],
+    ["Standard-IA", "Raro, imediato", "Menor", "Dado raro que ainda precisa responder na hora"],
+    ["One Zone-IA", "Raro, imediato, uma zona", "Menor ainda", "Dado raro e recriável"],
+    ["Glacier Instant", "Raro, milissegundos", "Baixo", "Arquivo que às vezes é consultado na hora"],
+    ["Glacier Flexible", "Minutos a horas", "Muito baixo", "Arquivamento com alguma urgência eventual"],
+    ["Deep Archive", "Horas", "O menor", "Retenção legal de anos, quase nunca lida"]
+  ]}
+/>
+
+Três pegadinhas de custo aparecem nas questões: **mínimo de dias faturados**
+(30 nas IA, 90 e 180 nas de arquivamento), **tamanho mínimo por objeto** e
+**custo de recuperação**. Por isso dado pequeno e volátil sai **mais caro** numa
+classe fria — a economia por GB é engolida pelos mínimos.
+
+E a regra que fecha quase todo cenário de custo de armazenamento: **ciclo de
+vida**. "Frequente nos primeiros 30 dias e raro depois" nunca é resolvido
+escolhendo uma classe só; é resolvido com uma transição automática.
+
+## Como responder o cenário
+
+Comece pelo tipo: **quantas instâncias escrevem juntas**. Depois pelo sistema
+operacional, se for arquivo: Linux é EFS, Windows é FSx. Se for S3, leia o
+**padrão de acesso** e o **tempo tolerado na recuperação**: os dois juntos
+apontam a classe, e "muda com o tempo" aponta ciclo de vida. Se for EBS, leia
+o **número de IOPS** e a palavra de custo antes de subir para io2.

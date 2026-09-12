@@ -36,8 +36,9 @@ test("a trilha mostra o exame: versão, formato, corte e o peso de cada domínio
   );
   await expect(page.getByText("30% da prova")).toBeVisible();
   await expect(page.getByText("26% da prova")).toBeVisible();
-  // Dois domínios publicados; desempenho e custo seguem em breve.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("24% da prova")).toBeVisible();
+  // Três domínios publicados; custo segue em breve.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(1);
   await expect(page.getByRole("link", { name: "Prova simulada" })).toBeVisible();
 });
 

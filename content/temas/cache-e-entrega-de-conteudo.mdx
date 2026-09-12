@@ -1,0 +1,252 @@
+---
+slug: cache-e-entrega-de-conteudo
+titulo: "Cache e entrega de conteúdo: CloudFront, ElastiCache e DAX"
+resumo: "Onde pôr cache para resolver latência e carga: CloudFront na borda para conteúdo que viaja pela internet, ElastiCache (Redis ou Memcached) entre a aplicação e o banco, DAX na frente do DynamoDB. A prova cobra qual camada resolve o sintoma descrito e a diferença entre Redis e Memcached."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Cache é a resposta de desempenho mais barata, e por isso aparece muito. A prova testa se você põe o cache na camada certa: usuário distante reclamando de lentidão é borda; banco sobrecarregado com a mesma consulta é cache de dados. Trocar as duas é o erro que a questão procura."
+comoCai: "O mesmo conjunto de consultas está sobrecarregando o banco e a latência subiu. Qual a solução de MENOR esforço?"
+feynman: "Explique em um minuto por que guardar uma cópia da resposta perto de quem pergunta resolve dois problemas ao mesmo tempo: a espera e a carga."
+preRequisitos: ["armazenamento-por-caso-de-uso"]
+errosComuns:
+  - "Usar CloudFront para aliviar consulta repetida ao banco vinda de dentro da aplicação. CloudFront é cache de borda para conteúdo entregue a clientes; consulta interna é ElastiCache ou DAX."
+  - "Usar ElastiCache para conteúdo estático de site global. Funciona, e ignora que o CloudFront já resolve isso na borda, mais perto do usuário e com menos código."
+  - "Escolher Memcached quando o enunciado pede persistência, réplicas, failover ou estruturas de dados. Isso é Redis; Memcached é cache simples, multithread e sem persistência."
+  - "Achar que DAX serve para qualquer banco. DAX é específico do DynamoDB; para relacional, é ElastiCache."
+  - "Esquecer que cache exige estratégia de invalidação. Dado que muda e cache sem TTL ou sem escrita explícita produz resposta velha, que é pior que resposta lenta."
+  - "Ignorar que o CloudFront também acelera conteúdo dinâmico e requisição não cacheável, pela rede da AWS até a origem."
+preTeste:
+  - enunciado: "Usuários de vários países reclamam de lentidão ao carregar imagens e arquivos estáticos de um site hospedado em uma única região. Qual solução resolve com o MENOR esforço?"
+    alternativas:
+      - texto: "Distribuir o conteúdo pelo Amazon CloudFront, com o bucket ou o balanceador como origem."
+        correta: true
+        explicacao: "Cache na borda, perto do usuário: resolve latência internacional sem mudar a arquitetura de origem."
+      - texto: "Criar réplicas da aplicação em cada país."
+        correta: false
+        explicacao: "Resolve com muito mais custo e complexidade do que uma CDN para conteúdo estático."
+      - texto: "Adicionar um cluster ElastiCache na região de origem."
+        correta: false
+        explicacao: "Alivia o banco, mas não reduz a distância física até o usuário."
+  - enunciado: "Uma aplicação faz repetidamente a mesma consulta pesada a um banco relacional, que está com CPU alta. A equipe quer reduzir a carga e a latência. Qual solução é adequada?"
+    alternativas:
+      - texto: "Introduzir um cache em memória com Amazon ElastiCache entre a aplicação e o banco."
+        correta: true
+        explicacao: "Cache de dados absorve leituras repetidas, tirando carga do banco e respondendo em microssegundos."
+      - texto: "Habilitar o Amazon DAX."
+        correta: false
+        explicacao: "DAX é cache específico do DynamoDB; não funciona com banco relacional."
+      - texto: "Colocar o CloudFront na frente do banco."
+        correta: false
+        explicacao: "CloudFront não é cache de banco; ele distribui conteúdo HTTP a clientes."
+videos:
+  - id: tsIe7ulevQI
+    publicadoEm: "2025-11-26"
+    titulo: "AWS Networking Módulo 6 | Entrega de Conteúdo com Amazon CloudFront"
+    canal: "PraticalCloudLab"
+    duracao: 42
+    porQue: "Explica como o CloudFront decide responder do cache ou ir à origem, que é o mecanismo por trás das questões. Assista atento ao comportamento de cache e ao TTL."
+  - id: fKFzKyMTMPs
+    publicadoEm: "2026-04-16"
+    titulo: "Distribuindo site com CloudFront (S3 Privado + OAC)"
+    canal: "Luiz Inhesta"
+    duracao: 19
+    porQue: "Complementar e prático: mostra o padrão que a prova adora, bucket privado servido pelo CloudFront com controle de acesso de origem. É o desenho certo para site estático seguro."
+artigos:
+  - titulo: "What is Amazon CloudFront?"
+    url: "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon ElastiCache?"
+    url: "https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html"
+    fonte: "AWS"
+  - titulo: "In-memory acceleration with DynamoDB Accelerator (DAX)"
+    url: "https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DAX.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "As três camadas de cache que a prova cobra."
+    verso: "Borda (CloudFront): conteúdo entregue a clientes pela internet. Dados (ElastiCache): entre aplicação e banco relacional. DynamoDB (DAX): cache específico do DynamoDB."
+  - frente: "CloudFront, em uma linha."
+    verso: "Rede de distribuição de conteúdo com pontos de presença no mundo todo: guarda a resposta perto do usuário, reduz latência e carga na origem, e integra WAF, Shield e certificados do ACM."
+  - frente: "O CloudFront só serve conteúdo estático?"
+    verso: "Não. Ele também acelera conteúdo dinâmico e requisições não cacheáveis, porque o trajeto até a origem passa pela rede da AWS, mais estável que a internet pública."
+  - frente: "O que é controle de acesso de origem (OAC)?"
+    verso: "Mecanismo que permite ao CloudFront ler um bucket S3 privado, mantendo o bucket fechado para acesso direto. É o desenho esperado para site estático seguro."
+  - frente: "Redis versus Memcached, em uma linha."
+    verso: "Redis: estruturas de dados, persistência, réplicas, failover, transações, pub/sub. Memcached: cache simples de chave e valor, multithread, sem persistência nem réplica."
+  - frente: "Quando a prova pede Redis?"
+    verso: "Quando cita persistência, alta disponibilidade ou failover, réplicas de leitura, listas, conjuntos, classificação, ou pub/sub."
+  - frente: "Quando a prova pede Memcached?"
+    verso: "Quando cita cache simples, de objeto, com necessidade de escalar horizontalmente e usar vários núcleos, sem persistência."
+  - frente: "DAX, em uma linha."
+    verso: "Cache em memória gerenciado, específico do DynamoDB, que reduz a leitura de milissegundos para microssegundos sem mudar o código da aplicação (usa a mesma API)."
+  - frente: "As duas estratégias de cache que caem."
+    verso: "Lazy loading (cache-aside): busca no banco só quando falta no cache; cache pode ficar velho. Write-through: grava no cache a cada escrita; cache sempre atualizado, com custo em toda escrita."
+  - frente: "Por que TTL é obrigatório numa estratégia de cache?"
+    verso: "Porque sem expiração o dado velho fica indefinidamente. TTL limita o tempo em que a resposta pode divergir da origem."
+  - frente: "Como invalidar conteúdo no CloudFront?"
+    verso: "Por invalidação explícita de caminho ou, melhor, por versionamento no nome do arquivo, que evita invalidação e cache velho ao mesmo tempo."
+  - frente: "Global Accelerator faz cache?"
+    verso: "Não. Ele melhora o caminho de rede até a aplicação e dá IPs estáticos, para tráfego não HTTP ou que não pode ser cacheado. CloudFront guarda conteúdo; Accelerator só acelera o trajeto."
+drills:
+  - titulo: "Qual cache resolve o sintoma?"
+    instrucao: "Para cada sintoma, diga onde pôr o cache."
+    opcoes: ["CloudFront", "ElastiCache Redis", "ElastiCache Memcached", "DAX"]
+    itens:
+      - enunciado: "Usuários na Ásia esperam segundos para carregar imagens de um site hospedado no Brasil."
+        resposta: "CloudFront"
+        explicacao: "Latência por distância: cache na borda."
+      - enunciado: "A mesma consulta SQL pesada é repetida milhares de vezes por minuto."
+        resposta: "ElastiCache Memcached"
+        explicacao: "Cache simples de resultado, sem exigência de persistência."
+      - enunciado: "Placar de jogo com ranking em tempo real e necessidade de sobreviver à falha do nó."
+        resposta: "ElastiCache Redis"
+        explicacao: "Estruturas ordenadas, réplicas e failover."
+      - enunciado: "Leituras no DynamoDB precisam cair para microssegundos sem alterar o código."
+        resposta: "DAX"
+        explicacao: "Cache do DynamoDB compatível com a mesma API."
+      - enunciado: "Sessões de usuário precisam sobreviver ao reinício do cache."
+        resposta: "ElastiCache Redis"
+        explicacao: "Persistência e réplicas."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação de comércio eletrônico usa DynamoDB e precisa que as leituras do catálogo caiam de milissegundos para microssegundos, sem reescrever a camada de acesso a dados. Qual solução atende?"
+    alternativas:
+      - texto: "Amazon DynamoDB Accelerator (DAX) na frente da tabela."
+        correta: true
+        explicacao: "DAX é o cache do próprio DynamoDB, compatível com a API existente: reduz a latência de leitura sem mudar o código."
+      - texto: "Amazon ElastiCache for Redis com lógica de cache na aplicação."
+        correta: false
+        explicacao: "Funciona, mas exige escrever a lógica de cache, o que o enunciado proíbe ao pedir que não se reescreva o acesso a dados."
+      - texto: "Amazon CloudFront na frente da API."
+        correta: false
+        explicacao: "Cache de borda para respostas HTTP; não acelera a leitura da tabela feita pela aplicação."
+      - texto: "Aumentar a capacidade de leitura provisionada da tabela."
+        correta: false
+        explicacao: "Aumenta a vazão suportada, não reduz a latência para microssegundos."
+  - tipo: unica
+    enunciado: "Um site estático servido a partir de um bucket S3 precisa ser entregue com baixa latência no mundo todo, e o bucket não pode ficar acessível diretamente pela internet. Qual configuração atende?"
+    alternativas:
+      - texto: "Uma distribuição do CloudFront com o bucket como origem e controle de acesso de origem, mantendo o bucket privado."
+        correta: true
+        explicacao: "É o desenho padrão: a borda entrega com baixa latência e só o CloudFront tem permissão de ler o bucket privado."
+      - texto: "Habilitar o site estático no S3 e tornar o bucket público."
+        correta: false
+        explicacao: "Viola o requisito de não expor o bucket e não resolve a latência internacional."
+      - texto: "Replicar o bucket para várias regiões e usar Route 53 por latência."
+        correta: false
+        explicacao: "Custa mais e entrega pior que a borda, além de multiplicar cópias do conteúdo."
+      - texto: "Colocar um Application Load Balancer na frente do bucket."
+        correta: false
+        explicacao: "Balanceador não tem o S3 como alvo dessa forma nem resolve distância geográfica."
+  - tipo: multipla
+    enunciado: "Uma aplicação precisa de um armazenamento em memória para sessões de usuário que sobrevivam à falha de um nó e que permita ordenação para um ranking em tempo real. Quais DUAS características apontam o mecanismo correto?"
+    alternativas:
+      - texto: "Necessidade de persistência e de réplicas com failover, que o Redis oferece."
+        correta: true
+        explicacao: "Sessão que não pode se perder exige persistência e alta disponibilidade, exclusivas do Redis no ElastiCache."
+      - texto: "Necessidade de estruturas de dados como conjuntos ordenados, disponíveis no Redis."
+        correta: true
+        explicacao: "Ranking em tempo real é o caso clássico de conjunto ordenado."
+      - texto: "Necessidade de um cache multithread e simples, que o Memcached oferece."
+        correta: false
+        explicacao: "Memcached não persiste nem replica; falharia nos dois requisitos."
+      - texto: "Necessidade de cache de borda próximo do usuário."
+        correta: false
+        explicacao: "Sessão e ranking são estado da aplicação, não conteúdo entregue pela borda."
+      - texto: "Necessidade de compatibilidade com a API do DynamoDB."
+        correta: false
+        explicacao: "Não há DynamoDB no cenário; isso apontaria DAX."
+  - tipo: unica
+    enunciado: "Depois de introduzir cache em uma aplicação, os usuários passaram a ver informações desatualizadas por longos períodos. Qual é a correção mais adequada?"
+    alternativas:
+      - texto: "Definir um TTL apropriado para as entradas e, nas escritas críticas, atualizar ou invalidar o cache."
+        correta: true
+        explicacao: "Cache sem política de expiração ou de atualização entrega dado velho indefinidamente; TTL e escrita explícita são o par que resolve."
+      - texto: "Aumentar o tamanho do cluster de cache."
+        correta: false
+        explicacao: "Mais memória guarda mais dado velho; não trata a validade."
+      - texto: "Remover o cache e voltar a consultar o banco sempre."
+        correta: false
+        explicacao: "Abre mão do ganho em vez de configurar a invalidação."
+      - texto: "Trocar Redis por Memcached."
+        correta: false
+        explicacao: "O motor não determina a validade do dado; a estratégia de cache determina."
+---
+
+## Em uma frase
+
+Cache resolve latência e carga ao mesmo tempo, e a questão é **em que camada**:
+**CloudFront** na borda para o que vai até o cliente, **ElastiCache** entre
+aplicação e banco, **DAX** só para o DynamoDB.
+
+## A camada certa para o sintoma
+
+<Comparativo
+  colunas={["Sintoma no enunciado", "Camada", "Serviço"]}
+  linhas={[
+    ["Usuários distantes reclamam de lentidão para carregar o site", "Borda", "CloudFront"],
+    ["O banco relacional está com CPU alta por consultas repetidas", "Dados", "ElastiCache"],
+    ["Leituras do DynamoDB precisam ficar em microssegundos", "Banco", "DAX"],
+    ["Tráfego não HTTP precisa de caminho de rede melhor e IP fixo", "Rede", "Global Accelerator (não é cache)"]
+  ]}
+/>
+
+O erro que a prova procura é trocar as duas primeiras linhas. CloudFront não
+alivia consulta feita por dentro da aplicação; ElastiCache não encurta a
+distância física até um usuário do outro lado do mundo.
+
+<Callout tipo="dica" titulo="CloudFront não é só estático">
+Ele também acelera conteúdo **dinâmico** e requisições não cacheáveis, porque o
+trecho entre a borda e a origem trafega pela rede da AWS, mais estável que a
+internet pública. Quando o enunciado diz "API lenta para usuários
+internacionais", CloudFront continua sendo resposta plausível.
+</Callout>
+
+## Redis ou Memcached
+
+<Comparativo
+  colunas={["", "Redis", "Memcached"]}
+  linhas={[
+    ["Estruturas de dados", "Listas, conjuntos, conjuntos ordenados, hash", "Só chave e valor"],
+    ["Persistência", "Sim", "Não"],
+    ["Réplicas e failover", "Sim, com Multi-AZ", "Não"],
+    ["Multithread", "Limitado", "Sim"],
+    ["Pista no enunciado", "Sessão que não pode se perder, ranking, pub/sub, alta disponibilidade", "Cache simples de objeto, escalar horizontalmente, usar vários núcleos"]
+  ]}
+/>
+
+A regra prática: se o enunciado mencionar **qualquer** requisito além de
+guardar e devolver um valor — persistir, replicar, ordenar, publicar — é Redis.
+
+<Termo nome="DAX">Cache em memória gerenciado, exclusivo do DynamoDB, compatível com a mesma API. Reduz leituras de milissegundos para microssegundos sem alterar o código da aplicação.</Termo>
+
+O "sem alterar o código" é a frase que a prova usa para separar DAX de
+ElastiCache num cenário de DynamoDB: com ElastiCache você teria de escrever a
+lógica de cache.
+
+## Estratégias, e o dado velho
+
+Cache sem política de validade produz resposta errada, que é pior que resposta
+lenta. Duas estratégias caem:
+
+- **Lazy loading** (cache-aside): busca no banco só quando falta no cache. Gasta
+  pouco, e o dado pode ficar velho até expirar.
+- **Write-through**: escreve no cache a cada escrita no banco. Cache sempre
+  atualizado, ao custo de latência e de guardar dado que talvez ninguém leia.
+
+As duas dependem de **TTL**. O cenário "usuários veem informação desatualizada"
+tem sempre a mesma resposta: TTL adequado mais invalidação ou atualização nas
+escritas críticas. Aumentar o cluster e trocar de motor são distratores.
+
+No CloudFront, o equivalente é **invalidação** de caminho — e a prática melhor,
+que a prova reconhece, é **versionar o nome do arquivo**, evitando invalidação e
+conteúdo velho de uma vez.
+
+## Como responder o cenário
+
+Pergunte **quem está esperando**: um usuário na internet (borda) ou a própria
+aplicação (dados). Depois, **qual banco**: DynamoDB puxa DAX, relacional puxa
+ElastiCache. Se for ElastiCache, procure qualquer requisito além de chave e
+valor para decidir Redis. E se o sintoma for dado desatualizado, a resposta é
+política de validade, não mais infraestrutura.

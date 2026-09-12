@@ -13,9 +13,8 @@ import type { Trilha } from "../types";
  * sorteia pelo peso. Os temas usam `formato: prova`: cenários objetivos em vez
  * de perguntas orais.
  *
- * Publicados: "como ler uma questão", o Domínio 1 (seis temas) e o Domínio 2
- * (seis temas). Os dois domínios restantes entram um por onda; o cronograma
- * cresce junto e o prazo-alvo com a trilha completa é 42 dias.
+ * Publicados: "como ler uma questão" e os Domínios 1, 2 e 3. Falta o Domínio 4
+ * (custo), que entra na próxima onda e fecha o cronograma.
  */
 export const awsSolutionsArchitectAssociate: Trilha = {
   slug: "aws-solutions-architect-associate",
@@ -27,7 +26,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
   resumo:
     "O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 130 minutos",
-  prazoSugeridoDias: 18,
+  prazoSugeridoDias: 26,
   status: "disponivel",
   exame: {
     codigo: "SAA-C03",
@@ -89,11 +88,17 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       titulo: "Arquiteturas de alto desempenho",
       resumo:
         "Escolher armazenamento, computação, cache, banco e rede pelo caso de uso: classes S3, tipos de EBS, famílias EC2, ElastiCache, DAX, Global Accelerator.",
-      status: "em-breve",
+      status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 3 · Design High-Performing Architectures",
       pesoExame: 24,
-      temas: [],
+      temas: [
+        "armazenamento-por-caso-de-uso",
+        "computacao-ec2-containers-e-serverless",
+        "cache-e-entrega-de-conteudo",
+        "banco-de-dados-por-caso-de-uso",
+        "rede-de-alto-desempenho",
+      ],
     },
     {
       slug: "custo",
@@ -216,7 +221,59 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       titulo: "Revisão leve",
       temas: [],
       revisao: ["como-funciona-a-prova", "seguras", "resilientes"],
-      nota: "Só cards vencidos e a folha de revisão. Os domínios de desempenho e custo entram em breve; o plano cresce com eles.",
+      nota: "Só cards vencidos e a folha de revisão. Amanhã começa o domínio de desempenho.",
+    },
+    {
+      dia: 19,
+      titulo: "Armazenamento por caso de uso",
+      temas: ["armazenamento-por-caso-de-uso"],
+      revisao: ["resilientes"],
+      nota: "Começa o domínio de 24%. A primeira pergunta de todo cenário aqui é: bloco, arquivo ou objeto?",
+    },
+    {
+      dia: 20,
+      titulo: "Computação: instâncias, containers e serverless",
+      temas: ["computacao-ec2-containers-e-serverless"],
+      revisao: ["resilientes"],
+    },
+    {
+      dia: 21,
+      titulo: "Cache e entrega de conteúdo",
+      temas: ["cache-e-entrega-de-conteudo"],
+      revisao: ["desempenho"],
+    },
+    {
+      dia: 22,
+      titulo: "Qual banco para qual caso de uso",
+      temas: ["banco-de-dados-por-caso-de-uso"],
+      revisao: ["desempenho"],
+    },
+    {
+      dia: 23,
+      titulo: "Rede de alto desempenho e híbrida",
+      temas: ["rede-de-alto-desempenho"],
+      revisao: ["desempenho"],
+    },
+    {
+      dia: 24,
+      titulo: "Cards e checkpoint do Domínio 3",
+      temas: [],
+      revisao: ["desempenho"],
+      nota: "Checkpoint do módulo. Abaixo de 70%, releia o tema apontado antes da prova de amanhã.",
+    },
+    {
+      dia: 25,
+      titulo: "Terceira prova simulada",
+      temas: [],
+      revisao: ["seguras", "resilientes", "desempenho"],
+      nota: "Três domínios no banco. Compare o resultado por domínio com o das provas anteriores e ataque o mais fraco.",
+    },
+    {
+      dia: 26,
+      titulo: "Revisão leve",
+      temas: [],
+      revisao: ["como-funciona-a-prova", "desempenho"],
+      nota: "Só cards vencidos e a folha de revisão. O domínio de custo entra em breve; o plano cresce com ele.",
     },
   ],
 };

@@ -37,6 +37,14 @@ Página: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/
 - [Desacoplamento: SQS, SNS e EventBridge](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/desacoplamento-com-filas-e-eventos/): Como a prova transforma 'o sistema caiu junto' em arquitetura resiliente: fila do SQS para absorver pico e tolerar consumidor fora do ar, tópico do SNS para entregar a vários assinantes, EventBridge para rotear eventos por regra. Mais fila FIFO, fila de mensagens mortas e o padrão de leque.
 - [Estratégias de recuperação de desastres: RTO, RPO e as quatro opções](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/resilientes/estrategias-de-recuperacao-de-desastres/): O eixo que organiza o fim do Domínio 2: RTO é quanto tempo você pode ficar parado, RPO é quanto dado pode perder, e as quatro estratégias (backup e restauração, luz-piloto, espera morna e multissítio) são pontos numa reta entre custo baixo e recuperação rápida. A prova dá os números e espera a escolha.
 
+### Arquiteturas de alto desempenho
+
+- [Armazenamento por caso de uso: S3, EBS, EFS e FSx](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/armazenamento-por-caso-de-uso/): A primeira decisão do Domínio 3: objeto, bloco ou arquivo. S3 para objeto e suas classes por padrão de acesso, EBS para disco de uma instância e seus tipos, EFS para arquivo compartilhado entre Linux, FSx para Windows e para cargas de alto desempenho.
+- [Computação: famílias EC2, containers e serverless](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/computacao-ec2-containers-e-serverless/): A segunda decisão do Domínio 3: em que rodar. As famílias de instância EC2 e o que cada letra significa, quando Lambda e seus limites, e a escolha entre ECS e EKS com EC2 ou Fargate. A prova dá a pista no perfil da carga e na palavra sobre esforço operacional.
+- [Cache e entrega de conteúdo: CloudFront, ElastiCache e DAX](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/cache-e-entrega-de-conteudo/): Onde pôr cache para resolver latência e carga: CloudFront na borda para conteúdo que viaja pela internet, ElastiCache (Redis ou Memcached) entre a aplicação e o banco, DAX na frente do DynamoDB. A prova cobra qual camada resolve o sintoma descrito e a diferença entre Redis e Memcached.
+- [Qual banco para qual caso de uso](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/banco-de-dados-por-caso-de-uso/): O cenário em que a prova descreve o dado e pergunta o serviço: relacional gerenciado (RDS, Aurora), chave-valor de escala (DynamoDB), data warehouse (Redshift), busca e log (OpenSearch), grafo (Neptune), documento (DocumentDB), série temporal e ledger. A pista está na forma da consulta.
+- [Rede de alto desempenho e conectividade híbrida](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/rede-de-alto-desempenho/): As peças que a prova usa quando o gargalo é a rede: Global Accelerator para melhorar o trajeto de tráfego não cacheável, Direct Connect para ligação dedicada ao data center, VPN como alternativa barata, Transit Gateway para muitas VPCs, e os grupos de posicionamento dentro da zona.
+
 ## Engenharia de Analytics
 
 A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.
@@ -1589,6 +1597,551 @@ Multi-AZ, está respondendo outra pergunta.
 - Confundir espera morna com multissítio. Espera morna mantém uma versão reduzida rodando de verdade, que é escalada no desastre; multissítio atende tráfego nas duas regiões o tempo todo.
 - Esquecer que a região secundária precisa de mais que dados: AMIs, modelos de lançamento, configuração, limites de serviço e a zona de DNS também precisam existir lá.
 - Confiar num plano de DR nunca testado. A prova cobra teste periódico, e o custo real de um RTO baixo inclui o ensaio.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Armazenamento por caso de uso: S3, EBS, EFS e FSx
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas de alto desempenho
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/armazenamento-por-caso-de-uso/
+Tempo estimado: 40 minutos · Nível: intermediario
+
+**Resumo.** A primeira decisão do Domínio 3: objeto, bloco ou arquivo. S3 para objeto e suas classes por padrão de acesso, EBS para disco de uma instância e seus tipos, EFS para arquivo compartilhado entre Linux, FSx para Windows e para cargas de alto desempenho.
+
+**Por que cai na prova.** Quase todo cenário de desempenho começa escolhendo onde o dado mora, e a prova monta as alternativas com os quatro serviços para ver se você sabe a diferença entre bloco, arquivo e objeto. Depois vem a segunda camada: qual classe do S3 e qual tipo de EBS, que é onde entra o custo.
+
+**Como o entrevistador pergunta.** "Várias instâncias precisam ler e gravar nos mesmos arquivos ao mesmo tempo. Qual serviço de armazenamento usar?"
+
+## Em uma frase
+
+Antes de falar de desempenho, a prova pergunta **que tipo de armazenamento**:
+bloco (EBS) para o disco de uma instância, arquivo (EFS, FSx) para várias
+instâncias ao mesmo tempo, objeto (S3) para dado acessado por API. Depois vem a
+segunda camada: qual classe e qual tipo.
+
+## Os três tipos, e o que os separa
+
+<Comparativo
+  colunas={["", "Bloco (EBS)", "Arquivo (EFS, FSx)", "Objeto (S3)"]}
+  linhas={[
+    ["Como é acessado", "Disco cru, com sistema de arquivos por cima", "Montado por NFS ou SMB", "API por chave"],
+    ["Quantas instâncias", "Uma (Multi-Attach é exceção)", "Muitas, simultâneas", "Ilimitadas, por rede"],
+    ["Escopo", "Zona", "Região (EFS atravessa zonas)", "Região"],
+    ["Cresce sozinho?", "Não: você redimensiona", "Sim, elástico", "Sim, sem limite prático"],
+    ["Caso típico", "Disco de sistema, banco em EC2", "Diretório compartilhado, conteúdo de aplicação", "Mídia, backup, data lake, site estático"]
+  ]}
+/>
+
+A pergunta que resolve a maioria dos cenários: **quantas instâncias precisam
+escrever ao mesmo tempo?** Uma, é EBS. Várias, é EFS (Linux) ou FSx (Windows).
+Nenhuma, porque o acesso é por API, é S3.
+
+<Callout tipo="atencao" titulo="A pista de SMB e Active Directory">
+EFS fala **NFS**, ou seja, Linux. Quando o enunciado cita **SMB**, **Windows**
+ou **Active Directory**, a resposta é **FSx for Windows File Server**, e a
+alternativa com EFS é o distrator. Para alto desempenho de HPC e aprendizado
+de máquina com dados no S3, é **FSx for Lustre**.
+</Callout>
+
+## EBS: escolher o tipo pelo que o enunciado exige
+
+<Comparativo
+  colunas={["Tipo", "Mídia", "Para que", "Pista no enunciado"]}
+  linhas={[
+    ["gp3", "SSD", "Uso geral, com IOPS e vazão configuráveis", "Padrão; 'bom desempenho com custo equilibrado'"],
+    ["io1 e io2", "SSD", "IOPS provisionada alta e latência consistente", "'IOPS sustentadas', banco crítico, durabilidade maior"],
+    ["st1", "HDD", "Vazão sequencial", "Log, big data, varredura, custo por GB baixo"],
+    ["sc1", "HDD", "Acesso raro, o mais barato", "'Dado frio em bloco'"]
+  ]}
+/>
+
+O erro comum é subir para io2 sem necessidade: o **gp3** já permite configurar
+IOPS e vazão **independentes do tamanho** do volume, o que resolve a maioria
+dos casos por menos dinheiro. io2 entra quando o número exigido é alto demais
+ou quando o enunciado fala em durabilidade de banco crítico.
+
+<Callout tipo="dica" titulo="O gargalo que muda de lugar">
+Um volume io2 com 40.000 IOPS não entrega nada se a instância não tiver banda
+até o EBS. Cenários de banco exigente pedem **as duas coisas**: o tipo de
+volume certo e um tipo de instância otimizado para EBS. Em múltipla resposta,
+essa é a segunda alternativa correta.
+</Callout>
+
+## S3: a classe segue o padrão de acesso
+
+<Comparativo
+  colunas={["Classe", "Acesso", "Custo de armazenamento", "Quando é a resposta"]}
+  linhas={[
+    ["Standard", "Frequente, imediato", "Maior", "Dado quente"],
+    ["Intelligent-Tiering", "Automático", "Standard, com taxa de monitoramento", "Padrão desconhecido ou variável, sem gestão manual"],
+    ["Standard-IA", "Raro, imediato", "Menor", "Dado raro que ainda precisa responder na hora"],
+    ["One Zone-IA", "Raro, imediato, uma zona", "Menor ainda", "Dado raro e recriável"],
+    ["Glacier Instant", "Raro, milissegundos", "Baixo", "Arquivo que às vezes é consultado na hora"],
+    ["Glacier Flexible", "Minutos a horas", "Muito baixo", "Arquivamento com alguma urgência eventual"],
+    ["Deep Archive", "Horas", "O menor", "Retenção legal de anos, quase nunca lida"]
+  ]}
+/>
+
+Três pegadinhas de custo aparecem nas questões: **mínimo de dias faturados**
+(30 nas IA, 90 e 180 nas de arquivamento), **tamanho mínimo por objeto** e
+**custo de recuperação**. Por isso dado pequeno e volátil sai **mais caro** numa
+classe fria — a economia por GB é engolida pelos mínimos.
+
+E a regra que fecha quase todo cenário de custo de armazenamento: **ciclo de
+vida**. "Frequente nos primeiros 30 dias e raro depois" nunca é resolvido
+escolhendo uma classe só; é resolvido com uma transição automática.
+
+## Como responder o cenário
+
+Comece pelo tipo: **quantas instâncias escrevem juntas**. Depois pelo sistema
+operacional, se for arquivo: Linux é EFS, Windows é FSx. Se for S3, leia o
+**padrão de acesso** e o **tempo tolerado na recuperação**: os dois juntos
+apontam a classe, e "muda com o tempo" aponta ciclo de vida. Se for EBS, leia
+o **número de IOPS** e a palavra de custo antes de subir para io2.
+
+## Erros comuns
+
+- Propor EBS para compartilhar arquivos entre instâncias. Um volume EBS comum anexa a uma instância por vez; compartilhamento entre várias é EFS (Linux) ou FSx (Windows).
+- Achar que S3 é sistema de arquivos. É armazenamento de objetos, acessado por API: não dá para montar e fazer a aplicação legada gravar nele como se fosse disco sem uma camada no meio.
+- Escolher classe de arquivamento para dado acessado com frequência. Glacier cobra recuperação e tem tempo de espera; economia de armazenamento vira custo de acesso.
+- Esquecer o mínimo de armazenamento das classes frias. Standard-IA e One Zone-IA cobram 30 dias mínimos e por objeto de 128 KB; para dado que muda toda hora, saem mais caras que a Standard.
+- Usar One Zone-IA para dado que não pode ser perdido. Ela vive em uma única zona: se a zona se perde, o dado se perde.
+- Trocar gp3 por io2 sem o enunciado pedir IOPS muito alta ou durabilidade de nível de banco crítico. gp3 já entrega IOPS e vazão configuráveis, e é mais barato.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Computação: famílias EC2, containers e serverless
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas de alto desempenho
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/computacao-ec2-containers-e-serverless/
+Tempo estimado: 40 minutos · Nível: intermediario
+
+**Resumo.** A segunda decisão do Domínio 3: em que rodar. As famílias de instância EC2 e o que cada letra significa, quando Lambda e seus limites, e a escolha entre ECS e EKS com EC2 ou Fargate. A prova dá a pista no perfil da carga e na palavra sobre esforço operacional.
+
+**Por que cai na prova.** É a escolha que aparece em cenário de desempenho e reaparece em custo. A prova testa duas coisas: ler o perfil da carga (CPU, memória, rede, GPU) para achar a família, e saber quando o serverless resolve — o que quase sempre é a resposta quando o enunciado diz 'menor esforço operacional' e a carga é intermitente.
+
+**Como o entrevistador pergunta.** "A carga é intermitente, dura poucos segundos por execução e a equipe não quer gerenciar servidores. Onde rodar?"
+
+## Em uma frase
+
+A escolha de computação sai de duas leituras: o **perfil da carga** (CPU,
+memória, GPU, armazenamento local) aponta a família da instância; a **forma da
+carga** (intermitente ou contínua, curta ou longa) e a palavra sobre **esforço
+operacional** decidem entre instância, container e serverless.
+
+## As famílias, pela letra
+
+<Comparativo
+  colunas={["Letra", "Privilegia", "Pista no enunciado"]}
+  linhas={[
+    ["T", "Carga intermitente, com créditos de CPU", "'Baixo uso a maior parte do tempo', desenvolvimento, site pequeno"],
+    ["M", "Equilíbrio entre CPU e memória", "Aplicação de propósito geral, servidor de aplicação"],
+    ["C", "CPU", "Cálculo, codificação de mídia, jogo, lote intensivo"],
+    ["R e X", "Memória", "Banco em memória, cache grande, análise que carrega tudo na RAM"],
+    ["I e D", "Armazenamento local rápido", "Banco NoSQL de alta IOPS, data warehouse local"],
+    ["G e P", "GPU", "Aprendizado de máquina, renderização, inferência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O crédito da família T">
+Instâncias T acumulam crédito de CPU quando ociosas e gastam quando precisam de
+mais. Sob carga **sustentada**, o crédito acaba e a instância é limitada — ou
+cobra excedente no modo ilimitado. Quando o cenário descreve carga constante e
+a alternativa oferece T pelo preço baixo, é distrator.
+</Callout>
+
+## Instância, container ou função
+
+<Comparativo
+  colunas={["", "EC2", "Containers (ECS/EKS)", "Lambda"]}
+  linhas={[
+    ["Você gerencia", "Sistema operacional e tudo acima", "A imagem e a definição da tarefa", "Só o código"],
+    ["Duração", "Ilimitada", "Ilimitada", "Até 15 minutos"],
+    ["Cobrança", "Por tempo ligado", "Por tarefa (Fargate) ou pela instância", "Por invocação e duração"],
+    ["Escala", "Auto Scaling", "Serviço e Auto Scaling de tarefas", "Concorrência automática"],
+    ["Pista", "Acesso ao SO, driver, licença, legado", "Já está em contêiner, microsserviços", "Evento, curto, intermitente, 'menor esforço'"]
+  ]}
+/>
+
+O limite de **15 minutos** da Lambda é o detalhe que a prova usa para eliminar
+a alternativa mais óbvia: o cenário descreve "sem servidor" e a duração passa do
+teto, então a resposta é **Fargate**, não Lambda.
+
+<Termo nome="Fargate">Modo de execução sem servidor para containers. Não é orquestrador: tanto o ECS quanto o EKS podem rodar suas tarefas em Fargate, deixando de gerenciar as instâncias que as hospedam.</Termo>
+
+## ECS ou EKS
+
+- **ECS**: orquestrador da própria AWS, mais simples, integrado a IAM,
+  balanceador e CloudWatch sem tradução. É a resposta de **menor esforço**.
+- **EKS**: Kubernetes gerenciado. Entra quando o enunciado cita **Kubernetes**,
+  manifestos existentes, operadores ou portabilidade entre nuvens.
+
+Sem menção a Kubernetes, escolher EKS é pagar complexidade que ninguém pediu —
+e a prova trata isso como erro.
+
+<Callout tipo="dica" titulo="Início a frio">
+"A primeira chamada depois de um tempo parado é lenta" é o sintoma de **início
+a frio** da Lambda, e a resposta é **concorrência provisionada**. Aumentar
+memória reduz a duração, não o início a frio; migrar para EC2 resolve com
+esforço que o enunciado não autorizou.
+</Callout>
+
+## Grupos de posicionamento
+
+Aparecem pouco, mas quando aparecem são decisivos:
+
+- **Cluster**: instâncias juntas na mesma zona, para latência mínima entre elas.
+  É a resposta de computação de alto desempenho com nós conversando.
+- **Spread**: instâncias em hardware distinto, para reduzir falha correlacionada.
+  É resiliência, não desempenho.
+- **Partition**: grupos isolados, para sistemas distribuídos grandes como HDFS
+  e Cassandra.
+
+Cluster e spread são opostos: um aproxima, o outro separa. O enunciado escolhe
+pelo que pede, latência ou tolerância a falha.
+
+## Como responder o cenário
+
+Leia o **perfil** para a família e a **forma** para o modelo. Depois confira
+dois tetos que eliminam alternativas sozinhos: 15 minutos na Lambda e créditos
+na família T. Por fim, aplique a palavra: "menor esforço operacional" empurra
+para Fargate e Lambda; "acesso ao sistema operacional" e "licença" puxam de
+volta para EC2.
+
+## Erros comuns
+
+- Escolher Lambda para processamento longo. O tempo máximo de execução é de 15 minutos; carga que passa disso é container ou instância.
+- Achar que EKS é sempre melhor que ECS. EKS traz Kubernetes e o ecossistema dele, com mais complexidade; ECS é mais simples e integrado. Sem exigência de Kubernetes no enunciado, ECS é a resposta de menor esforço.
+- Confundir Fargate com ECS ou EKS. Fargate não é orquestrador: é o modo de execução sem gerenciar instâncias, que tanto ECS quanto EKS podem usar.
+- Ignorar a família da instância. A letra indica o perfil: M para equilíbrio, C para computação, R e X para memória, T para carga intermitente com créditos, G e P para GPU, I e D para armazenamento local.
+- Esquecer os créditos das instâncias da família T. Elas acumulam e gastam crédito de CPU; carga sustentada esgota o crédito e a instância passa a andar devagar ou a cobrar por excedente.
+- Propor Lambda para carga constante e alta. Cobrança por invocação e duração compensa em carga intermitente; para carga previsível e contínua, instância com compromisso costuma sair mais barata.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Cache e entrega de conteúdo: CloudFront, ElastiCache e DAX
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas de alto desempenho
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/cache-e-entrega-de-conteudo/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Onde pôr cache para resolver latência e carga: CloudFront na borda para conteúdo que viaja pela internet, ElastiCache (Redis ou Memcached) entre a aplicação e o banco, DAX na frente do DynamoDB. A prova cobra qual camada resolve o sintoma descrito e a diferença entre Redis e Memcached.
+
+**Por que cai na prova.** Cache é a resposta de desempenho mais barata, e por isso aparece muito. A prova testa se você põe o cache na camada certa: usuário distante reclamando de lentidão é borda; banco sobrecarregado com a mesma consulta é cache de dados. Trocar as duas é o erro que a questão procura.
+
+**Como o entrevistador pergunta.** "O mesmo conjunto de consultas está sobrecarregando o banco e a latência subiu. Qual a solução de MENOR esforço?"
+
+## Em uma frase
+
+Cache resolve latência e carga ao mesmo tempo, e a questão é **em que camada**:
+**CloudFront** na borda para o que vai até o cliente, **ElastiCache** entre
+aplicação e banco, **DAX** só para o DynamoDB.
+
+## A camada certa para o sintoma
+
+<Comparativo
+  colunas={["Sintoma no enunciado", "Camada", "Serviço"]}
+  linhas={[
+    ["Usuários distantes reclamam de lentidão para carregar o site", "Borda", "CloudFront"],
+    ["O banco relacional está com CPU alta por consultas repetidas", "Dados", "ElastiCache"],
+    ["Leituras do DynamoDB precisam ficar em microssegundos", "Banco", "DAX"],
+    ["Tráfego não HTTP precisa de caminho de rede melhor e IP fixo", "Rede", "Global Accelerator (não é cache)"]
+  ]}
+/>
+
+O erro que a prova procura é trocar as duas primeiras linhas. CloudFront não
+alivia consulta feita por dentro da aplicação; ElastiCache não encurta a
+distância física até um usuário do outro lado do mundo.
+
+<Callout tipo="dica" titulo="CloudFront não é só estático">
+Ele também acelera conteúdo **dinâmico** e requisições não cacheáveis, porque o
+trecho entre a borda e a origem trafega pela rede da AWS, mais estável que a
+internet pública. Quando o enunciado diz "API lenta para usuários
+internacionais", CloudFront continua sendo resposta plausível.
+</Callout>
+
+## Redis ou Memcached
+
+<Comparativo
+  colunas={["", "Redis", "Memcached"]}
+  linhas={[
+    ["Estruturas de dados", "Listas, conjuntos, conjuntos ordenados, hash", "Só chave e valor"],
+    ["Persistência", "Sim", "Não"],
+    ["Réplicas e failover", "Sim, com Multi-AZ", "Não"],
+    ["Multithread", "Limitado", "Sim"],
+    ["Pista no enunciado", "Sessão que não pode se perder, ranking, pub/sub, alta disponibilidade", "Cache simples de objeto, escalar horizontalmente, usar vários núcleos"]
+  ]}
+/>
+
+A regra prática: se o enunciado mencionar **qualquer** requisito além de
+guardar e devolver um valor — persistir, replicar, ordenar, publicar — é Redis.
+
+<Termo nome="DAX">Cache em memória gerenciado, exclusivo do DynamoDB, compatível com a mesma API. Reduz leituras de milissegundos para microssegundos sem alterar o código da aplicação.</Termo>
+
+O "sem alterar o código" é a frase que a prova usa para separar DAX de
+ElastiCache num cenário de DynamoDB: com ElastiCache você teria de escrever a
+lógica de cache.
+
+## Estratégias, e o dado velho
+
+Cache sem política de validade produz resposta errada, que é pior que resposta
+lenta. Duas estratégias caem:
+
+- **Lazy loading** (cache-aside): busca no banco só quando falta no cache. Gasta
+  pouco, e o dado pode ficar velho até expirar.
+- **Write-through**: escreve no cache a cada escrita no banco. Cache sempre
+  atualizado, ao custo de latência e de guardar dado que talvez ninguém leia.
+
+As duas dependem de **TTL**. O cenário "usuários veem informação desatualizada"
+tem sempre a mesma resposta: TTL adequado mais invalidação ou atualização nas
+escritas críticas. Aumentar o cluster e trocar de motor são distratores.
+
+No CloudFront, o equivalente é **invalidação** de caminho — e a prática melhor,
+que a prova reconhece, é **versionar o nome do arquivo**, evitando invalidação e
+conteúdo velho de uma vez.
+
+## Como responder o cenário
+
+Pergunte **quem está esperando**: um usuário na internet (borda) ou a própria
+aplicação (dados). Depois, **qual banco**: DynamoDB puxa DAX, relacional puxa
+ElastiCache. Se for ElastiCache, procure qualquer requisito além de chave e
+valor para decidir Redis. E se o sintoma for dado desatualizado, a resposta é
+política de validade, não mais infraestrutura.
+
+## Erros comuns
+
+- Usar CloudFront para aliviar consulta repetida ao banco vinda de dentro da aplicação. CloudFront é cache de borda para conteúdo entregue a clientes; consulta interna é ElastiCache ou DAX.
+- Usar ElastiCache para conteúdo estático de site global. Funciona, e ignora que o CloudFront já resolve isso na borda, mais perto do usuário e com menos código.
+- Escolher Memcached quando o enunciado pede persistência, réplicas, failover ou estruturas de dados. Isso é Redis; Memcached é cache simples, multithread e sem persistência.
+- Achar que DAX serve para qualquer banco. DAX é específico do DynamoDB; para relacional, é ElastiCache.
+- Esquecer que cache exige estratégia de invalidação. Dado que muda e cache sem TTL ou sem escrita explícita produz resposta velha, que é pior que resposta lenta.
+- Ignorar que o CloudFront também acelera conteúdo dinâmico e requisição não cacheável, pela rede da AWS até a origem.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Qual banco para qual caso de uso
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas de alto desempenho
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/banco-de-dados-por-caso-de-uso/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** O cenário em que a prova descreve o dado e pergunta o serviço: relacional gerenciado (RDS, Aurora), chave-valor de escala (DynamoDB), data warehouse (Redshift), busca e log (OpenSearch), grafo (Neptune), documento (DocumentDB), série temporal e ledger. A pista está na forma da consulta.
+
+**Por que cai na prova.** A AWS tem um banco para cada forma de dado, e a prova aposta que você vai escolher pelo nome conhecido em vez do caso de uso. Reconhecer a assinatura de cada um — 'relacionamentos entre entidades' é grafo, 'agregação sobre bilhões de linhas' é data warehouse — elimina três alternativas de imediato.
+
+**Como o entrevistador pergunta.** "A consulta precisa percorrer relacionamentos entre pessoas e contas a várias profundidades. Qual banco?"
+
+## Em uma frase
+
+A AWS tem um banco por **forma de dado e de consulta**, e a questão descreve a
+forma sem dizer o nome. Reconhecer a assinatura — chave, agregação, texto,
+relacionamento, documento, série, ledger — é o que separa a resposta certa das
+três plausíveis.
+
+## O mapa
+
+<Comparativo
+  colunas={["Serviço", "Forma do dado", "Assinatura no enunciado"]}
+  linhas={[
+    ["RDS, Aurora", "Relacional", "Transação, junção, consulta ad hoc, compatibilidade com MySQL ou PostgreSQL"],
+    ["DynamoDB", "Chave-valor e documento", "Acesso por chave conhecida, escala massiva, milissegundo de um dígito"],
+    ["Redshift", "Colunar analítico", "Agregação sobre bilhões de linhas, relatório histórico, BI"],
+    ["OpenSearch", "Índice de busca", "Texto livre, relevância, log, painel de observabilidade"],
+    ["Neptune", "Grafo", "Relacionamentos, caminhos, 'amigos dos amigos', fraude por conexão"],
+    ["DocumentDB", "Documento", "Compatível com MongoDB, JSON com consultas ricas"],
+    ["Timestream", "Série temporal", "Métrica, sensor, IoT, janela de tempo"],
+    ["QLDB", "Ledger", "Histórico imutável, verificável criptograficamente"],
+    ["Athena", "SQL sobre o S3", "Dados já no S3, consulta ocasional, sem infraestrutura"]
+  ]}
+/>
+
+## Os pares que a prova confunde
+
+**Relacional × DynamoDB.** A pergunta que decide é se o **padrão de acesso é
+conhecido**. DynamoDB exige escolher a chave de partição sabendo como o dado
+será lido; em troca, entrega escala e latência constantes. Consulta ad hoc
+imprevisível, com junções, é relacional.
+
+**Redshift × Athena.** Os dois fazem SQL analítico. Athena consulta o que **já
+está no S3**, sem provisionar nada, cobrando por dado lido — ideal para consulta
+ocasional. Redshift entra quando há consulta frequente, muitos usuários e
+necessidade de desempenho previsível, e vale manter um cluster.
+
+**DocumentDB × DynamoDB.** Os dois guardam documentos. DocumentDB é
+**compatível com MongoDB**, com consultas ricas e índices sobre campos
+arbitrários; DynamoDB é chave-valor com índices que você planeja. A palavra
+"MongoDB" no enunciado resolve.
+
+<Callout tipo="atencao" titulo="Transacional não é analítico">
+O distrator mais repetido é oferecer **Redshift** para carga transacional ou
+**RDS** para agregação sobre bilhões de linhas. Colunar e paralelo serve para
+somar muito; por linha e transacional serve para gravar e ler pouco, muitas
+vezes. Quando o enunciado cita relatório histórico, é a primeira família;
+quando cita pedido, cadastro e pagamento, é a segunda.
+</Callout>
+
+## Aurora, e quando ele é a resposta
+
+Aurora aparece como versão "melhor" do relacional em três situações que o
+enunciado nomeia:
+
+- **Compatível com MySQL ou PostgreSQL** com desempenho maior e armazenamento
+  que cresce sozinho em três zonas.
+- **Muita leitura**: até 15 réplicas com endpoint de leitura próprio.
+- **Carga intermitente ou imprevisível**: **Aurora Serverless** ajusta a
+  capacidade sozinho, e é a resposta quando manter instância dimensionada para
+  o pico seria desperdício.
+
+<Callout tipo="dica" titulo="O banco em memória não é fonte de verdade">
+ElastiCache guarda sessão, cache e ranking — e a prova espera que o dado tenha
+origem em outro lugar. Quando a alternativa propõe ElastiCache como
+armazenamento principal de dado que não pode se perder, ela está errada, mesmo
+com Redis persistente.
+</Callout>
+
+## Como responder o cenário
+
+Leia a **consulta**, não o volume: por chave (DynamoDB), com junções
+(relacional), somando muito (Redshift), por texto (OpenSearch), por caminho
+entre entidades (Neptune), por janela de tempo (Timestream), com prova de
+imutabilidade (QLDB). Depois confira **onde o dado já está**: se está no S3 e a
+consulta é ocasional, Athena elimina toda a discussão sobre qual banco usar.
+
+## Erros comuns
+
+- Usar Redshift para carga transacional. Ele é colunar e massivamente paralelo, desenhado para agregação analítica; transação frequente e pequena é RDS ou DynamoDB.
+- Usar DynamoDB quando o enunciado exige consultas relacionais variadas e junções. DynamoDB brilha com padrões de acesso conhecidos e chave bem escolhida; consulta ad hoc arbitrária é relacional.
+- Achar que OpenSearch é banco primário. Ele é motor de busca e análise de log; o dado costuma ter uma fonte de verdade em outro lugar.
+- Propor um banco relacional para percorrer relacionamentos profundos. Cada nível vira uma junção; grafo (Neptune) foi feito para isso.
+- Confundir DocumentDB com DynamoDB. DocumentDB é compatível com MongoDB, para documentos com consultas ricas; DynamoDB é chave-valor de escala massiva.
+- Esquecer o Athena. Consultar dados que já estão no S3, sem carregar em banco nenhum, é Athena; propor Redshift nesse caso adiciona uma etapa que o enunciado não pediu.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Rede de alto desempenho e conectividade híbrida
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas de alto desempenho
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/desempenho/rede-de-alto-desempenho/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** As peças que a prova usa quando o gargalo é a rede: Global Accelerator para melhorar o trajeto de tráfego não cacheável, Direct Connect para ligação dedicada ao data center, VPN como alternativa barata, Transit Gateway para muitas VPCs, e os grupos de posicionamento dentro da zona.
+
+**Por que cai na prova.** Fecha o Domínio 3 e reaparece em custo e resiliência. A prova cobra três decisões: acelerar o trajeto de rede sem cache (Global Accelerator, que quase todo mundo confunde com CloudFront), ligar o data center à AWS (Direct Connect ou VPN, e a combinação dos dois), e conectar muitas VPCs sem virar uma teia.
+
+**Como o entrevistador pergunta.** "O tráfego é TCP, não pode ser cacheado, e usuários distantes reclamam de latência instável. O que usar?"
+
+## Em uma frase
+
+Quando o gargalo é rede, a prova separa três perguntas: **melhorar o trajeto**
+de quem vem de fora (Global Accelerator, e CloudFront quando há cache),
+**ligar o data center** (Direct Connect ou VPN), e **conectar muitas redes**
+(Transit Gateway em vez de peering).
+
+## Global Accelerator e CloudFront: o par mais confundido
+
+<Comparativo
+  colunas={["", "CloudFront", "Global Accelerator"]}
+  linhas={[
+    ["O que faz", "Guarda conteúdo na borda", "Melhora o caminho até a aplicação"],
+    ["Protocolo", "HTTP e HTTPS", "TCP e UDP"],
+    ["Endereço", "Nome DNS da distribuição", "Dois IPs anycast estáticos"],
+    ["Cacheia?", "Sim, é o ponto", "Não guarda nada"],
+    ["Pista no enunciado", "Conteúdo estático, site, mídia, API cacheável", "UDP, jogo, VoIP, IP fixo global, conteúdo não cacheável"]
+  ]}
+/>
+
+Os dois usam a rede da borda da AWS, e é por isso que confundem. A distinção
+que decide a questão: **CloudFront guarda uma cópia da resposta**; **Global
+Accelerator só melhora a estrada**. Tráfego que não pode ser cacheado —
+sessão de jogo, protocolo binário, conteúdo personalizado por usuário — é do
+Accelerator.
+
+Ele também comuta entre regiões **mais rápido que o DNS**, porque o IP não
+muda: não há TTL para esperar. Essa é a segunda pista, e liga este tema ao
+Route 53 do Domínio 2.
+
+## Ligar o data center: Direct Connect e VPN
+
+<Termo nome="Direct Connect">Conexão dedicada entre o data center e a AWS, sem passar pela internet, com banda consistente e latência previsível. Provisão leva semanas ou meses, e não é criptografada por padrão.</Termo>
+
+<Termo nome="VPN site a site">Túnel criptografado sobre a internet. Sobe em horas, custa pouco e herda a variabilidade da internet pública.</Termo>
+
+<Comparativo
+  colunas={["Requisito do enunciado", "Resposta"]}
+  linhas={[
+    ["'Em poucos dias', 'rapidamente'", "VPN"],
+    ["'Banda consistente', 'latência previsível', 'terabytes por dia'", "Direct Connect"],
+    ["'Criptografado em trânsito' sobre Direct Connect", "VPN por cima do Direct Connect (ou MACsec)"],
+    ["'Sem ponto único de falha' no enlace", "Duas conexões Direct Connect, ou uma com VPN de contingência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Direct Connect não é criptografado">
+É privado, e privado não é o mesmo que cifrado. Quando a política exige
+criptografia em trânsito, a alternativa certa acrescenta uma VPN sobre o
+enlace. "Confiar na criptografia nativa do Direct Connect" é uma premissa
+falsa que aparece como distrator.
+</Callout>
+
+## Conectar muitas VPCs
+
+Peering de VPC liga duas redes e **não é transitivo**: A com B e B com C não
+faz A falar com C. Com N VPCs, o número de conexões cresce ao quadrado. A
+partir de algumas redes, a resposta é **Transit Gateway**: cada VPC anexa uma
+vez, o roteamento vira estrela, e tabelas de rotas segmentam quem fala com
+quem — inclusive ligando as VPNs e o Direct Connect no mesmo lugar.
+
+**PrivateLink** resolve outro problema: expor **um serviço** por IP privado,
+sem conectar as redes. Quando o enunciado fala em consumir um serviço de outra
+conta ou de um fornecedor, é PrivateLink; quando fala em redes que precisam se
+comunicar, é Transit Gateway.
+
+## Dentro da zona: posicionamento e rede aprimorada
+
+- **Cluster**: instâncias próximas, para latência mínima e vazão máxima entre
+  nós do mesmo cálculo.
+- **Spread**: instâncias em hardware distinto, para reduzir falha correlacionada.
+- **Partition**: grupos isolados, para sistemas distribuídos grandes.
+
+Somados à **rede aprimorada** (ENA, e EFA para computação de alto desempenho),
+fecham os cenários de comunicação interna. Cluster e spread respondem a
+perguntas opostas: um quer velocidade entre os nós, o outro quer que eles não
+caiam juntos.
+
+<Callout tipo="dica" titulo="A rede também é custo">
+Transferência entre zonas e saída para a internet são cobradas, e o NAT cobra
+por GB. Muita decisão de rede que parece de desempenho reaparece no Domínio 4
+como decisão de custo — endpoint de gateway em vez de NAT é o exemplo que
+serve aos dois.
+</Callout>
+
+## Como responder o cenário
+
+Pergunte se o tráfego **pode ser cacheado**: sim aponta CloudFront, não aponta
+Global Accelerator. Para híbrido, leia o **prazo** e a **consistência de
+banda**: pressa é VPN, volume e previsibilidade são Direct Connect, e
+criptografia exige a VPN por cima. Para muitas redes, conte as VPCs: mais que
+um punhado significa Transit Gateway. E dentro da zona, cluster para
+aproximar, spread para separar.
+
+## Erros comuns
+
+- Confundir Global Accelerator com CloudFront. CloudFront guarda conteúdo na borda; Global Accelerator não guarda nada, ele melhora o caminho até a aplicação e dá IPs anycast estáticos. Tráfego não HTTP ou não cacheável é Accelerator.
+- Achar que Direct Connect é criptografado por padrão. É uma conexão dedicada e privada, mas sem criptografia; quando o enunciado exige criptografia em trânsito, a resposta acrescenta uma VPN por cima, ou MACsec.
+- Propor Direct Connect para uma necessidade imediata. A provisão leva semanas ou meses; quando o enunciado diz 'rapidamente' ou 'em dias', a resposta é VPN, eventualmente como ponte até o Direct Connect ficar pronto.
+- Usar peering de VPC para muitas VPCs. Peering não é transitivo e o número de conexões cresce ao quadrado; a partir de algumas VPCs, a resposta é Transit Gateway.
+- Esquecer que uma única conexão Direct Connect é ponto único de falha. Alta disponibilidade exige duas conexões, idealmente em locais diferentes, ou uma VPN de contingência.
+- Misturar grupo de posicionamento cluster com spread. Cluster aproxima para latência mínima; spread separa para reduzir falha correlacionada. São objetivos opostos.
 
 ## Perguntas de sabatina e respostas-modelo
 

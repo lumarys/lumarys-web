@@ -1,0 +1,259 @@
+---
+slug: banco-de-dados-por-caso-de-uso
+titulo: "Qual banco para qual caso de uso"
+resumo: "O cenário em que a prova descreve o dado e pergunta o serviço: relacional gerenciado (RDS, Aurora), chave-valor de escala (DynamoDB), data warehouse (Redshift), busca e log (OpenSearch), grafo (Neptune), documento (DocumentDB), série temporal e ledger. A pista está na forma da consulta."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "A AWS tem um banco para cada forma de dado, e a prova aposta que você vai escolher pelo nome conhecido em vez do caso de uso. Reconhecer a assinatura de cada um — 'relacionamentos entre entidades' é grafo, 'agregação sobre bilhões de linhas' é data warehouse — elimina três alternativas de imediato."
+comoCai: "A consulta precisa percorrer relacionamentos entre pessoas e contas a várias profundidades. Qual banco?"
+feynman: "Explique em um minuto por que uma consulta de 'amigos dos amigos' é lenta num banco relacional e natural num banco de grafo."
+preRequisitos: ["bancos-de-dados-resilientes"]
+errosComuns:
+  - "Usar Redshift para carga transacional. Ele é colunar e massivamente paralelo, desenhado para agregação analítica; transação frequente e pequena é RDS ou DynamoDB."
+  - "Usar DynamoDB quando o enunciado exige consultas relacionais variadas e junções. DynamoDB brilha com padrões de acesso conhecidos e chave bem escolhida; consulta ad hoc arbitrária é relacional."
+  - "Achar que OpenSearch é banco primário. Ele é motor de busca e análise de log; o dado costuma ter uma fonte de verdade em outro lugar."
+  - "Propor um banco relacional para percorrer relacionamentos profundos. Cada nível vira uma junção; grafo (Neptune) foi feito para isso."
+  - "Confundir DocumentDB com DynamoDB. DocumentDB é compatível com MongoDB, para documentos com consultas ricas; DynamoDB é chave-valor de escala massiva."
+  - "Esquecer o Athena. Consultar dados que já estão no S3, sem carregar em banco nenhum, é Athena; propor Redshift nesse caso adiciona uma etapa que o enunciado não pediu."
+preTeste:
+  - enunciado: "Uma empresa precisa gerar relatórios que agregam bilhões de linhas históricas de vendas, com consultas analíticas complexas. Qual serviço é adequado?"
+    alternativas:
+      - texto: "Amazon Redshift."
+        correta: true
+        explicacao: "Data warehouse colunar e paralelo, desenhado exatamente para agregação sobre grandes volumes históricos."
+      - texto: "Amazon DynamoDB."
+        correta: false
+        explicacao: "Chave-valor de escala: ótimo para acesso por chave, ruim para agregação analítica ampla."
+      - texto: "Amazon RDS em uma instância grande."
+        correta: false
+        explicacao: "Transacional por linha; agregação sobre bilhões de linhas satura mesmo instâncias grandes."
+  - enunciado: "Um sistema antifraude precisa descobrir se duas contas estão ligadas por uma cadeia de transferências de até seis níveis. Qual banco atende melhor?"
+    alternativas:
+      - texto: "Amazon Neptune."
+        correta: true
+        explicacao: "Banco de grafo: percorrer relacionamentos a várias profundidades é a operação nativa dele."
+      - texto: "Amazon RDS com PostgreSQL."
+        correta: false
+        explicacao: "Cada nível vira uma junção; a seis níveis a consulta fica impraticável."
+      - texto: "Amazon OpenSearch Service."
+        correta: false
+        explicacao: "Busca textual e análise de log; não percorre grafo."
+videos:
+  - id: 6X3H_HxIW0g
+    publicadoEm: "2025-04-05"
+    titulo: "AWS DynamoDB | O que é | Como funciona | Tabelas, Itens e Atributos"
+    canal: "Descomplicando Cloud"
+    duracao: 7
+    porQue: "Sete minutos para entender o modelo de chave-valor, que é o banco menos familiar para quem vem do relacional. Assista pensando em que tipo de consulta ele NÃO atende bem; é isso que a prova testa."
+  - id: x6Gy6JtJuko
+    publicadoEm: "2026-08-11"
+    titulo: "Aula 11 - Bancos de Dados NoSQL DynamoDB | AWS Learning Challenge 2026"
+    canal: "Ka Solution Oficial"
+    duracao: 70
+    porQue: "Complementar e longo: vale pelos trechos de modelagem e de chave de partição, que explicam por que DynamoDB exige conhecer o padrão de acesso antes de criar a tabela."
+artigos:
+  - titulo: "AWS databases"
+    url: "https://aws.amazon.com/products/databases/"
+    fonte: "AWS"
+  - titulo: "What is Amazon Redshift?"
+    url: "https://docs.aws.amazon.com/redshift/latest/mgmt/welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Neptune?"
+    url: "https://docs.aws.amazon.com/neptune/latest/userguide/intro.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Athena?"
+    url: "https://docs.aws.amazon.com/athena/latest/ug/what-is.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "RDS, em uma linha."
+    verso: "Relacional gerenciado (MySQL, PostgreSQL, MariaDB, Oracle, SQL Server): transação, junção e consulta ad hoc, com backup, patch e Multi-AZ pela AWS."
+  - frente: "Aurora, em uma linha."
+    verso: "Relacional compatível com MySQL e PostgreSQL, com armazenamento distribuído em três zonas, até 15 réplicas e versão sem servidor que escala por demanda."
+  - frente: "DynamoDB, em uma linha."
+    verso: "Chave-valor e documento, com latência de milissegundo em qualquer escala. Exige conhecer o padrão de acesso para escolher a chave de partição."
+  - frente: "Redshift, em uma linha."
+    verso: "Data warehouse colunar e massivamente paralelo, para agregação analítica sobre grandes volumes. Spectrum consulta dados direto no S3."
+  - frente: "OpenSearch Service, em uma linha."
+    verso: "Busca textual, análise de log e observabilidade, com painéis. Costuma consumir dado que tem fonte de verdade em outro lugar."
+  - frente: "Neptune, em uma linha."
+    verso: "Banco de grafo para relacionamentos: rede social, recomendação, detecção de fraude, grafo de conhecimento."
+  - frente: "DocumentDB, em uma linha."
+    verso: "Banco de documentos compatível com MongoDB, para JSON com consultas ricas e índices, quando a aplicação já usa esse modelo."
+  - frente: "ElastiCache entra na lista de bancos?"
+    verso: "Como armazenamento em memória, sim: sessão, cache, ranking. Não é fonte de verdade durável na resposta esperada pela prova."
+  - frente: "Timestream e QLDB, em uma linha cada."
+    verso: "Timestream: série temporal, para métricas e IoT. QLDB: registro imutável e verificável criptograficamente, para histórico que precisa provar que não foi alterado."
+  - frente: "Athena, em uma linha."
+    verso: "Consulta SQL sobre dados no S3, sem servidor e sem carregar nada, cobrando por dado lido. Particionar e usar formato colunar reduz o custo."
+  - frente: "A pista de 'padrão de acesso conhecido' no enunciado."
+    verso: "Aponta DynamoDB: ele exige saber como o dado será consultado para modelar chave e índices. 'Consulta ad hoc imprevisível' aponta relacional."
+  - frente: "Aurora Serverless, quando é a resposta?"
+    verso: "Carga relacional intermitente ou imprevisível, em que manter instância dimensionada seria desperdício. Escala capacidade automaticamente."
+  - frente: "Como escolher entre Redshift e Athena?"
+    verso: "Athena para consulta eventual sobre dado já no S3, sem infraestrutura. Redshift quando há consulta analítica frequente, muitos usuários e necessidade de desempenho previsível."
+drills:
+  - titulo: "Qual banco a forma do dado pede?"
+    instrucao: "Para cada descrição, diga o serviço esperado."
+    opcoes: ["RDS ou Aurora", "DynamoDB", "Redshift", "OpenSearch", "Neptune", "Athena"]
+    itens:
+      - enunciado: "Carrinho de compras com milhões de acessos por segundo, sempre buscado pelo identificador do usuário."
+        resposta: "DynamoDB"
+        explicacao: "Padrão de acesso conhecido, por chave, em escala."
+      - enunciado: "Relatórios que cruzam cinco anos de vendas por região e categoria."
+        resposta: "Redshift"
+        explicacao: "Agregação analítica sobre volume histórico."
+      - enunciado: "Busca com texto livre e correção de digitação num catálogo."
+        resposta: "OpenSearch"
+        explicacao: "Busca textual com relevância."
+      - enunciado: "Sistema de pedidos com transações, junções e consultas variadas."
+        resposta: "RDS ou Aurora"
+        explicacao: "Relacional transacional."
+      - enunciado: "Recomendação por 'quem comprou isso também comprou', percorrendo conexões."
+        resposta: "Neptune"
+        explicacao: "Travessia de grafo."
+      - enunciado: "Analista precisa rodar uma consulta pontual sobre arquivos já no S3."
+        resposta: "Athena"
+        explicacao: "SQL sobre S3, sem carregar nem provisionar."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação de jogos precisa registrar e ler o estado de sessão de milhões de jogadores simultâneos, sempre pelo identificador do jogador, com latência de milissegundo de um dígito e escala elástica. Qual banco atende?"
+    alternativas:
+      - texto: "Amazon DynamoDB."
+        correta: true
+        explicacao: "Acesso por chave conhecida, escala massiva e latência de milissegundo são exatamente o perfil do DynamoDB."
+      - texto: "Amazon RDS for PostgreSQL com réplicas de leitura."
+        correta: false
+        explicacao: "Escalaria leitura, mas não atinge esse perfil de escrita e latência com milhões de sessões simultâneas."
+      - texto: "Amazon Redshift."
+        correta: false
+        explicacao: "Data warehouse analítico; não serve leitura e escrita transacional de sessão."
+      - texto: "Amazon Neptune."
+        correta: false
+        explicacao: "Grafo; o acesso descrito é por chave simples, sem relacionamentos a percorrer."
+  - tipo: unica
+    enunciado: "Um time de dados precisa executar consultas SQL ocasionais sobre arquivos Parquet já armazenados no S3, sem provisionar nem manter infraestrutura, pagando apenas pelo que consultar. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon Athena."
+        correta: true
+        explicacao: "SQL direto sobre o S3, sem servidor, cobrando por dado lido. É o caso de uso literal do serviço."
+      - texto: "Amazon Redshift com um cluster dedicado."
+        correta: false
+        explicacao: "Exige provisionar e manter cluster, contrariando o enunciado para consultas ocasionais."
+      - texto: "Amazon RDS com importação dos arquivos."
+        correta: false
+        explicacao: "Adiciona uma etapa de carga e um banco para manter, que o enunciado quer evitar."
+      - texto: "Amazon OpenSearch Service."
+        correta: false
+        explicacao: "Busca e análise de log, com ingestão própria; não consulta Parquet no S3 por SQL."
+  - tipo: multipla
+    enunciado: "Uma equipe avalia migrar uma aplicação com carga relacional intermitente, que fica ociosa à noite e tem picos imprevisíveis durante o dia. Quais DUAS opções são adequadas?"
+    alternativas:
+      - texto: "Amazon Aurora Serverless, que ajusta a capacidade conforme a demanda."
+        correta: true
+        explicacao: "Desenhado para carga intermitente e imprevisível, sem manter instância dimensionada para o pico."
+      - texto: "Amazon RDS com uma instância dimensionada e escala vertical programada para os horários conhecidos."
+        correta: false
+        explicacao: "Os picos são imprevisíveis; agendamento não cobre o que não tem horário."
+      - texto: "Amazon Aurora com réplicas de leitura e escala automática de réplicas."
+        correta: true
+        explicacao: "Absorve picos de leitura elasticamente mantendo o modelo relacional; é a alternativa válida quando a carga é majoritariamente de leitura."
+      - texto: "Migrar para o Amazon DynamoDB mantendo as consultas SQL existentes."
+        correta: false
+        explicacao: "DynamoDB não executa SQL relacional com junções; a migração exigiria remodelar tudo."
+      - texto: "Amazon Redshift para absorver o pico."
+        correta: false
+        explicacao: "Data warehouse analítico não substitui carga transacional relacional."
+  - tipo: unica
+    enunciado: "Uma instituição precisa manter um histórico de transações que possa ser verificado criptograficamente para provar que nenhum registro foi alterado depois de gravado. Qual serviço atende diretamente a esse requisito?"
+    alternativas:
+      - texto: "Amazon QLDB."
+        correta: true
+        explicacao: "Registro imutável e verificável criptograficamente é exatamente a proposta do QLDB."
+      - texto: "Amazon RDS com backups e trilha do CloudTrail."
+        correta: false
+        explicacao: "Registra e audita ações, mas não oferece prova criptográfica de imutabilidade dos registros."
+      - texto: "Amazon DynamoDB com fluxos habilitados."
+        correta: false
+        explicacao: "Fluxos capturam mudanças, sem garantia criptográfica de que o histórico não foi alterado."
+      - texto: "Amazon Neptune."
+        correta: false
+        explicacao: "Grafo de relacionamentos; não tem relação com imutabilidade verificável."
+---
+
+## Em uma frase
+
+A AWS tem um banco por **forma de dado e de consulta**, e a questão descreve a
+forma sem dizer o nome. Reconhecer a assinatura — chave, agregação, texto,
+relacionamento, documento, série, ledger — é o que separa a resposta certa das
+três plausíveis.
+
+## O mapa
+
+<Comparativo
+  colunas={["Serviço", "Forma do dado", "Assinatura no enunciado"]}
+  linhas={[
+    ["RDS, Aurora", "Relacional", "Transação, junção, consulta ad hoc, compatibilidade com MySQL ou PostgreSQL"],
+    ["DynamoDB", "Chave-valor e documento", "Acesso por chave conhecida, escala massiva, milissegundo de um dígito"],
+    ["Redshift", "Colunar analítico", "Agregação sobre bilhões de linhas, relatório histórico, BI"],
+    ["OpenSearch", "Índice de busca", "Texto livre, relevância, log, painel de observabilidade"],
+    ["Neptune", "Grafo", "Relacionamentos, caminhos, 'amigos dos amigos', fraude por conexão"],
+    ["DocumentDB", "Documento", "Compatível com MongoDB, JSON com consultas ricas"],
+    ["Timestream", "Série temporal", "Métrica, sensor, IoT, janela de tempo"],
+    ["QLDB", "Ledger", "Histórico imutável, verificável criptograficamente"],
+    ["Athena", "SQL sobre o S3", "Dados já no S3, consulta ocasional, sem infraestrutura"]
+  ]}
+/>
+
+## Os pares que a prova confunde
+
+**Relacional × DynamoDB.** A pergunta que decide é se o **padrão de acesso é
+conhecido**. DynamoDB exige escolher a chave de partição sabendo como o dado
+será lido; em troca, entrega escala e latência constantes. Consulta ad hoc
+imprevisível, com junções, é relacional.
+
+**Redshift × Athena.** Os dois fazem SQL analítico. Athena consulta o que **já
+está no S3**, sem provisionar nada, cobrando por dado lido — ideal para consulta
+ocasional. Redshift entra quando há consulta frequente, muitos usuários e
+necessidade de desempenho previsível, e vale manter um cluster.
+
+**DocumentDB × DynamoDB.** Os dois guardam documentos. DocumentDB é
+**compatível com MongoDB**, com consultas ricas e índices sobre campos
+arbitrários; DynamoDB é chave-valor com índices que você planeja. A palavra
+"MongoDB" no enunciado resolve.
+
+<Callout tipo="atencao" titulo="Transacional não é analítico">
+O distrator mais repetido é oferecer **Redshift** para carga transacional ou
+**RDS** para agregação sobre bilhões de linhas. Colunar e paralelo serve para
+somar muito; por linha e transacional serve para gravar e ler pouco, muitas
+vezes. Quando o enunciado cita relatório histórico, é a primeira família;
+quando cita pedido, cadastro e pagamento, é a segunda.
+</Callout>
+
+## Aurora, e quando ele é a resposta
+
+Aurora aparece como versão "melhor" do relacional em três situações que o
+enunciado nomeia:
+
+- **Compatível com MySQL ou PostgreSQL** com desempenho maior e armazenamento
+  que cresce sozinho em três zonas.
+- **Muita leitura**: até 15 réplicas com endpoint de leitura próprio.
+- **Carga intermitente ou imprevisível**: **Aurora Serverless** ajusta a
+  capacidade sozinho, e é a resposta quando manter instância dimensionada para
+  o pico seria desperdício.
+
+<Callout tipo="dica" titulo="O banco em memória não é fonte de verdade">
+ElastiCache guarda sessão, cache e ranking — e a prova espera que o dado tenha
+origem em outro lugar. Quando a alternativa propõe ElastiCache como
+armazenamento principal de dado que não pode se perder, ela está errada, mesmo
+com Redis persistente.
+</Callout>
+
+## Como responder o cenário
+
+Leia a **consulta**, não o volume: por chave (DynamoDB), com junções
+(relacional), somando muito (Redshift), por texto (OpenSearch), por caminho
+entre entidades (Neptune), por janela de tempo (Timestream), com prova de
+imutabilidade (QLDB). Depois confira **onde o dado já está**: se está no S3 e a
+consulta é ocasional, Athena elimina toda a discussão sobre qual banco usar.

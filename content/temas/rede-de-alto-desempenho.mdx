@@ -1,0 +1,272 @@
+---
+slug: rede-de-alto-desempenho
+titulo: "Rede de alto desempenho e conectividade híbrida"
+resumo: "As peças que a prova usa quando o gargalo é a rede: Global Accelerator para melhorar o trajeto de tráfego não cacheável, Direct Connect para ligação dedicada ao data center, VPN como alternativa barata, Transit Gateway para muitas VPCs, e os grupos de posicionamento dentro da zona."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "Fecha o Domínio 3 e reaparece em custo e resiliência. A prova cobra três decisões: acelerar o trajeto de rede sem cache (Global Accelerator, que quase todo mundo confunde com CloudFront), ligar o data center à AWS (Direct Connect ou VPN, e a combinação dos dois), e conectar muitas VPCs sem virar uma teia."
+comoCai: "O tráfego é TCP, não pode ser cacheado, e usuários distantes reclamam de latência instável. O que usar?"
+feynman: "Explique em um minuto a diferença entre guardar a resposta perto de quem pergunta e melhorar a estrada por onde a pergunta viaja."
+preRequisitos: ["seguranca-de-rede-na-vpc", "cache-e-entrega-de-conteudo"]
+errosComuns:
+  - "Confundir Global Accelerator com CloudFront. CloudFront guarda conteúdo na borda; Global Accelerator não guarda nada, ele melhora o caminho até a aplicação e dá IPs anycast estáticos. Tráfego não HTTP ou não cacheável é Accelerator."
+  - "Achar que Direct Connect é criptografado por padrão. É uma conexão dedicada e privada, mas sem criptografia; quando o enunciado exige criptografia em trânsito, a resposta acrescenta uma VPN por cima, ou MACsec."
+  - "Propor Direct Connect para uma necessidade imediata. A provisão leva semanas ou meses; quando o enunciado diz 'rapidamente' ou 'em dias', a resposta é VPN, eventualmente como ponte até o Direct Connect ficar pronto."
+  - "Usar peering de VPC para muitas VPCs. Peering não é transitivo e o número de conexões cresce ao quadrado; a partir de algumas VPCs, a resposta é Transit Gateway."
+  - "Esquecer que uma única conexão Direct Connect é ponto único de falha. Alta disponibilidade exige duas conexões, idealmente em locais diferentes, ou uma VPN de contingência."
+  - "Misturar grupo de posicionamento cluster com spread. Cluster aproxima para latência mínima; spread separa para reduzir falha correlacionada. São objetivos opostos."
+preTeste:
+  - enunciado: "Uma aplicação expõe um serviço TCP que não pode ser cacheado e recebe usuários de vários continentes reclamando de latência instável. A empresa também quer IPs fixos para liberar em firewalls. Qual serviço atende?"
+    alternativas:
+      - texto: "AWS Global Accelerator."
+        correta: true
+        explicacao: "Ele entrega IPs anycast estáticos e leva o tráfego pela rede da AWS desde a borda, melhorando latência e estabilidade sem depender de cache."
+      - texto: "Amazon CloudFront."
+        correta: false
+        explicacao: "CloudFront é CDN para HTTP com cache; o enunciado diz que o tráfego não é cacheável."
+      - texto: "Route 53 com roteamento por latência."
+        correta: false
+        explicacao: "Escolhe a região no DNS, mas não melhora o trajeto nem oferece IP fixo único."
+  - enunciado: "Uma empresa precisa conectar o data center à AWS em poucos dias, com tráfego criptografado, enquanto aguarda a instalação de um enlace dedicado. Qual solução usar nesse período?"
+    alternativas:
+      - texto: "Uma VPN site a site sobre a internet."
+        correta: true
+        explicacao: "Sobe em horas, é criptografada por natureza e serve de ponte até o Direct Connect ficar disponível."
+      - texto: "Aguardar o Direct Connect, sem conectividade provisória."
+        correta: false
+        explicacao: "Deixa a empresa sem conexão por semanas, quando existe alternativa imediata."
+      - texto: "Peering de VPC com a rede local."
+        correta: false
+        explicacao: "Peering liga VPCs entre si; não conecta data center a nuvem."
+videos:
+  - id: 1K5tyJYIjdM
+    publicadoEm: "2020-08-30"
+    titulo: "AWS Transit Gateway - Introdução - O que é? Como configurar?"
+    canal: "Cafe com Cloud"
+    duracao: 13
+    porQue: "Mostra o problema antes da solução: a teia de conexões que o peering cria quando há muitas VPCs. É esse desenho que a prova descreve quando a resposta é Transit Gateway."
+  - id: LOQQO1br6Ig
+    publicadoEm: "2025-08-18"
+    titulo: "AWS Networking Módulo 2 | Interligação de Redes (VPC Peering, Transit Gateway, VPN, Direct Connect)"
+    canal: "PraticalCloudLab"
+    duracao: 191
+    porQue: "Complementar e muito longo: é uma aula completa das quatro formas de interligar redes. Não assista inteiro para a prova; use como consulta quando uma das quatro não tiver ficado clara."
+artigos:
+  - titulo: "What is AWS Global Accelerator?"
+    url: "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Direct Connect?"
+    url: "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is a transit gateway?"
+    url: "https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html"
+    fonte: "AWS"
+  - titulo: "Placement groups for your Amazon EC2 instances"
+    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Global Accelerator versus CloudFront."
+    verso: "CloudFront guarda conteúdo na borda (HTTP, cacheável). Global Accelerator não guarda nada: entrega dois IPs anycast estáticos e leva o tráfego pela rede da AWS até a aplicação. Serve TCP, UDP e conteúdo não cacheável."
+  - frente: "Quando a prova pede Global Accelerator?"
+    verso: "Tráfego não HTTP, conteúdo dinâmico não cacheável, necessidade de IP estático global, ou comutação entre regiões mais rápida que o DNS permite."
+  - frente: "Direct Connect, em uma linha."
+    verso: "Conexão dedicada entre o data center e a AWS, com largura de banda consistente e latência previsível. Não passa pela internet, e não é criptografada por padrão."
+  - frente: "Como criptografar sobre Direct Connect?"
+    verso: "VPN site a site por cima da conexão, ou MACsec onde disponível. O enunciado que exige criptografia em trânsito pede uma das duas."
+  - frente: "Quanto tempo leva um Direct Connect?"
+    verso: "Semanas a meses, por ser enlace físico. Por isso a VPN aparece como solução imediata ou provisória nas questões."
+  - frente: "VPN site a site, em uma linha."
+    verso: "Túnel criptografado sobre a internet, sobe em horas, custa pouco, mas herda a variabilidade da internet. Boa como contingência do Direct Connect."
+  - frente: "Por que peering de VPC não escala?"
+    verso: "Não é transitivo e exige uma conexão por par: com N VPCs, são N vezes N menos um, dividido por dois. Vira uma teia inadministrável."
+  - frente: "Transit Gateway, em uma linha."
+    verso: "Concentrador que liga muitas VPCs, VPNs e Direct Connect num modelo de estrela, com tabelas de rotas para segmentar quem fala com quem."
+  - frente: "Grupos de posicionamento: cluster, spread e partition."
+    verso: "Cluster: juntas na mesma zona, latência mínima e alta vazão entre elas. Spread: em hardware distinto, para reduzir falha correlacionada. Partition: grupos isolados, para sistemas distribuídos grandes."
+  - frente: "O que é rede aprimorada (enhanced networking)?"
+    verso: "Recurso de tipos de instância que entrega maior vazão de pacotes e menor latência, com ENA ou EFA. EFA é para computação de alto desempenho com comunicação entre nós."
+  - frente: "PrivateLink e endpoint de interface, em uma linha."
+    verso: "Expõe um serviço na sua VPC por um IP privado, sem passar pela internet e sem peering. É a forma de consumir serviço de terceiro ou de outra conta de modo privado."
+  - frente: "Como reduzir custo de transferência entre zonas?"
+    verso: "Manter o tráfego dentro da zona quando possível, usar endpoints em vez de NAT, e evitar arquiteturas que atravessem zonas sem necessidade. Ligado ao Domínio 4."
+drills:
+  - titulo: "Qual peça de rede resolve?"
+    instrucao: "Para cada necessidade, diga o serviço esperado."
+    opcoes: ["Global Accelerator", "CloudFront", "Direct Connect", "VPN site a site", "Transit Gateway"]
+    itens:
+      - enunciado: "Jogo online com UDP e jogadores em vários continentes, latência instável."
+        resposta: "Global Accelerator"
+        explicacao: "Não HTTP, não cacheável: melhora o trajeto, não guarda conteúdo."
+      - enunciado: "Site com imagens e vídeos acessado do mundo todo."
+        resposta: "CloudFront"
+        explicacao: "Conteúdo cacheável na borda."
+      - enunciado: "Transferência diária de 10 TB entre o data center e a AWS, com banda previsível."
+        resposta: "Direct Connect"
+        explicacao: "Volume alto e consistência de banda pedem enlace dedicado."
+      - enunciado: "Conectar o escritório à AWS ainda esta semana, com criptografia."
+        resposta: "VPN site a site"
+        explicacao: "Sobe em horas e é criptografada."
+      - enunciado: "Quarenta VPCs em três contas precisam se comunicar entre si e com o data center."
+        resposta: "Transit Gateway"
+        explicacao: "Estrela em vez de teia, com segmentação por tabela de rotas."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa de jogos expõe servidores UDP em três regiões. Os jogadores reclamam de latência instável e a empresa precisa de endereços IP fixos para que provedores corporativos os liberem. Qual solução atende?"
+    alternativas:
+      - texto: "AWS Global Accelerator, com os balanceadores das três regiões como endpoints."
+        correta: true
+        explicacao: "Entrega IPs anycast estáticos, admite UDP e encaminha o tráfego pela rede da AWS desde a borda, estabilizando a latência. Também comuta entre regiões sem depender de DNS."
+      - texto: "Amazon CloudFront com origem nas três regiões."
+        correta: false
+        explicacao: "CloudFront é para HTTP e HTTPS com cache; não atende UDP."
+      - texto: "Route 53 com roteamento por latência e verificações de integridade."
+        correta: false
+        explicacao: "Escolhe a região na resolução do nome, mas não melhora o trajeto nem oferece IP fixo, e depende do TTL para comutar."
+      - texto: "Um Network Load Balancer por região, com IPs elásticos."
+        correta: false
+        explicacao: "Dá IP fixo por região, mas o cliente precisa escolher a região e a latência entre continentes continua na internet pública."
+  - tipo: unica
+    enunciado: "Uma empresa tem 25 VPCs distribuídas em três contas, que precisam se comunicar entre si e com o data center local. A equipe quer reduzir a complexidade de roteamento e evitar dezenas de conexões ponto a ponto. Qual solução atende?"
+    alternativas:
+      - texto: "Um AWS Transit Gateway compartilhado entre as contas, com as VPCs e a conexão local anexadas a ele."
+        correta: true
+        explicacao: "Modelo de estrela: cada VPC anexa uma vez, e as tabelas de rotas segmentam a comunicação. É o serviço desenhado para substituir a teia de peerings."
+      - texto: "Peering de VPC entre todas as VPCs, duas a duas."
+        correta: false
+        explicacao: "São 300 conexões, sem transitividade, e o data center ainda ficaria de fora."
+      - texto: "Um endpoint do PrivateLink para cada VPC."
+        correta: false
+        explicacao: "PrivateLink expõe serviços específicos, não conecta redes inteiras."
+      - texto: "Uma VPN site a site por VPC."
+        correta: false
+        explicacao: "Resolve o data center com 25 túneis, e não faz as VPCs conversarem entre si."
+  - tipo: multipla
+    enunciado: "Uma empresa vai implantar o AWS Direct Connect para transferir grandes volumes entre o data center e a AWS. A política de segurança exige criptografia em trânsito e a área de negócio exige tolerância à falha do enlace. Quais DUAS ações atendem?"
+    alternativas:
+      - texto: "Estabelecer uma VPN site a site sobre a conexão Direct Connect, para criptografar o tráfego."
+        correta: true
+        explicacao: "Direct Connect é privado, mas não criptografado; a VPN por cima resolve o requisito de criptografia."
+      - texto: "Provisionar uma segunda conexão Direct Connect, preferencialmente em outro local, ou manter uma VPN de contingência."
+        correta: true
+        explicacao: "Uma conexão só é ponto único de falha; redundância é a resposta para tolerância a falha do enlace."
+      - texto: "Confiar na criptografia nativa do Direct Connect."
+        correta: false
+        explicacao: "Ela não existe por padrão; é justamente a premissa falsa que a questão testa."
+      - texto: "Habilitar o CloudFront na frente do data center."
+        correta: false
+        explicacao: "CDN para conteúdo web; não tem relação com o enlace híbrido."
+      - texto: "Aumentar a largura de banda da conexão única."
+        correta: false
+        explicacao: "Mais banda não cria redundância nem criptografa nada."
+  - tipo: unica
+    enunciado: "Um cluster de computação numérica precisa de latência de rede mínima e vazão máxima entre os nós que participam do mesmo cálculo, todos na mesma zona de disponibilidade. Qual configuração atende?"
+    alternativas:
+      - texto: "Um grupo de posicionamento do tipo cluster, com instâncias que suportem rede aprimorada."
+        correta: true
+        explicacao: "Cluster aproxima fisicamente as instâncias para latência mínima, e a rede aprimorada entrega a vazão de pacotes necessária."
+      - texto: "Um grupo de posicionamento do tipo spread em três zonas."
+        correta: false
+        explicacao: "Spread separa o hardware e atravessa zonas: o oposto do requisito de latência mínima entre nós."
+      - texto: "Um Transit Gateway ligando sub-redes dentro da mesma VPC."
+        correta: false
+        explicacao: "Transit Gateway conecta redes distintas; instâncias da mesma VPC já se comunicam diretamente."
+      - texto: "AWS Global Accelerator entre as instâncias."
+        correta: false
+        explicacao: "Acelera o trajeto de clientes na internet até a aplicação, não a comunicação interna do cluster."
+---
+
+## Em uma frase
+
+Quando o gargalo é rede, a prova separa três perguntas: **melhorar o trajeto**
+de quem vem de fora (Global Accelerator, e CloudFront quando há cache),
+**ligar o data center** (Direct Connect ou VPN), e **conectar muitas redes**
+(Transit Gateway em vez de peering).
+
+## Global Accelerator e CloudFront: o par mais confundido
+
+<Comparativo
+  colunas={["", "CloudFront", "Global Accelerator"]}
+  linhas={[
+    ["O que faz", "Guarda conteúdo na borda", "Melhora o caminho até a aplicação"],
+    ["Protocolo", "HTTP e HTTPS", "TCP e UDP"],
+    ["Endereço", "Nome DNS da distribuição", "Dois IPs anycast estáticos"],
+    ["Cacheia?", "Sim, é o ponto", "Não guarda nada"],
+    ["Pista no enunciado", "Conteúdo estático, site, mídia, API cacheável", "UDP, jogo, VoIP, IP fixo global, conteúdo não cacheável"]
+  ]}
+/>
+
+Os dois usam a rede da borda da AWS, e é por isso que confundem. A distinção
+que decide a questão: **CloudFront guarda uma cópia da resposta**; **Global
+Accelerator só melhora a estrada**. Tráfego que não pode ser cacheado —
+sessão de jogo, protocolo binário, conteúdo personalizado por usuário — é do
+Accelerator.
+
+Ele também comuta entre regiões **mais rápido que o DNS**, porque o IP não
+muda: não há TTL para esperar. Essa é a segunda pista, e liga este tema ao
+Route 53 do Domínio 2.
+
+## Ligar o data center: Direct Connect e VPN
+
+<Termo nome="Direct Connect">Conexão dedicada entre o data center e a AWS, sem passar pela internet, com banda consistente e latência previsível. Provisão leva semanas ou meses, e não é criptografada por padrão.</Termo>
+
+<Termo nome="VPN site a site">Túnel criptografado sobre a internet. Sobe em horas, custa pouco e herda a variabilidade da internet pública.</Termo>
+
+<Comparativo
+  colunas={["Requisito do enunciado", "Resposta"]}
+  linhas={[
+    ["'Em poucos dias', 'rapidamente'", "VPN"],
+    ["'Banda consistente', 'latência previsível', 'terabytes por dia'", "Direct Connect"],
+    ["'Criptografado em trânsito' sobre Direct Connect", "VPN por cima do Direct Connect (ou MACsec)"],
+    ["'Sem ponto único de falha' no enlace", "Duas conexões Direct Connect, ou uma com VPN de contingência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Direct Connect não é criptografado">
+É privado, e privado não é o mesmo que cifrado. Quando a política exige
+criptografia em trânsito, a alternativa certa acrescenta uma VPN sobre o
+enlace. "Confiar na criptografia nativa do Direct Connect" é uma premissa
+falsa que aparece como distrator.
+</Callout>
+
+## Conectar muitas VPCs
+
+Peering de VPC liga duas redes e **não é transitivo**: A com B e B com C não
+faz A falar com C. Com N VPCs, o número de conexões cresce ao quadrado. A
+partir de algumas redes, a resposta é **Transit Gateway**: cada VPC anexa uma
+vez, o roteamento vira estrela, e tabelas de rotas segmentam quem fala com
+quem — inclusive ligando as VPNs e o Direct Connect no mesmo lugar.
+
+**PrivateLink** resolve outro problema: expor **um serviço** por IP privado,
+sem conectar as redes. Quando o enunciado fala em consumir um serviço de outra
+conta ou de um fornecedor, é PrivateLink; quando fala em redes que precisam se
+comunicar, é Transit Gateway.
+
+## Dentro da zona: posicionamento e rede aprimorada
+
+- **Cluster**: instâncias próximas, para latência mínima e vazão máxima entre
+  nós do mesmo cálculo.
+- **Spread**: instâncias em hardware distinto, para reduzir falha correlacionada.
+- **Partition**: grupos isolados, para sistemas distribuídos grandes.
+
+Somados à **rede aprimorada** (ENA, e EFA para computação de alto desempenho),
+fecham os cenários de comunicação interna. Cluster e spread respondem a
+perguntas opostas: um quer velocidade entre os nós, o outro quer que eles não
+caiam juntos.
+
+<Callout tipo="dica" titulo="A rede também é custo">
+Transferência entre zonas e saída para a internet são cobradas, e o NAT cobra
+por GB. Muita decisão de rede que parece de desempenho reaparece no Domínio 4
+como decisão de custo — endpoint de gateway em vez de NAT é o exemplo que
+serve aos dois.
+</Callout>
+
+## Como responder o cenário
+
+Pergunte se o tráfego **pode ser cacheado**: sim aponta CloudFront, não aponta
+Global Accelerator. Para híbrido, leia o **prazo** e a **consistência de
+banda**: pressa é VPN, volume e previsibilidade são Direct Connect, e
+criptografia exige a VPN por cima. Para muitas redes, conte as VPCs: mais que
+um punhado significa Transit Gateway. E dentro da zona, cluster para
+aproximar, spread para separar.

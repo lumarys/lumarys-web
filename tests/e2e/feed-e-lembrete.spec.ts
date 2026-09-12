@@ -33,7 +33,7 @@ test("o feed é Atom válido, com uma entrada por tema", async ({ request }) => 
   // 31 e não 47: os 16 temas que Analytics compartilha com Dados entram uma
   // vez só, pela URL canônica.
   const entradas = xml.match(/<entry>/g) ?? [];
-  expect(entradas.length).toBe(44);
+  expect(entradas.length).toBe(49);
   // Todo id é uma URL do site, que é o que um leitor usa para deduplicar.
   const ids = [...xml.matchAll(/<id>([^<]+)<\/id>/g)].map((m) => m[1]!);
   expect(ids.every((id) => id.startsWith("https://lumarys.com.br/"))).toBe(true);

@@ -1,0 +1,269 @@
+---
+slug: computacao-ec2-containers-e-serverless
+titulo: "Computação: famílias EC2, containers e serverless"
+resumo: "A segunda decisão do Domínio 3: em que rodar. As famílias de instância EC2 e o que cada letra significa, quando Lambda e seus limites, e a escolha entre ECS e EKS com EC2 ou Fargate. A prova dá a pista no perfil da carga e na palavra sobre esforço operacional."
+minutos: 40
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É a escolha que aparece em cenário de desempenho e reaparece em custo. A prova testa duas coisas: ler o perfil da carga (CPU, memória, rede, GPU) para achar a família, e saber quando o serverless resolve — o que quase sempre é a resposta quando o enunciado diz 'menor esforço operacional' e a carga é intermitente."
+comoCai: "A carga é intermitente, dura poucos segundos por execução e a equipe não quer gerenciar servidores. Onde rodar?"
+feynman: "Explique em um minuto a diferença entre alugar uma máquina, alugar um lugar para o seu container e simplesmente entregar o código, do ponto de vista de quem paga a conta."
+preRequisitos: ["como-ler-uma-questao-saa"]
+errosComuns:
+  - "Escolher Lambda para processamento longo. O tempo máximo de execução é de 15 minutos; carga que passa disso é container ou instância."
+  - "Achar que EKS é sempre melhor que ECS. EKS traz Kubernetes e o ecossistema dele, com mais complexidade; ECS é mais simples e integrado. Sem exigência de Kubernetes no enunciado, ECS é a resposta de menor esforço."
+  - "Confundir Fargate com ECS ou EKS. Fargate não é orquestrador: é o modo de execução sem gerenciar instâncias, que tanto ECS quanto EKS podem usar."
+  - "Ignorar a família da instância. A letra indica o perfil: M para equilíbrio, C para computação, R e X para memória, T para carga intermitente com créditos, G e P para GPU, I e D para armazenamento local."
+  - "Esquecer os créditos das instâncias da família T. Elas acumulam e gastam crédito de CPU; carga sustentada esgota o crédito e a instância passa a andar devagar ou a cobrar por excedente."
+  - "Propor Lambda para carga constante e alta. Cobrança por invocação e duração compensa em carga intermitente; para carga previsível e contínua, instância com compromisso costuma sair mais barata."
+preTeste:
+  - enunciado: "Uma tarefa de processamento de imagem leva cerca de 40 minutos por execução e roda algumas vezes por dia. A equipe não quer gerenciar servidores. Qual opção atende?"
+    alternativas:
+      - texto: "Uma tarefa do ECS com Fargate."
+        correta: true
+        explicacao: "Fargate roda containers sem gerenciar instâncias e não tem o limite de 15 minutos da Lambda."
+      - texto: "Uma função Lambda."
+        correta: false
+        explicacao: "Lambda tem tempo máximo de 15 minutos por execução; 40 minutos não cabe."
+      - texto: "Uma instância EC2 ligada o tempo todo."
+        correta: false
+        explicacao: "Atende, mas mantém servidor para gerenciar e paga ocioso entre as execuções."
+  - enunciado: "Uma aplicação em memória precisa de 768 GB de RAM e pouca CPU. Qual família de instância é adequada?"
+    alternativas:
+      - texto: "Família otimizada para memória, como R ou X."
+        correta: true
+        explicacao: "R e X oferecem a maior relação memória por vCPU; X é a escolha para casos extremos, como bancos em memória."
+      - texto: "Família otimizada para computação, como C."
+        correta: false
+        explicacao: "C privilegia CPU; teria de ser enorme para chegar à memória exigida, e pagaria CPU que não será usada."
+      - texto: "Família de uso geral T com créditos."
+        correta: false
+        explicacao: "T é para carga intermitente e pequena, não para memória dessa ordem."
+videos:
+  - id: cRSY8T-7JS4
+    publicadoEm: "2026-03-10"
+    titulo: "Conheça os tipos de instâncias de EC2 da AWS"
+    canal: "Canal do Rolmer"
+    duracao: 16
+    porQue: "Explica a nomenclatura e o que cada família privilegia, que é exatamente o que a prova cobra. Assista tentando prever a letra a partir do perfil da carga, antes de ele dizer."
+  - id: 8rQU_FBTCj0
+    publicadoEm: "2025-09-09"
+    titulo: "ECS vs EKS — Qual orquestrador usar na AWS?"
+    canal: "UpperStack"
+    duracao: 3
+    porQue: "Três minutos sobre a comparação que decide a questão de containers. Repare no argumento de complexidade: é ele que a prova usa quando diz 'menor esforço operacional'."
+artigos:
+  - titulo: "Amazon EC2 instance types"
+    url: "https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-types.html"
+    fonte: "AWS"
+  - titulo: "Lambda quotas"
+    url: "https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon ECS?"
+    url: "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Fargate?"
+    url: "https://docs.aws.amazon.com/AmazonECS/latest/userguide/what-is-fargate.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "As famílias de EC2 e o que privilegiam."
+    verso: "T: intermitente, com créditos de CPU. M: equilíbrio. C: computação. R e X: memória. I e D: armazenamento local rápido. G e P: GPU. Hpc: computação de alto desempenho."
+  - frente: "Como funcionam os créditos das instâncias T?"
+    verso: "A instância acumula crédito quando usa pouca CPU e gasta quando precisa de mais. Esgotado o crédito, ela é limitada (ou cobra excedente, no modo ilimitado). Ruim para carga sustentada."
+  - frente: "Limites da Lambda que caem na prova."
+    verso: "Tempo máximo de 15 minutos por execução, memória configurável (que também define a CPU proporcional), armazenamento temporário em /tmp e tamanho do pacote de implantação."
+  - frente: "Quando Lambda é a resposta?"
+    verso: "Carga intermitente ou orientada a evento, execução curta, e enunciado pedindo menor esforço operacional. Paga-se por invocação e duração, sem ocioso."
+  - frente: "Quando Lambda NÃO é a resposta?"
+    verso: "Execução acima de 15 minutos, carga constante e alta (instância com compromisso sai mais barata), ou dependência de estado local e de sistema operacional."
+  - frente: "ECS versus EKS."
+    verso: "ECS: orquestrador próprio da AWS, mais simples, integrado. EKS: Kubernetes gerenciado, para quem já usa o ecossistema ou precisa de portabilidade. Sem menção a Kubernetes, ECS é o de menor esforço."
+  - frente: "Fargate é orquestrador?"
+    verso: "Não. É o modo de execução sem servidor para containers, usado por ECS ou EKS. Você deixa de gerenciar as instâncias que hospedam as tarefas."
+  - frente: "EC2 ou Fargate no ECS?"
+    verso: "EC2 dá controle do hospedeiro, acesso a tipos específicos (GPU) e pode ser mais barato com Spot e alta utilização. Fargate elimina a gestão de instâncias e é a resposta de menor esforço."
+  - frente: "O que é grupo de posicionamento (placement group)?"
+    verso: "Cluster junta instâncias na mesma zona para latência mínima entre elas; spread as separa em hardware distinto para reduzir falha correlacionada; partition isola grupos, usado por sistemas distribuídos grandes."
+  - frente: "O que é instância otimizada para EBS?"
+    verso: "Tipo com banda dedicada até o armazenamento em bloco. Sem ela, a rede da instância vira gargalo antes da IOPS do volume."
+  - frente: "Armazenamento de instância (instance store), em uma linha."
+    verso: "Disco físico local, muito rápido e efêmero: some ao parar a instância. Serve cache e dados temporários, nunca dado que precisa sobreviver."
+  - frente: "Amazon EC2 Auto Scaling e Lambda escalam igual?"
+    verso: "Não. O Auto Scaling cria instâncias conforme política; a Lambda escala por concorrência automaticamente, com limite de conta e concorrência reservada ou provisionada por função."
+  - frente: "O que é concorrência provisionada na Lambda?"
+    verso: "Instâncias já inicializadas para eliminar o início a frio. É a resposta quando o enunciado reclama de latência no primeiro acesso."
+drills:
+  - titulo: "Onde essa carga roda?"
+    instrucao: "Para cada perfil, diga a escolha esperada."
+    opcoes: ["Lambda", "Fargate", "EC2", "Família R ou X", "Família C"]
+    itens:
+      - enunciado: "Função disparada por evento, executa em 200 ms, milhares de vezes por hora."
+        resposta: "Lambda"
+        explicacao: "Curta, orientada a evento, sem servidor."
+      - enunciado: "Container que processa um lote por 40 minutos, algumas vezes por dia."
+        resposta: "Fargate"
+        explicacao: "Sem servidor, e sem o limite de 15 minutos."
+      - enunciado: "Simulação numérica pesada que usa toda a CPU por horas."
+        resposta: "Família C"
+        explicacao: "Otimizada para computação."
+      - enunciado: "Banco em memória que exige centenas de GB de RAM."
+        resposta: "Família R ou X"
+        explicacao: "Otimizadas para memória."
+      - enunciado: "Aplicação legada que exige acesso ao sistema operacional e a um driver específico."
+        resposta: "EC2"
+        explicacao: "Controle do hospedeiro; container e serverless não expõem isso."
+      - enunciado: "API com picos e vales, que precisa responder rápido no primeiro acesso da manhã."
+        resposta: "Lambda"
+        explicacao: "Serverless com concorrência provisionada resolve o início a frio."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa processa arquivos enviados pelos clientes. Cada processamento dura entre 20 e 45 minutos, e os envios são esporádicos. A equipe quer o MENOR esforço operacional possível e não quer pagar por capacidade ociosa. Qual solução atende?"
+    alternativas:
+      - texto: "Tarefas do Amazon ECS em AWS Fargate, disparadas a cada arquivo recebido."
+        correta: true
+        explicacao: "Containers sem gerenciar instâncias, cobrados pela execução, e sem o teto de 15 minutos da Lambda. Atende duração, esforço e ocioso."
+      - texto: "Uma função AWS Lambda por arquivo."
+        correta: false
+        explicacao: "O limite de 15 minutos por execução não comporta processamentos de 45 minutos."
+      - texto: "Um grupo de Auto Scaling de instâncias EC2 com capacidade mínima de uma instância."
+        correta: false
+        explicacao: "Mantém instância ligada entre os envios esporádicos e exige gerenciar o sistema operacional."
+      - texto: "Uma instância EC2 dedicada ligada permanentemente."
+        correta: false
+        explicacao: "Máximo de ocioso e de esforço operacional; é o oposto do pedido."
+  - tipo: unica
+    enunciado: "Uma equipe vai migrar uma aplicação já empacotada em contêineres e que hoje roda em Kubernetes no data center, mantendo os manifestos e as ferramentas do ecossistema Kubernetes. Qual serviço da AWS deve ser usado?"
+    alternativas:
+      - texto: "Amazon EKS."
+        correta: true
+        explicacao: "É o Kubernetes gerenciado; preserva manifestos, operadores e ferramental do ecossistema, que é o requisito declarado."
+      - texto: "Amazon ECS com Fargate."
+        correta: false
+        explicacao: "Orquestrador próprio da AWS: exigiria reescrever as definições e perder o ferramental Kubernetes."
+      - texto: "AWS Lambda com imagens de contêiner."
+        correta: false
+        explicacao: "Executa imagens, mas com modelo de execução por evento e limite de tempo; não é orquestração Kubernetes."
+      - texto: "Instâncias EC2 com Docker instalado manualmente."
+        correta: false
+        explicacao: "Perde a orquestração e aumenta o esforço operacional."
+  - tipo: multipla
+    enunciado: "Uma aplicação de análise numérica precisa de altíssima CPU e de comunicação de baixa latência entre os nós que participam do mesmo cálculo. Quais DUAS decisões atendem?"
+    alternativas:
+      - texto: "Usar instâncias de uma família otimizada para computação."
+        correta: true
+        explicacao: "A carga é limitada por CPU; a família C é a desenhada para isso."
+      - texto: "Colocar as instâncias em um grupo de posicionamento do tipo cluster."
+        correta: true
+        explicacao: "Cluster aproxima as instâncias na mesma zona, minimizando a latência de rede entre os nós."
+      - texto: "Distribuir as instâncias em um grupo de posicionamento do tipo spread, em várias zonas."
+        correta: false
+        explicacao: "Spread separa o hardware para reduzir falha correlacionada, ao custo de latência entre os nós. Contraria o requisito."
+      - texto: "Usar instâncias da família T com créditos ilimitados."
+        correta: false
+        explicacao: "T é para carga intermitente pequena; carga sustentada de CPU esgotaria os créditos."
+      - texto: "Substituir as instâncias por funções Lambda."
+        correta: false
+        explicacao: "Lambda não oferece comunicação de baixa latência entre nós do mesmo cálculo nem execução longa."
+  - tipo: unica
+    enunciado: "Uma API serverless apresenta latência alta nas primeiras chamadas depois de períodos sem uso, e o time de produto considera isso inaceitável no horário comercial. Qual ajuste resolve com o MENOR esforço?"
+    alternativas:
+      - texto: "Configurar concorrência provisionada na função Lambda para o horário comercial."
+        correta: true
+        explicacao: "Mantém ambientes de execução inicializados, eliminando o início a frio, que é exatamente o sintoma descrito."
+      - texto: "Aumentar a memória da função."
+        correta: false
+        explicacao: "Melhora a CPU proporcional e pode reduzir a duração, mas não elimina o início a frio."
+      - texto: "Migrar a API para instâncias EC2 sempre ligadas."
+        correta: false
+        explicacao: "Resolve, com muito mais esforço operacional e custo, o que uma configuração da própria Lambda resolve."
+      - texto: "Reduzir o tempo limite da função."
+        correta: false
+        explicacao: "Não tem relação com a latência da primeira invocação."
+---
+
+## Em uma frase
+
+A escolha de computação sai de duas leituras: o **perfil da carga** (CPU,
+memória, GPU, armazenamento local) aponta a família da instância; a **forma da
+carga** (intermitente ou contínua, curta ou longa) e a palavra sobre **esforço
+operacional** decidem entre instância, container e serverless.
+
+## As famílias, pela letra
+
+<Comparativo
+  colunas={["Letra", "Privilegia", "Pista no enunciado"]}
+  linhas={[
+    ["T", "Carga intermitente, com créditos de CPU", "'Baixo uso a maior parte do tempo', desenvolvimento, site pequeno"],
+    ["M", "Equilíbrio entre CPU e memória", "Aplicação de propósito geral, servidor de aplicação"],
+    ["C", "CPU", "Cálculo, codificação de mídia, jogo, lote intensivo"],
+    ["R e X", "Memória", "Banco em memória, cache grande, análise que carrega tudo na RAM"],
+    ["I e D", "Armazenamento local rápido", "Banco NoSQL de alta IOPS, data warehouse local"],
+    ["G e P", "GPU", "Aprendizado de máquina, renderização, inferência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O crédito da família T">
+Instâncias T acumulam crédito de CPU quando ociosas e gastam quando precisam de
+mais. Sob carga **sustentada**, o crédito acaba e a instância é limitada — ou
+cobra excedente no modo ilimitado. Quando o cenário descreve carga constante e
+a alternativa oferece T pelo preço baixo, é distrator.
+</Callout>
+
+## Instância, container ou função
+
+<Comparativo
+  colunas={["", "EC2", "Containers (ECS/EKS)", "Lambda"]}
+  linhas={[
+    ["Você gerencia", "Sistema operacional e tudo acima", "A imagem e a definição da tarefa", "Só o código"],
+    ["Duração", "Ilimitada", "Ilimitada", "Até 15 minutos"],
+    ["Cobrança", "Por tempo ligado", "Por tarefa (Fargate) ou pela instância", "Por invocação e duração"],
+    ["Escala", "Auto Scaling", "Serviço e Auto Scaling de tarefas", "Concorrência automática"],
+    ["Pista", "Acesso ao SO, driver, licença, legado", "Já está em contêiner, microsserviços", "Evento, curto, intermitente, 'menor esforço'"]
+  ]}
+/>
+
+O limite de **15 minutos** da Lambda é o detalhe que a prova usa para eliminar
+a alternativa mais óbvia: o cenário descreve "sem servidor" e a duração passa do
+teto, então a resposta é **Fargate**, não Lambda.
+
+<Termo nome="Fargate">Modo de execução sem servidor para containers. Não é orquestrador: tanto o ECS quanto o EKS podem rodar suas tarefas em Fargate, deixando de gerenciar as instâncias que as hospedam.</Termo>
+
+## ECS ou EKS
+
+- **ECS**: orquestrador da própria AWS, mais simples, integrado a IAM,
+  balanceador e CloudWatch sem tradução. É a resposta de **menor esforço**.
+- **EKS**: Kubernetes gerenciado. Entra quando o enunciado cita **Kubernetes**,
+  manifestos existentes, operadores ou portabilidade entre nuvens.
+
+Sem menção a Kubernetes, escolher EKS é pagar complexidade que ninguém pediu —
+e a prova trata isso como erro.
+
+<Callout tipo="dica" titulo="Início a frio">
+"A primeira chamada depois de um tempo parado é lenta" é o sintoma de **início
+a frio** da Lambda, e a resposta é **concorrência provisionada**. Aumentar
+memória reduz a duração, não o início a frio; migrar para EC2 resolve com
+esforço que o enunciado não autorizou.
+</Callout>
+
+## Grupos de posicionamento
+
+Aparecem pouco, mas quando aparecem são decisivos:
+
+- **Cluster**: instâncias juntas na mesma zona, para latência mínima entre elas.
+  É a resposta de computação de alto desempenho com nós conversando.
+- **Spread**: instâncias em hardware distinto, para reduzir falha correlacionada.
+  É resiliência, não desempenho.
+- **Partition**: grupos isolados, para sistemas distribuídos grandes como HDFS
+  e Cassandra.
+
+Cluster e spread são opostos: um aproxima, o outro separa. O enunciado escolhe
+pelo que pede, latência ou tolerância a falha.
+
+## Como responder o cenário
+
+Leia o **perfil** para a família e a **forma** para o modelo. Depois confira
+dois tetos que eliminam alternativas sozinhos: 15 minutos na Lambda e créditos
+na família T. Por fim, aplique a palavra: "menor esforço operacional" empurra
+para Fargate e Lambda; "acesso ao sistema operacional" e "licença" puxam de
+volta para EC2.
