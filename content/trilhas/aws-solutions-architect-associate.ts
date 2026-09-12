@@ -13,9 +13,9 @@ import type { Trilha } from "../types";
  * sorteia pelo peso. Os temas usam `formato: prova`: cenários objetivos em vez
  * de perguntas orais.
  *
- * Onda 1: a prova, "como ler uma questão" e os três primeiros temas do
- * Domínio 1. Os demais domínios entram um por onda; o cronograma cresce junto
- * e o prazo-alvo com a trilha completa é 42 dias.
+ * Onda 1: a prova, "como ler uma questão" e o Domínio 1 (seis temas, em duas
+ * ondas). Os demais domínios entram um por onda; o cronograma cresce junto e
+ * o prazo-alvo com a trilha completa é 42 dias.
  */
 export const awsSolutionsArchitectAssociate: Trilha = {
   slug: "aws-solutions-architect-associate",
@@ -27,7 +27,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
   resumo:
     "O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 130 minutos",
-  prazoSugeridoDias: 7,
+  prazoSugeridoDias: 10,
   status: "disponivel",
   exame: {
     codigo: "SAA-C03",
@@ -52,12 +52,19 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       slug: "seguras",
       titulo: "Arquiteturas seguras",
       resumo:
-        "Acesso, rede e proteção de dados: IAM além do básico, o perímetro da VPC e a criptografia que a prova cobra em quase todo cenário.",
+        "Acesso, rede, dados, borda e detecção: IAM além do básico, o perímetro da VPC, criptografia, WAF e Shield, auditoria com CloudTrail e Config, e Cognito para usuários de aplicação.",
       status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 1 · Design Secure Architectures",
       pesoExame: 30,
-      temas: ["iam-avancado", "seguranca-de-rede-na-vpc", "protecao-de-dados-na-aws"],
+      temas: [
+        "iam-avancado",
+        "seguranca-de-rede-na-vpc",
+        "protecao-de-dados-na-aws",
+        "protecao-de-borda-waf-shield",
+        "deteccao-e-auditoria-na-aws",
+        "identidade-de-usuarios-e-acesso-a-apis",
+      ],
     },
     {
       slug: "resilientes",
@@ -115,20 +122,38 @@ export const awsSolutionsArchitectAssociate: Trilha = {
     },
     {
       dia: 5,
+      titulo: "Borda: WAF e Shield",
+      temas: ["protecao-de-borda-waf-shield"],
+      revisao: ["seguras"],
+    },
+    {
+      dia: 6,
+      titulo: "Detecção e auditoria",
+      temas: ["deteccao-e-auditoria-na-aws"],
+      revisao: ["seguras"],
+    },
+    {
+      dia: 7,
+      titulo: "Usuários de aplicação e APIs",
+      temas: ["identidade-de-usuarios-e-acesso-a-apis"],
+      revisao: ["seguras"],
+    },
+    {
+      dia: 8,
       titulo: "Cards e checkpoint do Domínio 1",
       temas: [],
       revisao: ["seguras"],
       nota: "Faça o checkpoint do módulo. Abaixo de 70%, releia o tema apontado antes de seguir.",
     },
     {
-      dia: 6,
+      dia: 9,
       titulo: "Primeira prova simulada",
       temas: [],
       revisao: ["seguras"],
       nota: "Prova simulada com o banco atual, no ritmo do exame: 2 minutos por questão. O que importa hoje é o tempo, não a nota.",
     },
     {
-      dia: 7,
+      dia: 10,
       titulo: "Revisão leve",
       temas: [],
       revisao: ["como-funciona-a-prova", "seguras"],

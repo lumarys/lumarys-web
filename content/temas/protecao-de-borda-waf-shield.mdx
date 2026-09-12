@@ -1,0 +1,252 @@
+---
+slug: protecao-de-borda-waf-shield
+titulo: "Proteção de borda: WAF, Shield e Firewall Manager"
+resumo: "O que protege a aplicação na borda e contra o quê: WAF filtra requisições HTTP por regra (injeção, bots, taxa por IP), Shield absorve DDoS na rede (Standard grátis, Advanced com resposta e proteção de custo) e Firewall Manager aplica os dois em várias contas. A prova cobra qual serviço para qual ataque."
+minutos: 30
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "É o cenário 'a aplicação está sob ataque' do Domínio 1, e ele tem sempre a mesma armadilha: WAF e Shield parecem sinônimos e não são. Quem sabe que WAF é camada 7 com regra e Shield é camada 3 e 4 contra volume elimina duas alternativas antes de ler o resto. A segunda armadilha é onde anexar: WAF não vai em EC2 nem em NLB."
+comoCai: "Uma aplicação atrás de um ALB sofre injeção de SQL e um pico de requisições de um mesmo IP. Qual serviço resolve com o MENOR esforço operacional?"
+feynman: "Explique em um minuto para alguém de negócio a diferença entre 'alguém está tentando invadir pelo formulário' e 'alguém está derrubando o site com volume', e por que cada um tem um serviço."
+preRequisitos: ["seguranca-de-rede-na-vpc"]
+errosComuns:
+  - "Usar Shield para injeção de SQL. Shield olha volume e padrão de rede, não o conteúdo da requisição HTTP; inspeção de conteúdo é WAF."
+  - "Anexar WAF a uma instância EC2 ou a um NLB. WAF se anexa a CloudFront, ALB, API Gateway, AppSync e Cognito; NLB e EC2 direto não têm WAF."
+  - "Achar que Shield Standard precisa ser ligado ou pago. Está ativo em toda conta, de graça, e cobre os ataques de rede mais comuns; a prova só pede Advanced quando há exigência explícita de resposta dedicada, proteção contra custo do ataque ou visibilidade avançada."
+  - "Tentar bloquear IP no WAF com regra normal quando o problema é volume de um mesmo cliente. A regra certa é a de taxa (rate-based), que bloqueia sozinha quem passa de N requisições em 5 minutos."
+  - "Configurar WAF conta por conta numa organização. Regras iguais em várias contas é Firewall Manager, que também aplica Shield Advanced e grupos de segurança em escala."
+  - "Esquecer que um grupo de segurança não substitui nada disso. Grupo de segurança filtra porta e origem; não lê HTTP nem absorve DDoS."
+preTeste:
+  - enunciado: "Uma aplicação web atrás de um Application Load Balancer recebe requisições com padrões de injeção de SQL em um formulário. Qual serviço deve ser usado para bloqueá-las?"
+    alternativas:
+      - texto: "AWS WAF com o conjunto de regras gerenciadas para injeção de SQL, anexado ao ALB."
+        correta: true
+        explicacao: "Inspeção do conteúdo da requisição HTTP é WAF, e o ALB é um dos pontos onde ele se anexa."
+      - texto: "AWS Shield Advanced."
+        correta: false
+        explicacao: "Shield trata DDoS por volume na rede; não lê o corpo do formulário."
+      - texto: "Um grupo de segurança negando a porta 80."
+        correta: false
+        explicacao: "Derruba o site inteiro e não distingue requisição boa de ruim."
+  - enunciado: "Uma empresa quer que as mesmas regras de WAF valham para todas as contas da organização, incluindo contas novas. Qual serviço atende?"
+    alternativas:
+      - texto: "AWS Firewall Manager, com uma política de WAF aplicada à organização."
+        correta: true
+        explicacao: "Gestão centralizada de WAF, Shield Advanced e grupos de segurança em várias contas é o papel do Firewall Manager."
+      - texto: "Uma SCP no Organizations que exige WAF."
+        correta: false
+        explicacao: "SCP limita permissões; não cria nem anexa regras de WAF."
+      - texto: "Copiar a Web ACL manualmente em cada conta."
+        correta: false
+        explicacao: "Funciona hoje e falha na próxima conta criada; é o oposto de gestão centralizada."
+videos:
+  - id: uSyNEvcVZkE
+    publicadoEm: "2022-01-18"
+    titulo: "Afinal o que é: AWS Shield, WAF e DDoS?"
+    canal: "Cafe com Cloud"
+    duracao: 30
+    porQue: "Explica DDoS antes de explicar os serviços, que é a ordem certa: sem entender o ataque, WAF e Shield parecem a mesma coisa. Anote em que camada cada um trabalha; é a distinção que a prova testa."
+  - id: gXB6-CJe8Ao
+    publicadoEm: "2026-06-07"
+    titulo: "AWS Security & Compliance Completo: WAF, Shield, GuardDuty, Macie, KMS e Security Hub"
+    canal: "Jean Diogo"
+    duracao: 31
+    porQue: "Complementar e feito para prova. Assista só o trecho de WAF, Shield e Firewall Manager; o resto do vídeo cobre os outros temas deste módulo."
+artigos:
+  - titulo: "What is AWS WAF?"
+    url: "https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html"
+    fonte: "AWS"
+  - titulo: "How AWS Shield and Shield Advanced work"
+    url: "https://docs.aws.amazon.com/waf/latest/developerguide/ddos-overview.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Firewall Manager?"
+    url: "https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "WAF, em uma linha."
+    verso: "Firewall de aplicação web: inspeciona requisições HTTP e HTTPS por regras (injeção, XSS, bots, geografia, taxa por IP). Camada 7."
+  - frente: "Shield, em uma linha."
+    verso: "Proteção contra DDoS na rede e no transporte. Standard: automático e gratuito em toda conta. Advanced: pago, com equipe de resposta, proteção contra custo do ataque e detecção avançada."
+  - frente: "Onde o WAF se anexa?"
+    verso: "CloudFront, Application Load Balancer, API Gateway, AppSync e Cognito. Não em NLB, não em EC2 direto."
+  - frente: "Regra de taxa (rate-based) do WAF."
+    verso: "Bloqueia automaticamente um IP que passa de N requisições numa janela de 5 minutos. É a resposta para 'um mesmo cliente está inundando a aplicação'."
+  - frente: "Regras gerenciadas do WAF."
+    verso: "Conjuntos prontos, mantidos pela AWS ou por parceiros, para injeção de SQL, XSS, bots conhecidos, IPs de reputação ruim. 'Menor esforço' aponta para elas em vez de regra escrita à mão."
+  - frente: "Quando o Shield Advanced é a resposta?"
+    verso: "Quando o enunciado exige resposta 24x7 de uma equipe, proteção contra o custo gerado pelo ataque (escala do Auto Scaling, tráfego) ou proteção para recursos específicos como Elastic IP e Global Accelerator."
+  - frente: "Firewall Manager, em uma linha."
+    verso: "Aplica políticas de WAF, Shield Advanced, grupos de segurança e Network Firewall em todas as contas do Organizations, inclusive as criadas depois."
+  - frente: "CloudFront na frente da aplicação: o que muda para a proteção?"
+    verso: "Absorve tráfego na borda, junta WAF e Shield no mesmo ponto e esconde a origem. É a resposta comum para 'proteger contra DDoS com menor esforço'."
+  - frente: "Grupo de segurança versus WAF."
+    verso: "Grupo de segurança filtra porta e origem, não lê HTTP. WAF lê a requisição. Um não substitui o outro."
+  - frente: "Como bloquear um país inteiro?"
+    verso: "Regra de geolocalização no WAF. Também dá com restrição geográfica do CloudFront, mas com WAF a regra fica auditável e combinável."
+drills:
+  - titulo: "Qual serviço para qual ataque?"
+    instrucao: "Para cada situação, diga qual serviço a prova espera."
+    opcoes: ["WAF", "Shield Advanced", "Firewall Manager", "Grupo de segurança"]
+    itens:
+      - enunciado: "Tentativas de injeção de SQL num formulário de login."
+        resposta: "WAF"
+        explicacao: "Inspeção de conteúdo HTTP é WAF, com regras gerenciadas."
+      - enunciado: "Ataque volumétrico de rede que faz o Auto Scaling subir dezenas de instâncias e a fatura explodir."
+        resposta: "Shield Advanced"
+        explicacao: "DDoS na rede com proteção contra o custo do ataque é o caso do Advanced."
+      - enunciado: "As regras de WAF precisam valer em todas as contas, inclusive nas que ainda vão ser criadas."
+        resposta: "Firewall Manager"
+        explicacao: "Gestão de políticas em escala na organização."
+      - enunciado: "Só as instâncias da camada web podem alcançar o banco na porta 3306."
+        resposta: "Grupo de segurança"
+        explicacao: "Porta e origem entre camadas é grupo de segurança; nada de HTTP aqui."
+      - enunciado: "Um mesmo IP faz 5.000 requisições por minuto a uma API."
+        resposta: "WAF"
+        explicacao: "Regra de taxa no WAF anexado ao API Gateway."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa executa uma aplicação web em instâncias EC2 atrás de um Application Load Balancer. A equipe detectou tentativas de injeção de SQL e cross-site scripting vindas de vários países. Qual solução bloqueia esses ataques com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Criar uma Web ACL no AWS WAF com os grupos de regras gerenciadas da AWS para injeção de SQL e XSS e associá-la ao ALB."
+        correta: true
+        explicacao: "WAF é o serviço para inspeção de requisição HTTP; as regras gerenciadas evitam escrever e manter regras próprias, que é o 'menor esforço'."
+      - texto: "Ativar o AWS Shield Advanced na conta."
+        correta: false
+        explicacao: "Shield protege contra DDoS por volume; não inspeciona o conteúdo das requisições."
+      - texto: "Escrever regras próprias no WAF para cada padrão de ataque conhecido."
+        correta: false
+        explicacao: "Funciona, mas é manutenção contínua. Com regras gerenciadas disponíveis, é o distrator de esforço."
+      - texto: "Configurar NACLs para bloquear os países de origem."
+        correta: false
+        explicacao: "NACL filtra por CIDR, não por país nem por conteúdo, e bloquear faixas de IP inteiras derruba usuário legítimo."
+  - tipo: unica
+    enunciado: "Uma aplicação sofreu um ataque DDoS volumétrico que fez o grupo de Auto Scaling crescer e gerou uma fatura inesperada. A diretoria exige proteção contra novos ataques, acesso a uma equipe de resposta e reembolso de custos causados por DDoS. Qual solução atende?"
+    alternativas:
+      - texto: "Assinar o AWS Shield Advanced e proteger os recursos expostos."
+        correta: true
+        explicacao: "Equipe de resposta, proteção contra o custo do ataque e detecção avançada são exatamente o que diferencia o Advanced do Standard."
+      - texto: "Confiar no AWS Shield Standard, que já está ativo."
+        correta: false
+        explicacao: "Standard protege contra os ataques comuns, mas não oferece equipe de resposta nem proteção de custo."
+      - texto: "Criar uma regra de taxa no AWS WAF."
+        correta: false
+        explicacao: "Ajuda contra abuso de um IP na camada 7, mas não cobre ataque volumétrico de rede nem os requisitos de resposta e custo."
+      - texto: "Limitar o tamanho máximo do grupo de Auto Scaling."
+        correta: false
+        explicacao: "Reduz a fatura derrubando a aplicação sob carga legítima também. Não é proteção."
+  - tipo: multipla
+    enunciado: "Uma API pública no API Gateway está sendo abusada por alguns clientes que fazem milhares de requisições por minuto, e a empresa quer bloquear automaticamente esses clientes sem afetar os demais. Quais DUAS ações compõem a solução?"
+    alternativas:
+      - texto: "Criar uma Web ACL no AWS WAF com uma regra de taxa (rate-based) e o limite de requisições por IP em 5 minutos."
+        correta: true
+        explicacao: "A regra de taxa bloqueia sozinha quem passa do limite e libera quando o volume cai."
+      - texto: "Associar a Web ACL ao estágio do API Gateway."
+        correta: true
+        explicacao: "WAF só age quando anexado ao recurso; API Gateway é um dos pontos suportados."
+      - texto: "Ativar o AWS Shield Advanced para a API."
+        correta: false
+        explicacao: "Não trata abuso por cliente na camada 7; o problema aqui é taxa por IP, não DDoS de rede."
+      - texto: "Adicionar uma NACL que bloqueie os IPs abusivos."
+        correta: false
+        explicacao: "Manual, não automático, e a lista de IPs muda; a regra de taxa faz isso sozinha."
+      - texto: "Reduzir o throttling global do estágio do API Gateway."
+        correta: false
+        explicacao: "Afeta todos os clientes igualmente, inclusive os legítimos."
+  - tipo: unica
+    enunciado: "Uma organização com 40 contas AWS quer garantir que toda aplicação exposta tenha uma Web ACL padrão do WAF e que contas criadas no futuro também recebam a proteção automaticamente. Qual serviço deve ser usado?"
+    alternativas:
+      - texto: "AWS Firewall Manager, com uma política de WAF aplicada às unidades organizacionais."
+        correta: true
+        explicacao: "Aplicação centralizada e automática de WAF em contas existentes e novas é o caso do Firewall Manager."
+      - texto: "AWS Config com uma regra que detecte ALBs sem WAF."
+        correta: false
+        explicacao: "Detecta e avisa, mas não aplica a proteção."
+      - texto: "Uma SCP que impeça a criação de ALB sem Web ACL."
+        correta: false
+        explicacao: "SCP não avalia se um ALB tem WAF; e mesmo que bloqueasse, não criaria a proteção."
+      - texto: "AWS CloudFormation StackSets com a Web ACL em cada conta."
+        correta: false
+        explicacao: "Cria a Web ACL, mas não a associa automaticamente a recursos novos nem cobre contas futuras sem trabalho adicional; o Firewall Manager faz as duas coisas."
+---
+
+## Em uma frase
+
+**WAF** lê a requisição HTTP e bloqueia por regra; **Shield** absorve DDoS por
+volume na rede (Standard grátis, Advanced com equipe e proteção de custo);
+**Firewall Manager** aplica os dois em todas as contas. A prova pergunta qual
+serviço para qual ataque e onde cada um se anexa.
+
+## Dois ataques, dois serviços
+
+A confusão que a prova explora é tratar WAF e Shield como a mesma coisa. Não
+são, e a diferença está na **camada**:
+
+<Comparativo
+  colunas={["", "WAF", "Shield Standard", "Shield Advanced"]}
+  linhas={[
+    ["Camada", "7: conteúdo HTTP", "3 e 4: rede e transporte", "3, 4 e 7 com detecção avançada"],
+    ["Contra o quê", "Injeção, XSS, bots, abuso por IP, geografia", "DDoS volumétrico comum (SYN flood, reflexão)", "DDoS grande e sofisticado"],
+    ["Custo", "Por Web ACL, regra e requisição", "Gratuito, ativo em toda conta", "Assinatura mensal com compromisso"],
+    ["Extras", "Regras gerenciadas, regra de taxa", "Nenhum", "Equipe de resposta 24x7, proteção contra custo do ataque, relatórios"],
+    ["Quando é a resposta", "Enunciado fala em requisição, formulário, padrão, IP abusivo", "Nunca precisa ser 'escolhido': já está lá", "Enunciado exige equipe, reembolso ou proteção de EIP e Global Accelerator"]
+  ]}
+/>
+
+<Termo nome="WAF">Web Application Firewall: inspeciona requisições HTTP e HTTPS e aplica regras de permitir, bloquear ou contar. Trabalha com Web ACLs anexadas a CloudFront, ALB, API Gateway, AppSync ou Cognito.</Termo>
+
+<Termo nome="Shield">Proteção contra DDoS. O Standard é automático e gratuito; o Advanced acrescenta equipe de resposta, proteção contra o custo gerado pelo ataque e detecção mais fina.</Termo>
+
+## Onde o WAF se anexa, e onde não
+
+A segunda armadilha é de topologia. O WAF **não** vai em instância EC2 nem
+em Network Load Balancer. Ele se anexa a:
+
+- **CloudFront**, o ponto mais comum: protege na borda, antes de o tráfego
+  chegar à região.
+- **Application Load Balancer**.
+- **API Gateway** (REST e HTTP).
+- **AppSync** e **Cognito** (user pool).
+
+Se o enunciado tem EC2 direto na internet e pede WAF, a resposta envolve pôr um
+ALB ou um CloudFront na frente primeiro.
+
+<Callout tipo="dica" titulo="Regra de taxa: o cenário mais repetido">
+"Um mesmo IP faz milhares de requisições" não é DDoS de rede; é abuso na
+camada 7. A resposta é a **regra de taxa** (rate-based) do WAF: bloqueia
+sozinha quem passa de N requisições em 5 minutos e libera quando o volume cai.
+Nada de NACL com lista de IPs, que é manual e envelhece.
+</Callout>
+
+## Regras gerenciadas: onde mora o "menor esforço"
+
+O WAF aceita regras escritas à mão, mas a prova prefere os **grupos de regras
+gerenciadas**: conjuntos mantidos pela AWS ou por parceiros para injeção de
+SQL, XSS, bots conhecidos, IPs de má reputação e regras por linguagem ou
+framework. Quando o enunciado diz "menor esforço operacional", a alternativa
+com regras gerenciadas vence a alternativa com regras próprias.
+
+## Firewall Manager: os dois em escala
+
+<Termo nome="Firewall Manager">Serviço que aplica políticas de WAF, Shield Advanced, grupos de segurança e Network Firewall em todas as contas do Organizations, inclusive nas criadas depois.</Termo>
+
+Cenário: "40 contas, todas as aplicações expostas precisam da mesma Web ACL,
+inclusive as futuras". Config detecta; SCP não sabe o que é WAF; StackSets
+cria mas não associa a recurso novo. O Firewall Manager faz os dois: cria e
+associa, hoje e nas contas de amanhã.
+
+<Callout tipo="atencao" titulo="O que a prova espera para 'DDoS com menor esforço'">
+CloudFront na frente da aplicação. Ele já absorve tráfego na borda, esconde a
+origem, e é onde WAF e Shield se aplicam no mesmo ponto. Muitos cenários de
+proteção terminam com "colocar CloudFront na frente" como a alternativa que
+resolve segurança e desempenho juntos.
+</Callout>
+
+## Como responder o cenário
+
+Primeiro, **que tipo de ataque**: conteúdo de requisição (WAF), volume de
+rede (Shield) ou abuso por cliente (regra de taxa no WAF)? Segundo, **onde o
+serviço se anexa**: se não há CloudFront, ALB ou API Gateway, a alternativa
+precisa criar um. Terceiro, **escala**: várias contas é Firewall Manager. E
+lembre: grupo de segurança e NACL não leem HTTP; quando aparecem como resposta
+para ataque de aplicação, são o distrator.

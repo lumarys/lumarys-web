@@ -24,6 +24,9 @@ Página: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/
 - [IAM além do básico](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/iam-avancado/): Como o IAM decide se uma chamada passa: a lógica de avaliação com negação explícita, políticas de identidade e de recurso, condições, roles entre contas, limites de permissão, SCPs do Organizations e federação com o Identity Center. É o que a SAA cobra em quase todo cenário de segurança.
 - [Segurança de rede na VPC](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/seguranca-de-rede-na-vpc/): O perímetro que a prova cobra em quase todo cenário de rede: grupos de segurança e NACLs, sub-redes públicas e privadas, NAT Gateway, VPC endpoints de gateway e de interface (PrivateLink), e o custo de cada escolha. Quem vem de dados erra aqui; é o módulo que mais vale estudar de propósito.
 - [Proteção de dados: KMS, criptografia e segredos](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/protecao-de-dados-na-aws/): Criptografia em repouso e em trânsito na AWS como a prova cobra: os tipos de chave do KMS, as opções de criptografia do S3, EBS e RDS, Secrets Manager contra Parameter Store, certificados no ACM e descoberta de dados sensíveis com o Macie.
+- [Proteção de borda: WAF, Shield e Firewall Manager](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/protecao-de-borda-waf-shield/): O que protege a aplicação na borda e contra o quê: WAF filtra requisições HTTP por regra (injeção, bots, taxa por IP), Shield absorve DDoS na rede (Standard grátis, Advanced com resposta e proteção de custo) e Firewall Manager aplica os dois em várias contas. A prova cobra qual serviço para qual ataque.
+- [Detecção e auditoria: CloudTrail, Config, GuardDuty e Security Hub](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/deteccao-e-auditoria-na-aws/): Quem fez o quê (CloudTrail), como o recurso está configurado e se está conforme (Config), o que parece ameaça (GuardDuty), o que está vulnerável (Inspector) e onde tudo isso se junta (Security Hub). A prova cobra qual serviço responde a cada pergunta e como proteger o próprio registro de auditoria.
+- [Usuários de aplicação e acesso a APIs: Cognito, API Gateway e acesso privado](https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/identidade-de-usuarios-e-acesso-a-apis/): Como a prova espera que uma aplicação autentique pessoas e proteja suas APIs: Cognito user pool para login e identity pool para credenciais temporárias, os autorizadores do API Gateway (Cognito, IAM, Lambda) e o acesso privado entre serviços. O erro clássico é dar usuário IAM a cliente de aplicativo.
 
 ## Engenharia de Analytics
 
@@ -560,6 +563,337 @@ simples que ainda cumpre o requisito.
 - Achar que dá para ligar criptografia num volume EBS ou numa instância RDS existente. Não dá: cria-se um snapshot, copia-se com criptografia e restaura-se. A prova adora esse detalhe.
 - Esquecer que o Macie descobre dados sensíveis, não os criptografa nem os protege. Ele classifica o que está no S3; a ação é sua.
 - Escolher CloudHSM sem o enunciado pedir. CloudHSM só é a resposta com exigência explícita de hardware dedicado ou de nível de conformidade que o KMS não cobre; fora isso, é o distrator caro.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Proteção de borda: WAF, Shield e Firewall Manager
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas seguras
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/protecao-de-borda-waf-shield/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** O que protege a aplicação na borda e contra o quê: WAF filtra requisições HTTP por regra (injeção, bots, taxa por IP), Shield absorve DDoS na rede (Standard grátis, Advanced com resposta e proteção de custo) e Firewall Manager aplica os dois em várias contas. A prova cobra qual serviço para qual ataque.
+
+**Por que cai na prova.** É o cenário 'a aplicação está sob ataque' do Domínio 1, e ele tem sempre a mesma armadilha: WAF e Shield parecem sinônimos e não são. Quem sabe que WAF é camada 7 com regra e Shield é camada 3 e 4 contra volume elimina duas alternativas antes de ler o resto. A segunda armadilha é onde anexar: WAF não vai em EC2 nem em NLB.
+
+**Como o entrevistador pergunta.** "Uma aplicação atrás de um ALB sofre injeção de SQL e um pico de requisições de um mesmo IP. Qual serviço resolve com o MENOR esforço operacional?"
+
+## Em uma frase
+
+**WAF** lê a requisição HTTP e bloqueia por regra; **Shield** absorve DDoS por
+volume na rede (Standard grátis, Advanced com equipe e proteção de custo);
+**Firewall Manager** aplica os dois em todas as contas. A prova pergunta qual
+serviço para qual ataque e onde cada um se anexa.
+
+## Dois ataques, dois serviços
+
+A confusão que a prova explora é tratar WAF e Shield como a mesma coisa. Não
+são, e a diferença está na **camada**:
+
+<Comparativo
+  colunas={["", "WAF", "Shield Standard", "Shield Advanced"]}
+  linhas={[
+    ["Camada", "7: conteúdo HTTP", "3 e 4: rede e transporte", "3, 4 e 7 com detecção avançada"],
+    ["Contra o quê", "Injeção, XSS, bots, abuso por IP, geografia", "DDoS volumétrico comum (SYN flood, reflexão)", "DDoS grande e sofisticado"],
+    ["Custo", "Por Web ACL, regra e requisição", "Gratuito, ativo em toda conta", "Assinatura mensal com compromisso"],
+    ["Extras", "Regras gerenciadas, regra de taxa", "Nenhum", "Equipe de resposta 24x7, proteção contra custo do ataque, relatórios"],
+    ["Quando é a resposta", "Enunciado fala em requisição, formulário, padrão, IP abusivo", "Nunca precisa ser 'escolhido': já está lá", "Enunciado exige equipe, reembolso ou proteção de EIP e Global Accelerator"]
+  ]}
+/>
+
+<Termo nome="WAF">Web Application Firewall: inspeciona requisições HTTP e HTTPS e aplica regras de permitir, bloquear ou contar. Trabalha com Web ACLs anexadas a CloudFront, ALB, API Gateway, AppSync ou Cognito.</Termo>
+
+<Termo nome="Shield">Proteção contra DDoS. O Standard é automático e gratuito; o Advanced acrescenta equipe de resposta, proteção contra o custo gerado pelo ataque e detecção mais fina.</Termo>
+
+## Onde o WAF se anexa, e onde não
+
+A segunda armadilha é de topologia. O WAF **não** vai em instância EC2 nem
+em Network Load Balancer. Ele se anexa a:
+
+- **CloudFront**, o ponto mais comum: protege na borda, antes de o tráfego
+  chegar à região.
+- **Application Load Balancer**.
+- **API Gateway** (REST e HTTP).
+- **AppSync** e **Cognito** (user pool).
+
+Se o enunciado tem EC2 direto na internet e pede WAF, a resposta envolve pôr um
+ALB ou um CloudFront na frente primeiro.
+
+<Callout tipo="dica" titulo="Regra de taxa: o cenário mais repetido">
+"Um mesmo IP faz milhares de requisições" não é DDoS de rede; é abuso na
+camada 7. A resposta é a **regra de taxa** (rate-based) do WAF: bloqueia
+sozinha quem passa de N requisições em 5 minutos e libera quando o volume cai.
+Nada de NACL com lista de IPs, que é manual e envelhece.
+</Callout>
+
+## Regras gerenciadas: onde mora o "menor esforço"
+
+O WAF aceita regras escritas à mão, mas a prova prefere os **grupos de regras
+gerenciadas**: conjuntos mantidos pela AWS ou por parceiros para injeção de
+SQL, XSS, bots conhecidos, IPs de má reputação e regras por linguagem ou
+framework. Quando o enunciado diz "menor esforço operacional", a alternativa
+com regras gerenciadas vence a alternativa com regras próprias.
+
+## Firewall Manager: os dois em escala
+
+<Termo nome="Firewall Manager">Serviço que aplica políticas de WAF, Shield Advanced, grupos de segurança e Network Firewall em todas as contas do Organizations, inclusive nas criadas depois.</Termo>
+
+Cenário: "40 contas, todas as aplicações expostas precisam da mesma Web ACL,
+inclusive as futuras". Config detecta; SCP não sabe o que é WAF; StackSets
+cria mas não associa a recurso novo. O Firewall Manager faz os dois: cria e
+associa, hoje e nas contas de amanhã.
+
+<Callout tipo="atencao" titulo="O que a prova espera para 'DDoS com menor esforço'">
+CloudFront na frente da aplicação. Ele já absorve tráfego na borda, esconde a
+origem, e é onde WAF e Shield se aplicam no mesmo ponto. Muitos cenários de
+proteção terminam com "colocar CloudFront na frente" como a alternativa que
+resolve segurança e desempenho juntos.
+</Callout>
+
+## Como responder o cenário
+
+Primeiro, **que tipo de ataque**: conteúdo de requisição (WAF), volume de
+rede (Shield) ou abuso por cliente (regra de taxa no WAF)? Segundo, **onde o
+serviço se anexa**: se não há CloudFront, ALB ou API Gateway, a alternativa
+precisa criar um. Terceiro, **escala**: várias contas é Firewall Manager. E
+lembre: grupo de segurança e NACL não leem HTTP; quando aparecem como resposta
+para ataque de aplicação, são o distrator.
+
+## Erros comuns
+
+- Usar Shield para injeção de SQL. Shield olha volume e padrão de rede, não o conteúdo da requisição HTTP; inspeção de conteúdo é WAF.
+- Anexar WAF a uma instância EC2 ou a um NLB. WAF se anexa a CloudFront, ALB, API Gateway, AppSync e Cognito; NLB e EC2 direto não têm WAF.
+- Achar que Shield Standard precisa ser ligado ou pago. Está ativo em toda conta, de graça, e cobre os ataques de rede mais comuns; a prova só pede Advanced quando há exigência explícita de resposta dedicada, proteção contra custo do ataque ou visibilidade avançada.
+- Tentar bloquear IP no WAF com regra normal quando o problema é volume de um mesmo cliente. A regra certa é a de taxa (rate-based), que bloqueia sozinha quem passa de N requisições em 5 minutos.
+- Configurar WAF conta por conta numa organização. Regras iguais em várias contas é Firewall Manager, que também aplica Shield Advanced e grupos de segurança em escala.
+- Esquecer que um grupo de segurança não substitui nada disso. Grupo de segurança filtra porta e origem; não lê HTTP nem absorve DDoS.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Detecção e auditoria: CloudTrail, Config, GuardDuty e Security Hub
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas seguras
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/deteccao-e-auditoria-na-aws/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Quem fez o quê (CloudTrail), como o recurso está configurado e se está conforme (Config), o que parece ameaça (GuardDuty), o que está vulnerável (Inspector) e onde tudo isso se junta (Security Hub). A prova cobra qual serviço responde a cada pergunta e como proteger o próprio registro de auditoria.
+
+**Por que cai na prova.** São cinco serviços com nomes parecidos e a prova monta o cenário para você confundir: 'quem apagou o bucket' é CloudTrail, 'o bucket está público' é Config, 'há uma instância minerando cripto' é GuardDuty. Quem tem a pergunta de cada serviço na cabeça responde em dez segundos; quem decorou descrições erra pelo menos uma.
+
+**Como o entrevistador pergunta.** "A equipe de segurança precisa saber quem alterou um grupo de segurança na semana passada e ser alertada se isso acontecer de novo. Quais serviços?"
+
+## Em uma frase
+
+Cada serviço responde a uma pergunta: **CloudTrail** diz quem fez o quê,
+**Config** diz como o recurso está e se está conforme, **GuardDuty** diz o
+que parece ameaça, **Inspector** diz o que está vulnerável e **Security Hub**
+mostra tudo junto. Acertar a pergunta é acertar a questão.
+
+## A pergunta de cada serviço
+
+<Comparativo
+  colunas={["Serviço", "Responde a", "Fonte", "Exemplo de cenário"]}
+  linhas={[
+    ["CloudTrail", "Quem fez o quê, quando, de onde", "Chamadas de API", "Quem apagou o bucket ontem"],
+    ["Config", "Como o recurso está e esteve; está conforme?", "Configuração dos recursos", "Quais buckets estão sem criptografia; como era o grupo de segurança antes"],
+    ["GuardDuty", "O que parece ameaça", "CloudTrail, VPC Flow Logs, DNS", "Instância minerando cripto; credencial usada de país estranho"],
+    ["Inspector", "O que está vulnerável", "Varredura de EC2, ECR, Lambda", "Instâncias com CVE crítica"],
+    ["Security Hub", "Onde vejo tudo e qual é a nota", "Achados dos outros", "Painel CIS de 25 contas"],
+    ["Detective", "O que aconteceu em volta deste achado", "Os mesmos logs, em grafo", "Investigar o achado do GuardDuty"]
+  ]}
+/>
+
+<Termo nome="CloudTrail">Registro de auditoria: cada chamada de API na conta, com identidade, origem, horário e parâmetros. É a resposta para toda pergunta que começa com "quem".</Termo>
+
+<Termo nome="Config">Inventário e histórico de configuração dos recursos, avaliado contra regras (conforme ou não), com remediação automática opcional. É a resposta para "como está" e "está conforme".</Termo>
+
+## CloudTrail: o que a prova cobra além do "quem"
+
+- **Retenção.** O histórico de eventos gratuito guarda 90 dias, só eventos de
+  gerenciamento. "Guardar por 7 anos" exige uma **trilha** gravando no S3.
+- **Eventos de dados.** GetObject no S3 e Invoke na Lambda não entram por
+  padrão; precisam ser ligados e custam. "Saber quem leu o objeto" pede
+  eventos de dados.
+- **Organização.** Uma trilha por conta é repetição. A **trilha de
+  organização**, criada na conta de gerenciamento, cobre todas as contas,
+  inclusive as futuras.
+- **Proteger o log.** O auditado não pode apagar a auditoria: bucket com
+  versionamento e MFA delete, validação de integridade de arquivo, política
+  restrita e uma **SCP negando StopLogging e DeleteTrail**.
+
+<Callout tipo="atencao" titulo="Ação ou estado?">
+"Quem alterou o grupo de segurança" é CloudTrail. "O grupo de segurança está
+com a porta 22 aberta" é Config. A questão que combina os dois ("descubra
+quem fez e alerte se voltar a acontecer") tem as duas alternativas certas: uma
+de cada. Quem escolhe só CloudTrail ou só Config erra a múltipla resposta.
+</Callout>
+
+## Config: regra e remediação
+
+Uma **regra** do Config avalia cada recurso de um tipo contra uma condição
+(bucket público, volume sem criptografia, porta 22 aberta) e marca conforme
+ou não. A prova cobra o passo seguinte: **remediação** automática, que
+executa um documento do Systems Manager para corrigir. "Detectar e corrigir
+sozinho" é Config com remediação; "detectar e avisar" é Config com
+EventBridge.
+
+## GuardDuty e Inspector: ameaça versus vulnerabilidade
+
+<Termo nome="GuardDuty">Detecção de ameaças: analisa continuamente CloudTrail, VPC Flow Logs e logs de DNS com inteligência de ameaças e aprendizado de máquina. Sem agente.</Termo>
+
+<Termo nome="Inspector">Varredura de vulnerabilidades: procura CVEs conhecidas e exposição de rede em instâncias EC2, imagens no ECR e funções Lambda.</Termo>
+
+A diferença que decide a questão: GuardDuty olha **comportamento** (o que a
+instância está fazendo agora); Inspector olha **estado** (que pacote
+desatualizado está instalado). "Sem instalar agente" aponta para GuardDuty.
+"CVE" ou "vulnerabilidade conhecida" aponta para Inspector.
+
+## Security Hub: o painel, não o detector
+
+O Security Hub **não detecta nada**. Ele agrega achados de GuardDuty,
+Inspector, Macie, Config e parceiros, em várias contas, e os avalia contra
+padrões como CIS e PCI, com pontuação. Quando o enunciado pede "painel único",
+"várias contas" ou "padrão de conformidade", é ele. Quando pede "investigar
+este achado em detalhe", é o **Detective**.
+
+<Callout tipo="dica" titulo="Resposta automática">
+O padrão que fecha muitos cenários: o achado (GuardDuty, Config, Security
+Hub) vira evento no **EventBridge**, que dispara uma Lambda, uma automação do
+Systems Manager ou uma notificação SNS. "Isolar a instância automaticamente
+ao detectar" é GuardDuty, EventBridge e Lambda trocando o grupo de segurança.
+</Callout>
+
+## Como responder o cenário
+
+Encontre o verbo da pergunta da equipe de segurança: **quem** (CloudTrail),
+**como está** ou **está conforme** (Config), **parece ameaça** (GuardDuty),
+**está vulnerável** (Inspector), **ver tudo junto** (Security Hub),
+**investigar** (Detective). Depois aplique o modificador: "todas as contas"
+puxa trilha de organização e Security Hub; "automaticamente" puxa EventBridge
+e remediação; "sem agente" puxa GuardDuty.
+
+## Erros comuns
+
+- Usar CloudTrail para saber se um recurso está conforme. CloudTrail registra chamadas de API, ou seja, ações; o estado e a conformidade do recurso são do Config.
+- Usar Config para descobrir quem fez uma alteração. Config mostra a linha do tempo de configuração do recurso; o 'quem' e o 'de onde' estão no evento do CloudTrail.
+- Confundir GuardDuty com Inspector. GuardDuty detecta comportamento suspeito a partir de logs (CloudTrail, VPC Flow Logs, DNS); Inspector procura vulnerabilidades conhecidas em instâncias, contêineres e funções Lambda.
+- Achar que o CloudTrail guarda tudo para sempre por padrão. O histórico de eventos gratuito cobre 90 dias; retenção longa exige uma trilha gravando no S3.
+- Deixar o log de auditoria desprotegido. Trilha em bucket sem versionamento, sem MFA delete e sem validação de integridade de arquivo pode ser apagada por quem está sendo auditado.
+- Ignorar a organização. Uma trilha por conta é trabalho repetido; a resposta para 'todas as contas' é a trilha de organização, criada na conta de gerenciamento.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Usuários de aplicação e acesso a APIs: Cognito, API Gateway e acesso privado
+
+Trilha: AWS Solutions Architect Associate · Módulo: Arquiteturas seguras
+URL: https://lumarys.com.br/trilhas/aws-solutions-architect-associate/seguras/identidade-de-usuarios-e-acesso-a-apis/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Como a prova espera que uma aplicação autentique pessoas e proteja suas APIs: Cognito user pool para login e identity pool para credenciais temporárias, os autorizadores do API Gateway (Cognito, IAM, Lambda) e o acesso privado entre serviços. O erro clássico é dar usuário IAM a cliente de aplicativo.
+
+**Por que cai na prova.** O Domínio 1 tem um cenário recorrente que não é sobre infraestrutura: 'a aplicação móvel precisa de login e de acesso ao S3'. A resposta errada mais comum é IAM para pessoas de fora da empresa. A prova quer Cognito, e quer que você saiba qual pool faz o quê. Depois vem a API: qual autorizador, e como manter tudo privado.
+
+**Como o entrevistador pergunta.** "Um aplicativo móvel precisa que usuários façam login com e-mail ou rede social e enviem fotos direto para o S3. Qual desenho atende com o MENOR esforço?"
+
+## Em uma frase
+
+Pessoas de fora entram pelo **Cognito**: o **user pool** autentica e emite
+tokens; o **identity pool** troca o token por credenciais temporárias da AWS.
+A API se protege com o **autorizador** certo (Cognito, Lambda ou IAM) e, se
+for interna, fica **privada** atrás de um endpoint de interface.
+
+## Duas piscinas, dois trabalhos
+
+O nome atrapalha: os dois "pools" do Cognito fazem coisas diferentes, e a
+prova sabe disso.
+
+<Comparativo
+  colunas={["", "User pool", "Identity pool"]}
+  linhas={[
+    ["Pergunta que responde", "Quem é você?", "O que você pode usar na AWS?"],
+    ["Entrada", "E-mail e senha, telefone, Google, Facebook, SAML, OIDC", "Um token: do user pool, de rede social, de SAML, ou nada (convidado)"],
+    ["Saída", "Tokens JWT: id, acesso, refresh", "Credenciais temporárias da AWS (STS) com uma role"],
+    ["Recursos", "Cadastro, MFA, recuperação de senha, verificação, grupos, UI hospedada", "Role autenticada e role de convidado"],
+    ["Usado por", "A aplicação e o API Gateway (autorizador)", "O aplicativo, para chamar S3, DynamoDB e outros direto"]
+  ]}
+/>
+
+<Termo nome="user pool">Diretório de usuários da aplicação. Faz cadastro, login, MFA e emite tokens JWT. Não dá acesso a serviços da AWS por si.</Termo>
+
+<Termo nome="identity pool">Troca um token de identidade por credenciais temporárias da AWS, com uma role. Aceita usuários autenticados e, opcionalmente, convidados.</Termo>
+
+O cenário-padrão: aplicativo com login e upload direto para o S3. User pool
+para o login, identity pool para o upload. Quem responde "só user pool" erra
+porque o S3 não aceita JWT; quem responde "usuário IAM" erra porque IAM não é
+para público.
+
+<Callout tipo="atencao" titulo="IAM ou Cognito?">
+IAM e Identity Center são para quem **opera** a conta: funcionários,
+serviços, automações. Cognito é para quem **usa** a aplicação: clientes, o
+público. Se o enunciado fala em "usuários do aplicativo" em quantidade
+indefinida, IAM está errado por definição.
+</Callout>
+
+## Os autorizadores do API Gateway
+
+<Comparativo
+  colunas={["Autorizador", "Valida", "Quando é a resposta"]}
+  linhas={[
+    ["Cognito user pool", "JWT emitido pelo pool, sem código", "Os usuários já estão num user pool: menor esforço"],
+    ["Lambda", "O que você programar", "Token de provedor de terceiro, regra de negócio, formato próprio"],
+    ["IAM", "Assinatura SigV4 de credenciais da AWS", "Chamadas de serviços, contas e identidades da AWS, não de público"]
+  ]}
+/>
+
+A regra de leitura: "sem manter código" e "usuários no Cognito" apontam para
+o autorizador Cognito; "provedor externo" ou "lógica personalizada" apontam
+para Lambda; "outro serviço" ou "outra conta" apontam para IAM.
+
+**Chave de API e plano de uso** não autenticam ninguém. Identificam o cliente
+(um parceiro comercial) e limitam taxa e cota por cliente. "Cada parceiro com
+seu limite" é plano de uso; "cada usuário autenticado" é autorizador.
+
+## API privada e acesso sem internet
+
+Uma API consumida só por serviços internos não precisa existir na internet.
+O desenho: API com endpoint do tipo **privado**, um **endpoint de interface**
+para o API Gateway na VPC, e a **política de recurso** da API restrita a esse
+endpoint. WAF não resolve isso: ele filtra o que já chegou.
+
+O mesmo princípio vale ao contrário: para consumir um serviço de terceiro
+exposto via **PrivateLink**, um endpoint de interface na sua VPC aponta para
+o serviço do provedor, e o tráfego não sai da rede da AWS.
+
+<Callout tipo="dica" titulo="Ordem das defesas numa API pública">
+Throttling do estágio primeiro (é nativo e grátis); planos de uso por cliente
+quando há parceiros; autorizador para saber quem chama; WAF anexado ao
+estágio para o que chama. Quando o enunciado pede "limitar abuso com o menor
+esforço", comece pelo throttling, não pelo WAF.
+</Callout>
+
+## Como responder o cenário
+
+Classifique quem acessa: **público** (Cognito), **funcionário** (Identity
+Center), **serviço** (role e autorizador IAM). Depois, o que ele precisa:
+**provar quem é** (user pool), **usar um serviço da AWS** (identity pool),
+**chamar a API** (autorizador). Por fim, a exposição: se ninguém de fora
+consome, a API é privada. Com essas três respostas, a alternativa certa sobra
+sozinha, e a que tem usuário IAM para cliente de aplicativo cai primeiro.
+
+## Erros comuns
+
+- Criar usuário IAM para cliente de aplicativo. Usuário IAM é para operar a conta; pessoas de fora, em número indefinido, entram por Cognito ou por federação.
+- Confundir user pool com identity pool. User pool autentica (login, cadastro, MFA, tokens JWT). Identity pool troca um token por credenciais temporárias da AWS para acessar S3, DynamoDB e afins.
+- Usar autorizador Lambda quando o Cognito basta. Autorizador Lambda é para lógica própria (token de terceiro, regra de negócio); com user pool do Cognito, o autorizador nativo é a resposta de menor esforço.
+- Achar que autorizador IAM serve para usuário final de aplicativo. Autorizador IAM (SigV4) é para chamadas de serviços, contas e identidades da AWS, não para o público.
+- Expor a API na internet quando só serviços internos a consomem. API privada com endpoint de interface na VPC mantém tudo fora da internet.
+- Ignorar que o API Gateway já limita taxa. Throttling e chaves de API com planos de uso resolvem 'limitar clientes' antes de qualquer WAF.
 
 ## Perguntas de sabatina e respostas-modelo
 

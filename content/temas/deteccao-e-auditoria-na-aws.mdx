@@ -1,0 +1,274 @@
+---
+slug: deteccao-e-auditoria-na-aws
+titulo: "Detecção e auditoria: CloudTrail, Config, GuardDuty e Security Hub"
+resumo: "Quem fez o quê (CloudTrail), como o recurso está configurado e se está conforme (Config), o que parece ameaça (GuardDuty), o que está vulnerável (Inspector) e onde tudo isso se junta (Security Hub). A prova cobra qual serviço responde a cada pergunta e como proteger o próprio registro de auditoria."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "São cinco serviços com nomes parecidos e a prova monta o cenário para você confundir: 'quem apagou o bucket' é CloudTrail, 'o bucket está público' é Config, 'há uma instância minerando cripto' é GuardDuty. Quem tem a pergunta de cada serviço na cabeça responde em dez segundos; quem decorou descrições erra pelo menos uma."
+comoCai: "A equipe de segurança precisa saber quem alterou um grupo de segurança na semana passada e ser alertada se isso acontecer de novo. Quais serviços?"
+feynman: "Explique em um minuto a diferença entre 'registrar tudo que aconteceu' e 'avisar quando algo parece errado', e por que uma empresa precisa dos dois."
+preRequisitos: ["iam-avancado"]
+errosComuns:
+  - "Usar CloudTrail para saber se um recurso está conforme. CloudTrail registra chamadas de API, ou seja, ações; o estado e a conformidade do recurso são do Config."
+  - "Usar Config para descobrir quem fez uma alteração. Config mostra a linha do tempo de configuração do recurso; o 'quem' e o 'de onde' estão no evento do CloudTrail."
+  - "Confundir GuardDuty com Inspector. GuardDuty detecta comportamento suspeito a partir de logs (CloudTrail, VPC Flow Logs, DNS); Inspector procura vulnerabilidades conhecidas em instâncias, contêineres e funções Lambda."
+  - "Achar que o CloudTrail guarda tudo para sempre por padrão. O histórico de eventos gratuito cobre 90 dias; retenção longa exige uma trilha gravando no S3."
+  - "Deixar o log de auditoria desprotegido. Trilha em bucket sem versionamento, sem MFA delete e sem validação de integridade de arquivo pode ser apagada por quem está sendo auditado."
+  - "Ignorar a organização. Uma trilha por conta é trabalho repetido; a resposta para 'todas as contas' é a trilha de organização, criada na conta de gerenciamento."
+preTeste:
+  - enunciado: "Um bucket S3 de produção foi apagado ontem à noite. A equipe precisa saber qual identidade executou a exclusão e de qual endereço IP. Qual serviço tem essa resposta?"
+    alternativas:
+      - texto: "AWS CloudTrail, no evento DeleteBucket."
+        correta: true
+        explicacao: "CloudTrail registra cada chamada de API com identidade, origem, horário e parâmetros. 'Quem fez' é sempre CloudTrail."
+      - texto: "AWS Config, na linha do tempo do bucket."
+        correta: false
+        explicacao: "Config mostra que o recurso deixou de existir e quando, mas o 'quem' vem do evento do CloudTrail ligado àquela mudança."
+      - texto: "Amazon GuardDuty."
+        correta: false
+        explicacao: "GuardDuty pode alertar se a exclusão parecer anômala, mas não é o registro de auditoria."
+  - enunciado: "Uma empresa precisa ser alertada sempre que um grupo de segurança permitir a porta 22 aberta para qualquer origem, e quer que a regra seja corrigida automaticamente. Qual serviço é o centro dessa solução?"
+    alternativas:
+      - texto: "AWS Config, com uma regra gerenciada e uma ação de remediação."
+        correta: true
+        explicacao: "Avaliar a configuração de um recurso contra uma regra e remediar é o papel do Config."
+      - texto: "AWS CloudTrail, com um filtro no log."
+        correta: false
+        explicacao: "CloudTrail vê a chamada que alterou o grupo, mas não avalia o estado resultante contra uma regra nem remedia."
+      - texto: "Amazon Inspector."
+        correta: false
+        explicacao: "Inspector avalia vulnerabilidades em instâncias e imagens, não regras de rede."
+videos:
+  - id: 2Is5uQ-3xqg
+    publicadoEm: "2024-10-11"
+    titulo: "AWS CloudTrail vs AWS Config: Monitoramento de Ações ou Conformidade de Recursos?"
+    canal: "Jean Diogo"
+    duracao: 5
+    porQue: "Cinco minutos sobre a distinção que mais cai: ação versus estado. Assista antes de ler; o tema constrói o resto do módulo em cima dessa diferença."
+  - id: mKJ_ndS8q6M
+    publicadoEm: "2022-03-11"
+    titulo: "Como começar com o Amazon GuardDuty - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 12
+    porQue: "Complementar, da própria AWS: mostra de onde o GuardDuty tira os achados (CloudTrail, Flow Logs, DNS), que é o que diferencia detecção de ameaça de varredura de vulnerabilidade."
+artigos:
+  - titulo: "What is AWS CloudTrail?"
+    url: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Config?"
+    url: "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon GuardDuty?"
+    url: "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Inspector?"
+    url: "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Security Hub?"
+    url: "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "A pergunta que cada serviço responde."
+    verso: "CloudTrail: quem fez o quê, quando e de onde. Config: como o recurso está e se está conforme. GuardDuty: o que parece ameaça. Inspector: o que está vulnerável. Security Hub: onde vejo tudo junto."
+  - frente: "CloudTrail versus Config, em uma linha."
+    verso: "CloudTrail registra ações (chamadas de API). Config registra estado (configuração ao longo do tempo) e avalia regras."
+  - frente: "Retenção do CloudTrail."
+    verso: "Histórico de eventos gratuito: 90 dias, só eventos de gerenciamento. Para mais tempo, eventos de dados (S3, Lambda) e análise, é preciso uma trilha gravando no S3."
+  - frente: "Como proteger a trilha do CloudTrail?"
+    verso: "Bucket com versionamento e MFA delete, validação de integridade de arquivo de log ligada, política de bucket restrita, e uma SCP que negue StopLogging e DeleteTrail."
+  - frente: "Trilha de organização."
+    verso: "Criada na conta de gerenciamento do Organizations, registra automaticamente todas as contas, inclusive as novas, num só bucket."
+  - frente: "Eventos de gerenciamento versus eventos de dados."
+    verso: "Gerenciamento: operações de controle (criar instância, alterar política); ligados por padrão. Dados: operações nos objetos (GetObject no S3, Invoke na Lambda); precisam ser ligados e custam."
+  - frente: "Config: o que é uma regra e o que é remediação?"
+    verso: "Regra avalia um recurso contra uma condição (bucket sem criptografia, porta 22 aberta) e marca conforme ou não. Remediação executa uma automação do Systems Manager para corrigir."
+  - frente: "GuardDuty: de onde vêm os achados?"
+    verso: "Análise contínua de CloudTrail, VPC Flow Logs, logs de DNS e, opcionalmente, S3, EKS e malware em EBS. Não exige agente."
+  - frente: "Inspector: o que ele varre?"
+    verso: "Vulnerabilidades conhecidas (CVEs) e exposição de rede em instâncias EC2, imagens de contêiner no ECR e funções Lambda. Usa o agente do Systems Manager no EC2."
+  - frente: "Security Hub, em uma linha."
+    verso: "Agrega achados de GuardDuty, Inspector, Macie, Config e parceiros num painel único, com padrões de conformidade (CIS, PCI) e pontuação. Não detecta nada sozinho."
+  - frente: "Detective: para que serve?"
+    verso: "Investigar um achado: monta a linha do tempo e o grafo de relações entre identidade, IP e recurso a partir dos mesmos logs. É o 'e depois?' do GuardDuty."
+  - frente: "Como reagir automaticamente a um achado?"
+    verso: "EventBridge recebe o achado (GuardDuty, Config, Security Hub) e dispara Lambda, Systems Manager ou SNS. É o padrão de resposta automática da prova."
+drills:
+  - titulo: "Qual serviço responde?"
+    instrucao: "Para cada pergunta da equipe de segurança, diga o serviço."
+    opcoes: ["CloudTrail", "Config", "GuardDuty", "Inspector", "Security Hub"]
+    itens:
+      - enunciado: "Quem desativou o MFA do usuário administrador?"
+        resposta: "CloudTrail"
+        explicacao: "Ação com identidade e horário: registro de auditoria."
+      - enunciado: "Quais buckets estão sem criptografia neste momento?"
+        resposta: "Config"
+        explicacao: "Estado atual de recursos contra uma regra."
+      - enunciado: "Uma instância está se comunicando com um servidor de comando e controle conhecido."
+        resposta: "GuardDuty"
+        explicacao: "Comportamento suspeito a partir de Flow Logs e DNS: detecção de ameaça."
+      - enunciado: "Quais instâncias têm uma CVE crítica sem correção?"
+        resposta: "Inspector"
+        explicacao: "Varredura de vulnerabilidade conhecida."
+      - enunciado: "Qual é a pontuação geral de segurança da organização contra o padrão CIS?"
+        resposta: "Security Hub"
+        explicacao: "Agregação e padrões de conformidade num painel só."
+      - enunciado: "Como estava a configuração do grupo de segurança antes da alteração de ontem?"
+        resposta: "Config"
+        explicacao: "Linha do tempo de configuração do recurso."
+perguntas:
+  - tipo: multipla
+    enunciado: "A equipe de segurança de uma empresa precisa identificar quem alterou as regras de um grupo de segurança na semana passada e receber um alerta automático se um grupo de segurança voltar a permitir SSH de qualquer origem. Quais DOIS serviços compõem a solução?"
+    alternativas:
+      - texto: "AWS CloudTrail, para localizar o evento de alteração com a identidade e a origem."
+        correta: true
+        explicacao: "'Quem alterou' é registro de chamada de API: CloudTrail."
+      - texto: "AWS Config, com uma regra gerenciada que avalie os grupos de segurança e notifique via EventBridge."
+        correta: true
+        explicacao: "Avaliar o estado do recurso contra uma condição e alertar é o Config."
+      - texto: "Amazon Inspector, para varrer os grupos de segurança."
+        correta: false
+        explicacao: "Inspector avalia vulnerabilidades em instâncias e imagens, não regras de grupo de segurança."
+      - texto: "Amazon Macie, para detectar a alteração."
+        correta: false
+        explicacao: "Macie classifica dados sensíveis em S3; não tem relação com grupos de segurança."
+      - texto: "AWS Shield Advanced, para alertar sobre a exposição."
+        correta: false
+        explicacao: "Shield trata DDoS; não avalia configuração."
+  - tipo: unica
+    enunciado: "Uma empresa com 25 contas no AWS Organizations precisa manter os registros de auditoria de todas as contas por 7 anos, em um só lugar, garantindo que nenhuma conta consiga apagar ou interromper o próprio registro. Qual solução atende com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Criar uma trilha de organização na conta de gerenciamento gravando em um bucket S3 central com versionamento e ciclo de vida, e uma SCP negando StopLogging e DeleteTrail."
+        correta: true
+        explicacao: "A trilha de organização cobre todas as contas automaticamente, inclusive novas; o bucket central com versionamento guarda; a SCP impede que uma conta desligue o registro."
+      - texto: "Criar uma trilha em cada conta gravando em um bucket local e copiar para uma conta central com um script diário."
+        correta: false
+        explicacao: "Repetição por conta, script para manter e uma janela em que a conta pode apagar o próprio log antes da cópia."
+      - texto: "Confiar no histórico de eventos do CloudTrail, que já está ativo em todas as contas."
+        correta: false
+        explicacao: "O histórico gratuito cobre só 90 dias e não sai da conta."
+      - texto: "Habilitar o AWS Config em todas as contas com retenção de 7 anos."
+        correta: false
+        explicacao: "Config guarda histórico de configuração, não o registro de quem fez cada chamada de API."
+  - tipo: unica
+    enunciado: "Uma empresa quer detectar automaticamente se alguma instância EC2 está sendo usada para mineração de criptomoedas ou se comunicando com endereços IP maliciosos conhecidos, sem instalar agentes. Qual serviço deve ser habilitado?"
+    alternativas:
+      - texto: "Amazon GuardDuty."
+        correta: true
+        explicacao: "Detecção de ameaça a partir de Flow Logs, DNS e CloudTrail, sem agente, com inteligência de ameaças. Mineração e comunicação com IP malicioso são achados clássicos dele."
+      - texto: "Amazon Inspector."
+        correta: false
+        explicacao: "Encontra vulnerabilidades conhecidas, não comportamento em tempo real, e usa agente no EC2."
+      - texto: "AWS CloudTrail."
+        correta: false
+        explicacao: "Registra chamadas de API; não analisa tráfego de rede nem DNS."
+      - texto: "AWS Config."
+        correta: false
+        explicacao: "Avalia configuração de recursos; não detecta atividade de rede suspeita."
+  - tipo: unica
+    enunciado: "Uma equipe de segurança recebe achados de GuardDuty, Inspector e Macie em várias contas e quer um painel único, com verificação automática contra o padrão CIS AWS Foundations e priorização. Qual serviço atende?"
+    alternativas:
+      - texto: "AWS Security Hub."
+        correta: true
+        explicacao: "Agregação de achados de vários serviços e contas, padrões de conformidade e pontuação num só lugar é o Security Hub."
+      - texto: "Amazon Detective."
+        correta: false
+        explicacao: "Detective investiga um achado específico com grafo e linha do tempo; não é painel de agregação."
+      - texto: "AWS Config."
+        correta: false
+        explicacao: "Config avalia recursos contra regras; não agrega achados de GuardDuty e Inspector."
+      - texto: "Amazon CloudWatch."
+        correta: false
+        explicacao: "CloudWatch é métricas, logs e alarmes; não entende achados de segurança nem padrões de conformidade."
+---
+
+## Em uma frase
+
+Cada serviço responde a uma pergunta: **CloudTrail** diz quem fez o quê,
+**Config** diz como o recurso está e se está conforme, **GuardDuty** diz o
+que parece ameaça, **Inspector** diz o que está vulnerável e **Security Hub**
+mostra tudo junto. Acertar a pergunta é acertar a questão.
+
+## A pergunta de cada serviço
+
+<Comparativo
+  colunas={["Serviço", "Responde a", "Fonte", "Exemplo de cenário"]}
+  linhas={[
+    ["CloudTrail", "Quem fez o quê, quando, de onde", "Chamadas de API", "Quem apagou o bucket ontem"],
+    ["Config", "Como o recurso está e esteve; está conforme?", "Configuração dos recursos", "Quais buckets estão sem criptografia; como era o grupo de segurança antes"],
+    ["GuardDuty", "O que parece ameaça", "CloudTrail, VPC Flow Logs, DNS", "Instância minerando cripto; credencial usada de país estranho"],
+    ["Inspector", "O que está vulnerável", "Varredura de EC2, ECR, Lambda", "Instâncias com CVE crítica"],
+    ["Security Hub", "Onde vejo tudo e qual é a nota", "Achados dos outros", "Painel CIS de 25 contas"],
+    ["Detective", "O que aconteceu em volta deste achado", "Os mesmos logs, em grafo", "Investigar o achado do GuardDuty"]
+  ]}
+/>
+
+<Termo nome="CloudTrail">Registro de auditoria: cada chamada de API na conta, com identidade, origem, horário e parâmetros. É a resposta para toda pergunta que começa com "quem".</Termo>
+
+<Termo nome="Config">Inventário e histórico de configuração dos recursos, avaliado contra regras (conforme ou não), com remediação automática opcional. É a resposta para "como está" e "está conforme".</Termo>
+
+## CloudTrail: o que a prova cobra além do "quem"
+
+- **Retenção.** O histórico de eventos gratuito guarda 90 dias, só eventos de
+  gerenciamento. "Guardar por 7 anos" exige uma **trilha** gravando no S3.
+- **Eventos de dados.** GetObject no S3 e Invoke na Lambda não entram por
+  padrão; precisam ser ligados e custam. "Saber quem leu o objeto" pede
+  eventos de dados.
+- **Organização.** Uma trilha por conta é repetição. A **trilha de
+  organização**, criada na conta de gerenciamento, cobre todas as contas,
+  inclusive as futuras.
+- **Proteger o log.** O auditado não pode apagar a auditoria: bucket com
+  versionamento e MFA delete, validação de integridade de arquivo, política
+  restrita e uma **SCP negando StopLogging e DeleteTrail**.
+
+<Callout tipo="atencao" titulo="Ação ou estado?">
+"Quem alterou o grupo de segurança" é CloudTrail. "O grupo de segurança está
+com a porta 22 aberta" é Config. A questão que combina os dois ("descubra
+quem fez e alerte se voltar a acontecer") tem as duas alternativas certas: uma
+de cada. Quem escolhe só CloudTrail ou só Config erra a múltipla resposta.
+</Callout>
+
+## Config: regra e remediação
+
+Uma **regra** do Config avalia cada recurso de um tipo contra uma condição
+(bucket público, volume sem criptografia, porta 22 aberta) e marca conforme
+ou não. A prova cobra o passo seguinte: **remediação** automática, que
+executa um documento do Systems Manager para corrigir. "Detectar e corrigir
+sozinho" é Config com remediação; "detectar e avisar" é Config com
+EventBridge.
+
+## GuardDuty e Inspector: ameaça versus vulnerabilidade
+
+<Termo nome="GuardDuty">Detecção de ameaças: analisa continuamente CloudTrail, VPC Flow Logs e logs de DNS com inteligência de ameaças e aprendizado de máquina. Sem agente.</Termo>
+
+<Termo nome="Inspector">Varredura de vulnerabilidades: procura CVEs conhecidas e exposição de rede em instâncias EC2, imagens no ECR e funções Lambda.</Termo>
+
+A diferença que decide a questão: GuardDuty olha **comportamento** (o que a
+instância está fazendo agora); Inspector olha **estado** (que pacote
+desatualizado está instalado). "Sem instalar agente" aponta para GuardDuty.
+"CVE" ou "vulnerabilidade conhecida" aponta para Inspector.
+
+## Security Hub: o painel, não o detector
+
+O Security Hub **não detecta nada**. Ele agrega achados de GuardDuty,
+Inspector, Macie, Config e parceiros, em várias contas, e os avalia contra
+padrões como CIS e PCI, com pontuação. Quando o enunciado pede "painel único",
+"várias contas" ou "padrão de conformidade", é ele. Quando pede "investigar
+este achado em detalhe", é o **Detective**.
+
+<Callout tipo="dica" titulo="Resposta automática">
+O padrão que fecha muitos cenários: o achado (GuardDuty, Config, Security
+Hub) vira evento no **EventBridge**, que dispara uma Lambda, uma automação do
+Systems Manager ou uma notificação SNS. "Isolar a instância automaticamente
+ao detectar" é GuardDuty, EventBridge e Lambda trocando o grupo de segurança.
+</Callout>
+
+## Como responder o cenário
+
+Encontre o verbo da pergunta da equipe de segurança: **quem** (CloudTrail),
+**como está** ou **está conforme** (Config), **parece ameaça** (GuardDuty),
+**está vulnerável** (Inspector), **ver tudo junto** (Security Hub),
+**investigar** (Detective). Depois aplique o modificador: "todas as contas"
+puxa trilha de organização e Security Hub; "automaticamente" puxa EventBridge
+e remediação; "sem agente" puxa GuardDuty.

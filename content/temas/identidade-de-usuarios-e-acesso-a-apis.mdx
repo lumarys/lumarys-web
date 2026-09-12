@@ -1,0 +1,264 @@
+---
+slug: identidade-de-usuarios-e-acesso-a-apis
+titulo: "Usuários de aplicação e acesso a APIs: Cognito, API Gateway e acesso privado"
+resumo: "Como a prova espera que uma aplicação autentique pessoas e proteja suas APIs: Cognito user pool para login e identity pool para credenciais temporárias, os autorizadores do API Gateway (Cognito, IAM, Lambda) e o acesso privado entre serviços. O erro clássico é dar usuário IAM a cliente de aplicativo."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-12"
+porQue: "O Domínio 1 tem um cenário recorrente que não é sobre infraestrutura: 'a aplicação móvel precisa de login e de acesso ao S3'. A resposta errada mais comum é IAM para pessoas de fora da empresa. A prova quer Cognito, e quer que você saiba qual pool faz o quê. Depois vem a API: qual autorizador, e como manter tudo privado."
+comoCai: "Um aplicativo móvel precisa que usuários façam login com e-mail ou rede social e enviem fotos direto para o S3. Qual desenho atende com o MENOR esforço?"
+feynman: "Explique em um minuto a diferença entre 'provar quem você é' e 'receber uma credencial temporária para usar um serviço', e por que o Cognito tem uma peça para cada."
+preRequisitos: ["iam-avancado"]
+errosComuns:
+  - "Criar usuário IAM para cliente de aplicativo. Usuário IAM é para operar a conta; pessoas de fora, em número indefinido, entram por Cognito ou por federação."
+  - "Confundir user pool com identity pool. User pool autentica (login, cadastro, MFA, tokens JWT). Identity pool troca um token por credenciais temporárias da AWS para acessar S3, DynamoDB e afins."
+  - "Usar autorizador Lambda quando o Cognito basta. Autorizador Lambda é para lógica própria (token de terceiro, regra de negócio); com user pool do Cognito, o autorizador nativo é a resposta de menor esforço."
+  - "Achar que autorizador IAM serve para usuário final de aplicativo. Autorizador IAM (SigV4) é para chamadas de serviços, contas e identidades da AWS, não para o público."
+  - "Expor a API na internet quando só serviços internos a consomem. API privada com endpoint de interface na VPC mantém tudo fora da internet."
+  - "Ignorar que o API Gateway já limita taxa. Throttling e chaves de API com planos de uso resolvem 'limitar clientes' antes de qualquer WAF."
+preTeste:
+  - enunciado: "Um aplicativo móvel com milhares de usuários precisa que eles façam login com e-mail e senha e, depois, enviem arquivos diretamente para um bucket S3. Qual combinação atende?"
+    alternativas:
+      - texto: "Cognito user pool para o login e identity pool para trocar o token por credenciais temporárias com uma role que permite gravar no bucket."
+        correta: true
+        explicacao: "Autenticação no user pool; credencial de AWS pelo identity pool. É o desenho padrão para aplicativo acessando serviço da AWS."
+      - texto: "Um usuário IAM por pessoa, com chaves de acesso embutidas no aplicativo."
+        correta: false
+        explicacao: "Milhares de usuários IAM e chaves no app: o antipadrão que a prova sempre pune."
+      - texto: "Cognito user pool apenas, com o token JWT enviado ao S3."
+        correta: false
+        explicacao: "O S3 não aceita JWT do Cognito; ele precisa de credenciais da AWS, que vêm do identity pool."
+  - enunciado: "Uma API REST no API Gateway é consumida por um aplicativo cujos usuários se autenticam num Cognito user pool. Qual autorizador exige MENOS esforço para proteger a API?"
+    alternativas:
+      - texto: "Autorizador do tipo Cognito user pool, validando o token JWT."
+        correta: true
+        explicacao: "Nativo, sem código: o API Gateway valida o token do user pool sozinho."
+      - texto: "Autorizador Lambda que valide o token."
+        correta: false
+        explicacao: "Funciona, mas é código para manter, e o autorizador nativo já faz isso."
+      - texto: "Autorizador IAM com credenciais assinadas."
+        correta: false
+        explicacao: "Exige credenciais da AWS no cliente; é para chamadas de serviço, não de usuário final."
+videos:
+  - id: p90-83IkkcE
+    publicadoEm: "2025-05-12"
+    titulo: "Módulo 23: Amazon Cognito: Autenticação, Autorização e Diferença entre User Pool e Identity Pool"
+    canal: "Jean Diogo"
+    duracao: 8
+    porQue: "Feito para a prova, em oito minutos: a distinção user pool versus identity pool é exatamente o que a SAA testa. Anote qual dos dois devolve credencial da AWS."
+  - id: A8Naua_2PMA
+    publicadoEm: "2023-05-16"
+    titulo: "Tech Pills - Configurando Autenticação com o Amazon Cognito - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 18
+    porQue: "Complementar, da própria AWS: vê o user pool sendo configurado, com cadastro, login e o token que sai dele. Ajuda a visualizar o que o autorizador do API Gateway valida."
+artigos:
+  - titulo: "What is Amazon Cognito?"
+    url: "https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html"
+    fonte: "AWS"
+  - titulo: "Control access to a REST API using Amazon Cognito user pools as authorizer"
+    url: "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-integrate-with-cognito.html"
+    fonte: "AWS"
+  - titulo: "Use API Gateway Lambda authorizers"
+    url: "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html"
+    fonte: "AWS"
+  - titulo: "Private REST APIs in API Gateway"
+    url: "https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-private-apis.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "User pool, em uma linha."
+    verso: "Diretório de usuários da aplicação: cadastro, login com e-mail, telefone ou rede social, MFA, recuperação de senha. Devolve tokens JWT (id, acesso, refresh)."
+  - frente: "Identity pool, em uma linha."
+    verso: "Troca um token (do user pool, de rede social ou de SAML) por credenciais temporárias da AWS via STS, com uma role. É o que permite ao aplicativo chamar S3 ou DynamoDB direto."
+  - frente: "Quando usar Cognito em vez de IAM?"
+    verso: "Sempre que os usuários são pessoas de fora da operação da conta: clientes de aplicativo, público. IAM e Identity Center são para quem opera a AWS."
+  - frente: "Identity pool aceita usuário não autenticado?"
+    verso: "Sim: identidade de convidado com uma role separada e mais restrita. É a resposta para 'permitir leitura pública limitada sem login'."
+  - frente: "Os três autorizadores do API Gateway."
+    verso: "Cognito user pool: valida JWT do pool, sem código. Lambda: lógica própria, para token de terceiro ou regra de negócio. IAM: assinatura SigV4, para serviços e identidades da AWS."
+  - frente: "Chave de API e plano de uso."
+    verso: "Identificam o cliente e limitam taxa e cota por cliente. Não são autenticação de usuário; são controle de consumo."
+  - frente: "API privada no API Gateway."
+    verso: "Endpoint do tipo privado, acessível só por um endpoint de interface na VPC, com política de recurso que restringe ao endpoint. Nada sai para a internet."
+  - frente: "Como um serviço na VPC chama uma API de terceiro exposta via PrivateLink?"
+    verso: "Endpoint de interface na sua VPC apontando para o serviço do provedor. O tráfego fica na rede da AWS; o provedor expõe via Network Load Balancer."
+  - frente: "Federação SAML para pessoas da empresa acessarem a AWS."
+    verso: "IAM Identity Center com o diretório corporativo. Cognito é para usuários da aplicação, não para funcionários acessando o console."
+  - frente: "Throttling do API Gateway."
+    verso: "Limite de taxa e rajada por estágio, por método e por plano de uso. É a primeira linha contra abuso, antes do WAF."
+  - frente: "Como proteger a API contra ataques de aplicação?"
+    verso: "WAF anexado ao estágio do API Gateway (REST) ou ao CloudFront na frente. Autorizador cuida de quem entra; WAF cuida do que entra."
+drills:
+  - titulo: "Qual peça resolve?"
+    instrucao: "Para cada necessidade, diga a peça esperada na prova."
+    opcoes: ["User pool", "Identity pool", "Autorizador Cognito", "Autorizador Lambda", "Autorizador IAM", "API privada"]
+    itens:
+      - enunciado: "Login com Google e Facebook num aplicativo, com MFA opcional."
+        resposta: "User pool"
+        explicacao: "Autenticação e diretório de usuários, com provedores sociais."
+      - enunciado: "O aplicativo, já logado, precisa gravar direto num bucket S3."
+        resposta: "Identity pool"
+        explicacao: "Credenciais temporárias da AWS a partir do token."
+      - enunciado: "Proteger a API validando o token do próprio Cognito, sem escrever código."
+        resposta: "Autorizador Cognito"
+        explicacao: "Nativo e sem código."
+      - enunciado: "A API precisa aceitar tokens emitidos por um provedor de identidade de terceiro, com regra própria."
+        resposta: "Autorizador Lambda"
+        explicacao: "Lógica personalizada de validação."
+      - enunciado: "Um serviço interno em outra conta chama a API assinando as requisições."
+        resposta: "Autorizador IAM"
+        explicacao: "SigV4 para identidades da AWS."
+      - enunciado: "A API só deve ser alcançável de dentro da VPC, nunca pela internet."
+        resposta: "API privada"
+        explicacao: "Endpoint privado com endpoint de interface."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa está lançando um aplicativo móvel para o público. Os usuários precisam se cadastrar com e-mail, fazer login com redes sociais e enviar fotos diretamente para o Amazon S3. Qual solução atende com o MENOR esforço operacional?"
+    alternativas:
+      - texto: "Cognito user pool com provedores sociais para o cadastro e login, e identity pool para fornecer credenciais temporárias com uma role que permite gravar no bucket."
+        correta: true
+        explicacao: "Cadastro, login social e MFA no user pool; credenciais da AWS pelo identity pool. Sem código de autenticação próprio e sem chave no aplicativo."
+      - texto: "Criar usuários IAM para cada pessoa e distribuir chaves de acesso pelo aplicativo."
+        correta: false
+        explicacao: "Usuário IAM não é para público, e chave no aplicativo é o antipadrão da prova."
+      - texto: "Desenvolver um serviço próprio de login em EC2 e um proxy para o S3."
+        correta: false
+        explicacao: "Funciona, mas é o máximo de esforço: código de autenticação, servidor e proxy para manter."
+      - texto: "Tornar o bucket público para gravação e validar as fotos depois."
+        correta: false
+        explicacao: "Bucket público para escrita é exposição total; nunca é resposta."
+  - tipo: unica
+    enunciado: "Uma API REST no API Gateway é chamada por um portal web cujos usuários se autenticam em um Cognito user pool. A empresa quer que só usuários autenticados chamem a API, sem manter código de autorização. Qual configuração atende?"
+    alternativas:
+      - texto: "Um autorizador do tipo Cognito user pool no API Gateway, com o portal enviando o token JWT no cabeçalho."
+        correta: true
+        explicacao: "O API Gateway valida o token do pool nativamente. Zero código de autorização."
+      - texto: "Um autorizador Lambda que consulte o user pool a cada requisição."
+        correta: false
+        explicacao: "Reimplementa o que o autorizador nativo já faz, com código e latência a mais."
+      - texto: "Autorização IAM, com o portal assinando as requisições."
+        correta: false
+        explicacao: "Exigiria credenciais da AWS no navegador de cada usuário; é o mecanismo para serviços, não para público."
+      - texto: "Chaves de API distribuídas aos usuários."
+        correta: false
+        explicacao: "Chave de API identifica cliente e limita consumo; não autentica pessoa."
+  - tipo: multipla
+    enunciado: "Uma empresa tem uma API interna no API Gateway consumida apenas por microsserviços que rodam em uma VPC. A política de segurança exige que a API não seja alcançável pela internet. Quais DUAS configurações são necessárias?"
+    alternativas:
+      - texto: "Configurar a API com endpoint do tipo privado."
+        correta: true
+        explicacao: "API privada não recebe tráfego da internet."
+      - texto: "Criar um endpoint de interface para o API Gateway na VPC e restringir a política de recurso da API a esse endpoint."
+        correta: true
+        explicacao: "É por onde os microsserviços chegam à API privada, e a política de recurso fecha o acesso a esse caminho."
+      - texto: "Anexar um WAF à API para bloquear tráfego externo."
+        correta: false
+        explicacao: "WAF filtra requisições que já chegaram; não tira a API da internet."
+      - texto: "Configurar um NAT Gateway para os microsserviços."
+        correta: false
+        explicacao: "NAT dá saída para a internet; o objetivo é justamente não passar por ela."
+      - texto: "Usar um autorizador Lambda que verifique o IP de origem."
+        correta: false
+        explicacao: "A API continuaria pública, só recusando requisições depois de recebê-las."
+  - tipo: unica
+    enunciado: "Uma empresa expõe uma API pública no API Gateway para parceiros comerciais e quer que cada parceiro tenha um limite próprio de requisições por segundo e uma cota mensal, além de identificar qual parceiro faz cada chamada. Qual recurso do API Gateway atende?"
+    alternativas:
+      - texto: "Chaves de API associadas a planos de uso, com throttling e cota por plano."
+        correta: true
+        explicacao: "Plano de uso é exatamente limite e cota por cliente; a chave identifica o parceiro."
+      - texto: "Um autorizador Cognito com um grupo por parceiro."
+        correta: false
+        explicacao: "Autentica usuários; não define cota nem taxa por cliente."
+      - texto: "AWS WAF com uma regra de taxa por IP."
+        correta: false
+        explicacao: "Limita por IP, não por parceiro, e não tem cota mensal."
+      - texto: "Throttling global do estágio."
+        correta: false
+        explicacao: "Vale igual para todos; não distingue parceiros."
+---
+
+## Em uma frase
+
+Pessoas de fora entram pelo **Cognito**: o **user pool** autentica e emite
+tokens; o **identity pool** troca o token por credenciais temporárias da AWS.
+A API se protege com o **autorizador** certo (Cognito, Lambda ou IAM) e, se
+for interna, fica **privada** atrás de um endpoint de interface.
+
+## Duas piscinas, dois trabalhos
+
+O nome atrapalha: os dois "pools" do Cognito fazem coisas diferentes, e a
+prova sabe disso.
+
+<Comparativo
+  colunas={["", "User pool", "Identity pool"]}
+  linhas={[
+    ["Pergunta que responde", "Quem é você?", "O que você pode usar na AWS?"],
+    ["Entrada", "E-mail e senha, telefone, Google, Facebook, SAML, OIDC", "Um token: do user pool, de rede social, de SAML, ou nada (convidado)"],
+    ["Saída", "Tokens JWT: id, acesso, refresh", "Credenciais temporárias da AWS (STS) com uma role"],
+    ["Recursos", "Cadastro, MFA, recuperação de senha, verificação, grupos, UI hospedada", "Role autenticada e role de convidado"],
+    ["Usado por", "A aplicação e o API Gateway (autorizador)", "O aplicativo, para chamar S3, DynamoDB e outros direto"]
+  ]}
+/>
+
+<Termo nome="user pool">Diretório de usuários da aplicação. Faz cadastro, login, MFA e emite tokens JWT. Não dá acesso a serviços da AWS por si.</Termo>
+
+<Termo nome="identity pool">Troca um token de identidade por credenciais temporárias da AWS, com uma role. Aceita usuários autenticados e, opcionalmente, convidados.</Termo>
+
+O cenário-padrão: aplicativo com login e upload direto para o S3. User pool
+para o login, identity pool para o upload. Quem responde "só user pool" erra
+porque o S3 não aceita JWT; quem responde "usuário IAM" erra porque IAM não é
+para público.
+
+<Callout tipo="atencao" titulo="IAM ou Cognito?">
+IAM e Identity Center são para quem **opera** a conta: funcionários,
+serviços, automações. Cognito é para quem **usa** a aplicação: clientes, o
+público. Se o enunciado fala em "usuários do aplicativo" em quantidade
+indefinida, IAM está errado por definição.
+</Callout>
+
+## Os autorizadores do API Gateway
+
+<Comparativo
+  colunas={["Autorizador", "Valida", "Quando é a resposta"]}
+  linhas={[
+    ["Cognito user pool", "JWT emitido pelo pool, sem código", "Os usuários já estão num user pool: menor esforço"],
+    ["Lambda", "O que você programar", "Token de provedor de terceiro, regra de negócio, formato próprio"],
+    ["IAM", "Assinatura SigV4 de credenciais da AWS", "Chamadas de serviços, contas e identidades da AWS, não de público"]
+  ]}
+/>
+
+A regra de leitura: "sem manter código" e "usuários no Cognito" apontam para
+o autorizador Cognito; "provedor externo" ou "lógica personalizada" apontam
+para Lambda; "outro serviço" ou "outra conta" apontam para IAM.
+
+**Chave de API e plano de uso** não autenticam ninguém. Identificam o cliente
+(um parceiro comercial) e limitam taxa e cota por cliente. "Cada parceiro com
+seu limite" é plano de uso; "cada usuário autenticado" é autorizador.
+
+## API privada e acesso sem internet
+
+Uma API consumida só por serviços internos não precisa existir na internet.
+O desenho: API com endpoint do tipo **privado**, um **endpoint de interface**
+para o API Gateway na VPC, e a **política de recurso** da API restrita a esse
+endpoint. WAF não resolve isso: ele filtra o que já chegou.
+
+O mesmo princípio vale ao contrário: para consumir um serviço de terceiro
+exposto via **PrivateLink**, um endpoint de interface na sua VPC aponta para
+o serviço do provedor, e o tráfego não sai da rede da AWS.
+
+<Callout tipo="dica" titulo="Ordem das defesas numa API pública">
+Throttling do estágio primeiro (é nativo e grátis); planos de uso por cliente
+quando há parceiros; autorizador para saber quem chama; WAF anexado ao
+estágio para o que chama. Quando o enunciado pede "limitar abuso com o menor
+esforço", comece pelo throttling, não pelo WAF.
+</Callout>
+
+## Como responder o cenário
+
+Classifique quem acessa: **público** (Cognito), **funcionário** (Identity
+Center), **serviço** (role e autorizador IAM). Depois, o que ele precisa:
+**provar quem é** (user pool), **usar um serviço da AWS** (identity pool),
+**chamar a API** (autorizador). Por fim, a exposição: se ninguém de fora
+consome, a API é privada. Com essas três respostas, a alternativa certa sobra
+sozinha, e a que tem usuário IAM para cliente de aplicativo cai primeiro.

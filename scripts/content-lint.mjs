@@ -24,6 +24,15 @@ const vistos = new Set();
 const termos = new Map();
 
 for (const { arquivo, dados, corpo } of temas) {
+  // O schema em content/types.ts limita o resumo a 320 caracteres (meta
+  // description e llms.txt). O build já recusa; conferir aqui evita descobrir
+  // depois de 40 segundos de build.
+  if (typeof dados.resumo === "string" && (dados.resumo.length < 40 || dados.resumo.length > 320)) {
+    erros.push(
+      `${arquivo}: resumo com ${dados.resumo.length} caracteres; o schema exige entre 40 e 320.`,
+    );
+  }
+
   for (const [padrao, oque] of PROIBIDOS) {
     if (padrao.test(corpo)) erros.push(`${arquivo}: ${oque}.`);
   }
