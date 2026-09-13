@@ -7,7 +7,7 @@ nivel: avancado
 porQue: "É o tema em que a sabatina para de perguntar conceito e começa a perguntar diagnóstico. Quem sabe nomear shuffle, skew e broadcast e dizer como confirmaria cada hipótese na Spark UI mostra que já operou job em produção."
 comoCai: "Seu job passou de 10 para 40 minutos sem mudar o código. Por onde começa?"
 feynman: "Explique para um gestor por que redistribuir dados entre máquinas é a parte cara de um processamento distribuído, usando uma analogia sem falar em Spark."
-preRequisitos: ["big-data"]
+preRequisitos: ["spark-rdd"]
 errosComuns:
   - "Culpar o cluster antes de olhar o plano e a Spark UI. Job que dobra de tempo sem mudança de código quase sempre mudou de dado: volume, distribuição de chave ou quantidade de arquivos."
   - "Usar repartition onde coalesce bastava. Repartition dispara shuffle completo; coalesce só junta partições existentes e é a escolha certa para reduzir número de arquivos de saída."

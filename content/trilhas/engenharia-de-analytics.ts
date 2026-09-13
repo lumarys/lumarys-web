@@ -18,6 +18,11 @@ import type { Trilha } from "../types";
  * compartilhados com a trilha de Dados: um tema é um estudo só, e o progresso
  * conta nas duas.
  *
+ * A ordem dos módulos é a da ementa recebida. O cronograma não a segue à
+ * risca: ele respeita os pré-requisitos declarados nos temas (banco de dados
+ * antes de Redshift, orquestração antes de CI/CD, o mapa das arquiteturas
+ * antes dos princípios do Mesh), e o content-lint confere isso a cada build.
+ *
  * O nome da instituição não aparece em lugar nenhum: não temos autorização
  * para usá-lo, e o conteúdo vale sem ele.
  */
@@ -96,10 +101,10 @@ export const engenhariaDeAnalytics: Trilha = {
       status: "disponivel",
       oficial: false,
       temas: [
-        "cicd-para-dados-e-dashboards",
-        "ambientes-e-infraestrutura-como-codigo",
         "orquestracao",
         "dataops-e-observabilidade",
+        "ambientes-e-infraestrutura-como-codigo",
+        "cicd-para-dados-e-dashboards",
       ],
     },
     {
@@ -123,9 +128,9 @@ export const engenhariaDeAnalytics: Trilha = {
       status: "disponivel",
       oficial: false,
       temas: [
+        "arquiteturas-de-dados",
         "principios-do-data-mesh",
         "contratos-de-dados-e-plataforma",
-        "arquiteturas-de-dados",
       ],
     },
     {
@@ -151,13 +156,23 @@ export const engenhariaDeAnalytics: Trilha = {
       temas: ["big-data", "olap-oltp-etl", "data-centric-data-driven"],
       nota: "Leia a página de método antes de começar. Se você já fez a trilha de Dados, estes temas estão concluídos aqui também: use o dia para os cards.",
     },
-    { dia: 2, titulo: "Hadoop", temas: ["hadoop-arquitetura", "mapreduce"] },
+    {
+      dia: 2,
+      titulo: "Hadoop",
+      temas: ["hadoop-arquitetura", "mapreduce"],
+      nota: "Para Analytics, o que a banca quer daqui é o vocabulário e o porquê histórico: por que o processamento foi para perto do dado e por que o object storage tomou o lugar do HDFS. Não gaste o dia em detalhe de operação.",
+    },
     {
       dia: 3,
       titulo: "Processamento de dados",
       temas: ["batch-vs-stream", "etl-vs-elt", "particionamento-de-dados"],
     },
-    { dia: 4, titulo: "Spark", temas: ["spark-introducao", "spark-rdd"] },
+    {
+      dia: 4,
+      titulo: "Spark",
+      temas: ["spark-introducao", "spark-rdd"],
+      nota: "Fique com o modelo mental (driver, executores, avaliação preguiçosa, narrow e wide) e com o que ele explica sobre uma consulta lenta. RDD é contexto: a pergunta de Analytics é sobre DataFrame e SQL.",
+    },
     {
       dia: 5,
       titulo: "Onde o número nasce e onde ele é oficial",
@@ -169,6 +184,7 @@ export const engenhariaDeAnalytics: Trilha = {
       titulo: "Tipos de dados",
       temas: ["classificacao-tipos-dados", "xml", "json"],
       revisao: ["big-data"],
+      nota: "Aqui a classificação vale pelo efeito na métrica e no gráfico: nominal não tem média, ordinal não tem distância, e o campo aninhado do JSON precisa virar linha antes de virar indicador.",
     },
     {
       dia: 7,
@@ -186,87 +202,92 @@ export const engenhariaDeAnalytics: Trilha = {
     },
     {
       dia: 9,
-      titulo: "A pilha analítica na AWS",
-      temas: ["aws-para-dados"],
+      titulo: "Relacional, NoSQL e consistência",
+      temas: ["relacional-vs-nosql-e-consistencia"],
       revisao: ["big-data"],
-      nota: "Tema compartilhado com a trilha de Dados: se você já o concluiu lá, ele já conta aqui. Use o dia para os cards e o drill.",
+      nota: "Banco de dados vem antes de AWS de propósito: Redshift, no dia 13, pressupõe a modelagem dimensional do dia 11.",
     },
     {
       dia: 10,
-      titulo: "Redshift e a camada de consumo",
-      temas: ["redshift-e-consumo-analitico"],
+      titulo: "SQL que a banca cobra",
+      temas: ["sql-para-dados"],
       revisao: ["big-data"],
+      nota: "Tema compartilhado com a trilha de Dados: se você já o concluiu lá, ele já conta aqui. O foco desta trilha é a consulta que sustenta um indicador, não o pipeline.",
     },
     {
       dia: 11,
-      titulo: "Relacional, NoSQL e consistência",
-      temas: ["relacional-vs-nosql-e-consistencia"],
-      revisao: ["aws"],
-    },
-    {
-      dia: 12,
-      titulo: "SQL que a banca cobra",
-      temas: ["sql-para-dados"],
-      revisao: ["aws"],
-      nota: "Também compartilhado com a trilha de Dados. Aqui o foco é a consulta que sustenta um indicador, não o pipeline.",
-    },
-    {
-      dia: 13,
       titulo: "Modelagem dimensional",
       temas: ["modelagem-de-dados"],
       revisao: ["banco-de-dados"],
+      nota: "Também compartilhado. Grão, fato e dimensão são o que decide se dois painéis vão bater; é o tema que o Redshift e a camada semântica vão reutilizar.",
+    },
+    {
+      dia: 12,
+      titulo: "A pilha analítica na AWS",
+      temas: ["aws-para-dados"],
+      revisao: ["banco-de-dados"],
+      nota: "Compartilhado com a trilha de Dados. Aqui interessa a camada de consumo: onde o analista consulta, o que o Athena cobra e o que o Lake Formation libera.",
+    },
+    {
+      dia: 13,
+      titulo: "Redshift e a camada de consumo",
+      temas: ["redshift-e-consumo-analitico"],
+      revisao: ["aws"],
+      nota: "Chave de distribuição e de ordenação são a modelagem dimensional do dia 11 aplicada ao warehouse. Feche com QuickSight e SPICE.",
     },
     {
       dia: 14,
       titulo: "Revisão e checkpoints",
       temas: [],
-      revisao: ["big-data", "aws", "banco-de-dados"],
-      nota: "Cards vencidos, folhas de revisão e os checkpoints de AWS e banco de dados.",
+      revisao: ["big-data", "banco-de-dados", "aws"],
+      nota: "Cards vencidos, folhas de revisão e os checkpoints de banco de dados e AWS.",
     },
     {
       dia: 15,
-      titulo: "CI/CD para dados e dashboards",
-      temas: ["cicd-para-dados-e-dashboards"],
-      revisao: ["banco-de-dados"],
+      titulo: "Orquestração",
+      temas: ["orquestracao"],
+      revisao: ["aws"],
+      nota: "Abre o módulo DevOps pelo que já roda: o agendamento, a dependência e a reexecução. Tema compartilhado com a trilha de Dados: se já o concluiu lá, conta aqui.",
     },
     {
       dia: 16,
-      titulo: "Ambientes e infraestrutura como código",
-      temas: ["ambientes-e-infraestrutura-como-codigo"],
-      revisao: ["banco-de-dados"],
-    },
-    {
-      dia: 17,
-      titulo: "Orquestração",
-      temas: ["orquestracao"],
-      revisao: ["devops"],
-      nota: "Tema compartilhado com a trilha de Dados: se já o concluiu lá, conta aqui.",
-    },
-    {
-      dia: 18,
       titulo: "Observabilidade do pipeline",
       temas: ["dataops-e-observabilidade"],
       revisao: ["devops"],
       nota: "Também compartilhado. Aqui a pergunta é como você descobre que o número do painel está errado antes do negócio descobrir.",
     },
     {
-      dia: 19,
-      titulo: "Data Mesh: os quatro princípios",
-      temas: ["principios-do-data-mesh"],
+      dia: 17,
+      titulo: "Ambientes e infraestrutura como código",
+      temas: ["ambientes-e-infraestrutura-como-codigo"],
       revisao: ["devops"],
     },
     {
+      dia: 18,
+      titulo: "CI/CD para dados e dashboards",
+      temas: ["cicd-para-dados-e-dashboards"],
+      revisao: ["devops"],
+      nota: "Fecha o módulo: o que roda antes de aprovar, e como promover entre os ambientes de ontem sem levar dado de produção junto.",
+    },
+    {
+      dia: 19,
+      titulo: "Arquiteturas de dados",
+      temas: ["arquiteturas-de-dados"],
+      revisao: ["devops"],
+      nota: "Compartilhado com Dados, e abre o módulo: o mapa (Lambda, Kappa, warehouse, lake, lakehouse e Mesh) antes de entrar nos princípios do Mesh.",
+    },
+    {
       dia: 20,
-      titulo: "Contratos de dados e plataforma",
-      temas: ["contratos-de-dados-e-plataforma"],
+      titulo: "Data Mesh: os quatro princípios",
+      temas: ["principios-do-data-mesh"],
       revisao: ["data-mesh"],
     },
     {
       dia: 21,
-      titulo: "Arquiteturas de dados",
-      temas: ["arquiteturas-de-dados"],
+      titulo: "Contratos de dados e plataforma",
+      temas: ["contratos-de-dados-e-plataforma"],
       revisao: ["data-mesh"],
-      nota: "Compartilhado com Dados, e fecha o módulo: Mesh comparado a lake centralizado, Lambda e Kappa.",
+      nota: "Fecha o módulo com a pergunta que a banca repete: quando Mesh é má ideia, comparado ao lake centralizado do dia 19.",
     },
     {
       dia: 22,

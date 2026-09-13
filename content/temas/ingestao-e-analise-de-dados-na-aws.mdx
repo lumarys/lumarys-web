@@ -1,0 +1,289 @@
+---
+slug: ingestao-e-analise-de-dados-na-aws
+titulo: "Ingestão e análise de dados: Kinesis, Glue, EMR e Lake Formation"
+resumo: "O último item do Domínio 3: levar dado para dentro da AWS na frequência certa (Kinesis Data Streams ou Firehose para fluxo, DataSync para lote), transformar com Glue ou EMR, guardar num data lake no S3 governado pelo Lake Formation e consultar com Athena e QuickSight."
+minutos: 35
+nivel: intermediario
+formato: prova
+publicadoEm: "2026-09-13"
+porQue: "O guia da SAA-C03 tem uma tarefa só para isto (3.5, ingestão e transformação de alto desempenho) e quem vem de infraestrutura costuma chutar. As questões seguem um roteiro fixo: a frequência do dado escolhe entre fluxo e lote, a palavra 'consumidor próprio' separa Data Streams de Firehose, 'converter CSV em Parquet' aponta Glue, e 'Spark ou Hadoop' aponta EMR."
+comoCai: "Sensores enviam eventos a cada segundo; a empresa quer guardá-los no S3 em Parquet com o MENOR esforço operacional. O que usar?"
+feynman: "Explique em um minuto a diferença entre Kinesis Data Streams e Kinesis Data Firehose usando a imagem de uma esteira de fábrica: quem tira as peças da esteira em cada caso?"
+preRequisitos: ["armazenamento-por-caso-de-uso", "banco-de-dados-por-caso-de-uso"]
+errosComuns:
+  - "Propor Kinesis Data Streams quando o enunciado só quer entregar o fluxo no S3 ou no Redshift. Data Streams exige escrever e operar consumidores; se ninguém precisa processar registro a registro, Firehose entrega sozinho e é a resposta de menor esforço."
+  - "Propor Firehose quando o enunciado pede vários consumidores lendo o mesmo fluxo em paralelo, ou reprocessar registros das últimas horas. Firehose entrega e esquece; retenção e leitura por aplicação própria são Data Streams."
+  - "Escolher EMR para converter arquivos de formato. Glue é sem servidor e faz isso com um job; EMR só ganha quando o enunciado cita Spark, Hadoop, Hive ou controle do cluster."
+  - "Usar SQS para ingestão de telemetria. Fila entrega cada mensagem a um consumidor e apaga; fluxo mantém a ordem por chave e permite vários leitores. 'Eventos por segundo, em ordem, para análise' é Kinesis."
+  - "Resolver permissão por coluna com política de bucket. Política de bucket enxerga objeto, não coluna; permissão por tabela e coluna sobre o data lake é Lake Formation."
+  - "Transferir terabytes de um servidor local com um script de cópia para o S3. Transferência recorrente e gerenciada entre local e AWS é DataSync; acesso contínuo de aplicação local a arquivos no S3 é Storage Gateway."
+preTeste:
+  - enunciado: "Uma aplicação gera eventos de clique continuamente. A empresa quer que eles cheguem ao S3 em até um minuto, em Parquet, sem escrever nem manter código de consumo. Qual serviço atende com menor esforço operacional?"
+    alternativas:
+      - texto: "Kinesis Data Firehose entregando no S3 com conversão de formato."
+        correta: true
+        explicacao: "Firehose recebe o fluxo, agrupa, converte para Parquet e grava no S3 sem consumidor próprio."
+      - texto: "Kinesis Data Streams com uma função Lambda gravando no S3."
+        correta: false
+        explicacao: "Funciona, mas exige escrever e operar o consumidor, que o enunciado quer evitar."
+      - texto: "Amazon SQS com uma instância EC2 lendo a fila."
+        correta: false
+        explicacao: "Fila não é fluxo analítico e a instância é esforço operacional puro."
+  - enunciado: "Um time precisa converter diariamente arquivos CSV no S3 para Parquet e catalogar as tabelas para consulta em SQL. Qual combinação é a mais simples?"
+    alternativas:
+      - texto: "AWS Glue (crawler e job) com consulta pelo Athena."
+        correta: true
+        explicacao: "Glue descobre o schema, transforma o formato e alimenta o catálogo que o Athena usa."
+      - texto: "Amazon EMR com Spark e uma tabela no RDS para o catálogo."
+        correta: false
+        explicacao: "EMR exige cluster e o catálogo no RDS não é o que o Athena consulta."
+      - texto: "Kinesis Data Streams lendo os arquivos e gravando no Redshift."
+        correta: false
+        explicacao: "Arquivos diários são lote, não fluxo; Kinesis está no lugar errado."
+videos:
+  - id: LifnexifoH8
+    publicadoEm: "2024-11-15"
+    titulo: "AWS Glue vs EMR: Qual é a Melhor Ferramenta de Processamento de Dados?"
+    canal: "Jean Diogo"
+    duracao: 5
+    porQue: "Cinco minutos sobre a decisão que a prova mais repete neste item: Glue quando a transformação é sem servidor e sob demanda, EMR quando o enunciado fala de Spark, Hadoop e controle do cluster. Anote a pista de cada um."
+  - id: eDzUaGyVoyI
+    publicadoEm: "2023-08-21"
+    titulo: "AWS Glue + S3 + AWS Athena na Prática! Tutorial Transforme e catalogue dados com AWS Glue Parte 1"
+    canal: "Cloud e TI Brasil"
+    duracao: 10
+    porQue: "Mostra o fluxo inteiro que a questão descreve em palavras: arquivo no S3, crawler do Glue montando o catálogo e Athena consultando por SQL. Ver as três peças conectadas é o que faz a alternativa 'Glue com Athena' parecer óbvia na hora."
+artigos:
+  - titulo: "What is Amazon Kinesis Data Streams?"
+    url: "https://docs.aws.amazon.com/streams/latest/dev/introduction.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Data Firehose?"
+    url: "https://docs.aws.amazon.com/firehose/latest/dev/what-is-this-service.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Glue?"
+    url: "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Lake Formation?"
+    url: "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html"
+    fonte: "AWS"
+  - titulo: "What is AWS DataSync?"
+    url: "https://docs.aws.amazon.com/datasync/latest/userguide/what-is-datasync.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Kinesis Data Streams, em uma linha."
+    verso: "Fluxo em tempo real dividido em shards; produtores escrevem, um ou mais consumidores próprios (Lambda, KCL) leem em paralelo, com retenção de 24 horas a 365 dias para reler."
+  - frente: "Kinesis Data Firehose, em uma linha."
+    verso: "Entrega gerenciada de fluxo para S3, Redshift, OpenSearch ou destino HTTP, em quase tempo real, com agrupamento, compressão e conversão para Parquet ou ORC. Sem consumidor para escrever."
+  - frente: "A pista que separa Data Streams de Firehose."
+    verso: "'Consumidores próprios', 'vários leitores', 'reprocessar' apontam Data Streams. 'Entregar no S3 ou Redshift com o menor esforço' aponta Firehose."
+  - frente: "Como o Kinesis Data Streams escala?"
+    verso: "Por número de shards no modo provisionado, cada um com capacidade fixa de escrita e leitura, ou automaticamente no modo sob demanda. O enunciado que fala em 'ajustar capacidade' está falando de shards."
+  - frente: "AWS Glue, em uma linha."
+    verso: "Integração de dados sem servidor: crawlers descobrem o schema, o Data Catalog guarda as tabelas e jobs em Spark transformam, inclusive convertendo CSV e JSON para Parquet."
+  - frente: "Amazon EMR, em uma linha."
+    verso: "Cluster gerenciado de Hadoop, Spark, Hive e afins para processamento distribuído em grande escala, quando se quer controle do framework e do cluster."
+  - frente: "Glue ou EMR?"
+    verso: "Glue quando a transformação é sem servidor e o enunciado prioriza menor esforço. EMR quando cita Spark, Hadoop ou Hive explicitamente, bibliotecas próprias ou controle do cluster."
+  - frente: "AWS Lake Formation, em uma linha."
+    verso: "Monta e governa um data lake no S3: registra localizações, gerencia o catálogo e concede permissão por banco, tabela e coluna, que Athena, Redshift Spectrum e EMR respeitam."
+  - frente: "Athena e QuickSight no fim do fluxo."
+    verso: "Athena consulta em SQL o que está no S3 usando o Data Catalog; QuickSight é a camada de painel sem servidor que lê Athena, Redshift e RDS. 'Painel para o negócio' é QuickSight."
+  - frente: "AWS DataSync, em uma linha."
+    verso: "Transferência gerenciada e acelerada entre armazenamento local (ou outra nuvem) e S3, EFS ou FSx, com agendamento e verificação. Migração e carga recorrente."
+  - frente: "DataSync ou Storage Gateway?"
+    verso: "DataSync move dados de um lado para o outro. Storage Gateway dá à aplicação local acesso contínuo (NFS, SMB, iSCSI) a dados que ficam na AWS."
+  - frente: "A frequência decide o serviço: quatro faixas."
+    verso: "Eventos por segundo: Kinesis. A cada poucos minutos: Firehose ou Glue agendado. Diário ou semanal: DataSync, S3 e Glue. Uma vez, em massa: DataSync online ou Snow offline."
+  - frente: "Por que a prova insiste em Parquet e partição?"
+    verso: "Athena cobra por dado lido: formato colunar comprimido e partição por data ou chave reduzem o dado varrido, o custo e o tempo. 'Consulta lenta e cara no S3' se resolve assim."
+  - frente: "Ingestão que não pode passar pela internet pública."
+    verso: "Endpoint de VPC (Gateway para S3, Interface ou PrivateLink para Kinesis e Glue), sub-rede privada, TLS no caminho e KMS em repouso."
+drills:
+  - titulo: "Qual serviço a frase do enunciado pede?"
+    instrucao: "Para cada pedido, diga o serviço que a prova espera."
+    opcoes: ["Kinesis Data Streams", "Kinesis Data Firehose", "AWS Glue", "Amazon EMR", "Lake Formation", "DataSync"]
+    itens:
+      - enunciado: "Entregar o fluxo de logs no S3 em Parquet, sem escrever consumidor."
+        resposta: "Kinesis Data Firehose"
+        explicacao: "Entrega gerenciada com conversão de formato."
+      - enunciado: "Três aplicações diferentes precisam ler o mesmo fluxo de eventos em paralelo e reprocessar as últimas horas."
+        resposta: "Kinesis Data Streams"
+        explicacao: "Vários consumidores e retenção para reler."
+      - enunciado: "Converter todo dia os CSV que chegam ao S3 para Parquet e catalogar as tabelas."
+        resposta: "AWS Glue"
+        explicacao: "Job sem servidor mais Data Catalog."
+      - enunciado: "Rodar um pipeline em Spark já existente, com bibliotecas próprias, sobre petabytes."
+        resposta: "Amazon EMR"
+        explicacao: "Spark explícito e controle do cluster."
+      - enunciado: "Analistas de um departamento só podem ver algumas colunas das tabelas do data lake."
+        resposta: "Lake Formation"
+        explicacao: "Permissão por tabela e coluna sobre o lake."
+      - enunciado: "Copiar 200 TB de um NAS local para o S3, toda semana, com verificação."
+        resposta: "DataSync"
+        explicacao: "Transferência gerenciada e recorrente."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa de logística recebe a posição de milhares de veículos várias vezes por segundo. Um painel precisa mostrar a posição atual quase em tempo real e, ao mesmo tempo, uma aplicação antifraude precisa analisar cada evento com regras próprias. As duas leituras devem ser independentes. Qual solução atende?"
+    alternativas:
+      - texto: "Kinesis Data Streams recebendo os eventos, com um consumidor para o painel e outro para a aplicação antifraude."
+        correta: true
+        explicacao: "Data Streams permite vários consumidores lendo o mesmo fluxo de forma independente, em tempo real, com lógica própria em cada um."
+      - texto: "Kinesis Data Firehose entregando os eventos no S3, com os dois sistemas lendo os arquivos."
+        correta: false
+        explicacao: "Firehose entrega em lotes de segundos a minutos e não oferece leitura registro a registro com lógica própria; o antifraude ficaria atrasado."
+      - texto: "Amazon SQS padrão com os dois sistemas consumindo a mesma fila."
+        correta: false
+        explicacao: "Mensagem de fila é lida por um consumidor e apagada; dois leitores dividiriam os eventos em vez de cada um ver todos."
+      - texto: "AWS Glue com um job de streaming gravando no DynamoDB."
+        correta: false
+        explicacao: "Glue transforma; não é o ponto de entrada de fluxo com vários consumidores independentes."
+  - tipo: unica
+    enunciado: "Uma equipe de análise tem arquivos CSV que chegam ao S3 todas as noites. As consultas no Athena estão lentas e caras. A empresa quer reduzir custo e tempo de consulta com o MENOR esforço operacional. O que o arquiteto deve recomendar?"
+    alternativas:
+      - texto: "Um job do AWS Glue que converte os arquivos para Parquet, particionados por data, com as tabelas no Glue Data Catalog."
+        correta: true
+        explicacao: "Formato colunar comprimido e partição reduzem o dado que o Athena lê, que é o que ele cobra; Glue faz isso sem servidor."
+      - texto: "Um cluster do Amazon EMR permanente rodando Spark para reescrever os arquivos."
+        correta: false
+        explicacao: "Resolve o formato, mas cluster permanente é mais esforço e custo do que um job sem servidor para uma carga noturna."
+      - texto: "Carregar os CSV no Amazon Redshift e apontar o Athena para lá."
+        correta: false
+        explicacao: "Athena consulta o S3, não o Redshift; a proposta troca a arquitetura inteira em vez de otimizar a consulta."
+      - texto: "Aumentar o tamanho dos arquivos CSV juntando vários em um só."
+        correta: false
+        explicacao: "Ajuda um pouco no número de objetos, mas o Athena continua lendo texto inteiro sem partição."
+  - tipo: multipla
+    enunciado: "Um banco está montando um data lake no S3 com dados de várias áreas. Analistas de crédito só podem consultar algumas colunas das tabelas de clientes, e a consulta será feita pelo Athena. Quais DUAS ações atendem ao requisito de acesso?"
+    alternativas:
+      - texto: "Registrar as localizações do S3 no AWS Lake Formation e conceder permissão por tabela e coluna aos analistas."
+        correta: true
+        explicacao: "Lake Formation é o serviço que dá permissão em nível de tabela e coluna sobre o data lake, respeitada pelo Athena."
+      - texto: "Catalogar as tabelas no AWS Glue Data Catalog, que é o catálogo que o Athena e o Lake Formation usam."
+        correta: true
+        explicacao: "Sem catálogo não há tabela para o Athena consultar nem para o Lake Formation proteger."
+      - texto: "Escrever uma política de bucket do S3 que libere só as colunas permitidas."
+        correta: false
+        explicacao: "Política de bucket enxerga objetos e prefixos, não colunas dentro de um arquivo."
+      - texto: "Copiar os dados permitidos para um segundo bucket por área, toda noite, com uma função Lambda."
+        correta: false
+        explicacao: "Duplica dado, cria atraso e transfere para código a regra que o Lake Formation aplica de forma central."
+      - texto: "Carregar tudo no Amazon RDS e controlar o acesso por visões."
+        correta: false
+        explicacao: "Abandona o data lake e o Athena que o enunciado definiu."
+  - tipo: unica
+    enunciado: "Uma empresa tem 300 TB de arquivos num NAS local que precisam ir para o S3 nas próximas semanas, com verificação de integridade, e depois sincronizar diariamente as mudanças. O link dedicado com a AWS já existe. Qual serviço atende com o menor esforço?"
+    alternativas:
+      - texto: "AWS DataSync com uma tarefa agendada entre o NAS e o bucket."
+        correta: true
+        explicacao: "Transferência gerenciada, acelerada e agendável, com verificação, feita para exatamente este caso de migração seguida de sincronização."
+      - texto: "AWS Snowball Edge enviado ao data center."
+        correta: false
+        explicacao: "Vale quando não há banda; com link dedicado e necessidade de sincronização diária, Snowball resolve só a carga inicial."
+      - texto: "Kinesis Data Firehose recebendo os arquivos."
+        correta: false
+        explicacao: "Firehose é para fluxo de registros, não para mover arquivos de um NAS."
+      - texto: "Um script na instância EC2 rodando cópia contínua."
+        correta: false
+        explicacao: "Funciona, mas é esforço operacional próprio, sem verificação nem agendamento gerenciados."
+  - tipo: unica
+    enunciado: "Uma equipe de dados mantém um pipeline em Apache Spark com bibliotecas próprias, que hoje roda num cluster Hadoop local e processa petabytes por mês. Ela quer migrar para a AWS mantendo o código e o controle sobre a configuração do cluster. Qual serviço atende melhor?"
+    alternativas:
+      - texto: "Amazon EMR."
+        correta: true
+        explicacao: "Cluster gerenciado de Spark e Hadoop com controle de versão, configuração e bibliotecas: migra o pipeline como está."
+      - texto: "AWS Glue."
+        correta: false
+        explicacao: "Roda Spark, mas sem servidor e com menos controle do ambiente; bibliotecas e configuração de cluster próprias apontam para EMR."
+      - texto: "Kinesis Data Analytics."
+        correta: false
+        explicacao: "Processamento de fluxo em tempo real, não pipeline em lote sobre petabytes."
+      - texto: "Amazon Redshift."
+        correta: false
+        explicacao: "Data warehouse; não executa código Spark existente."
+---
+
+## Em uma frase
+
+A questão descreve **como o dado chega** (a cada segundo, a cada hora, uma
+vez só) e **o que precisa acontecer com ele** (entregar, transformar, governar,
+consultar). Cada trecho aponta um serviço, e o conjunto vira a alternativa
+certa.
+
+## O roteiro em quatro decisões
+
+<Passos
+  itens={[
+    "Frequência: eventos contínuos são fluxo (Kinesis); arquivos periódicos são lote (S3, Glue, DataSync).",
+    "Entrada: quem precisa ler o fluxo? Ninguém em especial, só entregar: Firehose. Consumidores próprios, vários leitores ou reler: Data Streams.",
+    "Transformação: sem servidor e sob demanda: Glue. Spark, Hadoop, Hive ou controle do cluster no enunciado: EMR.",
+    "Consumo: SQL sobre o S3: Athena. Painel: QuickSight. Permissão por tabela e coluna: Lake Formation.",
+  ]}
+/>
+
+## Fluxo: Data Streams ou Firehose
+
+Os dois se chamam Kinesis e a prova conta com a confusão.
+
+<Comparativo
+  colunas={["", "Kinesis Data Streams", "Kinesis Data Firehose"]}
+  linhas={[
+    ["Quem lê", "Consumidores que você escreve (Lambda, KCL, EMR)", "Ninguém: o serviço entrega no destino"],
+    ["Latência", "Tempo real, registro a registro", "Quase tempo real: lotes de segundos a minutos"],
+    ["Retenção", "24 horas a 365 dias; dá para reler", "Nenhuma: entrega e esquece"],
+    ["Escala", "Shards (provisionado) ou sob demanda", "Automática"],
+    ["Transformação", "No consumidor", "Lambda no caminho e conversão para Parquet ou ORC"],
+    ["Pista no enunciado", "'Vários consumidores', 'reprocessar', 'tempo real'", "'Entregar no S3 ou Redshift', 'menor esforço'"],
+  ]}
+/>
+
+O padrão que mais aparece é **Data Streams na entrada e Firehose na saída**:
+os eventos entram no fluxo, uma aplicação lê em tempo real e o Firehose lê o
+mesmo fluxo para gravar a cópia histórica no S3. Quando o enunciado só pede a
+cópia histórica, Firehose sozinho basta.
+
+<Callout tipo="atencao" titulo="Fila não é fluxo">
+SQS entrega cada mensagem a um consumidor e apaga. Fluxo mantém a ordem por
+chave de partição e deixa vários leitores verem todos os registros. Quando a
+questão fala em telemetria, clique ou log **para análise**, SQS é distrator.
+</Callout>
+
+## Transformação: Glue ou EMR
+
+**Glue** é o serviço de integração sem servidor: o **crawler** descobre o
+schema dos arquivos, o **Data Catalog** guarda as tabelas, e o **job** roda
+Spark sob demanda. A tarefa clássica é converter CSV ou JSON em **Parquet
+particionado**, que é o que faz consulta no Athena ficar rápida e barata.
+
+**EMR** é o cluster gerenciado de Hadoop, Spark, Hive e afins. Ele ganha quando
+o enunciado nomeia o framework, cita bibliotecas próprias ou pede controle do
+cluster. Se nada disso aparece e o pedido é "menor esforço operacional", a
+resposta é Glue.
+
+## Lote e migração: DataSync e Storage Gateway
+
+Arquivo que nasce fora da AWS chega por **DataSync**: transferência gerenciada,
+agendável e verificada entre local (ou outra nuvem) e S3, EFS ou FSx. Sem banda
+para o volume, entra **Snow**. Quando a aplicação local precisa continuar
+enxergando os arquivos como se fossem dela, com o dado morando na AWS, o
+serviço é **Storage Gateway**, que é acesso, não transferência.
+
+## Governar e consultar
+
+Um data lake na prova é sempre a mesma pilha: **S3** guardando em zonas, **Glue
+Data Catalog** com as tabelas, **Lake Formation** dando permissão por banco,
+tabela e coluna, **Athena** consultando em SQL e **QuickSight** mostrando o
+painel. Política de bucket protege objeto; coluna é Lake Formation.
+
+<Callout tipo="dica" titulo="Parquet e partição resolvem a questão de custo">
+Athena cobra por dado lido. Quando o enunciado diz "consultas lentas e caras
+sobre arquivos no S3", a resposta é converter para formato colunar e
+particionar por data ou chave, com Glue. Aumentar o cluster não é alternativa
+porque não há cluster.
+</Callout>
+
+## Como responder o cenário
+
+Leia a frequência primeiro: ela elimina metade das alternativas. Depois procure
+quem lê o dado: se a resposta é "ninguém, só guardar", é Firehose ou Glue. Por
+fim confira os adjetivos do pedido: "menor esforço" favorece o serviço sem
+servidor; "controle" ou o nome de um framework favorece EMR e Data Streams.

@@ -7,7 +7,7 @@ nivel: intermediario
 porQue: "Todo candidato sabe construir um pipeline. A banca quer saber o que acontece quando ele quebra em silêncio, que é o modo de falha mais caro em banco. Este tema separa quem entrega job de quem entrega dado confiável."
 comoCai: "Como você descobre que um pipeline entregou dado errado antes do usuário descobrir?"
 feynman: "Explique para o dono do produto de cartão, em um minuto, por que o time vai gastar duas semanas escrevendo testes de dados em vez de um relatório novo."
-preRequisitos: []
+preRequisitos: ["orquestracao", "data-quality"]
 errosComuns:
   - "Confundir monitoramento de job com observabilidade de dado. Job verde e dado errado é o cenário mais comum: o pipeline rodou, só entregou lixo."
   - "Testar só na camada final. Quando o erro aparece na gold, a causa já está três camadas atrás e o reprocessamento é caro."

@@ -27,7 +27,8 @@ export const engenhariaDeDados: Trilha = {
     {
       slug: "fundamentos",
       titulo: "Fundamentos",
-      resumo: "O vocabulário que a banca assume que você domina antes de qualquer pergunta técnica.",
+      resumo:
+        "O vocabulário que a banca assume que você domina antes de qualquer pergunta técnica.",
       status: "disponivel",
       oficial: true,
       temas: ["big-data", "olap-oltp-etl", "data-centric-data-driven"],
@@ -118,7 +119,12 @@ export const engenhariaDeDados: Trilha = {
       temas: ["big-data", "olap-oltp-etl", "data-centric-data-driven"],
       nota: "Leia a página de método antes de começar. Vale 10 minutos e muda o resto.",
     },
-    { dia: 2, titulo: "Hadoop", temas: ["hadoop-arquitetura", "mapreduce"], revisao: ["fundamentos"] },
+    {
+      dia: 2,
+      titulo: "Hadoop",
+      temas: ["hadoop-arquitetura", "mapreduce"],
+      revisao: ["fundamentos"],
+    },
     {
       dia: 3,
       titulo: "Processamento de dados",
@@ -143,7 +149,7 @@ export const engenhariaDeDados: Trilha = {
       titulo: "Qualidade e revisão da semana",
       temas: ["governanca-de-dados", "data-quality"],
       revisao: ["fundamentos", "hadoop", "processamento", "spark"],
-      nota: "Primeiro simulado parcial: 8 perguntas dos módulos 1 a 4.",
+      nota: "Checkpoint dos quatro primeiros módulos e primeiro simulado parcial: 8 perguntas dos módulos 1 a 4. Abaixo de 70% num checkpoint, releia o tema apontado.",
     },
     {
       dia: 8,
@@ -156,6 +162,7 @@ export const engenhariaDeDados: Trilha = {
       titulo: "Formatos e Spark avançado",
       temas: ["formatos-e-tabelas", "spark-avancado"],
       revisao: ["tipos-de-dados", "qualidade"],
+      nota: "Fecha a ementa oficial: faça os checkpoints de Camada de dados, Databricks, Tipos de dados e Qualidade antes de seguir.",
     },
     {
       dia: 10,

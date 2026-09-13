@@ -7,7 +7,7 @@ nivel: intermediario
 porQue: "SQL é o único tema em que a banca pode pedir para você escrever ou descrever a consulta na hora. É teste de fluência: quem hesita entre ROW_NUMBER e GROUP BY entrega que usa SQL só para conferir resultado, não para transformar dado."
 comoCai: "Como você pegaria a última transação de cada conta?"
 feynman: "Explique para um analista de negócio, sem escrever código, o que uma window function faz de diferente de um GROUP BY."
-preRequisitos: []
+preRequisitos: ["olap-oltp-etl"]
 errosComuns:
   - "Usar NOT IN com subconsulta que pode retornar NULL. Um único NULL faz a condição virar desconhecida e o resultado volta vazio. NOT EXISTS não tem esse problema."
   - "Achar que GROUP BY resolve 'a última transação de cada conta'. GROUP BY colapsa a linha e você perde as outras colunas; o certo é ROW_NUMBER particionado pela conta."

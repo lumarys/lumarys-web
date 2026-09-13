@@ -133,4 +133,60 @@ for (const arquivo of readdirSync(DIR_TRILHAS).filter(
   }
 }
 
+/**
+ * Cronograma x módulos x pré-requisitos. A trilha promete uma ordem de estudo;
+ * um tema no cronograma antes do seu pré-requisito, um tema de módulo que o
+ * cronograma esquece ou repete, e um dia fora de sequência são erros de
+ * conteúdo que nenhum teste de tela pega. Pré-requisito que não pertence à
+ * trilha é ignorado: o tema é compartilhado e a outra trilha o cobre.
+ */
+const porSlug = new Map(temas.map((t) => [t.dados.slug, t.dados]));
+for (const arquivo of readdirSync(DIR_TRILHAS).filter(
+  (f) => f.endsWith(".ts") && f !== "index.ts",
+)) {
+  const fonte = readFileSync(join(DIR_TRILHAS, arquivo), "utf8");
+  const corte = fonte.indexOf("cronograma:");
+  if (corte < 0) continue;
+  const slugsDe = (texto) => [...texto.matchAll(/"([a-z0-9-]+)"/g)].map((m) => m[1]);
+  const declarados = new Set(
+    [...fonte.slice(0, corte).matchAll(/temas:\s*\[([^\]]*)\]/g)].flatMap((b) => slugsDe(b[1])),
+  );
+  const dias = [...fonte.slice(corte).matchAll(/dia:\s*(\d+),[\s\S]*?temas:\s*\[([^\]]*)\]/g)].map(
+    (m) => ({ dia: Number(m[1]), temas: slugsDe(m[2]) }),
+  );
+
+  dias.forEach((d, i) => {
+    if (d.dia !== i + 1)
+      erros.push(`trilha ${arquivo}: dia ${d.dia} fora de sequência (esperado ${i + 1}).`);
+  });
+
+  const posicao = new Map();
+  dias.forEach((d, i) =>
+    d.temas.forEach((slug, j) => {
+      if (posicao.has(slug))
+        erros.push(`trilha ${arquivo}: tema "${slug}" aparece duas vezes no cronograma.`);
+      posicao.set(slug, [i, j]);
+      if (!declarados.has(slug))
+        erros.push(
+          `trilha ${arquivo}: dia ${d.dia} agenda "${slug}", que não está em módulo nenhum.`,
+        );
+    }),
+  );
+  for (const slug of declarados) {
+    if (!posicao.has(slug))
+      erros.push(`trilha ${arquivo}: tema "${slug}" está num módulo mas não no cronograma.`);
+  }
+  for (const [slug, [dia, pos]] of posicao) {
+    for (const pre of porSlug.get(slug)?.preRequisitos ?? []) {
+      if (!declarados.has(pre) || !posicao.has(pre)) continue;
+      const [diaPre, posPre] = posicao.get(pre);
+      if (diaPre > dia || (diaPre === dia && posPre > pos)) {
+        erros.push(
+          `trilha ${arquivo}: "${slug}" (dia ${dia + 1}) vem antes do pré-requisito "${pre}" (dia ${diaPre + 1}).`,
+        );
+      }
+    }
+  }
+}
+
 sair(erros, avisos, `content-lint (${temas.length} tema(s))`);

@@ -7,7 +7,7 @@ nivel: intermediario
 porQue: "Modelagem é onde a banca vê se você pensa antes de escrever pipeline. Perguntar o grão de um fato é o teste mais rápido para saber se a pessoa já modelou de verdade ou só consumiu tabela pronta."
 comoCai: "Modele o fato de transações de cartão: qual é o grão?"
 feynman: "Explique para o gerente de cartões, sem jargão, por que a tabela de análise dele repete o nome do estabelecimento em milhões de linhas e por que isso é proposital."
-preRequisitos: []
+preRequisitos: ["olap-oltp-etl"]
 errosComuns:
   - "Começar pela lista de colunas em vez do grão. Sem declarar o grão, você não consegue decidir o que é medida, o que é dimensão e nem validar duplicidade depois."
   - "Normalizar o modelo analítico até 3NF. Cada junção a mais custa leitura e shuffle; o modelo dimensional troca redundância controlada por velocidade e clareza."

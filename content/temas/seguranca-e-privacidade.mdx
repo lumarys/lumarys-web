@@ -7,7 +7,7 @@ nivel: intermediario
 porQue: "Em banco, privacidade não é assunto jurídico: é requisito de arquitetura. A banca usa este tema para ver se você projeta pensando em quem pode ver o quê, ou se joga tudo cru no lake e resolve depois. Também é o tema em que responder 'a gente criptografa' sem qualificar derruba a nota."
 comoCai: "Um analista precisa cruzar transações por cliente sem ver o CPF. Como você resolve?"
 feynman: "Explique para o gerente de crédito, em um minuto, por que a área dele não vai receber a base com CPF em claro e o que ela ganha em troca."
-preRequisitos: []
+preRequisitos: ["governanca-de-dados"]
 errosComuns:
   - "Dizer que dado pseudonimizado está fora da LGPD. Só o dado anonimizado sai do escopo da lei; pseudonimizado continua sendo dado pessoal, porque existe uma chave que reverte a operação."
   - "Chamar hash de CPF de anonimização. O hash é determinístico e o universo de CPFs é pequeno e enumerável: dá para montar a tabela inteira por força bruta e reidentificar todo mundo."

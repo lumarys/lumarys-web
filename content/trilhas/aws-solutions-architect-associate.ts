@@ -13,8 +13,8 @@ import type { Trilha } from "../types";
  * sorteia pelo peso. Os temas usam `formato: prova`: cenários objetivos em vez
  * de perguntas orais.
  *
- * Trilha completa: "como ler uma questão" e os quatro domínios do exame, 22
- * temas ao todo. O cronograma de 34 dias cobre um tema por dia útil, com
+ * Trilha completa: "como ler uma questão" e os quatro domínios do exame, 23
+ * temas ao todo. O cronograma de 35 dias cobre um tema por dia útil, com
  * checkpoint e prova simulada ao fim de cada domínio e uma prova completa de
  * 65 questões na reta final. O plano original estimava 42 dias para cerca de
  * 32 temas; os temas saíram menos numerosos e mais densos, e o cronograma
@@ -30,7 +30,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
   resumo:
     "O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 130 minutos",
-  prazoSugeridoDias: 34,
+  prazoSugeridoDias: 35,
   status: "disponivel",
   exame: {
     codigo: "SAA-C03",
@@ -91,7 +91,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
       slug: "desempenho",
       titulo: "Arquiteturas de alto desempenho",
       resumo:
-        "Escolher armazenamento, computação, cache, banco e rede pelo caso de uso: classes S3, tipos de EBS, famílias EC2, ElastiCache, DAX, Global Accelerator.",
+        "Escolher armazenamento, computação, cache, banco, rede e a pilha de dados pelo caso de uso: classes S3, tipos de EBS, famílias EC2, ElastiCache, DAX, Global Accelerator, Kinesis, Glue, EMR e Lake Formation.",
       status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 3 · Design High-Performing Architectures",
@@ -102,6 +102,7 @@ export const awsSolutionsArchitectAssociate: Trilha = {
         "cache-e-entrega-de-conteudo",
         "banco-de-dados-por-caso-de-uso",
         "rede-de-alto-desempenho",
+        "ingestao-e-analise-de-dados-na-aws",
       ],
     },
     {
@@ -265,73 +266,80 @@ export const awsSolutionsArchitectAssociate: Trilha = {
     },
     {
       dia: 24,
+      titulo: "Ingestão e análise de dados",
+      temas: ["ingestao-e-analise-de-dados-na-aws"],
+      revisao: ["desempenho"],
+      nota: "Fecha o domínio: a tarefa 3.5 do guia. A frequência do dado escolhe o serviço; 'consumidor próprio' separa Data Streams de Firehose.",
+    },
+    {
+      dia: 25,
       titulo: "Cards e checkpoint do Domínio 3",
       temas: [],
       revisao: ["desempenho"],
       nota: "Checkpoint do módulo. Abaixo de 70%, releia o tema apontado antes da prova de amanhã.",
     },
     {
-      dia: 25,
+      dia: 26,
       titulo: "Terceira prova simulada",
       temas: [],
       revisao: ["seguras", "resilientes", "desempenho"],
       nota: "Três domínios no banco. Compare o resultado por domínio com o das provas anteriores e ataque o mais fraco.",
     },
     {
-      dia: 26,
+      dia: 27,
       titulo: "Revisão leve",
       temas: [],
       revisao: ["como-funciona-a-prova", "desempenho"],
       nota: "Só cards vencidos e a folha de revisão. Amanhã começa o último domínio.",
     },
     {
-      dia: 27,
+      dia: 28,
       titulo: "Modelos de preço da computação",
       temas: ["modelos-de-preco-da-computacao"],
       revisao: ["desempenho"],
       nota: "Começa o domínio de 20%, o último. Aqui o enunciado descreve o padrão de uso e espera o modelo de compra.",
     },
     {
-      dia: 28,
+      dia: 29,
       titulo: "Custo de transferência de dados",
       temas: ["custo-de-transferencia-de-dados"],
       revisao: ["desempenho"],
     },
     {
-      dia: 29,
+      dia: 30,
       titulo: "Dimensionamento e custo de armazenamento",
       temas: ["dimensionamento-e-custo-de-armazenamento"],
       revisao: ["custo"],
     },
     {
-      dia: 30,
+      dia: 31,
       titulo: "Ferramentas de custo e governança",
       temas: ["ferramentas-de-custo-e-governanca"],
       revisao: ["custo"],
     },
     {
-      dia: 31,
+      dia: 32,
       titulo: "Cards e checkpoint do Domínio 4",
       temas: [],
       revisao: ["custo"],
       nota: "Último checkpoint. Abaixo de 70%, releia o tema apontado: amanhã a prova é completa.",
     },
     {
-      dia: 32,
+      dia: 33,
       titulo: "Prova simulada completa",
       temas: [],
       revisao: ["seguras", "resilientes", "desempenho", "custo"],
       nota: "As 65 questões, 130 minutos, os quatro domínios no peso real. Trate como a prova: sem consultar nada, de uma vez só.",
     },
     {
-      dia: 33,
+      dia: 34,
       titulo: "Atacar os domínios fracos",
       temas: [],
       revisao: ["seguras", "resilientes", "desempenho", "custo"],
       nota: "Olhe o resultado por domínio da prova de ontem e releia só os temas dos dois domínios mais fracos. Refaça os drills deles.",
     },
     {
-      dia: 34,
+      dia: 35,
       titulo: "Véspera",
       temas: [],
       revisao: ["como-funciona-a-prova"],
