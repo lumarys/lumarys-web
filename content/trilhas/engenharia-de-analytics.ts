@@ -30,7 +30,7 @@ export const engenhariaDeAnalytics: Trilha = {
   resumo:
     "A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
   formatoProva: "Sabatina oral com banca",
-  prazoSugeridoDias: 14,
+  prazoSugeridoDias: 22,
   status: "disponivel",
   modulos: [
     {
@@ -91,10 +91,15 @@ export const engenhariaDeAnalytics: Trilha = {
       slug: "devops",
       titulo: "DevOps",
       resumo:
-        "CI/CD para dados e dashboards, ambientes, Docker, infraestrutura como código e observabilidade.",
-      status: "em-breve",
+        "CI/CD para transformações e dashboards, ambientes reproduzíveis com infraestrutura como código, orquestração e observabilidade do pipeline.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: [
+        "cicd-para-dados-e-dashboards",
+        "ambientes-e-infraestrutura-como-codigo",
+        "orquestracao",
+        "dataops-e-observabilidade",
+      ],
     },
     {
       slug: "dataviz",
@@ -109,10 +114,14 @@ export const engenhariaDeAnalytics: Trilha = {
       slug: "data-mesh",
       titulo: "Data Mesh",
       resumo:
-        "Os quatro princípios, o produto de dados, contratos, plataforma self-serve e governança federada.",
-      status: "em-breve",
+        "Os quatro princípios, o dado tratado como produto, contratos entre domínios, plataforma self-serve e governança federada, e quando Mesh é má ideia.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: [
+        "principios-do-data-mesh",
+        "contratos-de-dados-e-plataforma",
+        "arquiteturas-de-dados",
+      ],
     },
     {
       slug: "alem-da-ementa",
@@ -198,10 +207,62 @@ export const engenhariaDeAnalytics: Trilha = {
     },
     {
       dia: 14,
-      titulo: "Revisão leve",
+      titulo: "Revisão e checkpoints",
       temas: [],
       revisao: ["big-data", "aws", "banco-de-dados"],
-      nota: "Só cards vencidos e as folhas de revisão. Programação, DevOps, dataviz e Data Mesh entram em breve; o plano cresce com eles.",
+      nota: "Cards vencidos, folhas de revisão e os checkpoints de AWS e banco de dados.",
+    },
+    {
+      dia: 15,
+      titulo: "CI/CD para dados e dashboards",
+      temas: ["cicd-para-dados-e-dashboards"],
+      revisao: ["banco-de-dados"],
+    },
+    {
+      dia: 16,
+      titulo: "Ambientes e infraestrutura como código",
+      temas: ["ambientes-e-infraestrutura-como-codigo"],
+      revisao: ["banco-de-dados"],
+    },
+    {
+      dia: 17,
+      titulo: "Orquestração",
+      temas: ["orquestracao"],
+      revisao: ["devops"],
+      nota: "Tema compartilhado com a trilha de Dados: se já o concluiu lá, conta aqui.",
+    },
+    {
+      dia: 18,
+      titulo: "Observabilidade do pipeline",
+      temas: ["dataops-e-observabilidade"],
+      revisao: ["devops"],
+      nota: "Também compartilhado. Aqui a pergunta é como você descobre que o número do painel está errado antes do negócio descobrir.",
+    },
+    {
+      dia: 19,
+      titulo: "Data Mesh: os quatro princípios",
+      temas: ["principios-do-data-mesh"],
+      revisao: ["devops"],
+    },
+    {
+      dia: 20,
+      titulo: "Contratos de dados e plataforma",
+      temas: ["contratos-de-dados-e-plataforma"],
+      revisao: ["data-mesh"],
+    },
+    {
+      dia: 21,
+      titulo: "Arquiteturas de dados",
+      temas: ["arquiteturas-de-dados"],
+      revisao: ["data-mesh"],
+      nota: "Compartilhado com Dados, e fecha o módulo: Mesh comparado a lake centralizado, Lambda e Kappa.",
+    },
+    {
+      dia: 22,
+      titulo: "Revisão leve",
+      temas: [],
+      revisao: ["devops", "data-mesh"],
+      nota: "Só cards vencidos e as folhas de revisão. Programação, dataviz e Além da ementa entram em breve.",
     },
   ],
 };

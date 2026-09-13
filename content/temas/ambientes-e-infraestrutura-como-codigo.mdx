@@ -1,0 +1,230 @@
+---
+slug: ambientes-e-infraestrutura-como-codigo
+titulo: "Ambientes e infraestrutura como código"
+resumo: "Por que existem desenvolvimento, homologação e produção em dados, o que muda entre eles além do nome, e como infraestrutura como código torna os três reproduzíveis: estado, plano antes de aplicar, e o que nunca deve estar no repositório."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "É a pergunta que separa quem opera de quem só entrega consulta. A banca pergunta como você garante que o ambiente de teste representa a produção, e a resposta boa fala de dado mascarado, de mesma definição de infraestrutura e de plano revisado antes de aplicar, não de 'a gente copia'."
+comoCai: "Como você garante que o que funcionou em homologação vai funcionar em produção?"
+feynman: "Explique em um minuto por que escrever a infraestrutura em arquivo, em vez de clicar no console, muda o que acontece quando alguém sai da empresa."
+preRequisitos: ["dataops-e-observabilidade"]
+errosComuns:
+  - "Achar que ambientes se distinguem pelo volume de dados. Distinguem-se por quem consome: produção tem consumidor real, homologação tem validação, desenvolvimento tem quem está construindo."
+  - "Copiar produção para desenvolvimento sem mascarar. É o vazamento mais comum em times de dados, e passa despercebido porque parece diligência."
+  - "Tratar infraestrutura como código como 'script de criação'. O que a distingue é ser declarativa e ter estado: ela sabe o que já existe e calcula a diferença."
+  - "Aplicar sem revisar o plano. O plano mostra o que será criado, alterado e destruído; aplicar sem ler é como aprovar um merge sem ver o diff."
+  - "Guardar segredo no repositório. Credencial vai para um cofre e entra por referência; repositório é histórico permanente, e apagar depois não apaga o histórico."
+  - "Ter definições diferentes por ambiente. Se produção e homologação são descritas por códigos distintos, homologação deixa de provar qualquer coisa."
+preTeste:
+  - enunciado: "O que distingue um ambiente de homologação de um de desenvolvimento, num projeto de dados?"
+    alternativas:
+      - texto: "O propósito e o consumidor: homologação valida a mudança em condições próximas da produção, antes de ela chegar a quem depende do dado."
+        correta: true
+        explicacao: "A distinção é de papel no fluxo, não de tamanho da máquina."
+      - texto: "O volume de dados armazenado."
+        correta: false
+        explicacao: "Volume ajuda no realismo, mas não é o que define o papel do ambiente."
+      - texto: "Homologação usa ferramentas pagas e desenvolvimento usa gratuitas."
+        correta: false
+        explicacao: "Ferramenta diferente por ambiente reduz a validade do teste."
+  - enunciado: "Por que o plano do Terraform deve ser revisado antes do apply?"
+    alternativas:
+      - texto: "Porque ele mostra o que será criado, alterado e destruído, e destruição acidental de um recurso com estado é irreversível."
+        correta: true
+        explicacao: "O plano é o diff da infraestrutura; aplicar sem ler é aprovar mudança sem ver o que muda."
+      - texto: "Porque o plano corrige erros de sintaxe."
+        correta: false
+        explicacao: "Sintaxe é verificada antes, na validação."
+      - texto: "Porque o apply não pode ser desfeito por design."
+        correta: false
+        explicacao: "Parte das mudanças é reversível; o problema é a parte que não é."
+videos:
+  - id: 5rqgH2c2oQA
+    publicadoEm: "2025-12-29"
+    titulo: "Infraestrutura como Código (IaC) - Fundamentos de Terraform e Ansible"
+    canal: "TI do Zero ao Expert"
+    duracao: 7
+    porQue: "Sete minutos para fixar a ideia antes da ferramenta: por que declarar o estado desejado é diferente de escrever passos. Assista antes do segundo vídeo."
+  - id: Pq4qKONvUrA
+    publicadoEm: "2025-08-22"
+    titulo: "Infraestrutura como Código com Terraform: Automatizando Ambientes em Nuvem"
+    canal: "Semana de Sistemas de Informação USP"
+    duracao: 51
+    porQue: "Complementar e prático, com ambientes reproduzíveis. Longo; use os trechos de estado e de plano, que são os dois conceitos que a sabatina cobra."
+artigos:
+  - titulo: "What is Infrastructure as Code?"
+    url: "https://aws.amazon.com/pt/what-is/iac/"
+    fonte: "AWS"
+  - titulo: "AWS CloudFormation - What is CloudFormation?"
+    url: "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Secrets Manager?"
+    url: "https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que distingue os três ambientes?"
+    verso: "O consumidor e o papel no fluxo: desenvolvimento é onde se constrói, homologação é onde se valida em condições próximas do real, produção é onde alguém depende do resultado."
+  - frente: "O que precisa ser igual entre homologação e produção?"
+    verso: "A definição da infraestrutura e o caminho da mudança. Se são descritos por códigos diferentes, homologação para de provar qualquer coisa."
+  - frente: "O que pode ser diferente entre eles?"
+    verso: "Tamanho e custo dos recursos, volume e origem do dado (amostrado e mascarado), e frequência de execução."
+  - frente: "Infraestrutura como código, em uma linha."
+    verso: "Descrever o estado desejado da infraestrutura em arquivos versionados, e deixar a ferramenta calcular e aplicar a diferença entre o que existe e o que foi declarado."
+  - frente: "Declarativo versus imperativo."
+    verso: "Declarativo diz o que deve existir e é idempotente: aplicar duas vezes dá o mesmo resultado. Imperativo diz os passos, e repetir pode duplicar ou falhar."
+  - frente: "O que é o estado na infraestrutura como código?"
+    verso: "O registro do que a ferramenta já criou, que permite calcular a diferença. Ele é sensível (pode conter identificadores e às vezes segredos) e precisa ficar remoto, versionado e com bloqueio."
+  - frente: "Por que revisar o plano antes de aplicar?"
+    verso: "O plano é o diff: mostra o que será criado, alterado e destruído. Recurso com estado destruído por engano nem sempre volta."
+  - frente: "O que nunca vai para o repositório?"
+    verso: "Credencial, chave e token. Vão para um cofre (Secrets Manager, Parameter Store) e entram por referência. Repositório é histórico permanente; apagar depois não apaga o histórico."
+  - frente: "Como os ambientes ficam parecidos sem custar igual?"
+    verso: "Mesmo código com variáveis por ambiente: tamanhos menores e dados amostrados em desenvolvimento, mesma topologia e mesmas permissões."
+  - frente: "O que é deriva de configuração (drift)?"
+    verso: "Alguém muda um recurso pelo console e a realidade deixa de bater com o código. A ferramenta detecta na próxima execução, e a correção é reaplicar o código, não repetir o clique."
+  - frente: "Como isso se liga a times de dados?"
+    verso: "Cluster, permissões, buckets, filas e agendamentos deixam de ser conhecimento de uma pessoa e passam a ser revisáveis, reproduzíveis e recriáveis depois de um incidente."
+drills:
+  - titulo: "Onde isso pertence?"
+    instrucao: "Para cada item, diga onde ele deve ficar."
+    opcoes: ["No repositório", "Em um cofre de segredos", "No estado remoto", "Em nenhum lugar"]
+    itens:
+      - enunciado: "Definição do bucket, das permissões e do agendamento."
+        resposta: "No repositório"
+        explicacao: "É a descrição declarativa, versionada e revisável."
+      - enunciado: "Senha do banco usada pelo pipeline."
+        resposta: "Em um cofre de segredos"
+        explicacao: "Entra por referência, nunca em arquivo versionado."
+      - enunciado: "O registro do que já foi criado pela ferramenta."
+        resposta: "No estado remoto"
+        explicacao: "Remoto, versionado e com bloqueio para dois applies não colidirem."
+      - enunciado: "Cópia crua de uma tabela de clientes para testar."
+        resposta: "Em nenhum lugar"
+        explicacao: "Dado pessoal em ambiente de desenvolvimento precisa ser mascarado ou amostrado."
+      - enunciado: "Diferenças de tamanho de máquina entre produção e homologação."
+        resposta: "No repositório"
+        explicacao: "Como variáveis por ambiente, no mesmo código."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você garante que o que funcionou em homologação vai funcionar em produção?"
+    respostaModelo: "Garantir por completo não dá, mas dá para tirar quase toda a diferença que costuma causar surpresa. A primeira coisa é os dois ambientes serem descritos pelo mesmo código de infraestrutura, com variáveis apenas para o que pode ser diferente: tamanho de máquina, volume, custo. Se produção foi criada no console e homologação por código, homologação não prova nada, porque a topologia e as permissões podem divergir sem ninguém ver. A segunda é o caminho da mudança ser o mesmo: o mesmo artefato versionado, promovido pelo mesmo pipeline, sem ninguém reescrever nada no meio. A terceira é o dado. Homologação não precisa do volume de produção, mas precisa da mesma forma: mesmos tipos, mesmos casos de borda, mesmas categorias, com dado mascarado ou sintético. É comum o teste passar porque homologação só tem dado bonito. O que continua diferente e eu declaro como risco residual é escala e concorrência: comportamento sob carga real e disputa por recurso só aparecem em produção. Para isso eu conto com observabilidade e com a capacidade de reverter, não com o teste anterior."
+    rubrica:
+      - "Exigiu a mesma definição de infraestrutura para os dois ambientes, com variáveis só para o que difere"
+      - "Exigiu o mesmo caminho de promoção, com o mesmo artefato"
+      - "Falou da forma do dado em homologação, incluindo casos de borda e mascaramento"
+      - "Reconheceu o risco residual de escala e concorrência, em vez de prometer garantia total"
+      - "Citou observabilidade e reversão como rede para o que o teste não cobre"
+  - tipo: oral
+    enunciado: "Por que infraestrutura como código importa num time de dados, e o que muda na prática?"
+    respostaModelo: "O que muda é que a infraestrutura deixa de ser conhecimento de uma pessoa e vira algo revisável e reproduzível. Num time de dados isso pega em coisas concretas: quais buckets existem e com que política, quais permissões o job tem, como o cluster é dimensionado, qual é o agendamento, o que é criptografado. Hoje, se isso foi clicado no console, a resposta para 'por que esse job enxerga essa tabela' é procurar quem configurou. Com código, é abrir um arquivo e ver o histórico de quem mudou e por quê. As duas ideias que fazem funcionar são declaratividade e estado. Declaratividade significa que eu escrevo o que deve existir, não os passos, e por isso aplicar duas vezes dá o mesmo resultado. Estado é o registro do que a ferramenta já criou, que permite calcular a diferença e me mostrar um plano antes de aplicar. Eu trato o plano como diff de revisão: leio o que vai ser criado, alterado e, principalmente, destruído, porque recurso com estado destruído por engano nem sempre volta. Duas disciplinas acompanham isso: segredo nunca no repositório, sempre em cofre por referência, e o estado remoto com bloqueio, para dois applies não se atropelarem."
+    rubrica:
+      - "Nomeou o ganho central: infraestrutura revisável e reproduzível, não conhecimento de uma pessoa"
+      - "Deu exemplos concretos do dia a dia de dados (bucket, permissão, agendamento, cluster)"
+      - "Explicou declaratividade e idempotência"
+      - "Explicou estado e o papel do plano como diff, com atenção ao que será destruído"
+      - "Citou segredo fora do repositório e estado remoto com bloqueio"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre ambientes é mais defensável numa sabatina?"
+    alternativas:
+      - texto: "Homologação só prova algo se for descrita pelo mesmo código de produção e receber dado com a mesma forma, ainda que em volume menor."
+        correta: true
+        explicacao: "Aponta as duas condições que dão validade ao teste: mesma definição e mesma forma de dado."
+      - texto: "Homologação precisa ter o mesmo volume de dados de produção."
+        correta: false
+        explicacao: "Volume ajuda no teste de carga, mas o que valida a maioria das mudanças é a forma do dado."
+      - texto: "Desenvolvimento pode usar uma cópia crua de produção para ser mais realista."
+        correta: false
+        explicacao: "É o caminho mais comum de vazamento de dado pessoal."
+      - texto: "Se o pipeline passou em homologação, produção está garantida."
+        correta: false
+        explicacao: "Escala e concorrência continuam sendo risco residual."
+  - tipo: multipla
+    enunciado: "Quais DUAS práticas são esperadas ao usar infraestrutura como código?"
+    alternativas:
+      - texto: "Revisar o plano antes de aplicar, prestando atenção especial ao que será destruído."
+        correta: true
+        explicacao: "O plano é o diff da infraestrutura; destruição de recurso com estado pode ser irreversível."
+      - texto: "Manter o estado remoto, versionado e com bloqueio."
+        correta: true
+        explicacao: "Evita que duas execuções simultâneas corrompam o registro do que existe."
+      - texto: "Guardar as credenciais no repositório para facilitar a reprodução."
+        correta: false
+        explicacao: "Repositório é histórico permanente; segredo vai para cofre por referência."
+      - texto: "Manter um código separado para cada ambiente."
+        correta: false
+        explicacao: "Códigos distintos fazem homologação deixar de representar produção."
+      - texto: "Ajustar recursos pelo console quando houver urgência, documentando depois."
+        correta: false
+        explicacao: "Cria deriva entre o código e a realidade, que é o problema que a prática existe para evitar."
+---
+
+## Em uma frase
+
+Ambientes se distinguem por **quem consome**, não por tamanho; e só valem
+alguma coisa se forem descritos pelo **mesmo código**, com o dado de teste
+tendo a **mesma forma** do real.
+
+## Os três ambientes, pelo papel
+
+<Comparativo
+  colunas={["Ambiente", "Quem consome", "Dado", "O que precisa ser igual a produção"]}
+  linhas={[
+    ["Desenvolvimento", "Quem está construindo", "Amostra pequena, mascarada ou sintética", "Topologia e permissões"],
+    ["Homologação", "Quem valida a mudança", "Amostra com os casos de borda reais, mascarada", "Definição de infraestrutura e caminho de promoção"],
+    ["Produção", "O negócio", "Real", "É a referência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Cópia de produção não é diligência">
+Copiar a tabela de clientes crua para desenvolver parece cuidado com o
+realismo e é o caminho mais comum de vazamento de dado pessoal. O que se
+precisa preservar é a **forma**: tipos, categorias, casos de borda, nulos. Isso
+se consegue com mascaramento ou dado sintético.
+</Callout>
+
+## Infraestrutura como código: as duas ideias
+
+<Termo nome="declaratividade">Descrever o estado desejado, não os passos. Aplicar duas vezes dá o mesmo resultado, porque a ferramenta calcula a diferença em vez de repetir comandos.</Termo>
+
+<Termo nome="estado">Registro do que a ferramenta já criou. É o que permite calcular a diferença e produzir um plano. Fica remoto, versionado e com bloqueio, para duas execuções não se atropelarem.</Termo>
+
+O fluxo que se espera ouvir:
+
+<Passos itens={[
+  "Escrever a mudança no código, em arquivo versionado.",
+  "Rodar o plano e LER: o que será criado, o que será alterado e, principalmente, o que será destruído.",
+  "Revisar como se revisa código, porque o plano é o diff da infraestrutura.",
+  "Aplicar, e deixar o estado registrar o resultado."
+]} />
+
+<Callout tipo="dica" titulo="A linha do plano que importa">
+Criar e alterar costumam ser reversíveis. **Destruir um recurso com estado** —
+um banco, um bucket com dado — nem sempre volta. Ler o plano é barato; aplicar
+sem ler é aprovar merge sem ver o diff.
+</Callout>
+
+## O que nunca entra no repositório
+
+Credencial, chave e token. Eles vivem num cofre — Secrets Manager, Parameter
+Store — e entram por **referência**. O motivo é que repositório é histórico
+permanente: apagar o segredo num commit posterior **não** o apaga do
+histórico, e quem clonou antes continua com ele.
+
+## Deriva: quando a realidade foge do código
+
+<Termo nome="deriva de configuração">Diferença entre o que o código declara e o que existe de fato, criada quando alguém ajusta um recurso pelo console.</Termo>
+
+A ferramenta detecta na execução seguinte. A correção é **reaplicar o código**,
+não repetir o clique — e, se a mudança manual era necessária, ela vira código.
+Ajuste no console "documentado depois" é a forma mais eficiente de fazer o
+código deixar de descrever a realidade.
+
+## Como responder isso em voz alta
+
+Para a pergunta dos ambientes: **mesma definição**, **mesmo caminho de
+promoção**, **mesma forma de dado** — e declare o risco residual de escala e
+concorrência em vez de prometer garantia. Para a de infraestrutura como
+código: o ganho é ser **revisável e reproduzível**, sustentado por
+declaratividade e estado, com plano lido antes de aplicar e segredo fora do
+repositório.

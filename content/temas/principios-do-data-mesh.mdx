@@ -1,0 +1,227 @@
+---
+slug: principios-do-data-mesh
+titulo: "Data Mesh: os quatro princípios"
+resumo: "A proposta que inverte o lake centralizado: propriedade por domínio, dado tratado como produto, plataforma self-serve e governança federada. O que cada princípio resolve, o que ele exige em troca, e por que Mesh não é ferramenta nem substitui o lake."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "A banca usa Data Mesh para separar quem leu o resumo de quem entendeu o problema. Quase todo candidato recita os quatro princípios; poucos conseguem dizer qual dor cada um resolve e o que a empresa precisa ter antes de tentar. A repergunta favorita é 'quando Mesh é má ideia'."
+comoCai: "A empresa tem um time central de dados que virou gargalo. Data Mesh resolve? O que precisaria acontecer antes?"
+feynman: "Explique em um minuto por que dar os dados de volta para as áreas pode melhorar a qualidade, em vez de virar bagunça."
+preRequisitos: ["arquiteturas-de-dados", "governanca-de-dados"]
+errosComuns:
+  - "Tratar Data Mesh como ferramenta ou produto. É um conjunto de princípios de organização; nenhuma compra implementa Mesh."
+  - "Achar que Mesh elimina a plataforma central. Ela muda de papel: deixa de construir pipelines para todo mundo e passa a oferecer a plataforma self-serve que os domínios usam."
+  - "Confundir descentralizar com abandonar. Sem governança federada e padrões comuns, o resultado não é Mesh, é um silo por área com nomes diferentes para a mesma coisa."
+  - "Propor Mesh para empresa pequena ou com poucos domínios. O custo de plataforma e governança só se paga quando o time central realmente virou gargalo para muitas áreas."
+  - "Esquecer que o domínio precisa ter gente. Propriedade por domínio exige alguém no domínio capaz de manter o produto de dados; sem isso, a responsabilidade é nominal e o dado apodrece."
+  - "Dizer que Mesh substitui o data lake. O armazenamento continua existindo; o que muda é quem é dono do que está nele e como aquilo é publicado."
+preTeste:
+  - enunciado: "Qual problema o princípio de propriedade por domínio pretende resolver?"
+    alternativas:
+      - texto: "O time central de dados vira gargalo porque precisa entender o negócio de todas as áreas para modelar os dados delas."
+        correta: true
+        explicacao: "A premissa do Mesh é que o conhecimento do domínio está na área, e centralizar a modelagem cria fila e perda de contexto."
+      - texto: "O custo de armazenamento cresce demais num lake único."
+        correta: false
+        explicacao: "Mesh não é uma proposta de redução de custo de armazenamento."
+      - texto: "Ferramentas de ETL centralizadas são tecnicamente inferiores às distribuídas."
+        correta: false
+        explicacao: "A questão não é técnica; é de quem detém o contexto e a responsabilidade."
+  - enunciado: "Uma empresa quer adotar Data Mesh, mas cada área tem no máximo uma pessoa técnica e não há plataforma de autoatendimento. O que um arquiteto deve responder?"
+    alternativas:
+      - texto: "Sem plataforma self-serve e sem gente no domínio, descentralizar produz silos; é preciso construir a plataforma e a capacidade antes."
+        correta: true
+        explicacao: "Os quatro princípios se sustentam juntos; adotar propriedade por domínio sem os outros três cria o problema que o Mesh queria evitar."
+      - texto: "Adotar Mesh mesmo assim, porque a responsabilidade pelo dado força a capacitação."
+        correta: false
+        explicacao: "Responsabilidade sem capacidade não gera qualidade; gera dado abandonado."
+      - texto: "Comprar uma ferramenta de Data Mesh."
+        correta: false
+        explicacao: "Não existe: Mesh é organização, não produto."
+videos:
+  - id: rebHscmEEN4
+    publicadoEm: "2023-10-10"
+    titulo: "Bytes de Dados | Os 4 principais pilares do Data Mesh"
+    canal: "Luan Moreno | Engenharia de Dados Academy"
+    duracao: 4
+    porQue: "Quatro minutos para fixar os quatro princípios na ordem certa. Assista primeiro; o tema depois explica que dor cada um resolve, que é o que a banca pergunta."
+  - id: iUPNT2VSEzk
+    publicadoEm: "2022-10-26"
+    titulo: "Data Mesh - Dados como produto"
+    canal: "PPT Não Compila"
+    duracao: 89
+    porQue: "Complementar e longo, com a origem do conceito e o contexto organizacional. Use os primeiros trechos, sobre por que o modelo centralizado trava; é o argumento que sustenta a resposta oral."
+artigos:
+  - titulo: "Data Mesh"
+    url: "https://martinfowler.com/articles/data-mesh-principles.html"
+    fonte: "Martin Fowler"
+  - titulo: "O que é uma malha de dados?"
+    url: "https://aws.amazon.com/pt/what-is/data-mesh/"
+    fonte: "AWS"
+  - titulo: "Data Mesh Architecture on AWS"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/design-build-analytics-for-saas-applications/data-mesh.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Os quatro princípios do Data Mesh."
+    verso: "Propriedade por domínio; dado como produto; plataforma de dados self-serve; governança federada e computacional."
+  - frente: "Propriedade por domínio: que dor resolve?"
+    verso: "O time central precisa entender o negócio de todas as áreas para modelar os dados delas, o que cria fila e perda de contexto. O domínio que gera o dado passa a ser dono dele."
+  - frente: "Dado como produto: o que muda na prática?"
+    verso: "O dado publicado tem dono, documentação, contrato, acordo de nível de serviço, versionamento e consumidor declarado. Deixa de ser um arquivo no lake e passa a ser algo que alguém mantém."
+  - frente: "As características de um bom produto de dados."
+    verso: "Descobrível, endereçável, confiável, com semântica própria, interoperável, seguro por padrão e com valor por si só."
+  - frente: "Plataforma self-serve: que dor resolve?"
+    verso: "Sem ela, cada domínio reinventa ingestão, catálogo, qualidade e observabilidade. A plataforma central passa a entregar capacidade, não pipelines."
+  - frente: "Governança federada e computacional: o que significa 'computacional'?"
+    verso: "As regras comuns (nomenclatura, privacidade, chaves, formatos) são verificadas por automação na plataforma, não por revisão manual em comitê."
+  - frente: "Mesh substitui o data lake?"
+    verso: "Não. O armazenamento continua; muda quem é dono do que está lá e como aquilo é publicado e consumido."
+  - frente: "Quando Data Mesh é má ideia?"
+    verso: "Poucos domínios, pouca gente técnica nas áreas, ausência de plataforma self-serve. O custo de plataforma e governança não se paga, e descentralizar vira silo."
+  - frente: "Qual é o risco central do Mesh mal feito?"
+    verso: "Silos com nomes diferentes para a mesma coisa: cada domínio define cliente do seu jeito e ninguém consegue cruzar. É o que a governança federada existe para impedir."
+  - frente: "O que sobra para o time central num Mesh?"
+    verso: "Construir e operar a plataforma, definir os padrões computáveis, e cuidar do que é transversal: identidade, catálogo, linhagem, chaves compartilhadas."
+  - frente: "Mesh e Source of Truth, como se relacionam?"
+    verso: "Cada domínio publica a verdade do próprio domínio como produto de dados. A governança federada garante que os produtos conversem, com chave compartilhada e linhagem entre fronteiras."
+drills:
+  - titulo: "Qual princípio responde?"
+    instrucao: "Para cada sintoma, diga o princípio do Mesh que o endereça."
+    opcoes: ["Propriedade por domínio", "Dado como produto", "Plataforma self-serve", "Governança federada"]
+    itens:
+      - enunciado: "O time central não conhece as regras de negócio de crédito e modela errado."
+        resposta: "Propriedade por domínio"
+        explicacao: "O contexto está na área que gera o dado."
+      - enunciado: "Ninguém sabe quem mantém a tabela de clientes nem quando ela atualiza."
+        resposta: "Dado como produto"
+        explicacao: "Dono, documentação e acordo de nível de serviço."
+      - enunciado: "Cada área montou o próprio pipeline, com ferramenta e padrão diferentes."
+        resposta: "Plataforma self-serve"
+        explicacao: "Capacidade comum evita reinvenção."
+      - enunciado: "Duas áreas definem 'cliente ativo' de formas incompatíveis."
+        resposta: "Governança federada"
+        explicacao: "Padrões comuns verificados por automação."
+      - enunciado: "Um produto de dados expõe CPF sem mascaramento."
+        resposta: "Governança federada"
+        explicacao: "Seguro por padrão, imposto pela plataforma."
+perguntas:
+  - tipo: oral
+    enunciado: "Nosso time central de dados virou gargalo: as áreas esperam semanas por uma tabela. Data Mesh resolve? O que precisaria acontecer antes?"
+    respostaModelo: "Data Mesh endereça exatamente essa dor, mas ele não é uma chave que se vira. O diagnóstico primeiro: o time central é gargalo porque precisa entender o negócio de cada área para modelar os dados dela, e esse conhecimento não está com ele. O Mesh devolve a propriedade para o domínio que gera o dado, que é quem tem o contexto. Só que os quatro princípios se sustentam juntos. Se eu descentralizar a propriedade sem plataforma self-serve, cada área vai reinventar ingestão, catálogo e qualidade, com ferramenta diferente. Se eu descentralizar sem governança federada, em seis meses teremos três definições de cliente ativo e ninguém consegue cruzar nada. E se a área não tiver gente capaz de manter um produto de dados, a propriedade é nominal e o dado apodrece com o nome de outra pessoa. Então o que precisa acontecer antes é: uma plataforma que entregue capacidade em autoatendimento, um conjunto de padrões verificados por automação e não por comitê, e pelo menos uma pessoa por domínio que consiga sustentar o produto. Enquanto isso não existir, eu atacaria o gargalo de outro jeito, priorizando fila e automatizando o que o time central mais repete."
+    rubrica:
+      - "Confirmou que o Mesh endereça essa dor e explicou por que o centralizado trava (contexto do negócio)"
+      - "Disse que os quatro princípios se sustentam juntos, não isoladamente"
+      - "Nomeou o risco concreto de descentralizar sem governança: definições divergentes"
+      - "Exigiu capacidade no domínio, não só responsabilidade"
+      - "Ofereceu um caminho alternativo enquanto os pré-requisitos não existem"
+  - tipo: oral
+    enunciado: "O que diferencia um 'produto de dados' de uma tabela publicada no data lake?"
+    respostaModelo: "A diferença é que alguém responde por ele. Uma tabela no lake existe; um produto de dados tem dono nomeado, documentação que diz o que cada campo significa, um contrato com o consumidor sobre esquema e semântica, um acordo de nível de serviço sobre atualização e disponibilidade, versionamento para mudanças não quebrarem quem consome, e uma forma de descobrir que ele existe, que é o catálogo. Na prática, é a diferença entre eu achar uma tabela chamada clientes_final_v2 e eu achar um produto que diz: sou a visão oficial de cliente do domínio de cadastro, atualizo a cada hora, tenho estas garantias de qualidade, e se eu mudar o esquema você é avisado antes. As características que eu uso como checklist são: descobrível, endereçável, confiável, com semântica própria, interoperável com os outros domínios pela chave compartilhada, e seguro por padrão. Interoperável é a que mais se esquece, e é a que impede que o Mesh vire um silo por área."
+    rubrica:
+      - "Centrou a diferença em responsabilidade: dono nomeado e alguém que responde"
+      - "Citou contrato, documentação e acordo de nível de serviço"
+      - "Mencionou versionamento e o efeito sobre quem consome"
+      - "Listou pelo menos três características de produto de dados, incluindo descobrível"
+      - "Destacou interoperabilidade como o que evita o silo"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre Data Mesh é mais defensável numa sabatina?"
+    alternativas:
+      - texto: "É um conjunto de princípios organizacionais, e adotar propriedade por domínio sem plataforma e governança tende a produzir silos."
+        correta: true
+        explicacao: "Trata o Mesh como organização e reconhece a interdependência dos princípios, que é o ponto que a repergunta busca."
+      - texto: "É uma arquitetura técnica que substitui o data lake por produtos distribuídos."
+        correta: false
+        explicacao: "O armazenamento continua existindo; o que muda é propriedade e publicação."
+      - texto: "É a evolução natural do data warehouse e se aplica a qualquer empresa."
+        correta: false
+        explicacao: "Empresa pequena ou com poucos domínios não paga o custo de plataforma e governança."
+      - texto: "É implementado comprando uma plataforma de malha de dados."
+        correta: false
+        explicacao: "Nenhuma compra implementa Mesh; ferramentas apoiam, não substituem organização."
+  - tipo: multipla
+    enunciado: "Quais DUAS condições tornam Data Mesh uma escolha ruim para uma organização?"
+    alternativas:
+      - texto: "Poucos domínios de negócio, com um time central que atende a demanda sem fila relevante."
+        correta: true
+        explicacao: "Sem gargalo, o custo de plataforma e governança não se paga."
+      - texto: "Ausência de pessoas capazes de manter produtos de dados dentro dos domínios."
+        correta: true
+        explicacao: "Propriedade sem capacidade vira responsabilidade nominal e dado abandonado."
+      - texto: "Volume de dados muito grande para um único data lake."
+        correta: false
+        explicacao: "Volume é problema de arquitetura de armazenamento, não o que o Mesh resolve."
+      - texto: "Necessidade de governança e padrões comuns entre áreas."
+        correta: false
+        explicacao: "Isso é parte do Mesh (governança federada), não um impedimento."
+      - texto: "Uso de nuvem em vez de data center próprio."
+        correta: false
+        explicacao: "Irrelevante para a decisão."
+---
+
+## Em uma frase
+
+Data Mesh é uma proposta de **organização**, não de ferramenta: devolve a
+propriedade do dado ao domínio que o gera, exige que ele seja tratado como
+produto, e só funciona com uma plataforma self-serve e governança verificada
+por automação.
+
+## Os quatro princípios, e a dor de cada um
+
+<Comparativo
+  colunas={["Princípio", "Dor que resolve", "O que exige em troca"]}
+  linhas={[
+    ["Propriedade por domínio", "Time central vira gargalo porque não tem o contexto do negócio", "Gente capaz dentro do domínio"],
+    ["Dado como produto", "Tabela sem dono, sem documentação e sem garantia de atualização", "Contrato, acordo de nível de serviço, versionamento, catálogo"],
+    ["Plataforma self-serve", "Cada área reinventa ingestão, qualidade e observabilidade", "Um time de plataforma que entrega capacidade, não pipelines"],
+    ["Governança federada e computacional", "Cada domínio define 'cliente' do seu jeito e nada cruza", "Padrões verificados por automação, não por comitê"]
+  ]}
+/>
+
+A palavra **computacional** no quarto princípio é o detalhe que separa quem
+entendeu: as regras comuns — nomenclatura, chave compartilhada, mascaramento de
+dado sensível, formato — são **verificadas pela plataforma**, não por revisão
+manual. Comitê não escala; automação sim.
+
+<Callout tipo="atencao" titulo="Os quatro se sustentam juntos">
+Descentralizar a propriedade sem os outros três não é Mesh: é silo. Cada área
+constrói do seu jeito, define os termos do seu jeito, e em seis meses ninguém
+consegue cruzar dois domínios. Esse é o cenário que a banca descreve para ver
+se você adota a moda ou o diagnóstico.
+</Callout>
+
+## Produto de dados: o que muda
+
+<Termo nome="produto de dados">Conjunto de dados publicado por um domínio com dono nomeado, documentação, contrato de esquema e semântica, acordo de nível de serviço, versionamento e presença no catálogo.</Termo>
+
+A diferença entre achar uma tabela `clientes_final_v2` no lake e achar um
+produto que declara: *sou a visão oficial de cliente do domínio de cadastro,
+atualizo a cada hora, tenho estas garantias, e se eu mudar o esquema você é
+avisado antes*.
+
+O checklist que vale decorar: **descobrível, endereçável, confiável, com
+semântica própria, interoperável, seguro por padrão, valioso por si só**.
+Interoperável é o mais esquecido — e é justamente o que impede o silo.
+
+## Quando Mesh é má ideia
+
+- **Poucos domínios**, com o time central atendendo sem fila relevante. Sem
+  gargalo, o custo de plataforma e governança não se paga.
+- **Sem gente no domínio.** Propriedade sem capacidade é responsabilidade
+  nominal, e o dado apodrece com o nome de alguém.
+- **Sem plataforma.** Descentralizar antes de ter autoatendimento transfere o
+  gargalo para dentro de cada área.
+
+<Callout tipo="dica" titulo="O que sobra para o time central">
+Ele não desaparece: muda de papel. Passa a construir e operar a plataforma,
+definir os padrões computáveis e cuidar do transversal — identidade, catálogo,
+linhagem e as chaves que ligam os domínios. É trabalho diferente, não menos
+trabalho.
+</Callout>
+
+## Como responder isso em voz alta
+
+Comece pelo diagnóstico, não pelos princípios: **por que o modelo atual
+trava**. Depois apresente os quatro como um conjunto, nomeando a dor de cada
+um. Termine com os pré-requisitos e com o que você faria enquanto eles não
+existem — é essa última parte que mostra critério em vez de entusiasmo.

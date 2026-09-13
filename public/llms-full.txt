@@ -90,6 +90,19 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
 - [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
 
+### DevOps
+
+- [CI/CD para dados e dashboards](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/cicd-para-dados-e-dashboards/): Por que pipeline de dados também merece integração e entrega contínuas: o que roda na verificação (lint de SQL, teste de transformação, dado de amostra), como promover uma mudança entre ambientes sem quebrar relatório, e o que fazer quando o que quebra não é o código, é o dado.
+- [Ambientes e infraestrutura como código](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/ambientes-e-infraestrutura-como-codigo/): Por que existem desenvolvimento, homologação e produção em dados, o que muda entre eles além do nome, e como infraestrutura como código torna os três reproduzíveis: estado, plano antes de aplicar, e o que nunca deve estar no repositório.
+- [Orquestração de pipelines](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/orquestracao/): Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura.
+- [DataOps e observabilidade](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/dataops-e-observabilidade/): Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard.
+
+### Data Mesh
+
+- [Data Mesh: os quatro princípios](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/principios-do-data-mesh/): A proposta que inverte o lake centralizado: propriedade por domínio, dado tratado como produto, plataforma self-serve e governança federada. O que cada princípio resolve, o que ele exige em troca, e por que Mesh não é ferramenta nem substitui o lake.
+- [Contratos de dados e plataforma self-serve](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/contratos-de-dados-e-plataforma/): Como o Data Mesh sai do slide: o contrato que declara esquema, semântica e garantias entre quem publica e quem consome, a evolução sem quebrar o consumidor, e a plataforma que entrega ingestão, catálogo, linhagem e qualidade sem cada domínio reinventar.
+- [Arquiteturas de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/arquiteturas-de-dados/): Lambda contra Kappa, Data Warehouse contra Data Lake contra Lakehouse, os quatro princípios do Data Mesh e a diferença entre Source of Record e Source of Truth: o vocabulário de arquitetura que a sabatina cobra em nível de trade-off.
+
 ## Engenharia de Dados
 
 A ementa oficial de uma carreira de Engenharia de Dados no mercado financeiro, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.
@@ -5465,6 +5478,842 @@ O grão é uma linha por autorização de cartão. Escolho o evento atômico por
 ### O cliente mudou de endereço. Como você trata isso na dimensão cliente e por quê?
 
 Depende do que o negócio precisa enxergar. Se ninguém analisa endereço no tempo, tipo 1 resolve: sobrescrevo e pronto, é barato e a dimensão não cresce. Mas em banco isso raramente se sustenta, porque risco e prevenção a fraude analisam concentração por região, e sobrescrever reescreve o passado. Então uso tipo 2: encerro a linha vigente preenchendo a data de fim e a flag de corrente, e insiro uma nova linha com nova chave substituta, nova data de início e fim em aberto. O fato passa a apontar para a chave substituta da versão vigente na data do evento, resolvida por busca com faixa de vigência durante a carga. O custo é dimensão maior e carga mais complexa, e todo mundo que consulta precisa saber que existe mais de uma linha por cliente. Tipo 3 eu deixaria só para comparar antes e depois de uma reclassificação pontual.
+
+---
+
+# CI/CD para dados e dashboards
+
+Trilha: Engenharia de Analytics · Módulo: DevOps
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/cicd-para-dados-e-dashboards/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** Por que pipeline de dados também merece integração e entrega contínuas: o que roda na verificação (lint de SQL, teste de transformação, dado de amostra), como promover uma mudança entre ambientes sem quebrar relatório, e o que fazer quando o que quebra não é o código, é o dado.
+
+**Por que cai na prova.** Na sabatina de Analytics a pergunta chega assim: 'como você garante que uma mudança no modelo não derruba o painel da diretoria?'. Quem responde 'testo antes' perde; quem descreve o que roda no pipeline de verificação, em que ambiente, e o que acontece quando falha, mostra que já quebrou produção antes.
+
+**Como o entrevistador pergunta.** "Você mudou um modelo que alimenta três dashboards. Como essa mudança chega à produção?"
+
+## Em uma frase
+
+Mudança em modelo de dados é mudança em produção: precisa ser **construída
+isolada**, **testada no código e no dado**, **promovida com o mesmo artefato**
+e ter **caminho de volta** — que em dados significa reprocessar, não só
+reverter.
+
+## O que roda antes de aprovar
+
+<Passos itens={[
+  "Construir os modelos num esquema isolado daquela mudança, com dado de amostra. Ninguém consome; falha não atinge consumidor.",
+  "Rodar os testes de dados: unicidade de chave, não nulo, conjunto de valores aceito, integridade entre modelos.",
+  "Rodar pelo menos um teste de negócio: o total do modelo bate com o total da origem.",
+  "Revisão por par, porque erro de regra de negócio nenhuma automação pega.",
+  "Quando o modelo alimenta um indicador, aprovação do dono daquele indicador."
+]} />
+
+<Callout tipo="atencao" titulo="O que diferencia dados de software comum">
+No software, o código muda e o comportamento muda. Em dados, **o dado de
+entrada muda sem uma linha sua mudar** — a coluna passa a vir nula, aparece
+uma categoria nova, surge duplicata. Por isso a suíte tem duas metades: testes
+de código e **testes de dado**. Sem a segunda, tudo fica verde e o relatório
+fica errado.
+</Callout>
+
+## Promover entre ambientes
+
+O mesmo artefato versionado avança: desenvolvimento, homologação, produção.
+Cada ambiente com o próprio dado e as próprias credenciais. Não se reescreve
+nada no caminho — reescrever é perder a garantia de que o que foi testado é o
+que subiu.
+
+<Callout tipo="dica" titulo="Dado de produção para desenvolver">
+Só **mascarado ou amostrado**, com o mesmo controle de acesso do original.
+Cópia crua de produção no ambiente de desenvolvimento é o vazamento mais
+comum em times de dados, e a banca costuma cutucar exatamente isso.
+</Callout>
+
+## O dashboard faz parte do fluxo
+
+Renomear uma coluna **passa** em todos os testes do modelo e **quebra** o
+painel que referenciava o nome antigo. Por isso o fluxo inclui:
+
+- **Linhagem** para descobrir quem consome antes de mudar.
+- **Publicação em paralelo** com prazo, quando a mudança é incompatível, em vez
+  de renomear em cima.
+- **Aviso aos donos** dos painéis afetados, que a linhagem identificou.
+
+É a mesma lógica dos contratos de dados, aplicada ao consumo final.
+
+## Voltar atrás em dados
+
+Reverter o código não conserta a tabela: o resultado errado **já está
+gravado**. O caminho de volta em dados tem duas partes, e as duas precisam
+existir antes de subir:
+
+1. **Versionamento** da transformação, para saber ao que voltar.
+2. **Capacidade de reprocessar** a partir da origem, para regravar o certo.
+
+É por isso que preservar o dado cru na camada de entrada não é preciosismo: é
+o que torna o rollback possível.
+
+## Como responder isso em voz alta
+
+Estruture pelo caminho da mudança: **impacto** (linhagem), **verificação**
+(isolado, testes de código e de dado, teste de negócio), **aprovação** (par e
+dono do indicador), **promoção** (mesmo artefato), **compatibilidade**
+(paralelo com prazo) e **volta** (reprocessar). Quem cita o reprocessamento
+mostra que já viu dado errado publicado.
+
+## Erros comuns
+
+- Achar que CI para dados é só rodar o pipeline. A verificação útil roda em ambiente isolado, com dado de amostra, e falha antes de tocar em produção.
+- Testar só o código e não o dado. Transformação correta sobre dado que mudou de formato continua quebrando o relatório; teste de dado é parte do pipeline.
+- Promover mudança direto em produção porque 'é só um SQL'. Modelo que alimenta painel é produção, com consumidor e horário crítico.
+- Esquecer o dashboard no fluxo. Renomear uma coluna passa no teste do modelo e quebra o painel que referenciava o nome antigo.
+- Não ter caminho de volta. Sem versionamento do modelo e sem capacidade de reprocessar, o rollback vira restauração de backup no meio do expediente.
+- Tratar ambiente de desenvolvimento com dado de produção sem mascaramento. Cópia de produção para desenvolver é o vazamento mais comum em times de dados.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Você precisa mudar um modelo que alimenta três dashboards da diretoria. Descreva como essa mudança chega à produção.
+
+Primeiro eu descubro o impacto: uso a linhagem para listar o que consome aquele modelo, e nesse caso são três painéis com dono conhecido. Isso muda quem precisa aprovar. Aí eu trabalho num branch, e o pipeline de verificação constrói os modelos num esquema isolado, só dessa mudança, com dado de amostra, e roda os testes: unicidade de chave, não nulo nos campos obrigatórios, valores dentro do conjunto esperado, integridade entre modelos, e pelo menos um teste de negócio comparando o total com a origem. Se qualquer um falha, a mudança não segue. Passando, vai para revisão por par, porque erro de regra de negócio nenhuma automação pega, e para o dono do indicador quando o número que ele usa muda de definição. Aprovado, a promoção é automática e usa o mesmo artefato versionado: homologação primeiro, com dado mais próximo do real, e produção depois. Se a mudança altera coluna que os painéis referenciam, eu não renomeio em cima: publico em paralelo, aviso os donos, dou prazo, e só então aposento a antiga. E eu garanto o caminho de volta antes de subir: a transformação é versionada e eu consigo reprocessar a partir da origem, porque reverter só o código deixaria a tabela com o resultado errado gravado.
+
+### Um relatório quebrou e todos os testes de código estavam passando. Como você investiga?
+
+Se o código não mudou e o relatório quebrou, o mais provável é que o dado de entrada mudou. Então eu começo pela origem: comparo o esquema e o perfil do dado de hoje com o de ontem. Coluna que passou a vir nula, categoria nova que não estava no conjunto esperado, duplicata que apareceu, mudança de fuso ou de formato de data. Em paralelo eu olho a observabilidade do pipeline: a execução rodou? Rodou no horário? Processou o volume esperado? Um pipeline que roda com sucesso sobre um arquivo vazio é o caso mais traiçoeiro, porque tudo fica verde e o relatório fica zerado. Com a causa na mão, eu faço duas coisas. A primeira é corrigir e reprocessar, porque o dado errado já está gravado. A segunda, que é a que evita a repetição, é transformar aquela causa em teste na entrada: se era nulo inesperado, entra um teste de não nulo; se era categoria nova, um teste de conjunto de valores com alerta em vez de falha, para eu decidir. É assim que a suíte de testes cresce, a partir de incidente real, e não de imaginação.
+
+---
+
+# Ambientes e infraestrutura como código
+
+Trilha: Engenharia de Analytics · Módulo: DevOps
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/ambientes-e-infraestrutura-como-codigo/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** Por que existem desenvolvimento, homologação e produção em dados, o que muda entre eles além do nome, e como infraestrutura como código torna os três reproduzíveis: estado, plano antes de aplicar, e o que nunca deve estar no repositório.
+
+**Por que cai na prova.** É a pergunta que separa quem opera de quem só entrega consulta. A banca pergunta como você garante que o ambiente de teste representa a produção, e a resposta boa fala de dado mascarado, de mesma definição de infraestrutura e de plano revisado antes de aplicar, não de 'a gente copia'.
+
+**Como o entrevistador pergunta.** "Como você garante que o que funcionou em homologação vai funcionar em produção?"
+
+## Em uma frase
+
+Ambientes se distinguem por **quem consome**, não por tamanho; e só valem
+alguma coisa se forem descritos pelo **mesmo código**, com o dado de teste
+tendo a **mesma forma** do real.
+
+## Os três ambientes, pelo papel
+
+<Comparativo
+  colunas={["Ambiente", "Quem consome", "Dado", "O que precisa ser igual a produção"]}
+  linhas={[
+    ["Desenvolvimento", "Quem está construindo", "Amostra pequena, mascarada ou sintética", "Topologia e permissões"],
+    ["Homologação", "Quem valida a mudança", "Amostra com os casos de borda reais, mascarada", "Definição de infraestrutura e caminho de promoção"],
+    ["Produção", "O negócio", "Real", "É a referência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Cópia de produção não é diligência">
+Copiar a tabela de clientes crua para desenvolver parece cuidado com o
+realismo e é o caminho mais comum de vazamento de dado pessoal. O que se
+precisa preservar é a **forma**: tipos, categorias, casos de borda, nulos. Isso
+se consegue com mascaramento ou dado sintético.
+</Callout>
+
+## Infraestrutura como código: as duas ideias
+
+<Termo nome="declaratividade">Descrever o estado desejado, não os passos. Aplicar duas vezes dá o mesmo resultado, porque a ferramenta calcula a diferença em vez de repetir comandos.</Termo>
+
+<Termo nome="estado">Registro do que a ferramenta já criou. É o que permite calcular a diferença e produzir um plano. Fica remoto, versionado e com bloqueio, para duas execuções não se atropelarem.</Termo>
+
+O fluxo que se espera ouvir:
+
+<Passos itens={[
+  "Escrever a mudança no código, em arquivo versionado.",
+  "Rodar o plano e LER: o que será criado, o que será alterado e, principalmente, o que será destruído.",
+  "Revisar como se revisa código, porque o plano é o diff da infraestrutura.",
+  "Aplicar, e deixar o estado registrar o resultado."
+]} />
+
+<Callout tipo="dica" titulo="A linha do plano que importa">
+Criar e alterar costumam ser reversíveis. **Destruir um recurso com estado** —
+um banco, um bucket com dado — nem sempre volta. Ler o plano é barato; aplicar
+sem ler é aprovar merge sem ver o diff.
+</Callout>
+
+## O que nunca entra no repositório
+
+Credencial, chave e token. Eles vivem num cofre — Secrets Manager, Parameter
+Store — e entram por **referência**. O motivo é que repositório é histórico
+permanente: apagar o segredo num commit posterior **não** o apaga do
+histórico, e quem clonou antes continua com ele.
+
+## Deriva: quando a realidade foge do código
+
+<Termo nome="deriva de configuração">Diferença entre o que o código declara e o que existe de fato, criada quando alguém ajusta um recurso pelo console.</Termo>
+
+A ferramenta detecta na execução seguinte. A correção é **reaplicar o código**,
+não repetir o clique — e, se a mudança manual era necessária, ela vira código.
+Ajuste no console "documentado depois" é a forma mais eficiente de fazer o
+código deixar de descrever a realidade.
+
+## Como responder isso em voz alta
+
+Para a pergunta dos ambientes: **mesma definição**, **mesmo caminho de
+promoção**, **mesma forma de dado** — e declare o risco residual de escala e
+concorrência em vez de prometer garantia. Para a de infraestrutura como
+código: o ganho é ser **revisável e reproduzível**, sustentado por
+declaratividade e estado, com plano lido antes de aplicar e segredo fora do
+repositório.
+
+## Erros comuns
+
+- Achar que ambientes se distinguem pelo volume de dados. Distinguem-se por quem consome: produção tem consumidor real, homologação tem validação, desenvolvimento tem quem está construindo.
+- Copiar produção para desenvolvimento sem mascarar. É o vazamento mais comum em times de dados, e passa despercebido porque parece diligência.
+- Tratar infraestrutura como código como 'script de criação'. O que a distingue é ser declarativa e ter estado: ela sabe o que já existe e calcula a diferença.
+- Aplicar sem revisar o plano. O plano mostra o que será criado, alterado e destruído; aplicar sem ler é como aprovar um merge sem ver o diff.
+- Guardar segredo no repositório. Credencial vai para um cofre e entra por referência; repositório é histórico permanente, e apagar depois não apaga o histórico.
+- Ter definições diferentes por ambiente. Se produção e homologação são descritas por códigos distintos, homologação deixa de provar qualquer coisa.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Como você garante que o que funcionou em homologação vai funcionar em produção?
+
+Garantir por completo não dá, mas dá para tirar quase toda a diferença que costuma causar surpresa. A primeira coisa é os dois ambientes serem descritos pelo mesmo código de infraestrutura, com variáveis apenas para o que pode ser diferente: tamanho de máquina, volume, custo. Se produção foi criada no console e homologação por código, homologação não prova nada, porque a topologia e as permissões podem divergir sem ninguém ver. A segunda é o caminho da mudança ser o mesmo: o mesmo artefato versionado, promovido pelo mesmo pipeline, sem ninguém reescrever nada no meio. A terceira é o dado. Homologação não precisa do volume de produção, mas precisa da mesma forma: mesmos tipos, mesmos casos de borda, mesmas categorias, com dado mascarado ou sintético. É comum o teste passar porque homologação só tem dado bonito. O que continua diferente e eu declaro como risco residual é escala e concorrência: comportamento sob carga real e disputa por recurso só aparecem em produção. Para isso eu conto com observabilidade e com a capacidade de reverter, não com o teste anterior.
+
+### Por que infraestrutura como código importa num time de dados, e o que muda na prática?
+
+O que muda é que a infraestrutura deixa de ser conhecimento de uma pessoa e vira algo revisável e reproduzível. Num time de dados isso pega em coisas concretas: quais buckets existem e com que política, quais permissões o job tem, como o cluster é dimensionado, qual é o agendamento, o que é criptografado. Hoje, se isso foi clicado no console, a resposta para 'por que esse job enxerga essa tabela' é procurar quem configurou. Com código, é abrir um arquivo e ver o histórico de quem mudou e por quê. As duas ideias que fazem funcionar são declaratividade e estado. Declaratividade significa que eu escrevo o que deve existir, não os passos, e por isso aplicar duas vezes dá o mesmo resultado. Estado é o registro do que a ferramenta já criou, que permite calcular a diferença e me mostrar um plano antes de aplicar. Eu trato o plano como diff de revisão: leio o que vai ser criado, alterado e, principalmente, destruído, porque recurso com estado destruído por engano nem sempre volta. Duas disciplinas acompanham isso: segredo nunca no repositório, sempre em cofre por referência, e o estado remoto com bloqueio, para dois applies não se atropelarem.
+
+---
+
+# Orquestração de pipelines
+
+Trilha: Engenharia de Analytics · Módulo: DevOps
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/orquestracao/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura.
+
+**Por que cai na prova.** Sabatina de engenharia de dados quase sempre entra em falha e reprocessamento, porque é lá que o candidato mostra se já operou pipeline em produção. Quem só sabe desenhar o fluxo feliz trava na primeira pergunta sobre retry duplicando lançamento.
+
+**Como o entrevistador pergunta.** "Seu pipeline diário falhou às 3h e rodou de novo às 6h. O que precisa ser verdade para isso não duplicar dados?"
+
+## Em uma frase
+
+Orquestrador é o componente que decide **o que roda, em que ordem, quando e o que
+fazer quando falha** — e que não deve, ele mesmo, processar o dado.
+
+## O que ele resolve
+
+Cinco problemas, sempre os mesmos:
+
+<Passos itens={[
+  "Dependência: a agregação de fraude só pode começar depois que a carga de cartão terminou",
+  "Ordem: o grafo declara a sequência, em vez de deixá-la implícita em horários",
+  "Retry: falha transitória de rede não pode virar chamado às 3h da manhã",
+  "Agendamento: por relógio, por evento ou por chegada de dado",
+  "Visibilidade: qual janela rodou, quando, com qual duração e qual resultado"
+]} />
+
+Cron entrega só o quarto item. Todo o resto vira gambiarra em shell script.
+
+## Airflow em cinco peças
+
+Uma **DAG** é o grafo dirigido acíclico das tasks e das dependências entre elas.
+Ela declara o fluxo; não é o lugar do processamento.
+
+Um **operator** é o molde de uma task que executa uma ação: submeter um job no
+Databricks, rodar um SQL, chamar uma API. Um **sensor** é uma task que espera uma
+condição — arquivo do parceiro no S3, partição criada, tabela liberada.
+
+O **scheduler** lê as DAGs, calcula quais task instances estão prontas e as
+enfileira. O **executor** define onde a task enfileirada roda: processos locais,
+workers Celery ou pods Kubernetes.
+
+<Callout tipo="dica" titulo="Frase que fecha a pergunta">
+Scheduler decide, executor executa, operator descreve a ação, sensor descreve a
+espera, DAG descreve a ordem.
+</Callout>
+
+## Idempotência é o requisito número um
+
+<Termo nome="idempotência">Rodar a mesma task sobre a mesma janela uma ou várias vezes deixa o destino no mesmo estado final.</Termo>
+
+Por que é o mais importante: o orquestrador **vai** reexecutar. É o que ele faz de
+madrugada, sozinho, sem perguntar. Se a task não for idempotente, a
+funcionalidade que existe para dar resiliência passa a ser a maior fonte de dado
+duplicado do lake.
+
+Duas receitas práticas:
+
+- **Sobrescrever a partição** da data de referência em vez de dar append. Barato,
+  mas exige janela fechada.
+- **MERGE pela chave de negócio** (identificador da transação, por exemplo).
+  Aguenta dado atrasado e correção, mas lê o destino, então custa mais.
+
+E o detalhe que derruba backfill: parametrize sempre pela **data lógica da
+execução**, nunca por `current_date`. No reprocessamento de janeiro, o relógio
+marca hoje.
+
+## Retry, backoff e backfill
+
+Retry cobre falha transitória: rede, throttling, cluster subindo. Sem **backoff**,
+tentar de novo a cada 30 segundos pressiona uma origem já degradada. Com número
+máximo de tentativas, falha permanente para de se disfarçar de amarelo eterno.
+
+**Backfill** é reexecutar janelas passadas — porque falhou ou porque a regra
+mudou. Reprocessar seis meses de extrato só é operação de rotina se cada janela
+for independente e idempotente. Caso contrário é projeto.
+
+## SLA e alerta
+
+SLA é o prazo declarado da entrega. Sem ele, o pipeline travado às 2h é
+descoberto às 9h pelo usuário do relatório regulatório. Alerta útil dispara em
+dois eventos: falha da task e SLA estourado — este último pega o pipeline que
+está rodando, mas devagar demais.
+
+## Anti-padrões
+
+<Comparativo
+  colunas={["Anti-padrão", "Por que quebra", "O que fazer"]}
+  linhas={[
+    ["DAG que processa o dado", "Worker do orquestrador não escala e vira ponto único de falha", "Task submete job no Databricks ou EMR e acompanha o estado"],
+    ["Dependência por horário", "No dia de pico o upstream atrasa e o downstream lê dado incompleto", "Sensor de partição, trigger do upstream ou evento"],
+    ["Task não idempotente", "Retry automático duplica lançamento", "Sobrescrita de partição ou MERGE por chave"],
+    ["Retry sem backoff nem limite", "Derruba origem degradada e esconde falha permanente", "Backoff exponencial com tentativas máximas"]
+  ]}
+/>
+
+## Airflow, Databricks Workflows e Step Functions
+
+<Comparativo
+  colunas={["Ferramenta", "Onde brilha", "Custo de escolher"]}
+  linhas={[
+    ["Airflow", "Fluxo que cruza muitos sistemas; DAG em Python versionada; ecossistema grande de operators", "Você opera o cluster de controle: scheduler, banco de metadados, workers"],
+    ["Databricks Workflows", "Quase tudo é notebook ou job Spark na própria plataforma; integra com Unity Catalog e cluster job", "Fica preso ao perímetro Databricks quando o fluxo puxa serviços de fora"],
+    ["AWS Step Functions", "Fluxo feito de serviços AWS, serverless, com máquina de estados e retry declarativos", "Orquestração fica em JSON e a lógica se espalha entre estados e Lambdas"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Onde a banca aperta">
+A pergunta raramente é qual ferramenta é melhor. É por que a sua escolha não vai
+duplicar dado no retry e como você descobre a falha antes do usuário.
+</Callout>
+
+## Erros comuns
+
+- Colocar o processamento pesado dentro da task do Airflow. O orquestrador vira gargalo e ponto único de falha; o certo é ele disparar o job no Databricks ou no EMR e acompanhar o estado.
+- Encadear pipelines por horário em vez de por sinal. Se o upstream atrasa 20 minutos, o downstream lê dado incompleto e ninguém percebe até o relatório sair errado.
+- Escrever task não idempotente. Qualquer retry, backfill ou clique em rerun duplica dado, e retry é justamente o que o orquestrador faz sozinho de madrugada.
+- Configurar retry infinito ou sem backoff. Se a origem caiu, martelar a cada 30 segundos derruba de vez e ainda esconde o incidente atrás de uma task que fica amarela para sempre.
+- Tratar SLA como enfeite. Sem prazo declarado, o pipeline que travou às 2h só é descoberto às 9h pelo usuário do relatório, e aí o custo já é reputacional.
+- Confundir data lógica da execução com a hora do relógio. Se a task usa current_date em vez da data da janela, o backfill de ontem grava tudo com a data de hoje.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Seu pipeline diário de conciliação falhou às 3h e o orquestrador rodou de novo às 6h. O que precisa ser verdade para isso não duplicar dados?
+
+Precisa que a task seja idempotente: rodar a mesma janela duas vezes tem que deixar o destino no mesmo estado. Na prática eu garanto isso de duas formas. A escrita é por sobrescrita da partição da data de referência, ou é um MERGE pela chave de negócio, como o identificador da transação. Nunca insert cego. Além disso, a task tem que ser parametrizada pela data lógica da execução, não por current_date, senão o retry das 6h escreveria no lugar errado. E a etapa anterior precisa ser repetível também: se ela consome de uma fila e dá commit do offset antes de gravar, o retry perde dado em vez de duplicar. O trade-off do MERGE é custo, porque ele lê o destino; a sobrescrita de partição é mais barata, mas só serve quando a janela é fechada e o dado atrasado é tratado à parte.
+
+### Um time diz que não precisa de orquestrador porque o cron do servidor já dispara os scripts na ordem certa. Como você responde?
+
+Eu perguntaria o que acontece quando o segundo script começa e o primeiro ainda não terminou. Com cron a ordem é uma aposta de horário; com orquestrador ela é uma dependência declarada, e o downstream só sai quando o upstream sinaliza sucesso. Depois eu perguntaria como o time descobre uma falha às 3h da manhã. Cron manda e-mail de erro no melhor caso; o orquestrador tem retry com backoff, alerta por SLA e histórico de execução por janela, que é o que permite reprocessar março inteiro sem editar script. Também vale citar visibilidade: numa auditoria, mostrar qual janela rodou, quando e com qual código é requisito, não conforto. Se o fluxo é um script só, sem dependência e sem reprocessamento, cron resolve mesmo e eu não trocaria. A complexidade do orquestrador se paga quando existem dependências e prazo.
+
+---
+
+# DataOps e observabilidade
+
+Trilha: Engenharia de Analytics · Módulo: DevOps
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/dataops-e-observabilidade/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard.
+
+**Por que cai na prova.** Todo candidato sabe construir um pipeline. A banca quer saber o que acontece quando ele quebra em silêncio, que é o modo de falha mais caro em banco. Este tema separa quem entrega job de quem entrega dado confiável.
+
+**Como o entrevistador pergunta.** "Como você descobre que um pipeline entregou dado errado antes do usuário descobrir?"
+
+## Em uma frase
+
+DataOps é aplicar disciplina de engenharia de software ao pipeline; observabilidade
+é o conjunto de sinais que te avisa que **o dado** quebrou, e não só que o job
+falhou.
+
+## Job verde não é dado certo
+
+Essa é a frase que ancora o tema inteiro. O Spark termina com sucesso lendo um
+arquivo vazio. O `MERGE` roda perfeitamente com a regra de negócio errada. O
+orquestrador pinta tudo de verde e o erro só aparece quando um diretor abre o
+relatório de fraude com número estranho.
+
+Tratar pipeline como software é o que fecha esse vão: código versionado, revisão
+por par, teste automatizado, ambientes separados, deploy reproduzível, rollback
+possível. Sai o script no notebook, entra o artefato com ciclo de vida.
+
+## Teste de dados: seis famílias
+
+<Comparativo
+  colunas={["Teste", "Pergunta que ele faz", "Exemplo bancário"]}
+  linhas={[
+    ["Esquema", "A estrutura é a contratada?", "O core renomeou vlr_transacao e a coluna sumiu"],
+    ["Volume", "Chegou a quantidade esperada?", "Ingestão de PIX trouxe 3% do volume de uma terça normal"],
+    ["Nulos", "Campo obrigatório veio preenchido?", "data_liquidacao vazia em 12% dos registros"],
+    ["Domínio", "Os valores estão na lista aceita?", "tipo_operacao trouxe um código novo que ninguém trata"],
+    ["Unicidade", "A chave de negócio se repete?", "Transação duplicada depois de reprocessar"],
+    ["Integridade", "As chaves existem do outro lado?", "id_cliente órfão na dimensão de clientes"]
+  ]}
+/>
+
+Três ferramentas para citar, uma frase cada. **Great Expectations**: você declara
+expectativas em Python, roda sobre Spark ou pandas e recebe relatório do que passou.
+**dbt tests**: asserções no YAML do modelo — `unique`, `not_null`,
+`accepted_values`, `relationships` — mais testes singulares em SQL. **Deequ**:
+biblioteca da Amazon sobre Spark que calcula métricas e verifica restrições em
+escala, com o AWS Glue Data Quality como versão gerenciada.
+
+<Callout tipo="dica" titulo="Onde colocar o teste">
+Na entrada de cada camada, não só na gold. Um erro que nasce na bronze e é detectado
+na gold custa três reprocessamentos e uma investigação. Detectado na bronze, custa
+um alerta.
+</Callout>
+
+## Contrato de dados
+
+Contrato é o acordo entre quem produz e quem consome, e vale mais que qualquer
+teste isolado. Precisa ter esquema, semântica de cada campo, granularidade, prazo de
+entrega, política de mudança com aviso prévio e **consequência declarada** quando
+alguém quebra. Sem consequência, é documentação.
+
+O contrato só existe de verdade quando vira teste executável na entrada da bronze:
+mudança compatível, como coluna nova, passa; incompatível, como troca de tipo, para
+o pipeline e avisa o produtor.
+
+## Linhagem
+
+<Termo nome="linhagem">Registro de origem e destino de cada tabela e coluna ao longo
+do pipeline.</Termo> responde duas perguntas caras: análise de impacto (quais
+dashboards param se esta tabela estiver errada) e causa raiz (de onde veio o número
+torto). **OpenLineage** é a especificação aberta para esses eventos, com integrações
+para orquestradores e motores, para a linhagem não ficar presa a uma ferramenta só.
+No Databricks, o Unity Catalog captura linhagem até o nível de coluna.
+
+## Os quatro sinais
+
+**Freshness**: há quanto tempo a tabela foi atualizada, contra o SLA. **Volume**:
+quantos registros chegaram, contra a faixa histórica do dia da semana. **Schema**: a
+estrutura mudou sem aviso. **Distribuição**: os valores continuam com a cara de
+sempre — média, nulos, cardinalidade. Muitas listas somam **linhagem** como quinto
+pilar.
+
+A diferença para teste: teste afirma uma regra que você conhece e falha o pipeline.
+Observabilidade detecta desvio de comportamento que você não enunciou.
+
+## Alerta útil e alerta ignorado
+
+<Callout tipo="erro" titulo="O alerta que ninguém lê">
+Alerta sem dono, com limiar não calibrado, disparado para lista de trinta pessoas,
+treina o time a ignorar o canal. Quando o alerta que importava chegar, ele vai para
+a mesma pasta.
+</Callout>
+
+Alerta útil é acionável, tem dono nomeado, tem limiar tirado do histórico e traz
+contexto para começar a investigar. Notificação de job que terminou bem não é
+alerta.
+
+## Reprocessamento idempotente
+
+Rodar a mesma janela duas vezes precisa produzir o mesmo resultado. Na prática:
+escrita por partição com overwrite dinâmico, ou `MERGE` pela chave de negócio.
+Append cego é a causa número um de transação duplicada em fato. Idempotência é o que
+transforma reprocessamento de operação de risco em rotina.
+
+## CI/CD, IaC e versionamento
+
+<Passos itens={[
+  "Em CI, sem dado de produção: valide contrato e esquema, rode a transformação sobre amostra sintética com casos de borda, e um teste de fumaça ponta a ponta em ambiente reduzido",
+  "Mantenha ambientes separados — desenvolvimento, homologação, produção — com o mesmo código e configuração por variável",
+  "Em CD, faça deploy do artefato versionado e mantenha o caminho de rollback testado"
+]} />
+
+**IaC** fecha a conta: Terraform descreve bucket, catálogo, permissão, cluster e job
+como código revisável, e recria o ambiente igual. Docker empacota a dependência do
+job para o que rodou no seu laptop rodar igual no cluster. Ambiente clicado na
+console é ambiente que ninguém consegue reproduzir depois do incidente.
+
+**Versionamento de dado** é a última peça: Delta com time travel por versão ou
+timestamp, Iceberg com snapshots. Permite comparar antes e depois de um
+reprocessamento e voltar atrás sem restaurar backup.
+
+## Como responder isso em voz alta
+
+Comece pela distinção job versus dado. Liste as famílias de teste com um exemplo
+bancário cada. Passe para os quatro sinais. Feche dizendo como prioriza cobertura
+por criticidade, porque testar tudo igual é o que faz o time abandonar a prática.
+
+## Erros comuns
+
+- Confundir monitoramento de job com observabilidade de dado. Job verde e dado errado é o cenário mais comum: o pipeline rodou, só entregou lixo.
+- Testar só na camada final. Quando o erro aparece na gold, a causa já está três camadas atrás e o reprocessamento é caro.
+- Alertar em tudo. Alerta que dispara toda semana e ninguém investiga é ruído: treina o time a ignorar, incluindo o alerta que importava.
+- Achar que contrato de dados é documentação. Contrato é acordo com esquema, semântica, prazo e consequência declarada quando alguém quebra.
+- Reprocessar com append. Rodar o mesmo dia duas vezes e duplicar transação é o defeito mais visível de pipeline não idempotente.
+- Deixar CI/CD de fora porque 'não dá para testar sem dado de produção'. Dá: esquema, transformação em amostra sintética e contrato são testáveis sem tocar em PII.
+- Tratar linhagem como diagrama bonito. Linhagem é o que responde, às três da manhã, quais dashboards param se esta tabela estiver errada.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Como você descobre que um pipeline entregou dado errado antes do usuário descobrir?
+
+Eu separo duas camadas. A primeira é teste: regras que eu conheço e que falham o pipeline antes de publicar — esquema contra o contrato, contagem contra a faixa esperada, nulos em campo obrigatório, domínio de valores, unicidade da chave de negócio e integridade com as dimensões. Rodo isso na entrada de cada camada, não só na gold, porque o custo de descobrir sobe a cada salto. A segunda camada é observabilidade, para o que eu não previ: freshness, volume, schema e distribuição monitorados contra o histórico, com limiar calibrado. Junto disso, linhagem, para saber na hora quais dashboards param se a tabela estiver errada. E um detalhe que eu faria questão de dizer: job verde não é sinal de dado certo. O trade-off é que teste demais atrasa entrega e alerta demais vira ruído, então eu começaria pelas tabelas críticas e cresceria a cobertura por criticidade, não por igualdade.
+
+### O time do core bancário mudou o tipo de um campo sem avisar e quebrou três pipelines seus. Como você evita que isso se repita?
+
+A resposta não é técnica sozinha, é contrato. Eu proporia um contrato de dados explícito com o time produtor: esquema versionado, semântica de cada campo, granularidade, prazo de entrega, política de mudança com aviso prévio e o que acontece quando alguém quebra. Do meu lado, implemento o contrato como teste automatizado na entrada da bronze, que falha rápido e não deixa a mudança se propagar. Para mudanças compatíveis, como coluna nova, eu deixo passar; para incompatíveis, como troca de tipo, eu paro e aviso. Em cima disso, registro linhagem para conseguir dizer ao produtor exatamente quais consumidores ele afeta, o que muda muito a conversa. O trade-off é fricção: contrato torna a evolução do produtor mais lenta, e eu reconheceria isso. Mas o custo alternativo é descobrir a quebra pelo dashboard errado do diretor.
+
+### Você precisa reprocessar 30 dias de transações de cartão porque uma regra de categorização estava errada. Como faz isso com segurança?
+
+Primeiro garanto que o pipeline é idempotente, porque reprocessar com append duplica transação. Na prática, escrevo por partição de data com overwrite dinâmico, ou uso MERGE pela chave de negócio. Segundo, versiono: com Delta eu tenho o histórico, então consigo comparar o antes e o depois e voltar atrás se o resultado sair pior. Terceiro, rodo primeiro em um ambiente separado ou em um subconjunto — um dia, uma bandeira — e comparo agregados contra a versão atual antes de liberar os 30 dias. Quarto, aviso os consumidores, porque números publicados vão mudar e alguém já fechou relatório com eles. O trade-off é tempo e custo de computação; a alternativa de corrigir só daqui para frente é mais barata, mas deixa a série histórica inconsistente. Em contexto regulatório eu não aceitaria isso sem alinhar com o dono do dado.
+
+---
+
+# Data Mesh: os quatro princípios
+
+Trilha: Engenharia de Analytics · Módulo: Data Mesh
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/principios-do-data-mesh/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** A proposta que inverte o lake centralizado: propriedade por domínio, dado tratado como produto, plataforma self-serve e governança federada. O que cada princípio resolve, o que ele exige em troca, e por que Mesh não é ferramenta nem substitui o lake.
+
+**Por que cai na prova.** A banca usa Data Mesh para separar quem leu o resumo de quem entendeu o problema. Quase todo candidato recita os quatro princípios; poucos conseguem dizer qual dor cada um resolve e o que a empresa precisa ter antes de tentar. A repergunta favorita é 'quando Mesh é má ideia'.
+
+**Como o entrevistador pergunta.** "A empresa tem um time central de dados que virou gargalo. Data Mesh resolve? O que precisaria acontecer antes?"
+
+## Em uma frase
+
+Data Mesh é uma proposta de **organização**, não de ferramenta: devolve a
+propriedade do dado ao domínio que o gera, exige que ele seja tratado como
+produto, e só funciona com uma plataforma self-serve e governança verificada
+por automação.
+
+## Os quatro princípios, e a dor de cada um
+
+<Comparativo
+  colunas={["Princípio", "Dor que resolve", "O que exige em troca"]}
+  linhas={[
+    ["Propriedade por domínio", "Time central vira gargalo porque não tem o contexto do negócio", "Gente capaz dentro do domínio"],
+    ["Dado como produto", "Tabela sem dono, sem documentação e sem garantia de atualização", "Contrato, acordo de nível de serviço, versionamento, catálogo"],
+    ["Plataforma self-serve", "Cada área reinventa ingestão, qualidade e observabilidade", "Um time de plataforma que entrega capacidade, não pipelines"],
+    ["Governança federada e computacional", "Cada domínio define 'cliente' do seu jeito e nada cruza", "Padrões verificados por automação, não por comitê"]
+  ]}
+/>
+
+A palavra **computacional** no quarto princípio é o detalhe que separa quem
+entendeu: as regras comuns — nomenclatura, chave compartilhada, mascaramento de
+dado sensível, formato — são **verificadas pela plataforma**, não por revisão
+manual. Comitê não escala; automação sim.
+
+<Callout tipo="atencao" titulo="Os quatro se sustentam juntos">
+Descentralizar a propriedade sem os outros três não é Mesh: é silo. Cada área
+constrói do seu jeito, define os termos do seu jeito, e em seis meses ninguém
+consegue cruzar dois domínios. Esse é o cenário que a banca descreve para ver
+se você adota a moda ou o diagnóstico.
+</Callout>
+
+## Produto de dados: o que muda
+
+<Termo nome="produto de dados">Conjunto de dados publicado por um domínio com dono nomeado, documentação, contrato de esquema e semântica, acordo de nível de serviço, versionamento e presença no catálogo.</Termo>
+
+A diferença entre achar uma tabela `clientes_final_v2` no lake e achar um
+produto que declara: *sou a visão oficial de cliente do domínio de cadastro,
+atualizo a cada hora, tenho estas garantias, e se eu mudar o esquema você é
+avisado antes*.
+
+O checklist que vale decorar: **descobrível, endereçável, confiável, com
+semântica própria, interoperável, seguro por padrão, valioso por si só**.
+Interoperável é o mais esquecido — e é justamente o que impede o silo.
+
+## Quando Mesh é má ideia
+
+- **Poucos domínios**, com o time central atendendo sem fila relevante. Sem
+  gargalo, o custo de plataforma e governança não se paga.
+- **Sem gente no domínio.** Propriedade sem capacidade é responsabilidade
+  nominal, e o dado apodrece com o nome de alguém.
+- **Sem plataforma.** Descentralizar antes de ter autoatendimento transfere o
+  gargalo para dentro de cada área.
+
+<Callout tipo="dica" titulo="O que sobra para o time central">
+Ele não desaparece: muda de papel. Passa a construir e operar a plataforma,
+definir os padrões computáveis e cuidar do transversal — identidade, catálogo,
+linhagem e as chaves que ligam os domínios. É trabalho diferente, não menos
+trabalho.
+</Callout>
+
+## Como responder isso em voz alta
+
+Comece pelo diagnóstico, não pelos princípios: **por que o modelo atual
+trava**. Depois apresente os quatro como um conjunto, nomeando a dor de cada
+um. Termine com os pré-requisitos e com o que você faria enquanto eles não
+existem — é essa última parte que mostra critério em vez de entusiasmo.
+
+## Erros comuns
+
+- Tratar Data Mesh como ferramenta ou produto. É um conjunto de princípios de organização; nenhuma compra implementa Mesh.
+- Achar que Mesh elimina a plataforma central. Ela muda de papel: deixa de construir pipelines para todo mundo e passa a oferecer a plataforma self-serve que os domínios usam.
+- Confundir descentralizar com abandonar. Sem governança federada e padrões comuns, o resultado não é Mesh, é um silo por área com nomes diferentes para a mesma coisa.
+- Propor Mesh para empresa pequena ou com poucos domínios. O custo de plataforma e governança só se paga quando o time central realmente virou gargalo para muitas áreas.
+- Esquecer que o domínio precisa ter gente. Propriedade por domínio exige alguém no domínio capaz de manter o produto de dados; sem isso, a responsabilidade é nominal e o dado apodrece.
+- Dizer que Mesh substitui o data lake. O armazenamento continua existindo; o que muda é quem é dono do que está nele e como aquilo é publicado.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Nosso time central de dados virou gargalo: as áreas esperam semanas por uma tabela. Data Mesh resolve? O que precisaria acontecer antes?
+
+Data Mesh endereça exatamente essa dor, mas ele não é uma chave que se vira. O diagnóstico primeiro: o time central é gargalo porque precisa entender o negócio de cada área para modelar os dados dela, e esse conhecimento não está com ele. O Mesh devolve a propriedade para o domínio que gera o dado, que é quem tem o contexto. Só que os quatro princípios se sustentam juntos. Se eu descentralizar a propriedade sem plataforma self-serve, cada área vai reinventar ingestão, catálogo e qualidade, com ferramenta diferente. Se eu descentralizar sem governança federada, em seis meses teremos três definições de cliente ativo e ninguém consegue cruzar nada. E se a área não tiver gente capaz de manter um produto de dados, a propriedade é nominal e o dado apodrece com o nome de outra pessoa. Então o que precisa acontecer antes é: uma plataforma que entregue capacidade em autoatendimento, um conjunto de padrões verificados por automação e não por comitê, e pelo menos uma pessoa por domínio que consiga sustentar o produto. Enquanto isso não existir, eu atacaria o gargalo de outro jeito, priorizando fila e automatizando o que o time central mais repete.
+
+### O que diferencia um 'produto de dados' de uma tabela publicada no data lake?
+
+A diferença é que alguém responde por ele. Uma tabela no lake existe; um produto de dados tem dono nomeado, documentação que diz o que cada campo significa, um contrato com o consumidor sobre esquema e semântica, um acordo de nível de serviço sobre atualização e disponibilidade, versionamento para mudanças não quebrarem quem consome, e uma forma de descobrir que ele existe, que é o catálogo. Na prática, é a diferença entre eu achar uma tabela chamada clientes_final_v2 e eu achar um produto que diz: sou a visão oficial de cliente do domínio de cadastro, atualizo a cada hora, tenho estas garantias de qualidade, e se eu mudar o esquema você é avisado antes. As características que eu uso como checklist são: descobrível, endereçável, confiável, com semântica própria, interoperável com os outros domínios pela chave compartilhada, e seguro por padrão. Interoperável é a que mais se esquece, e é a que impede que o Mesh vire um silo por área.
+
+---
+
+# Contratos de dados e plataforma self-serve
+
+Trilha: Engenharia de Analytics · Módulo: Data Mesh
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/contratos-de-dados-e-plataforma/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** Como o Data Mesh sai do slide: o contrato que declara esquema, semântica e garantias entre quem publica e quem consome, a evolução sem quebrar o consumidor, e a plataforma que entrega ingestão, catálogo, linhagem e qualidade sem cada domínio reinventar.
+
+**Por que cai na prova.** É a pergunta de execução depois da pergunta de conceito. A banca costuma dizer 'entendi os princípios, agora me diga como você impede que um domínio quebre o outro'. A resposta é contrato com versionamento e verificação automática na plataforma, e quem não sabe isso fica preso em 'a gente combina'.
+
+**Como o entrevistador pergunta.** "Um domínio mudou uma coluna e quebrou três dashboards de outra área. Como você evita que isso se repita?"
+
+## Em uma frase
+
+O contrato transforma "a gente combina" em algo **verificado na publicação**, e
+a plataforma self-serve transforma princípio em coisa que a pessoa do domínio
+consegue usar **sem abrir chamado**. Sem os dois, o Mesh fica no slide.
+
+## O que é um contrato de dados
+
+<Termo nome="contrato de dados">Acordo explícito e versionado entre quem publica e quem consome, declarando esquema, significado de cada campo, granularidade, janela de atualização, garantias de qualidade e quem responde quando algo falha.</Termo>
+
+Repare no que ele tem **além do esquema**: o significado, o grão e a
+frequência. Um produto pode manter todas as colunas e ainda assim quebrar
+quem consome, se mudar o grão de "uma linha por pedido" para "uma linha por
+item" — as somas passam a contar outra coisa.
+
+<Callout tipo="atencao" titulo="Contrato que não barra nada é documento">
+O que separa contrato de combinado é a **verificação automática na
+publicação**: se a entrega viola o contrato, ela falha antes de chegar ao
+consumidor. Documento em wiki envelhece; verificação não deixa passar.
+</Callout>
+
+## Evoluir sem quebrar
+
+<Comparativo
+  colunas={["Mudança", "Compatível?", "O que fazer"]}
+  linhas={[
+    ["Acrescentar coluna opcional", "Sim", "Publicar; quem não a conhece segue funcionando"],
+    ["Preencher campo que vinha nulo", "Sim", "Publicar; já era previsto"],
+    ["Renomear coluna", "Não", "Nova versão, com convivência"],
+    ["Remover coluna", "Não", "Nova versão, com convivência"],
+    ["Mudar tipo", "Não", "Nova versão"],
+    ["Mudar grão ou semântica", "Não", "Nova versão, e avisar explicitamente: silencioso é o pior caso"]
+  ]}
+/>
+
+O processo de versão que a banca espera ouvir:
+
+<Passos itens={[
+  "Publicar a versão nova em paralelo, sem tirar a antiga do ar.",
+  "Declarar um prazo de convivência entre as duas.",
+  "Usar a linhagem para descobrir quem consome e avisar essas pessoas.",
+  "Descontinuar a versão antiga só depois do prazo, com aviso."
+]} />
+
+## A plataforma, e o critério para saber se ela presta
+
+Ela entrega, **em autoatendimento**: ingestão, armazenamento em camadas,
+catálogo, linhagem, testes de qualidade, observabilidade, controle de acesso e
+o caminho de publicar um produto com contrato.
+
+O teste é uma pergunta só: *uma pessoa do domínio de crédito, que entende do
+negócio e não é engenheira de plataforma, consegue publicar um produto novo
+sem abrir chamado?* Se não, a plataforma virou o novo gargalo e o problema só
+trocou de nome.
+
+<Callout tipo="dica" titulo="Governança onde ela não cria fila">
+Nomenclatura, presença de dono, mascaramento de dado sensível e teste mínimo de
+qualidade são checados **no momento de publicar**, por automação. É assim que
+se tem padrão sem comitê semanal — e é literalmente o que "governança
+computacional" quer dizer.
+</Callout>
+
+## Nem todo dado vira produto
+
+Manter um produto custa: contrato, versão, acordo de nível de serviço, alguém
+de plantão. Esse compromisso só faz sentido onde há **consumidor declarado**.
+Transformar todas as tabelas em produtos é a forma mais rápida de tornar o
+Mesh insustentável — e dizer isso em voz alta mostra critério.
+
+## Como responder isso em voz alta
+
+Para a pergunta da quebra: o problema é a mudança **invisível**; a resposta é
+contrato verificado, com a distinção entre compatível e incompatível e um
+processo de versão com prazo e aviso. Para a pergunta da plataforma: liste
+capacidades, dê o critério de autoatendimento e reconheça o custo — é o
+reconhecimento do custo que separa a resposta madura da entusiasmada.
+
+## Erros comuns
+
+- Tratar o contrato como documento. Contrato que não é verificado na entrega é combinado, e combinado quebra na primeira pressa.
+- Achar que versionar é renomear a tabela para v2. Versionamento útil mantém a versão anterior viva durante um prazo declarado, para o consumidor migrar.
+- Confundir contrato com esquema. Esquema é tipo e nome de coluna; contrato inclui semântica, granularidade, atualização, qualidade esperada e quem responde.
+- Deixar a plataforma virar um novo gargalo. Ela entrega capacidade em autoatendimento; se cada uso precisar de um chamado, voltamos ao time central.
+- Esquecer a linhagem entre domínios. Sem ela, ninguém consegue responder de onde veio o número quando dois produtos discordam.
+- Publicar produto sem consumidor conhecido. Produto de dados sem consumidor declarado é custo de manutenção sem retorno; o Mesh não pede que tudo vire produto.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Um domínio mudou uma coluna e quebrou três painéis de outra área. Como você impede que isso se repita, sem travar a evolução do produto de dados?
+
+O problema aqui não é a mudança, é ela ter sido invisível até quebrar. O que eu ponho no lugar é um contrato de dados: um artefato versionado, que fica junto do produto, declarando esquema, significado de cada campo, grão, janela de atualização e garantias de qualidade. E o ponto que faz diferença é que esse contrato é verificado automaticamente na publicação: se a mudança viola o contrato, a publicação falha antes de chegar ao consumidor. Isso não trava evolução, porque eu separo mudança compatível de incompatível. Acrescentar coluna opcional é compatível e passa direto. Renomear, remover, mudar tipo ou mudar grão é incompatível, e aí entra versionamento: publico a versão nova em paralelo, mantenho a anterior por um prazo declarado, uso a linhagem para saber quem consome e aviso essas pessoas, e só depois descontinuo. O custo disso é real, e é por isso que nem todo dado vira produto: eu só assumo esse compromisso onde há consumidor declarado. O que eu não aceito é resolver por comunicado de e-mail, porque depende de alguém ler no dia certo.
+
+### O que uma plataforma de dados self-serve precisa entregar para que a descentralização funcione de verdade?
+
+Ela precisa entregar, em autoatendimento, tudo que hoje cada domínio teria de construir sozinho: ingestão, armazenamento com padrão de camadas, catálogo onde o produto é descoberto, linhagem, testes de qualidade, observabilidade de atualização e falha, controle de acesso, e o caminho de publicar um produto com contrato. O critério que eu uso para saber se está boa é simples: uma pessoa do domínio de crédito, que sabe do negócio e não é engenheira de plataforma, consegue publicar um produto de dados novo sem abrir chamado? Se a resposta for não, a plataforma virou o novo gargalo e trocamos o nome do problema. A segunda coisa que a plataforma faz é aplicar a governança por automação: nomenclatura, presença de dono, mascaramento de dado sensível e teste mínimo de qualidade são verificados no momento de publicar, não num comitê semanal. É isso que permite ter padrão sem ter fila. E vale dizer o custo: construir essa plataforma é um investimento grande, com time dedicado. Por isso Mesh não faz sentido em empresa com poucos domínios, onde o time central dá conta.
+
+---
+
+# Arquiteturas de dados
+
+Trilha: Engenharia de Analytics · Módulo: Data Mesh
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/arquiteturas-de-dados/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Lambda contra Kappa, Data Warehouse contra Data Lake contra Lakehouse, os quatro princípios do Data Mesh e a diferença entre Source of Record e Source of Truth: o vocabulário de arquitetura que a sabatina cobra em nível de trade-off.
+
+**Por que cai na prova.** Arquitetura é onde a banca mede senioridade. Qualquer pessoa lista nomes; o que separa é dizer o que cada escolha custa e em que condição você mudaria de ideia. A pergunta sobre fonte da verdade é a que mais expõe quem nunca conciliou número com área de negócio.
+
+**Como o entrevistador pergunta.** "O saldo no core diverge do saldo no relatório. Qual é a fonte da verdade?"
+
+## Em uma frase
+
+Arquitetura de dados é a escolha de **onde o dado mora, quem manda nele e quantas
+vezes a mesma regra é escrita** — e cada opção cobra num lugar diferente.
+
+## Lambda contra Kappa
+
+**Lambda** tem duas camadas de processamento. A *batch* reprocessa o histórico
+inteiro e produz o número correto, com latência de horas. A *speed* processa o
+que chega agora e produz um número aproximado, em segundos. A camada de serviço
+junta as duas na hora da consulta: histórico da batch, últimas horas da speed.
+
+**Kappa** elimina a camada batch. Tudo é stream, e reprocessar histórico é reler
+o log de eventos desde o começo com o código novo.
+
+<Comparativo
+  colunas={["", "Lambda", "Kappa"]}
+  linhas={[
+    ["Caminhos de processamento", "Dois: batch e speed", "Um: stream"],
+    ["Custo principal", "A mesma regra escrita duas vezes, que diverge com o tempo", "Depender do log reter histórico e reprocessar volume grande por stream"],
+    ["Quando faz sentido", "Regra batch complexa que não se traduz bem para stream", "Lógica que cabe em stream e log com retenção suficiente"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="A frase que a banca espera">
+O custo do Lambda não é infraestrutura, é manutenção: duas implementações do
+cálculo de exposição de crédito acabam discordando, e descobrir qual está certa
+vira projeto.
+</Callout>
+
+## Warehouse, Lake e Lakehouse
+
+<Comparativo
+  colunas={["", "Data Warehouse", "Data Lake", "Lakehouse"]}
+  linhas={[
+    ["Schema", "On write: modela antes de carregar", "On read: aplica na leitura", "On read com contrato de tabela por cima"],
+    ["Dado que aceita", "Estruturado", "Qualquer formato", "Qualquer formato, com tabelas governadas sobre os arquivos"],
+    ["Transação", "ACID nativo", "Não tem: escrita parcial é visível", "ACID pela camada Delta, Iceberg ou Hudi"],
+    ["Custo de armazenamento", "Alto", "Baixo (objetos)", "Baixo (objetos)"],
+    ["Risco típico", "Rigidez e fila de modelagem", "Virar pântano sem catálogo e qualidade", "Complexidade de operar a camada de tabela"],
+    ["Uso no banco", "Relatório regulatório estável", "Payload cru de PIX, log, áudio", "Tabelas de transação com MERGE e time travel para auditoria"]
+  ]}
+/>
+
+## Data Mesh
+
+Mesh responde a um gargalo **organizacional**: um time central de dados que não
+dá conta da fila de pedidos de quatro áreas de negócio. Quatro princípios:
+
+<Passos itens={[
+  "Propriedade descentralizada por domínio: quem gera o dado responde por ele",
+  "Dado como produto: dono, consumidor, contrato, SLA, documentação, descoberta",
+  "Plataforma de dados self-serve: o domínio publica sem depender do time central",
+  "Governança federada computacional: regras globais decididas em conjunto e aplicadas por automação"
+]} />
+
+Um **data product** não é uma tabela publicada. É uma tabela com dono nomeado,
+consumidor conhecido, SLA de atualização, qualidade medida e presença no
+catálogo. O **contrato de dados** é o acordo explícito de schema, semântica,
+frequência e política de mudança — o que transforma quebra silenciosa em
+violação detectável.
+
+<Callout tipo="erro" titulo="Quando Mesh é overhead">
+Sem domínios que tenham time de engenharia próprio, e sem plataforma self-serve,
+descentralizar propriedade só distribui o problema. Em organização pequena, o
+custo de coordenação supera o ganho e centralizar continua mais rápido.
+</Callout>
+
+## Source of Record e Source of Truth
+
+Este par é o que mais derruba candidato, porque parece sinônimo e não é.
+
+<Termo nome="Source of Record">O sistema onde o dado nasce e que é autoritativo sobre o fato original.</Termo>
+O core bancário é o SoR do lançamento. O sistema de cadastro é o SoR do endereço.
+Se a base analítica discorda do SoR sobre *o que aconteceu*, é a base analítica
+que se explica.
+
+<Termo nome="Source of Truth">A visão consolidada, tratada e governada que a organização usa para decidir.</Termo>
+A SoT reúne vários SoRs, resolve duplicidade, aplica regra de negócio e corte
+temporal, e é a referência do relatório e do indicador.
+
+**Elas divergem por bons motivos.** Corte temporal diferente (o core é agora, o
+relatório é o fechamento de ontem às 23h59). Regra distinta (lançamento em
+contingência que a contabilidade ainda não reconhece). Atraso de ingestão. E, às
+vezes, defeito real.
+
+A resposta profissional não é eleger um número, é **reconciliar**: comparar o
+mesmo corte, isolar a causa, documentar a explicação e configurar alerta para
+quando a diferença sair da faixa esperada. Divergência explicada é operação
+normal; divergência sem explicação é incidente.
+
+## Modern data stack, em uma frase
+
+Conjunto de ferramentas gerenciadas e desacopladas — ingestão, armazenamento em
+nuvem, transformação em SQL, orquestração, catálogo e BI — montadas por
+integração em vez de por plataforma única.
+
+## Erros comuns
+
+- Descrever Lambda e Kappa como opções equivalentes. Lambda cobra caro em manter a mesma regra escrita duas vezes; Kappa cobra em reprocessamento de histórico pelo próprio stream. Sem citar esse custo, a resposta vira lista.
+- Tratar Lakehouse como marketing de Data Lake. O que muda é concreto: formato de tabela com transação, evolução de schema e time travel sobre armazenamento de objetos.
+- Dizer que Data Mesh é arquitetura técnica. Os quatro princípios são organizacionais antes de tudo; sem times de domínio com dono, o Mesh vira lake bagunçado com nome novo.
+- Confundir Source of Record com Source of Truth. SoR é onde o dado nasce; SoT é a visão consolidada e governada usada para decidir. Podem ser sistemas diferentes sem que ninguém esteja errado.
+- Responder que a fonte da verdade é sempre o core bancário. Para saldo em tempo real, sim; para o número do relatório regulatório de fechamento, a verdade é a visão consolidada e datada, não a tela do momento.
+- Propor Data Mesh para uma empresa com um time de dados de oito pessoas. Governança federada e plataforma self-serve exigem escala organizacional; abaixo dela, é overhead.
+
+## Perguntas de sabatina e respostas-modelo
+
+### O saldo no core diverge do saldo no relatório gerencial. Qual é a fonte da verdade?
+
+Depende da pergunta que está sendo feita, e eu começaria separando dois conceitos. O core é o Source of Record do saldo: é onde o lançamento nasce e é autoritativo sobre o fato. O relatório vem da Source of Truth analítica, que é a visão consolidada, datada e governada usada para decidir. As duas podem divergir sem que nenhuma esteja errada, porque o relatório tem corte temporal, regra contábil e às vezes exclusão de lançamentos em contingência. Então minha primeira ação não é escolher um número, é reconciliar: comparar o mesmo corte, isolar se a diferença é de janela de ingestão, de regra de negócio ou defeito real. Para saldo em tempo real ao cliente, a resposta é o core. Para o número que vai ao regulador, é a visão consolidada, porque ela é auditável e reproduzível. O que não pode existir é divergência sem explicação documentada e sem alerta quando ela sai da faixa esperada.
+
+### A diretoria leu sobre Data Mesh e quer adotar. Vocês têm quatro domínios grandes, um time central de dados com fila de três meses e nenhuma plataforma self-serve. O que você recomenda?
+
+Eu concordaria com o diagnóstico e discordaria do primeiro passo. A fila de três meses é sintoma clássico do gargalo central que o Mesh ataca, então a direção faz sentido. Mas os quatro princípios se sustentam juntos: sem plataforma self-serve, descentralizar propriedade só transfere o problema para times que não têm ferramenta, e sem governança federada computacional cada domínio inventa seu padrão de qualidade e de privacidade. Eu começaria pela plataforma e pelo contrato de dados, escolheria um domínio piloto com time de engenharia maduro, como cartão, e trataria uma ou duas tabelas como produto de verdade: dono nomeado, SLA de atualização, schema versionado, catálogo. Mediria tempo de entrega antes e depois. Se o piloto não reduzir a fila, o problema é de plataforma ou de capacidade do domínio, e escalar o modelo só multiplicaria o custo de coordenação.
 
 ---
 

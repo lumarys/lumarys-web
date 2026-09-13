@@ -1,0 +1,237 @@
+---
+slug: contratos-de-dados-e-plataforma
+titulo: "Contratos de dados e plataforma self-serve"
+resumo: "Como o Data Mesh sai do slide: o contrato que declara esquema, semântica e garantias entre quem publica e quem consome, a evolução sem quebrar o consumidor, e a plataforma que entrega ingestão, catálogo, linhagem e qualidade sem cada domínio reinventar."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "É a pergunta de execução depois da pergunta de conceito. A banca costuma dizer 'entendi os princípios, agora me diga como você impede que um domínio quebre o outro'. A resposta é contrato com versionamento e verificação automática na plataforma, e quem não sabe isso fica preso em 'a gente combina'."
+comoCai: "Um domínio mudou uma coluna e quebrou três dashboards de outra área. Como você evita que isso se repita?"
+feynman: "Explique em um minuto por que uma tabela compartilhada precisa de um contrato, usando a ideia de uma API."
+preRequisitos: ["principios-do-data-mesh", "governanca-de-dados"]
+errosComuns:
+  - "Tratar o contrato como documento. Contrato que não é verificado na entrega é combinado, e combinado quebra na primeira pressa."
+  - "Achar que versionar é renomear a tabela para v2. Versionamento útil mantém a versão anterior viva durante um prazo declarado, para o consumidor migrar."
+  - "Confundir contrato com esquema. Esquema é tipo e nome de coluna; contrato inclui semântica, granularidade, atualização, qualidade esperada e quem responde."
+  - "Deixar a plataforma virar um novo gargalo. Ela entrega capacidade em autoatendimento; se cada uso precisar de um chamado, voltamos ao time central."
+  - "Esquecer a linhagem entre domínios. Sem ela, ninguém consegue responder de onde veio o número quando dois produtos discordam."
+  - "Publicar produto sem consumidor conhecido. Produto de dados sem consumidor declarado é custo de manutenção sem retorno; o Mesh não pede que tudo vire produto."
+preTeste:
+  - enunciado: "Um domínio renomeou uma coluna e quebrou relatórios de outras áreas. Qual mecanismo previne isso?"
+    alternativas:
+      - texto: "Contrato de dados verificado automaticamente na publicação, com versionamento e prazo de convivência entre versões."
+        correta: true
+        explicacao: "O contrato torna a expectativa explícita, a verificação impede a publicação que a viola, e o versionamento dá tempo para o consumidor migrar."
+      - texto: "Um comunicado por e-mail antes de cada mudança."
+        correta: false
+        explicacao: "Depende de disciplina e de alguém ler; não impede a quebra."
+      - texto: "Uma cópia da tabela para cada consumidor."
+        correta: false
+        explicacao: "Multiplica manutenção e cria divergência entre cópias."
+  - enunciado: "O que distingue uma plataforma de dados self-serve de um time central de dados?"
+    alternativas:
+      - texto: "A plataforma entrega capacidade que o domínio usa sozinho; o time central executava o trabalho do domínio."
+        correta: true
+        explicacao: "A diferença é quem faz: autoatendimento devolve a execução ao domínio, mantendo o padrão."
+      - texto: "A plataforma é sempre baseada em ferramentas de código aberto."
+        correta: false
+        explicacao: "A tecnologia não define o modelo; o autoatendimento define."
+      - texto: "A plataforma elimina a necessidade de governança."
+        correta: false
+        explicacao: "É justamente onde a governança é aplicada por automação."
+videos:
+  - id: KxxEw6UNTFA
+    publicadoEm: "2025-07-04"
+    titulo: "Data Mesh: A Revolução na Arquitetura de Dados"
+    canal: "Pedro Canizela"
+    duracao: 5
+    porQue: "Cinco minutos com o recorte prático: como o Mesh muda a relação entre quem publica e quem consome. Assista pensando em que garantia falta hoje na sua tabela mais consumida."
+  - id: rNmRcU9A0O0
+    publicadoEm: "2023-01-11"
+    titulo: "Arquitetura Data Mesh"
+    canal: "Data Science Academy"
+    duracao: 8
+    porQue: "Complementar, com o desenho dos componentes. Repare no papel da plataforma: é ela que transforma princípio em coisa que a pessoa do domínio consegue usar sozinha."
+artigos:
+  - titulo: "Data Mesh Principles and Logical Architecture"
+    url: "https://martinfowler.com/articles/data-mesh-principles.html"
+    fonte: "Martin Fowler"
+  - titulo: "O que é uma malha de dados?"
+    url: "https://aws.amazon.com/pt/what-is/data-mesh/"
+    fonte: "AWS"
+  - titulo: "AWS Lake Formation"
+    url: "https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Contrato de dados, em uma linha."
+    verso: "Acordo explícito entre quem publica e quem consome sobre esquema, semântica, granularidade, frequência de atualização, qualidade esperada e quem responde quando falha."
+  - frente: "Contrato e esquema são a mesma coisa?"
+    verso: "Não. Esquema é nome e tipo das colunas. Contrato inclui o significado, o grão, a janela de atualização, as garantias de qualidade e o responsável."
+  - frente: "O que torna um contrato eficaz?"
+    verso: "Ser verificado automaticamente na publicação. Contrato que não barra a entrega que o viola é documentação, não contrato."
+  - frente: "Mudança compatível e incompatível."
+    verso: "Compatível: acrescentar coluna opcional, ampliar domínio de valor. Incompatível: renomear, remover, mudar tipo, mudar semântica ou grão. A segunda exige nova versão."
+  - frente: "Como versionar um produto de dados?"
+    verso: "Publicar a nova versão em paralelo, manter a anterior por um prazo declarado, avisar os consumidores conhecidos e só então descontinuar."
+  - frente: "O que a plataforma self-serve precisa entregar?"
+    verso: "Ingestão, armazenamento, catálogo, linhagem, testes de qualidade, observabilidade, controle de acesso e publicação de produto — tudo em autoatendimento."
+  - frente: "Como a governança vira computacional na plataforma?"
+    verso: "Regras como nomenclatura, presença de dono, mascaramento de dado sensível e teste mínimo de qualidade são checadas por automação no momento de publicar."
+  - frente: "Para que serve a linhagem entre domínios?"
+    verso: "Para responder de onde veio o número quando dois produtos discordam, e para avaliar o impacto de uma mudança antes de fazê-la."
+  - frente: "Quem é o consumidor de um produto de dados?"
+    verso: "Outro domínio, um painel, um modelo. Produto sem consumidor declarado é manutenção sem retorno; nem todo dado precisa virar produto."
+  - frente: "Qual o risco de a plataforma virar gargalo?"
+    verso: "Se cada uso exigir um chamado ao time de plataforma, voltamos ao modelo centralizado com outro nome. Autoatendimento é o requisito, não um detalhe."
+  - frente: "Como o contrato se relaciona com Source of Truth?"
+    verso: "O contrato declara que aquele produto é a visão oficial de um domínio para determinada entidade, e as regras de precedência entre produtos ficam explícitas na governança."
+drills:
+  - titulo: "Compatível ou quebra o consumidor?"
+    instrucao: "Para cada mudança num produto de dados, diga se ela exige nova versão."
+    opcoes: ["Compatível", "Exige nova versão"]
+    itens:
+      - enunciado: "Acrescentar uma coluna opcional no fim da tabela."
+        resposta: "Compatível"
+        explicacao: "Quem não conhece a coluna continua funcionando."
+      - enunciado: "Renomear a coluna valor para valor_bruto."
+        resposta: "Exige nova versão"
+        explicacao: "Quebra qualquer consulta que referencia o nome antigo."
+      - enunciado: "Mudar o grão de uma linha por pedido para uma linha por item do pedido."
+        resposta: "Exige nova versão"
+        explicacao: "Muda a semântica: todas as somas passam a contar diferente."
+      - enunciado: "Passar a preencher uma coluna que antes vinha sempre nula."
+        resposta: "Compatível"
+        explicacao: "Preenche o que já era previsto; nada quebra."
+      - enunciado: "Trocar o tipo de uma coluna de texto para numérico."
+        resposta: "Exige nova versão"
+        explicacao: "Quebra leitura e comparação de quem esperava texto."
+perguntas:
+  - tipo: oral
+    enunciado: "Um domínio mudou uma coluna e quebrou três painéis de outra área. Como você impede que isso se repita, sem travar a evolução do produto de dados?"
+    respostaModelo: "O problema aqui não é a mudança, é ela ter sido invisível até quebrar. O que eu ponho no lugar é um contrato de dados: um artefato versionado, que fica junto do produto, declarando esquema, significado de cada campo, grão, janela de atualização e garantias de qualidade. E o ponto que faz diferença é que esse contrato é verificado automaticamente na publicação: se a mudança viola o contrato, a publicação falha antes de chegar ao consumidor. Isso não trava evolução, porque eu separo mudança compatível de incompatível. Acrescentar coluna opcional é compatível e passa direto. Renomear, remover, mudar tipo ou mudar grão é incompatível, e aí entra versionamento: publico a versão nova em paralelo, mantenho a anterior por um prazo declarado, uso a linhagem para saber quem consome e aviso essas pessoas, e só depois descontinuo. O custo disso é real, e é por isso que nem todo dado vira produto: eu só assumo esse compromisso onde há consumidor declarado. O que eu não aceito é resolver por comunicado de e-mail, porque depende de alguém ler no dia certo."
+    rubrica:
+      - "Identificou que o problema é a mudança invisível, não a mudança em si"
+      - "Descreveu o contrato incluindo semântica e grão, não só esquema"
+      - "Exigiu verificação automática na publicação, e não documento"
+      - "Separou mudança compatível de incompatível, com exemplos"
+      - "Descreveu o processo de versionamento com prazo e uso de linhagem para avisar consumidores"
+  - tipo: oral
+    enunciado: "O que uma plataforma de dados self-serve precisa entregar para que a descentralização funcione de verdade?"
+    respostaModelo: "Ela precisa entregar, em autoatendimento, tudo que hoje cada domínio teria de construir sozinho: ingestão, armazenamento com padrão de camadas, catálogo onde o produto é descoberto, linhagem, testes de qualidade, observabilidade de atualização e falha, controle de acesso, e o caminho de publicar um produto com contrato. O critério que eu uso para saber se está boa é simples: uma pessoa do domínio de crédito, que sabe do negócio e não é engenheira de plataforma, consegue publicar um produto de dados novo sem abrir chamado? Se a resposta for não, a plataforma virou o novo gargalo e trocamos o nome do problema. A segunda coisa que a plataforma faz é aplicar a governança por automação: nomenclatura, presença de dono, mascaramento de dado sensível e teste mínimo de qualidade são verificados no momento de publicar, não num comitê semanal. É isso que permite ter padrão sem ter fila. E vale dizer o custo: construir essa plataforma é um investimento grande, com time dedicado. Por isso Mesh não faz sentido em empresa com poucos domínios, onde o time central dá conta."
+    rubrica:
+      - "Listou pelo menos quatro capacidades concretas da plataforma"
+      - "Propôs um critério verificável de autoatendimento (publicar sem chamado)"
+      - "Alertou para o risco de a plataforma virar o novo gargalo"
+      - "Explicou governança computacional aplicada na publicação"
+      - "Reconheceu o custo da plataforma e ligou à decisão de adotar ou não o Mesh"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre contratos de dados é mais defensável?"
+    alternativas:
+      - texto: "Um contrato só é eficaz quando verificado automaticamente na publicação; caso contrário é documentação que envelhece."
+        correta: true
+        explicacao: "Coloca a verificação como parte da definição, que é o que separa contrato de combinado."
+      - texto: "Um contrato bem escrito dispensa versionamento, porque impede mudanças."
+        correta: false
+        explicacao: "Contrato não congela o produto; ele organiza a evolução."
+      - texto: "Contrato é o mesmo que esquema da tabela."
+        correta: false
+        explicacao: "Esquema é parte; semântica, grão, atualização e responsável também."
+      - texto: "Contratos só fazem sentido entre empresas diferentes."
+        correta: false
+        explicacao: "Entre domínios da mesma empresa é exatamente onde o Mesh os usa."
+  - tipo: multipla
+    enunciado: "Quais DUAS mudanças em um produto de dados exigem publicar uma nova versão em vez de alterar a existente?"
+    alternativas:
+      - texto: "Mudar o grão da tabela, de uma linha por pedido para uma linha por item."
+        correta: true
+        explicacao: "Altera a semântica: toda agregação existente passa a contar diferente."
+      - texto: "Renomear uma coluna usada por consumidores."
+        correta: true
+        explicacao: "Quebra qualquer consulta que referencia o nome antigo."
+      - texto: "Acrescentar uma coluna opcional ao fim."
+        correta: false
+        explicacao: "Compatível: quem não a conhece continua funcionando."
+      - texto: "Melhorar a documentação do produto."
+        correta: false
+        explicacao: "Não afeta o consumo."
+      - texto: "Passar a preencher um campo que sempre vinha nulo."
+        correta: false
+        explicacao: "Preenche o que já era previsto pelo contrato."
+---
+
+## Em uma frase
+
+O contrato transforma "a gente combina" em algo **verificado na publicação**, e
+a plataforma self-serve transforma princípio em coisa que a pessoa do domínio
+consegue usar **sem abrir chamado**. Sem os dois, o Mesh fica no slide.
+
+## O que é um contrato de dados
+
+<Termo nome="contrato de dados">Acordo explícito e versionado entre quem publica e quem consome, declarando esquema, significado de cada campo, granularidade, janela de atualização, garantias de qualidade e quem responde quando algo falha.</Termo>
+
+Repare no que ele tem **além do esquema**: o significado, o grão e a
+frequência. Um produto pode manter todas as colunas e ainda assim quebrar
+quem consome, se mudar o grão de "uma linha por pedido" para "uma linha por
+item" — as somas passam a contar outra coisa.
+
+<Callout tipo="atencao" titulo="Contrato que não barra nada é documento">
+O que separa contrato de combinado é a **verificação automática na
+publicação**: se a entrega viola o contrato, ela falha antes de chegar ao
+consumidor. Documento em wiki envelhece; verificação não deixa passar.
+</Callout>
+
+## Evoluir sem quebrar
+
+<Comparativo
+  colunas={["Mudança", "Compatível?", "O que fazer"]}
+  linhas={[
+    ["Acrescentar coluna opcional", "Sim", "Publicar; quem não a conhece segue funcionando"],
+    ["Preencher campo que vinha nulo", "Sim", "Publicar; já era previsto"],
+    ["Renomear coluna", "Não", "Nova versão, com convivência"],
+    ["Remover coluna", "Não", "Nova versão, com convivência"],
+    ["Mudar tipo", "Não", "Nova versão"],
+    ["Mudar grão ou semântica", "Não", "Nova versão, e avisar explicitamente: silencioso é o pior caso"]
+  ]}
+/>
+
+O processo de versão que a banca espera ouvir:
+
+<Passos itens={[
+  "Publicar a versão nova em paralelo, sem tirar a antiga do ar.",
+  "Declarar um prazo de convivência entre as duas.",
+  "Usar a linhagem para descobrir quem consome e avisar essas pessoas.",
+  "Descontinuar a versão antiga só depois do prazo, com aviso."
+]} />
+
+## A plataforma, e o critério para saber se ela presta
+
+Ela entrega, **em autoatendimento**: ingestão, armazenamento em camadas,
+catálogo, linhagem, testes de qualidade, observabilidade, controle de acesso e
+o caminho de publicar um produto com contrato.
+
+O teste é uma pergunta só: *uma pessoa do domínio de crédito, que entende do
+negócio e não é engenheira de plataforma, consegue publicar um produto novo
+sem abrir chamado?* Se não, a plataforma virou o novo gargalo e o problema só
+trocou de nome.
+
+<Callout tipo="dica" titulo="Governança onde ela não cria fila">
+Nomenclatura, presença de dono, mascaramento de dado sensível e teste mínimo de
+qualidade são checados **no momento de publicar**, por automação. É assim que
+se tem padrão sem comitê semanal — e é literalmente o que "governança
+computacional" quer dizer.
+</Callout>
+
+## Nem todo dado vira produto
+
+Manter um produto custa: contrato, versão, acordo de nível de serviço, alguém
+de plantão. Esse compromisso só faz sentido onde há **consumidor declarado**.
+Transformar todas as tabelas em produtos é a forma mais rápida de tornar o
+Mesh insustentável — e dizer isso em voz alta mostra critério.
+
+## Como responder isso em voz alta
+
+Para a pergunta da quebra: o problema é a mudança **invisível**; a resposta é
+contrato verificado, com a distinção entre compatível e incompatível e um
+processo de versão com prazo e aviso. Para a pergunta da plataforma: liste
+capacidades, dê o critério de autoatendimento e reconheça o custo — é o
+reconhecimento do custo que separa a resposta madura da entusiasmada.

@@ -90,6 +90,19 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
 - [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
 
+### DevOps
+
+- [CI/CD para dados e dashboards](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/cicd-para-dados-e-dashboards/): Por que pipeline de dados também merece integração e entrega contínuas: o que roda na verificação (lint de SQL, teste de transformação, dado de amostra), como promover uma mudança entre ambientes sem quebrar relatório, e o que fazer quando o que quebra não é o código, é o dado.
+- [Ambientes e infraestrutura como código](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/ambientes-e-infraestrutura-como-codigo/): Por que existem desenvolvimento, homologação e produção em dados, o que muda entre eles além do nome, e como infraestrutura como código torna os três reproduzíveis: estado, plano antes de aplicar, e o que nunca deve estar no repositório.
+- [Orquestração de pipelines](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/orquestracao/): Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura.
+- [DataOps e observabilidade](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/dataops-e-observabilidade/): Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard.
+
+### Data Mesh
+
+- [Data Mesh: os quatro princípios](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/principios-do-data-mesh/): A proposta que inverte o lake centralizado: propriedade por domínio, dado tratado como produto, plataforma self-serve e governança federada. O que cada princípio resolve, o que ele exige em troca, e por que Mesh não é ferramenta nem substitui o lake.
+- [Contratos de dados e plataforma self-serve](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/contratos-de-dados-e-plataforma/): Como o Data Mesh sai do slide: o contrato que declara esquema, semântica e garantias entre quem publica e quem consome, a evolução sem quebrar o consumidor, e a plataforma que entrega ingestão, catálogo, linhagem e qualidade sem cada domínio reinventar.
+- [Arquiteturas de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/arquiteturas-de-dados/): Lambda contra Kappa, Data Warehouse contra Data Lake contra Lakehouse, os quatro princípios do Data Mesh e a diferença entre Source of Record e Source of Truth: o vocabulário de arquitetura que a sabatina cobra em nível de trade-off.
+
 ## Engenharia de Dados
 
 A ementa oficial de uma carreira de Engenharia de Dados no mercado financeiro, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.

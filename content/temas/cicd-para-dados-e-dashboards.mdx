@@ -1,0 +1,230 @@
+---
+slug: cicd-para-dados-e-dashboards
+titulo: "CI/CD para dados e dashboards"
+resumo: "Por que pipeline de dados também merece integração e entrega contínuas: o que roda na verificação (lint de SQL, teste de transformação, dado de amostra), como promover uma mudança entre ambientes sem quebrar relatório, e o que fazer quando o que quebra não é o código, é o dado."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "Na sabatina de Analytics a pergunta chega assim: 'como você garante que uma mudança no modelo não derruba o painel da diretoria?'. Quem responde 'testo antes' perde; quem descreve o que roda no pipeline de verificação, em que ambiente, e o que acontece quando falha, mostra que já quebrou produção antes."
+comoCai: "Você mudou um modelo que alimenta três dashboards. Como essa mudança chega à produção?"
+feynman: "Explique em um minuto por que uma mudança em SQL merece o mesmo cuidado que uma mudança em código de aplicação."
+preRequisitos: ["dataops-e-observabilidade", "orquestracao"]
+errosComuns:
+  - "Achar que CI para dados é só rodar o pipeline. A verificação útil roda em ambiente isolado, com dado de amostra, e falha antes de tocar em produção."
+  - "Testar só o código e não o dado. Transformação correta sobre dado que mudou de formato continua quebrando o relatório; teste de dado é parte do pipeline."
+  - "Promover mudança direto em produção porque 'é só um SQL'. Modelo que alimenta painel é produção, com consumidor e horário crítico."
+  - "Esquecer o dashboard no fluxo. Renomear uma coluna passa no teste do modelo e quebra o painel que referenciava o nome antigo."
+  - "Não ter caminho de volta. Sem versionamento do modelo e sem capacidade de reprocessar, o rollback vira restauração de backup no meio do expediente."
+  - "Tratar ambiente de desenvolvimento com dado de produção sem mascaramento. Cópia de produção para desenvolver é o vazamento mais comum em times de dados."
+preTeste:
+  - enunciado: "O que uma verificação automática de um projeto de transformação deve fazer antes de aprovar uma mudança?"
+    alternativas:
+      - texto: "Construir os modelos num ambiente isolado com dado de amostra e rodar os testes de dados, falhando se algum não passar."
+        correta: true
+        explicacao: "Isolamento mais teste de dado é o que impede a mudança de chegar ao consumidor quebrada."
+      - texto: "Rodar o pipeline em produção fora do horário comercial."
+        correta: false
+        explicacao: "Isso é executar, não verificar; a quebra já aconteceu quando alguém perceber."
+      - texto: "Verificar apenas a sintaxe do SQL."
+        correta: false
+        explicacao: "Sintaxe válida produz número errado com a mesma facilidade."
+  - enunciado: "Um relatório quebrou depois de uma mudança que passou em todos os testes de código. Qual é a causa mais provável?"
+    alternativas:
+      - texto: "O dado de origem mudou de formato ou de significado, e não havia teste sobre o dado."
+        correta: true
+        explicacao: "Em dados, o contrato com a origem quebra sem que nenhuma linha do seu código mude."
+      - texto: "O SQL tinha erro de sintaxe."
+        correta: false
+        explicacao: "Erro de sintaxe não passaria na verificação."
+      - texto: "O dashboard precisa ser reiniciado."
+        correta: false
+        explicacao: "Sintoma tratado como causa."
+videos:
+  - id: DjMx6tSH8Nc
+    publicadoEm: "2025-02-24"
+    titulo: "Pipeline para Dados com Docker, Airflow, Python, DBT e PostgreSQL"
+    canal: "Dados Sobre Aprendizado"
+    duracao: 23
+    porQue: "Mostra as peças conversando: container, orquestrador e transformação versionada. Assista reparando em onde caberia uma verificação automática antes de publicar."
+  - id: k4AswQ5igW0
+    publicadoEm: "2024-03-27"
+    titulo: "Descomplicando pipelines de dados modernas com Airflow e dbt"
+    canal: "iFood Universo"
+    duracao: 45
+    porQue: "Complementar, com o ângulo de quem opera em escala. Use os trechos sobre como a transformação é promovida e testada; é o vocabulário que a sabatina espera."
+artigos:
+  - titulo: "About dbt tests"
+    url: "https://docs.getdbt.com/docs/build/data-tests"
+    fonte: "dbt"
+  - titulo: "Best practices for CI/CD"
+    url: "https://docs.getdbt.com/best-practices/best-practice-workflows"
+    fonte: "dbt"
+  - titulo: "AWS CodePipeline - What is CodePipeline?"
+    url: "https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "O que CI significa num projeto de dados?"
+    verso: "A cada mudança proposta, construir os modelos num ambiente isolado, rodar testes de código e de dados, e só permitir a integração se tudo passar."
+  - frente: "O que CD significa num projeto de dados?"
+    verso: "Promover a mudança aprovada para o ambiente seguinte de forma automática e repetível, com o mesmo artefato versionado que foi testado."
+  - frente: "Os quatro tipos de teste que importam em dados."
+    verso: "Unicidade de chave, não nulo em campo obrigatório, valores dentro de um conjunto aceito, e integridade referencial entre modelos. Mais testes de negócio: total bate com a origem."
+  - frente: "Por que testar o dado, e não só o código?"
+    verso: "Porque a origem muda sem o seu código mudar: coluna passa a vir nula, categoria nova aparece, duplicata surge. O teste de dado é o que detecta isso na entrada."
+  - frente: "O que é construção em ambiente isolado?"
+    verso: "Criar os modelos num esquema temporário, só daquela mudança, com dado de amostra. Ninguém consome, e a falha não atinge consumidor."
+  - frente: "Como o dashboard entra no fluxo?"
+    verso: "Renomear ou remover coluna passa nos testes do modelo e quebra o painel. É preciso rastrear qual painel usa qual campo, por linhagem ou por catálogo, antes de aprovar."
+  - frente: "O que é promoção entre ambientes?"
+    verso: "A mesma mudança versionada avança de desenvolvimento para homologação e depois produção, sem reescrita. Cada ambiente tem o próprio dado e as próprias credenciais."
+  - frente: "Como voltar atrás numa mudança de dados?"
+    verso: "Versionar a transformação e ser capaz de reprocessar a partir da origem. Reverter o código sem reprocessar deixa a tabela com o resultado errado."
+  - frente: "Dado de produção em ambiente de desenvolvimento?"
+    verso: "Só mascarado ou amostrado, e com o mesmo controle de acesso. Cópia crua para desenvolver é o vazamento mais comum em times de dados."
+  - frente: "O que é implantação azul e verde aplicada a dados?"
+    verso: "Construir a nova versão das tabelas em paralelo, validar, e só então apontar o consumo para elas. Evita a janela em que o relatório lê dado pela metade."
+  - frente: "Quem aprova a mudança?"
+    verso: "Revisão por par no código e, quando o modelo alimenta indicador de negócio, o dono daquele indicador. Ligado ao contrato de dados."
+drills:
+  - titulo: "O que detecta esse problema?"
+    instrucao: "Para cada falha, diga o mecanismo que a pegaria antes de chegar ao consumidor."
+    opcoes: ["Teste de dado", "Construção isolada", "Linhagem", "Revisão por par", "Reprocessamento"]
+    itens:
+      - enunciado: "A origem passou a mandar a coluna de valor com nulos."
+        resposta: "Teste de dado"
+        explicacao: "Teste de não nulo falha na entrada."
+      - enunciado: "A mudança geraria tabelas incompletas visíveis para quem consome."
+        resposta: "Construção isolada"
+        explicacao: "Ambiente separado impede que consumidor veja o intermediário."
+      - enunciado: "Preciso saber quais painéis usam a coluna que vou renomear."
+        resposta: "Linhagem"
+        explicacao: "Rastro de origem a consumo."
+      - enunciado: "A regra de negócio da transformação está errada, embora o SQL rode."
+        resposta: "Revisão por par"
+        explicacao: "Erro semântico passa por qualquer verificação automática."
+      - enunciado: "A tabela já foi publicada com o cálculo errado ontem."
+        resposta: "Reprocessamento"
+        explicacao: "Reverter o código não conserta o dado já gravado."
+perguntas:
+  - tipo: oral
+    enunciado: "Você precisa mudar um modelo que alimenta três dashboards da diretoria. Descreva como essa mudança chega à produção."
+    respostaModelo: "Primeiro eu descubro o impacto: uso a linhagem para listar o que consome aquele modelo, e nesse caso são três painéis com dono conhecido. Isso muda quem precisa aprovar. Aí eu trabalho num branch, e o pipeline de verificação constrói os modelos num esquema isolado, só dessa mudança, com dado de amostra, e roda os testes: unicidade de chave, não nulo nos campos obrigatórios, valores dentro do conjunto esperado, integridade entre modelos, e pelo menos um teste de negócio comparando o total com a origem. Se qualquer um falha, a mudança não segue. Passando, vai para revisão por par, porque erro de regra de negócio nenhuma automação pega, e para o dono do indicador quando o número que ele usa muda de definição. Aprovado, a promoção é automática e usa o mesmo artefato versionado: homologação primeiro, com dado mais próximo do real, e produção depois. Se a mudança altera coluna que os painéis referenciam, eu não renomeio em cima: publico em paralelo, aviso os donos, dou prazo, e só então aposento a antiga. E eu garanto o caminho de volta antes de subir: a transformação é versionada e eu consigo reprocessar a partir da origem, porque reverter só o código deixaria a tabela com o resultado errado gravado."
+    rubrica:
+      - "Começou pela linhagem para medir impacto e definir quem aprova"
+      - "Descreveu construção isolada com dado de amostra antes de qualquer publicação"
+      - "Listou testes de dado concretos, incluindo um de negócio"
+      - "Incluiu revisão humana para erro semântico, além da automação"
+      - "Tratou mudança de coluna com publicação em paralelo e prazo, e garantiu rollback por reprocessamento"
+  - tipo: oral
+    enunciado: "Um relatório quebrou e todos os testes de código estavam passando. Como você investiga?"
+    respostaModelo: "Se o código não mudou e o relatório quebrou, o mais provável é que o dado de entrada mudou. Então eu começo pela origem: comparo o esquema e o perfil do dado de hoje com o de ontem. Coluna que passou a vir nula, categoria nova que não estava no conjunto esperado, duplicata que apareceu, mudança de fuso ou de formato de data. Em paralelo eu olho a observabilidade do pipeline: a execução rodou? Rodou no horário? Processou o volume esperado? Um pipeline que roda com sucesso sobre um arquivo vazio é o caso mais traiçoeiro, porque tudo fica verde e o relatório fica zerado. Com a causa na mão, eu faço duas coisas. A primeira é corrigir e reprocessar, porque o dado errado já está gravado. A segunda, que é a que evita a repetição, é transformar aquela causa em teste na entrada: se era nulo inesperado, entra um teste de não nulo; se era categoria nova, um teste de conjunto de valores com alerta em vez de falha, para eu decidir. É assim que a suíte de testes cresce, a partir de incidente real, e não de imaginação."
+    rubrica:
+      - "Formulou a hipótese certa: o dado mudou, não o código"
+      - "Citou verificações concretas na origem (esquema, nulos, categoria nova, duplicata, formato)"
+      - "Lembrou de checar execução e volume, e citou o caso do pipeline verde com arquivo vazio"
+      - "Separou corrigir e reprocessar de prevenir"
+      - "Propôs transformar a causa em teste, com a suíte crescendo a partir de incidente"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre CI/CD aplicado a dados é mais defensável?"
+    alternativas:
+      - texto: "Além dos testes de código, é preciso testar o dado, porque a origem muda sem que nenhuma linha do seu projeto mude."
+        correta: true
+        explicacao: "Captura o que diferencia dados de software tradicional e justifica a suíte de testes de dados."
+      - texto: "Pipeline de dados não precisa de CI porque SQL é declarativo e não tem bug."
+        correta: false
+        explicacao: "SQL válido produz número errado com facilidade."
+      - texto: "Basta rodar o pipeline em produção fora do horário comercial."
+        correta: false
+        explicacao: "Executar não é verificar; a quebra só aparece depois."
+      - texto: "CI para dados substitui a revisão humana."
+        correta: false
+        explicacao: "Erro de regra de negócio passa por qualquer automação."
+  - tipo: multipla
+    enunciado: "Quais DUAS práticas reduzem o risco de uma mudança de modelo quebrar um dashboard em produção?"
+    alternativas:
+      - texto: "Consultar a linhagem para descobrir quais painéis consomem o modelo antes de aprovar a mudança."
+        correta: true
+        explicacao: "Impacto conhecido muda quem aprova e como a mudança é feita."
+      - texto: "Publicar a nova versão em paralelo e migrar os consumidores com prazo, em vez de renomear em cima."
+        correta: true
+        explicacao: "Evita a quebra imediata e dá tempo de migração."
+      - texto: "Executar a mudança de madrugada para reduzir o número de usuários afetados."
+        correta: false
+        explicacao: "Reduz a plateia da quebra, não a probabilidade dela."
+      - texto: "Aumentar a frequência de atualização do dashboard."
+        correta: false
+        explicacao: "Não tem relação com a compatibilidade da mudança."
+      - texto: "Manter uma cópia de produção no ambiente de desenvolvimento para testar melhor."
+        correta: false
+        explicacao: "Ajuda a testar e cria risco de vazamento; o certo é dado mascarado ou amostrado."
+---
+
+## Em uma frase
+
+Mudança em modelo de dados é mudança em produção: precisa ser **construída
+isolada**, **testada no código e no dado**, **promovida com o mesmo artefato**
+e ter **caminho de volta** — que em dados significa reprocessar, não só
+reverter.
+
+## O que roda antes de aprovar
+
+<Passos itens={[
+  "Construir os modelos num esquema isolado daquela mudança, com dado de amostra. Ninguém consome; falha não atinge consumidor.",
+  "Rodar os testes de dados: unicidade de chave, não nulo, conjunto de valores aceito, integridade entre modelos.",
+  "Rodar pelo menos um teste de negócio: o total do modelo bate com o total da origem.",
+  "Revisão por par, porque erro de regra de negócio nenhuma automação pega.",
+  "Quando o modelo alimenta um indicador, aprovação do dono daquele indicador."
+]} />
+
+<Callout tipo="atencao" titulo="O que diferencia dados de software comum">
+No software, o código muda e o comportamento muda. Em dados, **o dado de
+entrada muda sem uma linha sua mudar** — a coluna passa a vir nula, aparece
+uma categoria nova, surge duplicata. Por isso a suíte tem duas metades: testes
+de código e **testes de dado**. Sem a segunda, tudo fica verde e o relatório
+fica errado.
+</Callout>
+
+## Promover entre ambientes
+
+O mesmo artefato versionado avança: desenvolvimento, homologação, produção.
+Cada ambiente com o próprio dado e as próprias credenciais. Não se reescreve
+nada no caminho — reescrever é perder a garantia de que o que foi testado é o
+que subiu.
+
+<Callout tipo="dica" titulo="Dado de produção para desenvolver">
+Só **mascarado ou amostrado**, com o mesmo controle de acesso do original.
+Cópia crua de produção no ambiente de desenvolvimento é o vazamento mais
+comum em times de dados, e a banca costuma cutucar exatamente isso.
+</Callout>
+
+## O dashboard faz parte do fluxo
+
+Renomear uma coluna **passa** em todos os testes do modelo e **quebra** o
+painel que referenciava o nome antigo. Por isso o fluxo inclui:
+
+- **Linhagem** para descobrir quem consome antes de mudar.
+- **Publicação em paralelo** com prazo, quando a mudança é incompatível, em vez
+  de renomear em cima.
+- **Aviso aos donos** dos painéis afetados, que a linhagem identificou.
+
+É a mesma lógica dos contratos de dados, aplicada ao consumo final.
+
+## Voltar atrás em dados
+
+Reverter o código não conserta a tabela: o resultado errado **já está
+gravado**. O caminho de volta em dados tem duas partes, e as duas precisam
+existir antes de subir:
+
+1. **Versionamento** da transformação, para saber ao que voltar.
+2. **Capacidade de reprocessar** a partir da origem, para regravar o certo.
+
+É por isso que preservar o dado cru na camada de entrada não é preciosismo: é
+o que torna o rollback possível.
+
+## Como responder isso em voz alta
+
+Estruture pelo caminho da mudança: **impacto** (linhagem), **verificação**
+(isolado, testes de código e de dado, teste de negócio), **aprovação** (par e
+dono do indicador), **promoção** (mesmo artefato), **compatibilidade**
+(paralelo com prazo) e **volta** (reprocessar). Quem cita o reprocessamento
+mostra que já viu dado errado publicado.
