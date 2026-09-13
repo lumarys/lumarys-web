@@ -1,0 +1,237 @@
+---
+slug: percepcao-e-escolha-do-grafico
+titulo: "Percepção visual e escolha do gráfico"
+resumo: "Por que alguns gráficos são lidos em meio segundo e outros exigem esforço: a hierarquia de precisão da percepção, a pergunta que determina a forma (comparar, compor, distribuir, relacionar, evoluir), e os erros que distorcem a leitura sem mentir no número."
+minutos: 30
+nivel: fundamental
+publicadoEm: "2026-09-12"
+porQue: "É o tema que separa quem faz gráfico de quem comunica. A banca não pede desenho: pede justificativa. 'Por que barra e não pizza' tem resposta objetiva — comparação de comprimento é lida com mais precisão que ângulo e área — e quem responde por gosto não sustenta a escolha."
+comoCai: "Você tem participação de sete produtos no faturamento. Que gráfico usa e por quê?"
+feynman: "Explique em um minuto por que é mais fácil comparar duas barras do que duas fatias de pizza."
+preRequisitos: []
+errosComuns:
+  - "Escolher o gráfico pelo dado, e não pela pergunta. A mesma tabela vira gráficos diferentes conforme se queira comparar, ver composição, distribuição ou evolução."
+  - "Usar pizza para comparar mais de duas ou três fatias. Ângulo e área são lidos com menos precisão que comprimento; com sete categorias, ninguém ordena corretamente."
+  - "Truncar o eixo de um gráfico de barras. A barra codifica a quantidade pelo comprimento; cortar a base multiplica visualmente uma diferença pequena."
+  - "Usar cor para tudo. Cor é um canal poderoso e escasso: usada em todas as séries, ela deixa de destacar. Uma cor de destaque e o resto em cinza comunica mais."
+  - "Ignorar daltonismo. Vermelho e verde como único diferenciador exclui cerca de 8% dos homens; combine cor com forma, posição ou rótulo."
+  - "Colocar dois eixos verticais com escalas diferentes. A correlação visual passa a depender de como as escalas foram escolhidas, e ela pode ser fabricada."
+preTeste:
+  - enunciado: "Por que um gráfico de barras é mais preciso que um de pizza para comparar categorias?"
+    alternativas:
+      - texto: "Porque a percepção humana compara comprimento com mais precisão do que ângulo e área."
+        correta: true
+        explicacao: "É a hierarquia de precisão perceptual, e é o argumento objetivo para a escolha."
+      - texto: "Porque barras são mais modernas."
+        correta: false
+        explicacao: "Estética não é critério; precisão de leitura é."
+      - texto: "Porque pizza não permite mostrar valores."
+        correta: false
+        explicacao: "Permite rótulos; o problema é a comparação entre as fatias."
+  - enunciado: "Um gráfico de barras começa o eixo vertical em 90 em vez de 0. Qual é o efeito?"
+    alternativas:
+      - texto: "Diferenças pequenas parecem grandes, porque o comprimento da barra deixa de ser proporcional ao valor."
+        correta: true
+        explicacao: "A barra codifica quantidade pelo comprimento; truncar quebra essa proporção."
+      - texto: "Nenhum, desde que os valores estejam rotulados."
+        correta: false
+        explicacao: "A leitura visual acontece antes de alguém ler os rótulos."
+      - texto: "O gráfico fica mais preciso, porque usa melhor o espaço."
+        correta: false
+        explicacao: "Usa melhor o espaço e distorce a comparação, que é o objetivo do gráfico."
+videos:
+  - id: ApXbhBbZsp4
+    publicadoEm: "2021-06-26"
+    titulo: "Storytelling com dados Parte II - A escolha de um visual eficaz"
+    canal: "Descomplica Estatistica"
+    duracao: 41
+    porQue: "Trata a escolha do visual como decisão justificável, que é exatamente o que a sabatina cobra. Assista anotando o critério de cada escolha, não o tipo de gráfico."
+  - id: kRC3CmAJYRk
+    publicadoEm: "2021-12-07"
+    titulo: "Não use o gráfico de pizza desse jeito"
+    canal: "Xperiun | Data Analytics"
+    duracao: 1
+    porQue: "Um minuto sobre o erro mais comum e mais defendido em reunião. Curto de propósito: é a munição para a pergunta 'por que não pizza?'."
+artigos:
+  - titulo: "Data visualization"
+    url: "https://en.wikipedia.org/wiki/Data_visualization"
+    fonte: "Wikipédia"
+  - titulo: "Visualização de dados"
+    url: "https://pt.wikipedia.org/wiki/Visualiza%C3%A7%C3%A3o_de_dados"
+    fonte: "Wikipédia"
+  - titulo: "Data visualization best practices (QuickSight)"
+    url: "https://docs.aws.amazon.com/quicksight/latest/user/best-visual-type.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "A hierarquia de precisão perceptual, do mais preciso ao menos."
+    verso: "Posição numa escala comum, comprimento, ângulo e inclinação, área, volume, cor. Quanto mais alto na lista, mais exata é a comparação que a pessoa faz sem esforço."
+  - frente: "O que é atributo pré-atentivo?"
+    verso: "Característica visual processada antes da atenção consciente: cor, tamanho, posição, orientação. É o que faz um ponto saltar do gráfico em milissegundos."
+  - frente: "Qual gráfico para comparar categorias?"
+    verso: "Barras, ordenadas por valor quando não há ordem natural. Comprimento é o canal mais preciso depois de posição."
+  - frente: "Qual gráfico para evolução no tempo?"
+    verso: "Linha, com o tempo no eixo horizontal. Ela codifica tendência pela inclinação, que é o que a pergunta 'está subindo?' quer saber."
+  - frente: "Qual gráfico para relação entre duas variáveis?"
+    verso: "Dispersão. Posição em duas escalas comuns é o canal mais preciso que existe."
+  - frente: "Quando pizza é aceitável?"
+    verso: "Duas ou três fatias, com diferença grande, e quando a mensagem é 'parte do todo' e não 'compare as partes'. Fora disso, barra comunica melhor."
+  - frente: "Por que não truncar o eixo em gráfico de barras?"
+    verso: "A barra codifica quantidade pelo comprimento; começar fora do zero quebra a proporção e infla visualmente diferenças pequenas. Em gráfico de linha, truncar é aceitável, porque o que se lê é a variação."
+  - frente: "Como usar cor com disciplina?"
+    verso: "Uma cor de destaque para o que importa e cinza para o resto. Cor em tudo deixa de destacar qualquer coisa."
+  - frente: "Como tornar um gráfico acessível a daltônicos?"
+    verso: "Não depender só de vermelho e verde; combinar cor com forma, padrão, posição ou rótulo direto, e testar com simulador."
+  - frente: "Qual o problema de dois eixos verticais?"
+    verso: "A correlação visual entre as séries depende das escalas escolhidas, então ela pode ser fabricada. Prefira dois gráficos alinhados ou normalizar as séries."
+  - frente: "Rótulo direto ou legenda?"
+    verso: "Rótulo junto da série, quando cabe. Legenda obriga o olho a ir e voltar, e é a principal fonte de esforço desnecessário em gráficos de linha."
+drills:
+  - titulo: "Qual pergunta, qual gráfico?"
+    instrucao: "Para cada pergunta de negócio, diga a forma mais adequada."
+    opcoes: ["Barras", "Linha", "Dispersão", "Barras empilhadas", "Tabela"]
+    itens:
+      - enunciado: "Qual região vendeu mais no trimestre?"
+        resposta: "Barras"
+        explicacao: "Comparação entre categorias, ordenada por valor."
+      - enunciado: "O faturamento está crescendo desde janeiro?"
+        resposta: "Linha"
+        explicacao: "Evolução no tempo, lida pela inclinação."
+      - enunciado: "Clientes que gastam mais também compram com mais frequência?"
+        resposta: "Dispersão"
+        explicacao: "Relação entre duas variáveis contínuas."
+      - enunciado: "Como a composição do faturamento por canal mudou ao longo dos meses?"
+        resposta: "Barras empilhadas"
+        explicacao: "Composição ao longo do tempo, com a ressalva de que só a série de baixo é fácil de comparar."
+      - enunciado: "Preciso que o leitor veja o valor exato de 12 indicadores."
+        resposta: "Tabela"
+        explicacao: "Quando o valor exato importa mais que o padrão, tabela é o formato certo."
+perguntas:
+  - tipo: oral
+    enunciado: "Você precisa mostrar a participação de sete produtos no faturamento. Que gráfico escolhe e como justifica para quem pediu uma pizza?"
+    respostaModelo: "Eu faço barras horizontais ordenadas da maior para a menor participação, com rótulo direto do percentual. A justificativa não é estética, é de percepção: nós comparamos comprimento com muito mais precisão do que ângulo e área. Com duas ou três fatias bem diferentes, a pizza funciona; com sete, ninguém consegue ordenar corretamente as do meio, e a pessoa acaba lendo os rótulos, o que significa que o gráfico não está fazendo o trabalho dele. Quando quem pediu insiste, eu costumo mostrar os dois lado a lado e fazer uma pergunta concreta, tipo qual é o terceiro maior. Na pizza a pessoa hesita; na barra, responde na hora. Isso convence mais que citar teoria. Se a mensagem for mesmo 'parte do todo', e não comparação, eu tenho duas saídas: uma barra empilhada única, que mostra composição sem pedir comparação fina, ou reduzir as categorias, agrupando a cauda em 'outros', o que costuma ser o que o negócio realmente quer. E eu pergunto qual é a decisão por trás do pedido, porque se a pergunta é 'quais produtos concentram o faturamento', a resposta talvez nem seja participação: talvez seja uma curva acumulada mostrando que três produtos fazem 80%."
+    rubrica:
+      - "Escolheu barras ordenadas e justificou pela precisão de comprimento sobre ângulo e área"
+      - "Reconheceu quando a pizza é aceitável, em vez de proibi-la por dogma"
+      - "Propôs uma demonstração prática para convencer, não só o argumento teórico"
+      - "Ofereceu alternativa para a mensagem de composição (empilhada única ou agrupar a cauda)"
+      - "Voltou à pergunta de negócio por trás do pedido"
+  - tipo: oral
+    enunciado: "Um gráfico que você recebeu tem o eixo começando em 90, duas séries em vermelho e verde, e uma legenda no canto. O que você mudaria e por quê?"
+    respostaModelo: "Três mudanças, e cada uma tem um motivo diferente. A primeira é o eixo: se for gráfico de barras, começar em 90 quebra a proporção entre comprimento e valor, e uma diferença de dois pontos parece enorme. Barras começam em zero, sem exceção. Se for gráfico de linha, aí truncar é aceitável, porque o que se lê é a variação e não o tamanho absoluto; nesse caso eu só deixaria o corte explícito. A segunda é a cor: vermelho e verde como único diferenciador exclui cerca de oito por cento dos homens, que têm alguma deficiência na distinção dessas cores. Eu troco por uma paleta segura e, principalmente, não deixo a cor ser o único canal: acrescento rótulo direto ou diferença de traço. A terceira é a legenda no canto, que obriga o olho a ir e voltar para cada série. Se couber, eu ponho o nome da série no fim da linha, junto do dado. Parece detalhe, e é o que mais reduz esforço de leitura. Fecharia perguntando qual é a mensagem: se existe uma série que importa, ela fica colorida e as outras em cinza, porque cor usada em tudo deixa de destacar qualquer coisa."
+    rubrica:
+      - "Corrigiu o eixo distinguindo barra de linha, com a razão de cada caso"
+      - "Identificou o problema de acessibilidade de vermelho e verde e propôs não depender só de cor"
+      - "Trocou legenda por rótulo direto, justificando pelo esforço de leitura"
+      - "Propôs destaque com cor única e o resto em cinza"
+      - "Terminou perguntando pela mensagem, ligando forma a intenção"
+  - tipo: unica
+    enunciado: "Qual justificativa para escolher barras em vez de pizza é mais defensável?"
+    alternativas:
+      - texto: "A percepção compara comprimento com mais precisão que ângulo e área, então com várias categorias a barra permite ordenar sem esforço."
+        correta: true
+        explicacao: "Argumento objetivo, baseado em como a leitura acontece."
+      - texto: "Pizza é considerada ultrapassada em visualização moderna."
+        correta: false
+        explicacao: "Apelo à moda, não a critério."
+      - texto: "Pizza não permite exibir rótulos com os valores."
+        correta: false
+        explicacao: "Permite; o problema é a comparação entre fatias."
+      - texto: "Barras ocupam menos espaço na tela."
+        correta: false
+        explicacao: "Depende do caso, e não é o critério que decide."
+  - tipo: multipla
+    enunciado: "Quais DUAS práticas reduzem o esforço de leitura de um gráfico sem alterar os dados?"
+    alternativas:
+      - texto: "Rotular a série diretamente, em vez de depender de legenda no canto."
+        correta: true
+        explicacao: "Elimina o vaivém do olho entre legenda e gráfico."
+      - texto: "Destacar com cor apenas a série que sustenta a mensagem e deixar as demais em cinza."
+        correta: true
+        explicacao: "Cor é canal escasso; usada em tudo, deixa de destacar."
+      - texto: "Adicionar um segundo eixo vertical para caber mais uma série."
+        correta: false
+        explicacao: "Cria correlação visual que depende da escala escolhida."
+      - texto: "Aumentar a saturação de todas as cores para o gráfico ficar mais visível."
+        correta: false
+        explicacao: "Tudo saltando é o mesmo que nada saltando."
+      - texto: "Truncar o eixo para as diferenças ficarem mais visíveis."
+        correta: false
+        explicacao: "Isso altera a leitura, e em barras distorce a proporção."
+---
+
+## Em uma frase
+
+A escolha do gráfico se justifica por **como a percepção funciona**, não por
+gosto: comparamos **posição e comprimento** com muito mais precisão que
+**ângulo, área e cor** — e a pergunta de negócio decide a forma.
+
+## A hierarquia que sustenta toda justificativa
+
+Do mais preciso para o menos:
+
+<Passos itens={[
+  "Posição numa escala comum (dispersão, pontos alinhados).",
+  "Comprimento (barras).",
+  "Ângulo e inclinação (pizza, linha).",
+  "Área (bolhas, treemap).",
+  "Volume e cor (mapas de calor, 3D)."
+]} />
+
+É daqui que sai a resposta para "por que não pizza": com sete categorias,
+ninguém ordena as fatias do meio, e a pessoa acaba **lendo os rótulos** — sinal
+de que o gráfico não fez o trabalho dele.
+
+<Termo nome="atributo pré-atentivo">Característica visual processada antes da atenção consciente — cor, tamanho, posição, orientação. É o que faz um ponto saltar da tela em milissegundos, e por isso é um recurso escasso.</Termo>
+
+## A pergunta decide a forma
+
+<Comparativo
+  colunas={["Pergunta de negócio", "Forma", "Por quê"]}
+  linhas={[
+    ["Qual é maior?", "Barras ordenadas", "Comprimento, o canal preciso para comparar"],
+    ["Está subindo?", "Linha", "Inclinação comunica tendência"],
+    ["Uma coisa acompanha a outra?", "Dispersão", "Posição em duas escalas comuns"],
+    ["Do que é feito o total?", "Barra empilhada única", "Composição sem exigir comparação fina"],
+    ["Como se distribui?", "Histograma ou boxplot", "Mostra forma, e não só a média"],
+    ["Qual é o valor exato?", "Tabela", "Quando o número importa mais que o padrão"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O eixo truncado">
+Em **barras**, começar fora do zero quebra a proporção entre comprimento e
+valor: dois pontos de diferença viram uma montanha. Em **linha**, truncar é
+aceitável, porque o que se lê é a variação — mas deixe o corte explícito. Saber
+distinguir os dois casos é o que separa a regra decorada do critério.
+</Callout>
+
+## Cor: poderosa e escassa
+
+Usada em todas as séries, a cor deixa de destacar. O padrão que funciona é
+**uma cor para o que importa e cinza para o resto** — a mensagem aparece sem
+ninguém procurar.
+
+E há a parte que é acessibilidade, não estética: **vermelho e verde** como
+único diferenciador exclui cerca de 8% dos homens. A correção não é só trocar
+a paleta; é **não depender só de cor**: acrescente rótulo direto, forma ou
+posição.
+
+<Callout tipo="dica" titulo="Rótulo direto vence legenda">
+Legenda no canto obriga o olho a ir e voltar para cada série. Nome junto do
+fim da linha elimina esse vaivém. É a mudança que mais reduz esforço de
+leitura sem tocar em um único número.
+</Callout>
+
+## O segundo eixo
+
+Dois eixos verticais com escalas diferentes criam uma correlação visual que
+**depende de como as escalas foram escolhidas** — ou seja, ela pode ser
+fabricada, com ou sem intenção. Prefira dois gráficos alinhados no mesmo eixo
+de tempo, ou normalize as séries.
+
+## Como responder isso em voz alta
+
+Nunca justifique por gosto. Diga **qual pergunta o gráfico responde**, **qual
+canal perceptual ele usa** e **por que esse canal é adequado à pergunta**.
+Quando discordarem, mostre os dois e faça uma pergunta concreta — "qual é o
+terceiro maior?" — porque a hesitação de quem olha a pizza convence mais que
+qualquer teoria.

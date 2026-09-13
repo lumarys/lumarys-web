@@ -103,6 +103,12 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [Orquestração de pipelines](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/orquestracao/): Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura.
 - [DataOps e observabilidade](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/dataops-e-observabilidade/): Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard.
 
+### Dataviz
+
+- [Percepção visual e escolha do gráfico](https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/percepcao-e-escolha-do-grafico/): Por que alguns gráficos são lidos em meio segundo e outros exigem esforço: a hierarquia de precisão da percepção, a pergunta que determina a forma (comparar, compor, distribuir, relacionar, evoluir), e os erros que distorcem a leitura sem mentir no número.
+- [Storytelling com dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/storytelling-com-dados/): O que fazer depois que o gráfico está certo: entender a audiência e a decisão, escolher a mensagem única que o material defende, dar contexto ao número, e apresentar de forma que a conclusão apareça antes da metodologia.
+- [Dashboards e indicadores que alguém usa](https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/dashboards-e-indicadores/): Como um painel deixa de ser enfeite: definir a pergunta e a ação antes do layout, escolher indicadores que mudam decisão, organizar do resumo ao detalhe, e resolver as questões que a sabatina cobra — de que momento é o número, quem pode ver, e o que fazer com o painel que ninguém abre.
+
 ### Data Mesh
 
 - [Data Mesh: os quatro princípios](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/principios-do-data-mesh/): A proposta que inverte o lake centralizado: propriedade por domínio, dado tratado como produto, plataforma self-serve e governança federada. O que cada princípio resolve, o que ele exige em troca, e por que Mesh não é ferramenta nem substitui o lake.

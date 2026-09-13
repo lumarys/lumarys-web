@@ -103,6 +103,12 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [Orquestração de pipelines](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/orquestracao/): Orquestrador não processa dado: ele decide o que roda, em que ordem, quando e o que fazer quando falha. Airflow, idempotência, retry com backoff, backfill e os anti-padrões que a banca procura.
 - [DataOps e observabilidade](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/dataops-e-observabilidade/): Tratar pipeline como software: teste de dados, contrato entre produtor e consumidor, linhagem e os quatro sinais que avisam que o dado quebrou antes do usuário abrir o dashboard.
 
+### Dataviz
+
+- [Percepção visual e escolha do gráfico](https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/percepcao-e-escolha-do-grafico/): Por que alguns gráficos são lidos em meio segundo e outros exigem esforço: a hierarquia de precisão da percepção, a pergunta que determina a forma (comparar, compor, distribuir, relacionar, evoluir), e os erros que distorcem a leitura sem mentir no número.
+- [Storytelling com dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/storytelling-com-dados/): O que fazer depois que o gráfico está certo: entender a audiência e a decisão, escolher a mensagem única que o material defende, dar contexto ao número, e apresentar de forma que a conclusão apareça antes da metodologia.
+- [Dashboards e indicadores que alguém usa](https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/dashboards-e-indicadores/): Como um painel deixa de ser enfeite: definir a pergunta e a ação antes do layout, escolher indicadores que mudam decisão, organizar do resumo ao detalhe, e resolver as questões que a sabatina cobra — de que momento é o número, quem pode ver, e o que fazer com o painel que ninguém abre.
+
 ### Data Mesh
 
 - [Data Mesh: os quatro princípios](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/principios-do-data-mesh/): A proposta que inverte o lake centralizado: propriedade por domínio, dado tratado como produto, plataforma self-serve e governança federada. O que cada princípio resolve, o que ele exige em troca, e por que Mesh não é ferramenta nem substitui o lake.
@@ -6295,6 +6301,353 @@ A resposta não é técnica sozinha, é contrato. Eu proporia um contrato de dad
 ### Você precisa reprocessar 30 dias de transações de cartão porque uma regra de categorização estava errada. Como faz isso com segurança?
 
 Primeiro garanto que o pipeline é idempotente, porque reprocessar com append duplica transação. Na prática, escrevo por partição de data com overwrite dinâmico, ou uso MERGE pela chave de negócio. Segundo, versiono: com Delta eu tenho o histórico, então consigo comparar o antes e o depois e voltar atrás se o resultado sair pior. Terceiro, rodo primeiro em um ambiente separado ou em um subconjunto — um dia, uma bandeira — e comparo agregados contra a versão atual antes de liberar os 30 dias. Quarto, aviso os consumidores, porque números publicados vão mudar e alguém já fechou relatório com eles. O trade-off é tempo e custo de computação; a alternativa de corrigir só daqui para frente é mais barata, mas deixa a série histórica inconsistente. Em contexto regulatório eu não aceitaria isso sem alinhar com o dono do dado.
+
+---
+
+# Percepção visual e escolha do gráfico
+
+Trilha: Engenharia de Analytics · Módulo: Dataviz
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/percepcao-e-escolha-do-grafico/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** Por que alguns gráficos são lidos em meio segundo e outros exigem esforço: a hierarquia de precisão da percepção, a pergunta que determina a forma (comparar, compor, distribuir, relacionar, evoluir), e os erros que distorcem a leitura sem mentir no número.
+
+**Por que cai na prova.** É o tema que separa quem faz gráfico de quem comunica. A banca não pede desenho: pede justificativa. 'Por que barra e não pizza' tem resposta objetiva — comparação de comprimento é lida com mais precisão que ângulo e área — e quem responde por gosto não sustenta a escolha.
+
+**Como o entrevistador pergunta.** "Você tem participação de sete produtos no faturamento. Que gráfico usa e por quê?"
+
+## Em uma frase
+
+A escolha do gráfico se justifica por **como a percepção funciona**, não por
+gosto: comparamos **posição e comprimento** com muito mais precisão que
+**ângulo, área e cor** — e a pergunta de negócio decide a forma.
+
+## A hierarquia que sustenta toda justificativa
+
+Do mais preciso para o menos:
+
+<Passos itens={[
+  "Posição numa escala comum (dispersão, pontos alinhados).",
+  "Comprimento (barras).",
+  "Ângulo e inclinação (pizza, linha).",
+  "Área (bolhas, treemap).",
+  "Volume e cor (mapas de calor, 3D)."
+]} />
+
+É daqui que sai a resposta para "por que não pizza": com sete categorias,
+ninguém ordena as fatias do meio, e a pessoa acaba **lendo os rótulos** — sinal
+de que o gráfico não fez o trabalho dele.
+
+<Termo nome="atributo pré-atentivo">Característica visual processada antes da atenção consciente — cor, tamanho, posição, orientação. É o que faz um ponto saltar da tela em milissegundos, e por isso é um recurso escasso.</Termo>
+
+## A pergunta decide a forma
+
+<Comparativo
+  colunas={["Pergunta de negócio", "Forma", "Por quê"]}
+  linhas={[
+    ["Qual é maior?", "Barras ordenadas", "Comprimento, o canal preciso para comparar"],
+    ["Está subindo?", "Linha", "Inclinação comunica tendência"],
+    ["Uma coisa acompanha a outra?", "Dispersão", "Posição em duas escalas comuns"],
+    ["Do que é feito o total?", "Barra empilhada única", "Composição sem exigir comparação fina"],
+    ["Como se distribui?", "Histograma ou boxplot", "Mostra forma, e não só a média"],
+    ["Qual é o valor exato?", "Tabela", "Quando o número importa mais que o padrão"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O eixo truncado">
+Em **barras**, começar fora do zero quebra a proporção entre comprimento e
+valor: dois pontos de diferença viram uma montanha. Em **linha**, truncar é
+aceitável, porque o que se lê é a variação — mas deixe o corte explícito. Saber
+distinguir os dois casos é o que separa a regra decorada do critério.
+</Callout>
+
+## Cor: poderosa e escassa
+
+Usada em todas as séries, a cor deixa de destacar. O padrão que funciona é
+**uma cor para o que importa e cinza para o resto** — a mensagem aparece sem
+ninguém procurar.
+
+E há a parte que é acessibilidade, não estética: **vermelho e verde** como
+único diferenciador exclui cerca de 8% dos homens. A correção não é só trocar
+a paleta; é **não depender só de cor**: acrescente rótulo direto, forma ou
+posição.
+
+<Callout tipo="dica" titulo="Rótulo direto vence legenda">
+Legenda no canto obriga o olho a ir e voltar para cada série. Nome junto do
+fim da linha elimina esse vaivém. É a mudança que mais reduz esforço de
+leitura sem tocar em um único número.
+</Callout>
+
+## O segundo eixo
+
+Dois eixos verticais com escalas diferentes criam uma correlação visual que
+**depende de como as escalas foram escolhidas** — ou seja, ela pode ser
+fabricada, com ou sem intenção. Prefira dois gráficos alinhados no mesmo eixo
+de tempo, ou normalize as séries.
+
+## Como responder isso em voz alta
+
+Nunca justifique por gosto. Diga **qual pergunta o gráfico responde**, **qual
+canal perceptual ele usa** e **por que esse canal é adequado à pergunta**.
+Quando discordarem, mostre os dois e faça uma pergunta concreta — "qual é o
+terceiro maior?" — porque a hesitação de quem olha a pizza convence mais que
+qualquer teoria.
+
+## Erros comuns
+
+- Escolher o gráfico pelo dado, e não pela pergunta. A mesma tabela vira gráficos diferentes conforme se queira comparar, ver composição, distribuição ou evolução.
+- Usar pizza para comparar mais de duas ou três fatias. Ângulo e área são lidos com menos precisão que comprimento; com sete categorias, ninguém ordena corretamente.
+- Truncar o eixo de um gráfico de barras. A barra codifica a quantidade pelo comprimento; cortar a base multiplica visualmente uma diferença pequena.
+- Usar cor para tudo. Cor é um canal poderoso e escasso: usada em todas as séries, ela deixa de destacar. Uma cor de destaque e o resto em cinza comunica mais.
+- Ignorar daltonismo. Vermelho e verde como único diferenciador exclui cerca de 8% dos homens; combine cor com forma, posição ou rótulo.
+- Colocar dois eixos verticais com escalas diferentes. A correlação visual passa a depender de como as escalas foram escolhidas, e ela pode ser fabricada.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Você precisa mostrar a participação de sete produtos no faturamento. Que gráfico escolhe e como justifica para quem pediu uma pizza?
+
+Eu faço barras horizontais ordenadas da maior para a menor participação, com rótulo direto do percentual. A justificativa não é estética, é de percepção: nós comparamos comprimento com muito mais precisão do que ângulo e área. Com duas ou três fatias bem diferentes, a pizza funciona; com sete, ninguém consegue ordenar corretamente as do meio, e a pessoa acaba lendo os rótulos, o que significa que o gráfico não está fazendo o trabalho dele. Quando quem pediu insiste, eu costumo mostrar os dois lado a lado e fazer uma pergunta concreta, tipo qual é o terceiro maior. Na pizza a pessoa hesita; na barra, responde na hora. Isso convence mais que citar teoria. Se a mensagem for mesmo 'parte do todo', e não comparação, eu tenho duas saídas: uma barra empilhada única, que mostra composição sem pedir comparação fina, ou reduzir as categorias, agrupando a cauda em 'outros', o que costuma ser o que o negócio realmente quer. E eu pergunto qual é a decisão por trás do pedido, porque se a pergunta é 'quais produtos concentram o faturamento', a resposta talvez nem seja participação: talvez seja uma curva acumulada mostrando que três produtos fazem 80%.
+
+### Um gráfico que você recebeu tem o eixo começando em 90, duas séries em vermelho e verde, e uma legenda no canto. O que você mudaria e por quê?
+
+Três mudanças, e cada uma tem um motivo diferente. A primeira é o eixo: se for gráfico de barras, começar em 90 quebra a proporção entre comprimento e valor, e uma diferença de dois pontos parece enorme. Barras começam em zero, sem exceção. Se for gráfico de linha, aí truncar é aceitável, porque o que se lê é a variação e não o tamanho absoluto; nesse caso eu só deixaria o corte explícito. A segunda é a cor: vermelho e verde como único diferenciador exclui cerca de oito por cento dos homens, que têm alguma deficiência na distinção dessas cores. Eu troco por uma paleta segura e, principalmente, não deixo a cor ser o único canal: acrescento rótulo direto ou diferença de traço. A terceira é a legenda no canto, que obriga o olho a ir e voltar para cada série. Se couber, eu ponho o nome da série no fim da linha, junto do dado. Parece detalhe, e é o que mais reduz esforço de leitura. Fecharia perguntando qual é a mensagem: se existe uma série que importa, ela fica colorida e as outras em cinza, porque cor usada em tudo deixa de destacar qualquer coisa.
+
+---
+
+# Storytelling com dados
+
+Trilha: Engenharia de Analytics · Módulo: Dataviz
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/storytelling-com-dados/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** O que fazer depois que o gráfico está certo: entender a audiência e a decisão, escolher a mensagem única que o material defende, dar contexto ao número, e apresentar de forma que a conclusão apareça antes da metodologia.
+
+**Por que cai na prova.** É a diferença entre entregar um número e mudar uma decisão. A banca costuma pedir que você apresente um achado a um diretor, e quem começa pelo método perde a sala. Quem começa pela conclusão, dá contexto e diz o que fazer a seguir mostra que entende para que serve o trabalho.
+
+**Como o entrevistador pergunta.** "Você descobriu que a inadimplência subiu. Como apresenta isso para a diretoria?"
+
+## Em uma frase
+
+Depois que o gráfico está correto, o trabalho é de **narrativa**: uma
+audiência, uma decisão, **uma mensagem** — e a conclusão vem antes do método.
+
+## As três perguntas antes de abrir a ferramenta
+
+<Passos itens={[
+  "Quem é a audiência? Diretoria, time técnico, área de negócio — cada uma precisa de um nível de detalhe diferente.",
+  "Que decisão ela precisa tomar? Se não há decisão, o material é informativo e pode ser bem mais curto.",
+  "Qual é a mensagem única? Uma frase. Se você não consegue escrevê-la, o material ainda não está pronto."
+]} />
+
+<Callout tipo="atencao" titulo="A ordem da análise não é a ordem da apresentação">
+Você fez: dados, tratamento, exploração, achado. Você apresenta: **achado,
+consequência, evidência, método**. Começar pela fonte e pelo tratamento
+constrói credibilidade com quem já confia em você, e gasta os minutos que
+importavam.
+</Callout>
+
+## Contexto transforma número em informação
+
+"A inadimplência é 4,1%" não sustenta decisão nenhuma. As comparações que
+transformam o mesmo número em informação:
+
+<Comparativo
+  colunas={["Referência", "O que ela responde"]}
+  linhas={[
+    ["Período anterior", "Está melhorando ou piorando?"],
+    ["Meta", "Estamos onde deveríamos?"],
+    ["Mercado ou concorrente", "É problema nosso ou do setor?"],
+    ["Resto da carteira", "Onde está concentrado?"]
+  ]}
+/>
+
+A quarta é a que mais muda a conversa: se 70% do aumento vem de uma safra ou
+de um canal, o assunto deixa de ser "inadimplência" e passa a ser aquela
+safra.
+
+## Precisão é sobre a decisão
+
+4,13857% e 4,1% levam à mesma ação. A casa extra consome atenção sem mudar
+nada — e atenção é o recurso escasso da sala. Escolha a precisão pela decisão
+que o número sustenta.
+
+<Callout tipo="dica" titulo="O título faz metade do trabalho">
+"Inadimplência por mês" rotula. **"Inadimplência sobe pelo terceiro mês e
+supera a meta"** comunica, e transforma o gráfico em evidência do que o título
+afirma. É a mudança mais barata que existe num material.
+</Callout>
+
+## Terminar no problema é entregar pela metade
+
+Apresentar o achado e parar transfere para quem ouve um trabalho que era seu:
+dizer o que os dados sugerem fazer. A recomendação não precisa ser definitiva —
+pode ser "investigar a safra X" ou "revisar a política para o canal Y" — mas
+precisa existir.
+
+E a incerteza vai junto: **o que a análise não cobre, que premissa foi
+assumida, qual o corte do dado**. Esconder limitação parece fortalecer o
+argumento e destrói a credibilidade quando alguém a descobre depois.
+
+## Mesmo achado, públicos diferentes
+
+<Comparativo
+  colunas={["", "Diretoria", "Time técnico"]}
+  linhas={[
+    ["Abre com", "Consequência e decisão", "Achado e recorte"],
+    ["Precisão", "A que sustenta a decisão", "A real"],
+    ["Vocabulário", "Do negócio", "Técnico"],
+    ["Volume", "Um gráfico, uma mensagem", "Detalhe é o produto"],
+    ["O que não muda", "A conclusão e a declaração de incerteza", "A conclusão e a declaração de incerteza"]
+  ]}
+/>
+
+## Como responder isso em voz alta
+
+Conte a estrutura: **conclusão, contexto, concentração, recomendação**, com
+método em anexo. Cite a declaração de incerteza como parte do material, não
+como fraqueza. E, se lhe derem cinco minutos na pergunta, use quatro nesses
+quatro passos — a própria resposta vira a demonstração.
+
+## Erros comuns
+
+- Começar pela metodologia. Quem decide quer a conclusão primeiro; o método sustenta a conclusão quando perguntado, não precede.
+- Apresentar um número sem contexto. 'A inadimplência é 4,1%' não diz nada; comparado ao mês passado, à meta e ao setor, diz três coisas.
+- Mostrar todos os gráficos que você fez. O trabalho de análise não é o entregável; a conclusão é. O resto vira anexo.
+- Ter mais de uma mensagem por material. Se tudo é importante, nada é. Uma mensagem central, e o resto sustenta ela.
+- Confundir precisão com utilidade. 4,13857% não ajuda ninguém a decidir; 4,1% ajuda, e sobra atenção para o que vem depois.
+- Terminar sem recomendação. Apresentar o problema e parar transfere ao ouvinte um trabalho que era seu: dizer o que os dados sugerem fazer.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Você descobriu que a inadimplência subiu três meses seguidos. Como apresenta isso para a diretoria?
+
+Eu começo pela conclusão e pela consequência, não pelo método. Algo como: a inadimplência está em 4,1%, acima da meta de 3,5%, e subiu pelo terceiro mês consecutivo; se o ritmo continuar, passamos de 5% no trimestre, o que impacta a provisão. Só isso já dá à diretoria o que ela precisa para decidir se quer se aprofundar. Aí eu dou contexto, porque número sozinho não decide nada: comparo com a meta, com o mesmo período do ano passado e, se eu tiver, com o mercado. Em seguida eu mostro onde está concentrado, porque é o que aponta a ação: se 70% do aumento vem de uma safra específica ou de um canal, a conversa deixa de ser sobre inadimplência em geral. Um gráfico só, de linha, com os três meses destacados e a meta marcada. Depois vem o que eu recomendo, porque parar no problema transfere para eles um trabalho que era meu. E eu declaro a incerteza: o que essa análise não cobre, que premissa eu assumi, qual o corte do dado. Método, recortes e casos de borda ficam em anexo, prontos se alguém perguntar. Se eu tiver cinco minutos, os quatro primeiros são conclusão, contexto, concentração e recomendação.
+
+### Como você adapta o mesmo achado para a diretoria e para o time técnico que vai agir sobre ele?
+
+A conclusão é a mesma nos dois; o que muda é o nível de detalhe e o vocabulário. Para a diretoria, eu trago consequência e decisão: qual é o impacto no resultado, que opções existem, o que eu recomendo e o que preciso deles. Uso o vocabulário do negócio, arredondo os números para a precisão que sustenta a decisão e mostro um gráfico só. Para o time técnico, eu trago o caminho: qual recorte do dado, que definição de inadimplência eu usei, como tratei os casos de borda, onde está o código, quais foram as premissas e o que ainda não está validado. Aqui a precisão importa mais, e o detalhe é o produto, não o ruído. O que eu não faço é mandar o mesmo material para os dois. É tentador, porque dá menos trabalho, e o resultado é ruim para ambos: a diretoria se perde no método e o time técnico fica sem o que precisa para agir. E há uma coisa que não muda: a incerteza é declarada nos dois. Se eu escondo premissa da diretoria e alguém descobre depois, eu perco a credibilidade que sustenta todo o resto do trabalho.
+
+---
+
+# Dashboards e indicadores que alguém usa
+
+Trilha: Engenharia de Analytics · Módulo: Dataviz
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/dataviz/dashboards-e-indicadores/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** Como um painel deixa de ser enfeite: definir a pergunta e a ação antes do layout, escolher indicadores que mudam decisão, organizar do resumo ao detalhe, e resolver as questões que a sabatina cobra — de que momento é o número, quem pode ver, e o que fazer com o painel que ninguém abre.
+
+**Por que cai na prova.** Dashboard é o entregável mais visível do engenheiro de analytics, e o mais fácil de fazer errado: painel bonito que ninguém abre é o resultado padrão quando ninguém perguntou qual decisão ele apoia. A banca testa isso pedindo que você descreva como começaria, e quem começa pelo layout já errou.
+
+**Como o entrevistador pergunta.** "A diretoria pediu um dashboard de vendas. Por onde você começa?"
+
+## Em uma frase
+
+Painel útil nasce de **quem usa e que decisão toma**, não de layout: poucos
+indicadores de topo, organização do resumo ao detalhe, e o número sempre
+acompanhado de **quando** ele foi apurado e **contra o quê** é comparado.
+
+## Métrica e indicador não são a mesma coisa
+
+<Termo nome="métrica">Qualquer número medido: sessões, registros processados, ticket médio.</Termo>
+
+<Termo nome="indicador">Métrica escolhida para acompanhar um objetivo, com meta, responsável e frequência definidos.</Termo>
+
+A distinção importa porque explica por que nem todo número merece estar no
+painel. Se ninguém tem meta nem responde por aquele número, ele é métrica
+operacional — e ocupa espaço que deveria ser de decisão.
+
+## As quatro perguntas antes do layout
+
+<Passos itens={[
+  "Quem vai usar de fato? Diretoria e gerência regional precisam de coisas diferentes.",
+  "Que decisão essa pessoa toma olhando o painel? Se ninguém responde, o pedido é de relatório, não de painel.",
+  "Com que frequência ela olha? Define se o dado é diário ou quase em tempo real, o que muda arquitetura e custo.",
+  "O que ela faz quando o número está ruim? Se não há ação possível, aquele número talvez não precise estar ali."
+]} />
+
+<Callout tipo="atencao" titulo="A pergunta que desarma pedido genérico">
+"Que decisão você toma olhando isso?" É a que mais economiza trabalho. Pedido
+que não sobrevive a ela costuma virar um relatório mensal — mais barato de
+fazer e mais honesto sobre o que é.
+</Callout>
+
+## Organizar do resumo ao detalhe
+
+Três camadas, na ordem em que a pessoa lê:
+
+<Comparativo
+  colunas={["Camada", "Conteúdo", "Para quem"]}
+  linhas={[
+    ["Topo", "Três a cinco indicadores com meta e tendência", "Quem abre com pressa"],
+    ["Decomposição", "O mesmo indicador por região, canal, produto", "Quem quer saber onde está concentrado"],
+    ["Detalhe", "Tabela filtrável, registro a registro", "Quem vai investigar um caso"]
+  ]}
+/>
+
+Acima de cinco indicadores no topo, a pessoa deixa de olhar para todos e o
+painel perde a função de resumo.
+
+## O que todo painel precisa mostrar sobre si mesmo
+
+- **De que momento é o número**: carimbo da última atualização e janela de
+  corte. Metade das discussões de divergência entre painéis é defasagem, não
+  cálculo — e o carimbo na tela encerra essas discussões sem reunião.
+- **A referência**: meta, período anterior, ou ambos. Número sem referência não
+  sustenta decisão.
+
+<Callout tipo="dica" titulo="Não recalcule a métrica no painel">
+O painel deve consumir a **tabela certificada**. Escrever a consulta dentro da
+ferramenta é exatamente como nascem duas definições vivas de "venda" na mesma
+empresa. Isso liga este tema diretamente a Source of Record e Source of Truth.
+</Callout>
+
+## Acesso e camada em memória
+
+**Segurança em nível de linha** permite que um painel único sirva várias
+regiões, cada pessoa vendo só o que lhe cabe. É o mecanismo certo quando a
+alternativa seria duplicar o painel por área.
+
+E, quando há camada em memória (o SPICE do QuickSight, por exemplo), o número é
+do **último refresh**. Isso precisa estar visível, ou a divergência com a
+origem vira chamado toda semana.
+
+## Painel que ninguém abre
+
+Medir o uso — usuários distintos, frequência, páginas acessadas — faz parte do
+trabalho. Painel abandonado custa manutenção e, pior, faz circular número
+velho com aparência de acompanhado. Quando o uso não aparece, a conversa é com
+quem pediu, e aposentar é uma resposta legítima.
+
+E há o caso em que o painel nem era a ferramenta certa: se a pessoa só precisa
+saber **quando algo sai da faixa**, um **alerta** serve melhor que um painel
+que ela teria de lembrar de abrir.
+
+## Como responder isso em voz alta
+
+Comece pelas perguntas de uso e deixe claro que o layout vem depois. Cite
+poucos indicadores de topo, a organização em camadas, o consumo da tabela
+certificada e o carimbo de atualização. Termine com a medição de uso — é a
+parte que quase ninguém menciona e que mostra que você já viu painel morrer.
+
+## Erros comuns
+
+- Começar pelo layout. Antes de desenhar, é preciso saber quem usa, que decisão toma e com que frequência olha; o layout é consequência disso.
+- Confundir métrica com indicador. Métrica é qualquer número medido; indicador é a métrica escolhida para acompanhar um objetivo, com meta e responsável.
+- Colocar tudo que dá para medir. Painel com quarenta números não tem nenhuma mensagem; cada elemento precisa responder a uma pergunta de quem abre.
+- Não informar de que momento é o número. Painel sem carimbo de atualização gera a discussão de sempre sobre divergência, que é problema de corte e não de cálculo.
+- Ignorar o controle de acesso. Painel que mistura dado agregado com dado pessoal precisa de permissão por linha ou por coluna, não de confiança.
+- Manter painel que ninguém abre. Painel sem uso é custo de manutenção e fonte de número desatualizado; medir o uso e aposentar faz parte do trabalho.
+
+## Perguntas de sabatina e respostas-modelo
+
+### A diretoria pediu um dashboard de vendas. Por onde você começa?
+
+Não começo pela ferramenta nem pelo layout. Começo por quatro perguntas com quem pediu. Quem vai usar de fato, porque diretoria e gerência regional precisam de coisas diferentes. Que decisão essa pessoa toma olhando o painel, e essa é a pergunta que mais desarma pedido genérico: se ninguém consegue responder, o que estão pedindo é um relatório, não um painel de decisão. Com que frequência ela olha, porque isso define se o dado precisa ser diário ou em tempo quase real, e isso muda a arquitetura e o custo. E o que ela faz quando o número está ruim, porque se não há ação possível, aquele número talvez não precise estar ali. Com as respostas, eu escolho poucos indicadores de topo, três a cinco, ligados às decisões que apareceram, e organizo do resumo ao detalhe: quem abre com pressa vê o topo, quem quer investigar desce para a decomposição. Cada indicador consome a tabela certificada, não uma consulta que eu escrevi no painel, porque recalcular ali é como nascem definições divergentes. Ponho o carimbo de atualização visível, resolvo o acesso com segurança em nível de linha se o painel serve várias regiões, e combino de medir o uso em um mês. Se ninguém abrir, eu volto e converso, em vez de manter um painel que só gera número velho circulando.
+
+### Dois dashboards mostram números diferentes para o mesmo indicador e as áreas estão discutindo. Como você conduz?
+
+Primeiro eu tiro a discussão do campo de quem está certo e coloco no campo de qual é a diferença. A primeira verificação é o momento: de que data e de que hora é cada número, e qual a janela de corte de cada painel. Se um lê uma camada em memória atualizada de madrugada e o outro consulta a origem, os dois estão certos e não são comparáveis. Isso resolve boa parte dos casos e custa dez minutos. Não sendo isso, eu comparo a definição: o que cada painel chama de venda. Um pode excluir cancelamento, o outro não; um pode contar pela data do pedido, o outro pela data de faturamento. Aqui normalmente está a causa real, e ela não é técnica: é que existem duas definições vivas na empresa. Se ainda sobrar diferença, aí sim eu sigo a linhagem de cada um até a origem e procuro erro de cálculo. Independentemente do resultado, eu proponho a correção estrutural: aquele indicador passa a ter uma definição escrita, um dono e uma tabela certificada, e os dois painéis consomem dela em vez de cada um recalcular. E eu deixo o carimbo de atualização visível nos dois, porque a discussão de defasagem volta toda semana enquanto ele não estiver na tela.
 
 ---
 

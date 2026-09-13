@@ -30,7 +30,7 @@ export const engenhariaDeAnalytics: Trilha = {
   resumo:
     "A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
   formatoProva: "Sabatina oral com banca",
-  prazoSugeridoDias: 26,
+  prazoSugeridoDias: 30,
   status: "disponivel",
   modulos: [
     {
@@ -105,10 +105,14 @@ export const engenhariaDeAnalytics: Trilha = {
       slug: "dataviz",
       titulo: "Dataviz",
       resumo:
-        "Percepção visual, escolha de gráfico, storytelling, dashboards que funcionam e os erros que a banca conhece.",
-      status: "em-breve",
+        "Percepção visual e escolha do gráfico pela pergunta, narrativa que transforma achado em decisão, e painéis que alguém de fato usa — com carimbo de atualização, controle de acesso e medição de uso.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: [
+        "percepcao-e-escolha-do-grafico",
+        "storytelling-com-dados",
+        "dashboards-e-indicadores",
+      ],
     },
     {
       slug: "data-mesh",
@@ -285,10 +289,36 @@ export const engenhariaDeAnalytics: Trilha = {
     },
     {
       dia: 26,
-      titulo: "Revisão leve",
+      titulo: "Revisão e checkpoint de Programação",
       temas: [],
       revisao: ["programacao", "devops"],
-      nota: "Só cards vencidos e as folhas de revisão. Dataviz e Além da ementa entram em breve.",
+      nota: "Cards vencidos, folha de revisão e checkpoint do módulo.",
+    },
+    {
+      dia: 27,
+      titulo: "Percepção e escolha do gráfico",
+      temas: ["percepcao-e-escolha-do-grafico"],
+      revisao: ["programacao"],
+      nota: "A escolha do visual se justifica por como a percepção funciona, não por gosto. É a resposta que a banca espera.",
+    },
+    {
+      dia: 28,
+      titulo: "Storytelling com dados",
+      temas: ["storytelling-com-dados"],
+      revisao: ["dataviz"],
+    },
+    {
+      dia: 29,
+      titulo: "Dashboards e indicadores",
+      temas: ["dashboards-e-indicadores"],
+      revisao: ["dataviz"],
+    },
+    {
+      dia: 30,
+      titulo: "Revisão leve",
+      temas: [],
+      revisao: ["dataviz", "programacao"],
+      nota: "Só cards vencidos e as folhas de revisão. O módulo Além da ementa entra em breve.",
     },
   ],
 };

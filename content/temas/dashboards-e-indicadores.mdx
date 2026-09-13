@@ -1,0 +1,249 @@
+---
+slug: dashboards-e-indicadores
+titulo: "Dashboards e indicadores que alguém usa"
+resumo: "Como um painel deixa de ser enfeite: definir a pergunta e a ação antes do layout, escolher indicadores que mudam decisão, organizar do resumo ao detalhe, e resolver as questões que a sabatina cobra — de que momento é o número, quem pode ver, e o que fazer com o painel que ninguém abre."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "Dashboard é o entregável mais visível do engenheiro de analytics, e o mais fácil de fazer errado: painel bonito que ninguém abre é o resultado padrão quando ninguém perguntou qual decisão ele apoia. A banca testa isso pedindo que você descreva como começaria, e quem começa pelo layout já errou."
+comoCai: "A diretoria pediu um dashboard de vendas. Por onde você começa?"
+feynman: "Explique em um minuto a diferença entre uma métrica e um indicador, usando um exemplo do dia a dia."
+preRequisitos: ["storytelling-com-dados", "source-of-record-vs-source-of-truth"]
+errosComuns:
+  - "Começar pelo layout. Antes de desenhar, é preciso saber quem usa, que decisão toma e com que frequência olha; o layout é consequência disso."
+  - "Confundir métrica com indicador. Métrica é qualquer número medido; indicador é a métrica escolhida para acompanhar um objetivo, com meta e responsável."
+  - "Colocar tudo que dá para medir. Painel com quarenta números não tem nenhuma mensagem; cada elemento precisa responder a uma pergunta de quem abre."
+  - "Não informar de que momento é o número. Painel sem carimbo de atualização gera a discussão de sempre sobre divergência, que é problema de corte e não de cálculo."
+  - "Ignorar o controle de acesso. Painel que mistura dado agregado com dado pessoal precisa de permissão por linha ou por coluna, não de confiança."
+  - "Manter painel que ninguém abre. Painel sem uso é custo de manutenção e fonte de número desatualizado; medir o uso e aposentar faz parte do trabalho."
+preTeste:
+  - enunciado: "Qual é o primeiro passo ao receber o pedido de um novo dashboard?"
+    alternativas:
+      - texto: "Descobrir quem vai usar, que decisão precisa tomar e com que frequência."
+        correta: true
+        explicacao: "Sem isso, o painel vira lista de números; com isso, cada elemento tem justificativa."
+      - texto: "Escolher a ferramenta e o esquema de cores."
+        correta: false
+        explicacao: "Decisão de execução, tomada depois da de conteúdo."
+      - texto: "Levantar todas as métricas disponíveis na base."
+        correta: false
+        explicacao: "Leva ao painel de quarenta números que ninguém lê."
+  - enunciado: "Dois dashboards mostram números diferentes para o mesmo indicador. Qual é a primeira verificação?"
+    alternativas:
+      - texto: "De que momento é cada número: carimbo de atualização e janela de corte."
+        correta: true
+        explicacao: "Defasagem é a causa mais comum, e a mais barata de descartar antes de investigar cálculo."
+      - texto: "Qual dos dois tem o gráfico mais bonito."
+        correta: false
+        explicacao: "Irrelevante para a divergência."
+      - texto: "Qual foi criado primeiro."
+        correta: false
+        explicacao: "Antiguidade não define correção."
+videos:
+  - id: iMuTGjmrAZE
+    publicadoEm: "2023-09-07"
+    titulo: "Faça gráficos mais bonitos e legíveis com storytelling"
+    canal: "DC - Learning Tech"
+    duracao: 19
+    porQue: "Trata da legibilidade que faz um painel ser usado ou abandonado. Assista pensando em quantos elementos cabem antes de a mensagem sumir."
+  - id: fP4qmi6GR50
+    publicadoEm: "2026-02-02"
+    titulo: "De dados a história: como o contexto transforma um gráfico (caso real)"
+    canal: "Lucas Sanromã - Dashboard Design"
+    duracao: 2
+    porQue: "Dois minutos com um caso real de antes e depois. Curto e direto ao ponto deste tema: contexto é o que faz o número virar decisão."
+artigos:
+  - titulo: "Key performance indicator"
+    url: "https://en.wikipedia.org/wiki/Performance_indicator"
+    fonte: "Wikipédia"
+  - titulo: "Working with dashboards (QuickSight)"
+    url: "https://docs.aws.amazon.com/quicksight/latest/user/working-with-dashboards.html"
+    fonte: "AWS"
+  - titulo: "Row-level security (QuickSight)"
+    url: "https://docs.aws.amazon.com/quicksight/latest/user/restrict-access-to-a-data-set-using-row-level-security.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Métrica e indicador: a diferença."
+    verso: "Métrica é qualquer número medido. Indicador é a métrica escolhida para acompanhar um objetivo, com meta, responsável e frequência definidos."
+  - frente: "As perguntas antes do layout."
+    verso: "Quem usa, que decisão toma, com que frequência olha, e o que vai fazer quando o número estiver ruim. A última é a que mais revela se o painel serve."
+  - frente: "Como organizar um painel?"
+    verso: "Do resumo ao detalhe: os poucos indicadores de topo primeiro, depois a decomposição, depois o detalhe para investigar. Quem abre rápido vê o topo; quem investiga desce."
+  - frente: "Quantos indicadores de topo?"
+    verso: "Poucos, tipicamente três a cinco. Acima disso a pessoa deixa de olhar para todos e o painel perde a função de resumo."
+  - frente: "O que todo painel precisa mostrar sobre o próprio dado?"
+    verso: "De que momento ele é: carimbo da última atualização e a janela de corte. É o que encerra metade das discussões de divergência."
+  - frente: "O que é segurança em nível de linha?"
+    verso: "Cada pessoa vê só as linhas que lhe cabem, por regra ligada à identidade dela. É o mecanismo para um painel único servir a várias regiões ou gerências."
+  - frente: "Painel em memória: qual o cuidado?"
+    verso: "Camadas como o SPICE guardam uma cópia; o número é do último refresh, não de agora. Precisa estar visível, ou vira divergência com a origem."
+  - frente: "Como saber se o painel é usado?"
+    verso: "Medindo acesso: quantos usuários distintos, com que frequência, quais páginas. Painel sem uso é custo de manutenção e risco de número velho circulando."
+  - frente: "O que fazer com painel abandonado?"
+    verso: "Conversar com quem pediu, entender por que não usa e aposentar se não houver uso. Manter dá trabalho e dá a falsa impressão de que o número está sendo acompanhado."
+  - frente: "Alerta ou painel?"
+    verso: "Se a pessoa só precisa saber quando algo sai da faixa, um alerta serve melhor que um painel que ela teria de lembrar de abrir."
+  - frente: "Qual a relação com Source of Truth?"
+    verso: "O painel deve consumir a tabela certificada, não recalcular a métrica por conta própria. Recalcular no painel é como novas definições divergentes nascem."
+drills:
+  - titulo: "Métrica, indicador ou nenhum?"
+    instrucao: "Para cada item, classifique."
+    opcoes: ["Métrica", "Indicador", "Nenhum dos dois"]
+    itens:
+      - enunciado: "Número de sessões no aplicativo ontem."
+        resposta: "Métrica"
+        explicacao: "Número medido, sem meta nem objetivo associado."
+      - enunciado: "Taxa de conversão com meta de 3% e dono na área comercial."
+        resposta: "Indicador"
+        explicacao: "Métrica escolhida para acompanhar objetivo, com meta e responsável."
+      - enunciado: "Quantidade de registros processados pelo pipeline."
+        resposta: "Métrica"
+        explicacao: "Operacional; vira indicador só se houver objetivo e meta."
+      - enunciado: "A opinião do gerente sobre o trimestre."
+        resposta: "Nenhum dos dois"
+        explicacao: "Não é medida."
+      - enunciado: "Inadimplência mensal acompanhada contra meta de 3,5%."
+        resposta: "Indicador"
+        explicacao: "Meta e acompanhamento definidos."
+perguntas:
+  - tipo: oral
+    enunciado: "A diretoria pediu um dashboard de vendas. Por onde você começa?"
+    respostaModelo: "Não começo pela ferramenta nem pelo layout. Começo por quatro perguntas com quem pediu. Quem vai usar de fato, porque diretoria e gerência regional precisam de coisas diferentes. Que decisão essa pessoa toma olhando o painel, e essa é a pergunta que mais desarma pedido genérico: se ninguém consegue responder, o que estão pedindo é um relatório, não um painel de decisão. Com que frequência ela olha, porque isso define se o dado precisa ser diário ou em tempo quase real, e isso muda a arquitetura e o custo. E o que ela faz quando o número está ruim, porque se não há ação possível, aquele número talvez não precise estar ali. Com as respostas, eu escolho poucos indicadores de topo, três a cinco, ligados às decisões que apareceram, e organizo do resumo ao detalhe: quem abre com pressa vê o topo, quem quer investigar desce para a decomposição. Cada indicador consome a tabela certificada, não uma consulta que eu escrevi no painel, porque recalcular ali é como nascem definições divergentes. Ponho o carimbo de atualização visível, resolvo o acesso com segurança em nível de linha se o painel serve várias regiões, e combino de medir o uso em um mês. Se ninguém abrir, eu volto e converso, em vez de manter um painel que só gera número velho circulando."
+    rubrica:
+      - "Começou pelas perguntas de uso, não por ferramenta ou layout"
+      - "Incluiu 'que decisão' e 'o que faz quando o número está ruim' como perguntas"
+      - "Propôs poucos indicadores de topo e organização do resumo ao detalhe"
+      - "Exigiu consumo da tabela certificada em vez de recalcular no painel"
+      - "Citou carimbo de atualização, controle de acesso e medição de uso"
+  - tipo: oral
+    enunciado: "Dois dashboards mostram números diferentes para o mesmo indicador e as áreas estão discutindo. Como você conduz?"
+    respostaModelo: "Primeiro eu tiro a discussão do campo de quem está certo e coloco no campo de qual é a diferença. A primeira verificação é o momento: de que data e de que hora é cada número, e qual a janela de corte de cada painel. Se um lê uma camada em memória atualizada de madrugada e o outro consulta a origem, os dois estão certos e não são comparáveis. Isso resolve boa parte dos casos e custa dez minutos. Não sendo isso, eu comparo a definição: o que cada painel chama de venda. Um pode excluir cancelamento, o outro não; um pode contar pela data do pedido, o outro pela data de faturamento. Aqui normalmente está a causa real, e ela não é técnica: é que existem duas definições vivas na empresa. Se ainda sobrar diferença, aí sim eu sigo a linhagem de cada um até a origem e procuro erro de cálculo. Independentemente do resultado, eu proponho a correção estrutural: aquele indicador passa a ter uma definição escrita, um dono e uma tabela certificada, e os dois painéis consomem dela em vez de cada um recalcular. E eu deixo o carimbo de atualização visível nos dois, porque a discussão de defasagem volta toda semana enquanto ele não estiver na tela."
+    rubrica:
+      - "Reformulou de 'quem está certo' para 'qual é a diferença'"
+      - "Verificou momento e janela de corte primeiro, com justificativa de custo"
+      - "Comparou definições e reconheceu que a causa costuma ser organizacional"
+      - "Usou linhagem como terceiro passo, para erro real"
+      - "Propôs correção estrutural: definição escrita, dono, tabela certificada e carimbo visível"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre indicadores é mais defensável?"
+    alternativas:
+      - texto: "Um indicador é uma métrica escolhida para acompanhar um objetivo, com meta e responsável; sem isso é apenas um número no painel."
+        correta: true
+        explicacao: "Separa medida de acompanhamento e explica por que nem todo número merece estar no painel."
+      - texto: "Quanto mais indicadores o painel tiver, mais completo ele é."
+        correta: false
+        explicacao: "Excesso elimina a função de resumo e dilui a atenção."
+      - texto: "Indicador e métrica são sinônimos na prática."
+        correta: false
+        explicacao: "A distinção é justamente o que a pergunta testa."
+      - texto: "O melhor indicador é o mais fácil de calcular."
+        correta: false
+        explicacao: "Facilidade de cálculo não tem relação com utilidade para decisão."
+  - tipo: multipla
+    enunciado: "Quais DUAS informações todo painel de indicador deveria exibir?"
+    alternativas:
+      - texto: "O momento a que o dado se refere, com carimbo da última atualização."
+        correta: true
+        explicacao: "Encerra a maior parte das discussões de divergência, que são de corte e não de cálculo."
+      - texto: "A referência que dá sentido ao número, como meta ou período anterior."
+        correta: true
+        explicacao: "Número sem referência não sustenta decisão."
+      - texto: "O nome de quem construiu o painel."
+        correta: false
+        explicacao: "Útil para suporte, não para a leitura do indicador."
+      - texto: "A consulta SQL que gerou o número."
+        correta: false
+        explicacao: "Pertence à documentação, não à tela de decisão."
+      - texto: "O tempo de execução da consulta."
+        correta: false
+        explicacao: "Métrica de operação do painel, não do negócio."
+---
+
+## Em uma frase
+
+Painel útil nasce de **quem usa e que decisão toma**, não de layout: poucos
+indicadores de topo, organização do resumo ao detalhe, e o número sempre
+acompanhado de **quando** ele foi apurado e **contra o quê** é comparado.
+
+## Métrica e indicador não são a mesma coisa
+
+<Termo nome="métrica">Qualquer número medido: sessões, registros processados, ticket médio.</Termo>
+
+<Termo nome="indicador">Métrica escolhida para acompanhar um objetivo, com meta, responsável e frequência definidos.</Termo>
+
+A distinção importa porque explica por que nem todo número merece estar no
+painel. Se ninguém tem meta nem responde por aquele número, ele é métrica
+operacional — e ocupa espaço que deveria ser de decisão.
+
+## As quatro perguntas antes do layout
+
+<Passos itens={[
+  "Quem vai usar de fato? Diretoria e gerência regional precisam de coisas diferentes.",
+  "Que decisão essa pessoa toma olhando o painel? Se ninguém responde, o pedido é de relatório, não de painel.",
+  "Com que frequência ela olha? Define se o dado é diário ou quase em tempo real, o que muda arquitetura e custo.",
+  "O que ela faz quando o número está ruim? Se não há ação possível, aquele número talvez não precise estar ali."
+]} />
+
+<Callout tipo="atencao" titulo="A pergunta que desarma pedido genérico">
+"Que decisão você toma olhando isso?" É a que mais economiza trabalho. Pedido
+que não sobrevive a ela costuma virar um relatório mensal — mais barato de
+fazer e mais honesto sobre o que é.
+</Callout>
+
+## Organizar do resumo ao detalhe
+
+Três camadas, na ordem em que a pessoa lê:
+
+<Comparativo
+  colunas={["Camada", "Conteúdo", "Para quem"]}
+  linhas={[
+    ["Topo", "Três a cinco indicadores com meta e tendência", "Quem abre com pressa"],
+    ["Decomposição", "O mesmo indicador por região, canal, produto", "Quem quer saber onde está concentrado"],
+    ["Detalhe", "Tabela filtrável, registro a registro", "Quem vai investigar um caso"]
+  ]}
+/>
+
+Acima de cinco indicadores no topo, a pessoa deixa de olhar para todos e o
+painel perde a função de resumo.
+
+## O que todo painel precisa mostrar sobre si mesmo
+
+- **De que momento é o número**: carimbo da última atualização e janela de
+  corte. Metade das discussões de divergência entre painéis é defasagem, não
+  cálculo — e o carimbo na tela encerra essas discussões sem reunião.
+- **A referência**: meta, período anterior, ou ambos. Número sem referência não
+  sustenta decisão.
+
+<Callout tipo="dica" titulo="Não recalcule a métrica no painel">
+O painel deve consumir a **tabela certificada**. Escrever a consulta dentro da
+ferramenta é exatamente como nascem duas definições vivas de "venda" na mesma
+empresa. Isso liga este tema diretamente a Source of Record e Source of Truth.
+</Callout>
+
+## Acesso e camada em memória
+
+**Segurança em nível de linha** permite que um painel único sirva várias
+regiões, cada pessoa vendo só o que lhe cabe. É o mecanismo certo quando a
+alternativa seria duplicar o painel por área.
+
+E, quando há camada em memória (o SPICE do QuickSight, por exemplo), o número é
+do **último refresh**. Isso precisa estar visível, ou a divergência com a
+origem vira chamado toda semana.
+
+## Painel que ninguém abre
+
+Medir o uso — usuários distintos, frequência, páginas acessadas — faz parte do
+trabalho. Painel abandonado custa manutenção e, pior, faz circular número
+velho com aparência de acompanhado. Quando o uso não aparece, a conversa é com
+quem pediu, e aposentar é uma resposta legítima.
+
+E há o caso em que o painel nem era a ferramenta certa: se a pessoa só precisa
+saber **quando algo sai da faixa**, um **alerta** serve melhor que um painel
+que ela teria de lembrar de abrir.
+
+## Como responder isso em voz alta
+
+Comece pelas perguntas de uso e deixe claro que o layout vem depois. Cite
+poucos indicadores de topo, a organização em camadas, o consumo da tabela
+certificada e o carimbo de atualização. Termine com a medição de uso — é a
+parte que quase ninguém menciona e que mostra que você já viu painel morrer.
