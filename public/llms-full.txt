@@ -115,6 +115,14 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [Contratos de dados e plataforma self-serve](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/contratos-de-dados-e-plataforma/): Como o Data Mesh sai do slide: o contrato que declara esquema, semântica e garantias entre quem publica e quem consome, a evolução sem quebrar o consumidor, e a plataforma que entrega ingestão, catálogo, linhagem e qualidade sem cada domínio reinventar.
 - [Arquiteturas de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/data-mesh/arquiteturas-de-dados/): Lambda contra Kappa, Data Warehouse contra Data Lake contra Lakehouse, os quatro princípios do Data Mesh e a diferença entre Source of Record e Source of Truth: o vocabulário de arquitetura que a sabatina cobra em nível de trade-off.
 
+### Além da ementa
+
+- [dbt: transformação versionada em SQL](https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/dbt-e-transformacao-versionada/): A ferramenta que virou padrão na camada de transformação: modelos em SQL com referências que montam o grafo sozinho, testes e documentação junto do código, materialização escolhida por caso, e snapshots para histórico. É o T do ELT com disciplina de engenharia.
+- [Camada semântica e definição de métricas](https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/camada-semantica-e-metricas/): O lugar onde a definição de um indicador vive uma vez só: o que é camada semântica, por que a métrica calculada dentro de cada painel produz números divergentes, como escrever uma definição que não admite interpretação, e quem responde por ela.
+- [Estatística para analytics, sem virar estatístico](https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/estatistica-para-analytics/): O mínimo que impede conclusão errada: por que a média engana e a distribuição não, correlação que não é causalidade, variação normal confundida com tendência, o paradoxo de Simpson, viés de sobrevivência e o que um teste A/B realmente prova.
+- [Segurança e privacidade de dados em banco](https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/seguranca-e-privacidade/): Como a LGPD chega dentro do pipeline: dado pessoal e sensível, o que anonimização, pseudonimização e tokenização mudam no escopo da lei, e como controlar quem vê qual linha e qual coluna sem travar o analista.
+- [Como responder na sabatina](https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/como-responder-na-sabatina/): A estrutura que faz uma resposta oral pontuar: contexto, opções, trade-offs e recomendação. Como abrir com pergunta de esclarecimento, como admitir que não sabe sem perder ponto e os erros de comunicação que derrubam candidato bom.
+
 ## Engenharia de Dados
 
 A ementa oficial de uma carreira de Engenharia de Dados no mercado financeiro, transformada em estudo ativo: vídeo em português, explicação própria, recall espaçado e simulado oral no formato da sabatina.
@@ -6988,6 +6996,676 @@ Depende da pergunta que está sendo feita, e eu começaria separando dois concei
 ### A diretoria leu sobre Data Mesh e quer adotar. Vocês têm quatro domínios grandes, um time central de dados com fila de três meses e nenhuma plataforma self-serve. O que você recomenda?
 
 Eu concordaria com o diagnóstico e discordaria do primeiro passo. A fila de três meses é sintoma clássico do gargalo central que o Mesh ataca, então a direção faz sentido. Mas os quatro princípios se sustentam juntos: sem plataforma self-serve, descentralizar propriedade só transfere o problema para times que não têm ferramenta, e sem governança federada computacional cada domínio inventa seu padrão de qualidade e de privacidade. Eu começaria pela plataforma e pelo contrato de dados, escolheria um domínio piloto com time de engenharia maduro, como cartão, e trataria uma ou duas tabelas como produto de verdade: dono nomeado, SLA de atualização, schema versionado, catálogo. Mediria tempo de entrega antes e depois. Se o piloto não reduzir a fila, o problema é de plataforma ou de capacidade do domínio, e escalar o modelo só multiplicaria o custo de coordenação.
+
+---
+
+# dbt: transformação versionada em SQL
+
+Trilha: Engenharia de Analytics · Módulo: Além da ementa
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/dbt-e-transformacao-versionada/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** A ferramenta que virou padrão na camada de transformação: modelos em SQL com referências que montam o grafo sozinho, testes e documentação junto do código, materialização escolhida por caso, e snapshots para histórico. É o T do ELT com disciplina de engenharia.
+
+**Por que cai na prova.** É a ferramenta que o mercado de analytics assumiu, e a banca pergunta não o que ela é, mas o que ela resolve. A resposta boa liga a três coisas que já vieram antes: versionamento e revisão, teste de dado, e linhagem. Quem descreve dbt como 'roda SQL' não mostra por que ele mudou a rotina.
+
+**Como o entrevistador pergunta.** "O que o dbt resolve que rodar scripts SQL agendados não resolve?"
+
+## Em uma frase
+
+O dbt dá ao SQL as garantias que o código de aplicação já tinha:
+**versionamento, revisão, teste, documentação e linhagem** — e monta a ordem de
+execução sozinho a partir das referências entre modelos.
+
+## O que ele é, e o que não é
+
+<Comparativo
+  colunas={["É", "Não é"]}
+  linhas={[
+    ["A camada de transformação (o T do ELT)", "Ferramenta de extração ou carga"],
+    ["Executor de SQL versionado dentro do warehouse", "Um banco de dados"],
+    ["Resolvedor da ordem entre modelos", "Orquestrador do pipeline inteiro"],
+    ["Gerador de documentação e linhagem", "Ferramenta de visualização"]
+  ]}
+/>
+
+Delimitar o escopo é metade da resposta na sabatina: quem diz que o dbt
+substitui o orquestrador mostra que não usou.
+
+## A referência: a ideia que sustenta o resto
+
+Em vez de escrever o nome da tabela, o modelo **referencia** outro modelo.
+Dessa mudança pequena saem quatro capacidades:
+
+<Passos itens={[
+  "O grafo de dependências se monta sozinho.",
+  "A ordem de execução é derivada do grafo, não de nomes de arquivo numerados.",
+  "O dbt sabe o que precisa reconstruir quando um modelo muda.",
+  "A linhagem vira um site navegável, respondendo 'quem consome isto' sem garimpo."
+]} />
+
+<Callout tipo="atencao" titulo="Escrever o nome da tabela quebra tudo isso">
+É o erro mais comum de quem começa. O modelo funciona, o SQL roda — e o grafo
+não se forma, a ordem volta a ser manual e a linhagem fica incompleta. O
+sintoma aparece semanas depois, quando alguém confia na linhagem para avaliar
+impacto.
+</Callout>
+
+## Materialização: três perguntas
+
+<Comparativo
+  colunas={["Materialização", "Quando", "Custo"]}
+  linhas={[
+    ["View", "Intermediário pequeno, consultado por outros modelos", "Nenhum de armazenamento; resolve na consulta"],
+    ["Table", "Consultado com frequência por painéis", "Armazenamento e tempo de build"],
+    ["Incremental", "Volume grande que cresce por período", "Complexidade: chave única, lógica de atualização, refazer do zero"],
+    ["Ephemeral", "Lógica reaproveitada que não precisa existir no banco", "Nenhum: vira CTE em quem usa"]
+  ]}
+/>
+
+As perguntas que decidem: **quem consulta**, **qual o volume**, **com que
+frequência muda**. E o erro a evitar é materializar tudo como tabela por
+reflexo — a maior parte dos modelos intermediários de um projeto não é
+consultada por ninguém.
+
+<Callout tipo="dica" titulo="O custo escondido do incremental">
+Ele exige chave única, lógica de atualização e — o que se esquece — a
+capacidade de **refazer tudo do zero** quando a regra mudar. Sem isso, o
+histórico fica com dois cálculos diferentes convivendo na mesma tabela.
+</Callout>
+
+## Teste e documentação no mesmo lugar
+
+**Testes genéricos** (unicidade, não nulo, conjunto de valores, integridade)
+são declarados em configuração ao lado do modelo. **Testes específicos** são
+consultas próprias que afirmam uma regra de negócio — e é aí que mora o teste
+que pega erro caro: o total batendo com a origem.
+
+A **documentação** fica junto do código, e o site gerado traz o dicionário e o
+grafo. Isso resolve, de graça, a pergunta que sempre aparece em governança:
+*o que essa coluna significa e quem depende dela?*
+
+## Snapshot não é backup
+
+<Termo nome="snapshot">Mecanismo que captura mudanças de um registro ao longo do tempo, implementando dimensão de mudança lenta do tipo 2: preserva o valor antigo com data de validade quando o novo chega.</Termo>
+
+Serve para responder "qual era o segmento deste cliente em março". Não serve
+para restaurar ambiente — essa confusão aparece em entrevista e é fácil de
+evitar.
+
+## Como responder isso em voz alta
+
+Para "o que ele resolve": **ordem pelo grafo**, **teste junto do modelo**,
+**documentação e linhagem**, e **o fluxo de trabalho de software aplicado ao
+SQL**. Termine delimitando: não move dado, não substitui orquestrador. Para
+materialização, dê os três critérios e mencione o custo escondido do
+incremental — é o detalhe que mostra uso real.
+
+## Erros comuns
+
+- Descrever dbt como orquestrador. Ele transforma dentro do banco e resolve a ordem entre modelos; quem agenda e coordena o resto do pipeline é o orquestrador.
+- Achar que dbt move dados. Ele não extrai nem carrega: opera sobre o que já está no warehouse. É o T do ELT.
+- Escrever o nome da tabela em vez da referência. Sem a referência, o grafo de dependências não se monta e a ordem de execução volta a ser manual.
+- Materializar tudo como tabela. Modelo intermediário costuma ser view; tabela custa armazenamento e tempo de build. Incremental existe para o que é grande e cresce.
+- Confundir teste genérico com teste de negócio. Unicidade e não nulo são o mínimo; o teste que pega erro caro compara o total com a origem.
+- Usar snapshot achando que é backup. Snapshot captura mudanças de registro ao longo do tempo, implementando dimensão de mudança lenta, e não serve para restaurar ambiente.
+
+## Perguntas de sabatina e respostas-modelo
+
+### O que o dbt resolve que rodar scripts SQL agendados não resolve?
+
+Scripts agendados resolvem a execução; o que falta neles é tudo em volta. Primeiro, a ordem: com scripts, alguém precisa saber que o modelo A roda antes do B, e isso vive na cabeça de quem montou ou num nome de arquivo com número na frente. No dbt, eu escrevo uma referência a outro modelo em vez do nome da tabela, e a ferramenta monta o grafo de dependências sozinha, decide a ordem e sabe o que precisa reconstruir quando algo muda. Segundo, teste: no modelo de scripts, teste de dado é um script separado que alguém lembra de rodar. No dbt, o teste é declarado junto do modelo e roda no mesmo comando, então não existe a versão sem teste. Terceiro, documentação e linhagem: a descrição de cada coluna fica ao lado do código, e o grafo vira um site navegável, o que responde 'quem consome esse modelo' sem ninguém garimpar. E quarto, o fluxo de trabalho: como tudo é arquivo de texto versionado, a transformação entra em revisão por par, verificação automática e promoção entre ambientes, igual a software. É isso que muda a rotina: não é que o SQL ficou melhor, é que ele passou a ter as garantias que o código de aplicação já tinha. O que o dbt não faz é mover dado e orquestrar o resto do pipeline; ele é o T do ELT, e o orquestrador continua existindo.
+
+### Como você decide a materialização de cada modelo num projeto dbt?
+
+Eu decido por três perguntas: quem consulta, qual o volume e com que frequência muda. Modelo intermediário, que só existe para outro modelo usar e tem pouco dado, fica como view: não ocupa armazenamento e não tem tempo de construção. Modelo consultado com frequência por painéis vira tabela, porque aí vale pagar o build uma vez e ler rápido muitas vezes. Quando a tabela é grande e cresce por período, como fato de transações, eu uso incremental: processo só o que entrou desde a última execução em vez de reconstruir bilhões de linhas todo dia. Incremental tem um custo escondido que eu declaro: preciso definir a chave única e a lógica de atualização, e preciso conseguir refazer tudo do zero quando a regra mudar, senão o histórico fica com dois cálculos diferentes convivendo. E tem ephemeral, para um trecho de lógica que três modelos reaproveitam mas que não precisa existir como objeto no banco: ele vira uma CTE dentro de quem usa. O erro que eu evito é materializar tudo como tabela por reflexo, porque isso infla armazenamento e o tempo total de execução, e a maior parte dos modelos intermediários de um projeto não é consultada por ninguém.
+
+---
+
+# Camada semântica e definição de métricas
+
+Trilha: Engenharia de Analytics · Módulo: Além da ementa
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/camada-semantica-e-metricas/
+Tempo estimado: 30 minutos · Nível: avancado
+
+**Resumo.** O lugar onde a definição de um indicador vive uma vez só: o que é camada semântica, por que a métrica calculada dentro de cada painel produz números divergentes, como escrever uma definição que não admite interpretação, e quem responde por ela.
+
+**Por que cai na prova.** É a resposta estrutural para a pergunta que abre quase toda sabatina de Analytics: por que dois relatórios divergem. Reconciliar caso a caso resolve o incidente; camada semântica resolve a classe do problema. Quem só sabe reconciliar mostra operação; quem propõe a camada mostra arquitetura.
+
+**Como o entrevistador pergunta.** "Cada área calcula 'cliente ativo' de um jeito. Como você resolve isso de forma definitiva?"
+
+## Em uma frase
+
+A camada semântica é onde a **definição de uma métrica vive uma vez só** e de
+onde qualquer ferramenta recebe o mesmo número — mas ela não decide **qual**
+definição vale: isso é decisão de negócio.
+
+## Por que os números divergem
+
+A causa estrutural não é cálculo errado: é **duplicação**. Quando cada painel
+implementa a própria versão de "receita", as versões evoluem separadas. Uma
+passa a excluir cancelamento, outra não; uma usa a data do pedido, outra a do
+faturamento. Ninguém errou — e os números não batem.
+
+<Comparativo
+  colunas={["Onde a métrica é definida", "O que acontece"]}
+  linhas={[
+    ["Dentro de cada painel", "Lógica duplicada, evolução separada, divergência garantida"],
+    ["Numa consulta compartilhada por cópia", "Divergem assim que alguém edita a cópia"],
+    ["Na camada semântica", "Definida uma vez, consumida por todos, muda num lugar só"]
+  ]}
+/>
+
+<Termo nome="camada semântica">Lugar onde métricas e dimensões são definidas de forma consultável, para que ferramentas diferentes recebam o mesmo número com a mesma regra.</Termo>
+
+Ela **não** é o dicionário de dados: o dicionário descreve o significado de
+colunas; a camada define **métricas**, e é consumida em tempo de consulta.
+
+## O que uma definição precisa ter
+
+<Passos itens={[
+  "Nome e fórmula.",
+  "Janela de tempo.",
+  "Filtros e exclusões: cancelamento, teste interno, pedido de funcionário.",
+  "Qual data usar: do pedido, do faturamento ou do pagamento.",
+  "Grão a que ela se aplica.",
+  "Dono, que é do negócio.",
+  "Versão, com data de vigência."
+]} />
+
+<Callout tipo="atencao" titulo="As duas omissões que mais causam divergência">
+**Qual data usar** e **quais exclusões**. Receita pela data do pedido, do
+faturamento e do pagamento dá três números — e todo mundo acha óbvio qual é o
+certo, até comparar com a área do lado.
+</Callout>
+
+O teste de uma boa definição é operacional: **duas pessoas implementam a partir
+do texto e chegam ao mesmo número**. Se não chegam, o problema está no texto.
+
+## O problema é organizacional
+
+Três áreas com três definições de "cliente ativo" quase sempre têm três
+definições **legítimas** para contextos diferentes. A camada semântica dá o
+lugar para resolver, mas alguém precisa **decidir**:
+
+- Se uma é a oficial da empresa, ela é implementada uma vez, com dono do
+  negócio, e as outras são aposentadas.
+- Se as três são legítimas, a saída não é escolher: é **dar três nomes
+  distintos**, cada um com dono, e abandonar a palavra genérica.
+
+<Callout tipo="dica" titulo="Mudar a definição muda o passado">
+Redefinir uma métrica altera a série histórica inteira quando recalculada. Sem
+datar a mudança e comunicar, quem olha o gráfico vê uma quebra e acredita que
+ela é do negócio. Versionar a definição não é burocracia: é o que preserva a
+leitura da série.
+</Callout>
+
+## Como isso fecha com o resto da trilha
+
+A camada semântica é onde a **regra de precedência** de Source of Truth vira
+executável: a métrica oficial é definida sobre a **tabela certificada**, e
+todo consumidor — painel, consulta, modelo — recebe esse número. O painel para
+de recalcular, e a divergência deixa de ter por onde nascer.
+
+## Como responder isso em voz alta
+
+Comece dizendo que o problema é organizacional. Mostre as diferenças nos eixos
+concretos (janela, critério, exclusão, data). Peça **decisão e dono de
+negócio**. Só então proponha a implementação única na camada, sobre a tabela
+certificada. E declare o efeito na série histórica — é a parte que o resto das
+pessoas esquece e que, esquecida, gera a próxima crise de confiança.
+
+## Erros comuns
+
+- Achar que o problema é técnico. Duas definições de receita convivendo é problema organizacional; a camada semântica dá o lugar para resolvê-lo, mas alguém precisa decidir qual vale.
+- Deixar cada painel calcular a métrica. É assim que definições divergentes nascem: a lógica fica duplicada em ferramentas diferentes e evolui separada.
+- Escrever definição ambígua. 'Cliente ativo é quem comprou recentemente' não é definição; sem janela, sem critério de compra e sem tratamento de cancelamento, cada pessoa implementa uma coisa.
+- Não nomear o dono da métrica. Sem alguém que responda pela definição, qualquer mudança vira discussão sem árbitro.
+- Versionar métrica sem avisar. Mudar a definição muda a série histórica; quem olha o gráfico vê uma quebra que parece do negócio e é da régua.
+- Confundir camada semântica com dicionário de dados. O dicionário descreve colunas; a camada semântica define métricas e é consultável, entregando o mesmo número a qualquer ferramenta.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Descobrimos que três áreas calculam 'cliente ativo' de formas diferentes. Como você resolve isso de forma definitiva?
+
+A primeira coisa que eu digo é que isso não é um problema técnico, é organizacional, e por isso a solução técnica sozinha não resolve. O que eu faço primeiro é levantar as três definições e escrever, lado a lado, exatamente em que elas diferem: janela de tempo, o que conta como compra, se cancelamento entra, qual data é usada. Normalmente as três fazem sentido para o contexto de quem criou, e é isso que eu levo para a mesa: não vou dizer que duas estão erradas, vou pedir uma decisão sobre qual é a oficial da empresa, e nomear um dono para ela, que precisa ser alguém do negócio, não do time de dados. Decidido isso, vem a parte técnica: a definição oficial é implementada uma única vez, na camada semântica, sobre a tabela certificada. Os painéis e as consultas passam a consumir dali em vez de cada um recalcular, que é exatamente como as três nasceram. E eu declaro o custo da mudança: se a definição oficial for diferente da que uma área usa hoje, a série histórica dela muda, e isso precisa ser datado e comunicado, senão a pessoa vai ver uma quebra no gráfico e achar que é do negócio. Se as três definições forem legítimas para propósitos diferentes, a saída não é escolher uma: é nomear as três com nomes distintos, cada uma com dono, e acabar com o uso da palavra genérica.
+
+### O que faz uma definição de métrica ser boa, e como você sabe que a sua está?
+
+Uma definição boa é a que duas pessoas diferentes implementam a partir do texto e chegam ao mesmo número. Esse é o teste, e é bem mais duro do que parece. Para passar nele, a definição precisa de sete coisas: nome, fórmula, janela de tempo, filtros e exclusões, qual data usar, grão, e o dono. A que mais falta é qual data usar: receita pela data do pedido, do faturamento ou do pagamento dá três números diferentes, e todo mundo acha que é óbvio qual é, até comparar. A segunda que mais falta é exclusão: cancelamento, teste interno, pedido de funcionário. Na prática eu faço assim: escrevo a definição, mando para outra pessoa implementar sem conversar comigo, e comparo. Se der diferente, o problema está no texto, não em quem implementou. Também guardo a definição junto do código, versionada, com data de vigência, porque métrica muda e a série histórica muda junto. E declaro o que a métrica não cobre, porque a maior parte das discussões futuras é sobre casos de borda que ninguém pensou no dia em que a definição foi escrita.
+
+---
+
+# Estatística para analytics, sem virar estatístico
+
+Trilha: Engenharia de Analytics · Módulo: Além da ementa
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/estatistica-para-analytics/
+Tempo estimado: 35 minutos · Nível: avancado
+
+**Resumo.** O mínimo que impede conclusão errada: por que a média engana e a distribuição não, correlação que não é causalidade, variação normal confundida com tendência, o paradoxo de Simpson, viés de sobrevivência e o que um teste A/B realmente prova.
+
+**Por que cai na prova.** A banca não vai pedir derivação de fórmula. Vai descrever um achado com armadilha estatística e ver se você morde: 'as vendas caíram 8% esta semana' ou 'quem usa o recurso X compra mais'. Quem responde sem perguntar pela variação normal ou pela seleção da amostra entrega uma conclusão que não se sustenta.
+
+**Como o entrevistador pergunta.** "A conversão de quem usa o recurso novo é o dobro. Podemos dizer que o recurso aumenta a conversão?"
+
+## Em uma frase
+
+A estatística que o engenheiro de analytics precisa não é a de derivar
+fórmula: é a que **impede conclusão errada** — variação normal, distribuição
+em vez de média, e a distância entre associação e causa.
+
+## A média engana; a distribuição, não
+
+Renda, ticket, tempo de resposta e duração de sessão quase sempre são
+assimétricos ou têm valores extremos. Nesses casos, a média descreve mal o
+típico.
+
+<Comparativo
+  colunas={["O que reportar", "O que ela responde"]}
+  linhas={[
+    ["Média", "Quanto daria se dividisse igualmente (sensível a extremos)"],
+    ["Mediana", "O valor do caso do meio: o típico"],
+    ["Quartis", "Onde estão os 25% menores e maiores"],
+    ["Histograma", "A forma: há um grupo ou dois?"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O caso das duas populações">
+"A nota média é 8,2, nossos clientes estão satisfeitos" — com metade dando 10 e
+metade dando 6. A média existe, e não descreve **ninguém**. O histograma mostra
+duas populações e muda completamente a conversa.
+</Callout>
+
+## Associação não é causa
+
+<Termo nome="autosseleção">Quando as pessoas escolhem em qual grupo estar. Quem opta por usar um recurso já é diferente de quem não opta, e essa diferença contamina qualquer comparação entre os dois grupos.</Termo>
+
+É a armadilha mais cobrada: "quem usa o recurso converte o dobro". Pode ser o
+recurso causando — ou o cliente engajado, que já convertia mais, sendo o que
+adota o recurso.
+
+Duas saídas, em ordem de custo:
+
+1. **Checagem barata**: os grupos já eram diferentes **antes** do lançamento? Se
+   sim, a hipótese cai sem experimento nenhum.
+2. **Experimento**: oferecer a uma parcela **aleatória**, comparar com controle,
+   com tamanho e duração definidos **antes**.
+
+<Callout tipo="dica" titulo="Parar quando deu bom">
+Olhar o teste todo dia e encerrar quando aparece significância é a forma mais
+comum de **fabricar** um resultado. Por isso tamanho de amostra e duração são
+definidos antes e respeitados — e por isso significância **não** é o mesmo que
+relevância: com amostra grande, diferenças minúsculas ficam significantes.
+</Callout>
+
+## Variação normal: confirmar que houve fato
+
+Antes de explicar uma queda, confirme que ela é diferente do ruído. "Caiu 8%"
+num indicador que oscila 10% por semana não é evento — e investigar isso gera
+narrativa para algo que não aconteceu.
+
+<Passos itens={[
+  "Olhar a série de várias semanas, não só a anterior: qual é a oscilação habitual?",
+  "Considerar sazonalidade: feriado, virada de mês, campanha. O comparativo honesto costuma ser a mesma semana do ano anterior.",
+  "Se continua fora do padrão, decompor: concentrado numa região ou canal aponta causa; queda uniforme costuma ser sistêmico.",
+  "Checar falha de dado. Pipeline que rodou parcialmente parece exatamente queda de vendas."
+]} />
+
+## Duas armadilhas com nome
+
+**Paradoxo de Simpson.** Um padrão no agregado pode **se inverter** em cada
+subgrupo, quando os subgrupos têm tamanhos e taxas diferentes. A campanha pode
+parecer melhor no total e ser pior em todas as faixas de idade. A defesa é
+simples: sempre olhar segmentado.
+
+**Viés de sobrevivência.** Analisar só quem restou e concluir sobre todos.
+Entrevistar clientes atuais sobre a mudança de preço ignora exatamente quem
+saiu por causa dela.
+
+## A pergunta que desarma quase tudo
+
+**Comparado com o quê?** Período anterior, mesmo período do ano passado, grupo
+de controle, variação habitual. Toda conclusão apressada morre nessa pergunta,
+e fazê-la em voz alta na sabatina é mais valioso que qualquer fórmula.
+
+## Como responder isso em voz alta
+
+Separe **o que o dado mostra** do **que ele não mostra**. Ofereça a checagem
+barata antes do experimento caro. Para qualquer movimento de indicador,
+confirme **variação habitual e sazonalidade** antes de procurar causa. E diga
+sempre o que é achado e o que é suposição — é isso que faz alguém confiar no
+próximo número que você trouxer.
+
+## Erros comuns
+
+- Reportar média sem olhar a distribuição. Média em distribuição assimétrica ou com valores extremos descreve mal o típico; mediana e quartis costumam informar melhor.
+- Tratar correlação como causalidade. Pode haver causa reversa, terceira variável ou coincidência; afirmar causa exige desenho que isole o efeito.
+- Confundir variação normal com tendência. Todo indicador oscila; sem noção da variação habitual, qualquer movimento vira reunião.
+- Comparar grupos sem checar se são comparáveis. Quem escolhe usar um recurso costuma ser diferente de quem não escolhe, e essa diferença explica boa parte do resultado.
+- Ignorar o paradoxo de Simpson. Um padrão pode existir no agregado e se inverter em cada subgrupo, quando os subgrupos têm tamanhos e taxas diferentes.
+- Encerrar teste A/B ao ver resultado favorável. Parar quando deu bom, sem tamanho de amostra e duração definidos antes, é a forma mais comum de fabricar significância.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Um gerente diz: a conversão de quem usa o recurso novo é o dobro, então vamos empurrar o recurso para todos. Como você responde?
+
+Eu começo confirmando o que o dado mostra e o que ele não mostra. Ele mostra associação: quem usa converte mais. O que ele não mostra é que o recurso cause isso, e a razão é autosseleção: quem escolheu usar já era diferente. Provavelmente é o cliente mais engajado, que já convertia mais antes de o recurso existir. Se for isso, empurrar o recurso para todo mundo não traz o mesmo resultado, e vamos investir achando que compramos o efeito quando compramos a seleção. Então eu proponho duas coisas. A primeira, barata: olhar se os dois grupos eram diferentes antes, no período anterior ao lançamento. Se quem usa já convertia o dobro antes, a hipótese cai na hora. A segunda, que responde de verdade: um experimento, oferecendo o recurso a uma parcela aleatória e comparando com um controle, com tamanho de amostra e duração definidos antes de começar. Aí a diferença entre grupos comparáveis sustenta causa. E eu declaro o custo do experimento e o prazo, porque a alternativa de decidir agora com o dado observacional não é irracional se a aposta for barata e reversível; é só que ela precisa ser tomada sabendo que é aposta, e não conclusão.
+
+### As vendas caíram 8% esta semana. O diretor quer saber o que aconteceu. Como você conduz?
+
+Antes de procurar causa, eu confirmo que há o que explicar. A primeira pergunta é qual é a variação semanal habitual desse indicador: se ele oscila 10% de uma semana para outra normalmente, 8% não é evento, é ruído, e montar uma investigação em cima disso gasta o tempo do time e cria narrativa para uma coisa que não aconteceu. Olho a série de várias semanas, não só a anterior. Segundo, sazonalidade: comparar com a semana passada pode ser comparação errada se teve feriado, virada de mês ou um pico de campanha. O comparativo mais honesto costuma ser a mesma semana do ano passado, ou a média das últimas semanas equivalentes. Terceiro, se depois disso a queda continua fora do padrão, eu decomponho antes de teorizar: caiu em todas as regiões, canais e categorias, ou está concentrada? Concentração aponta causa; queda uniforme costuma ser algo sistêmico, inclusive falha de dado, e essa é uma hipótese que eu sempre checo: pipeline que rodou parcialmente parece queda de vendas. Só com isso na mão eu levo hipóteses, sempre indicando o que é achado e o que é suposição, e digo o que faria para confirmar cada uma.
+
+---
+
+# Segurança e privacidade de dados em banco
+
+Trilha: Engenharia de Analytics · Módulo: Além da ementa
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/seguranca-e-privacidade/
+Tempo estimado: 35 minutos · Nível: intermediario
+
+**Resumo.** Como a LGPD chega dentro do pipeline: dado pessoal e sensível, o que anonimização, pseudonimização e tokenização mudam no escopo da lei, e como controlar quem vê qual linha e qual coluna sem travar o analista.
+
+**Por que cai na prova.** Em banco, privacidade não é assunto jurídico: é requisito de arquitetura. A banca usa este tema para ver se você projeta pensando em quem pode ver o quê, ou se joga tudo cru no lake e resolve depois. Também é o tema em que responder 'a gente criptografa' sem qualificar derruba a nota.
+
+**Como o entrevistador pergunta.** "Um analista precisa cruzar transações por cliente sem ver o CPF. Como você resolve?"
+
+## Em uma frase
+
+Privacidade em pipeline de banco é decidir, **campo a campo e usuário a usuário**,
+quem pode ver o quê — e provar depois que foi assim que aconteceu.
+
+## Dado pessoal, dado sensível e o teste que importa
+
+A LGPD chama de **dado pessoal** a informação relacionada a pessoa natural
+identificada ou identificável. Repare no "identificável": o teste não é o campo
+isolado, é a chance de chegar na pessoa combinando campos. CEP, data de
+nascimento e valor da fatura, juntos, identificam.
+
+**Dado pessoal sensível** é uma lista fechada: origem racial ou étnica, convicção
+religiosa, opinião política, filiação a sindicato ou a organização religiosa,
+filosófica ou política, dado de saúde ou vida sexual, dado genético e dado
+biométrico. Sensível tem base legal mais estreita e, no seu desenho, deve virar
+tabela à parte com acesso nominal.
+
+<Callout tipo="atencao" titulo="Cuidado com o dado inferido">
+Score de propensão, cluster de comportamento e classificação de risco também são
+dado pessoal quando ligados a alguém identificável. Muita gente protege o cadastro
+e deixa a tabela de modelo aberta.
+</Callout>
+
+## Bases legais, uma linha cada
+
+O art. 7º traz dez hipóteses. Você não precisa recitar, precisa saber que existem
+dez e citar as que aparecem em banco: **consentimento**; **cumprimento de obrigação
+legal ou regulatória**; **execução de políticas públicas**; **estudo por órgão de
+pesquisa**; **execução de contrato**; **exercício regular de direitos** em
+processo; **proteção da vida**; **tutela da saúde**; **legítimo interesse**; e
+**proteção do crédito**. Em banco, a maior parte do tratamento se apoia em contrato,
+obrigação legal e proteção ao crédito — não em consentimento.
+
+Dois princípios do art. 6º mandam no seu pipeline. **Finalidade**: o dado foi
+coletado para um propósito declarado e não pode migrar de propósito no silêncio.
+**Necessidade**: traga o mínimo de campos que resolve o caso de uso. Ingerir a
+tabela inteira do core porque é mais fácil não é precaução, é exposição.
+
+## Direitos do titular e o que cada um cobra de você
+
+<Comparativo
+  colunas={["Direito", "O que o pipeline precisa ter"]}
+  linhas={[
+    ["Confirmação e acesso", "Saber onde o dado daquele titular vive: catálogo e linhagem confiáveis"],
+    ["Correção", "Caminho de atualização que se propague às camadas derivadas, não só ao cadastro"],
+    ["Eliminação", "Capacidade de apagar de verdade, incluindo versões antigas do formato de tabela e cópias em zonas analíticas"],
+    ["Portabilidade", "Exportar os dados do titular em formato estruturado e interoperável, dentro de prazo"],
+    ["Informação sobre compartilhamento", "Registro de com quem o dado foi compartilhado, o que na prática é linhagem para fora"]
+  ]}
+/>
+
+Eliminação e portabilidade são as duas que mais quebram desenho. Formato imutável,
+backup e log de auditoria transformam um DELETE em projeto. O **encarregado** é o
+canal entre titular, ANPD e a empresa — ele não escreve o pipeline, mas depende de
+você para conseguir responder no prazo.
+
+## Anonimizar, pseudonimizar, tokenizar
+
+<Comparativo
+  colunas={["Técnica", "O que faz", "Continua sob a LGPD?"]}
+  linhas={[
+    ["Anonimização", "Remove a possibilidade de associação ao titular por meios razoáveis: agregação, generalização, supressão", "Não"],
+    ["Pseudonimização", "Substitui o identificador por um substituto, mantendo chave de reversão em separado", "Sim"],
+    ["Tokenização", "Troca o valor por um token sem significado, com o de-para em cofre", "Sim"]
+  ]}
+/>
+
+Essa é a distinção que a banca procura: **anonimizado sai do escopo da lei,
+pseudonimizado não**. Hash de CPF é pseudonimização, não anonimização — o universo
+de CPFs é enumerável e a tabela reversa é trivial de montar.
+
+## Mascaramento, criptografia e chave
+
+**Mascaramento estático** grava a versão mascarada em uma cópia: bom para ambiente
+de desenvolvimento e teste. **Mascaramento dinâmico** mantém o dado original e
+decide na consulta o que exibir, conforme quem pergunta.
+
+**Criptografia em repouso** protege contra quem acessa a mídia por fora: snapshot
+copiado, bucket exposto. **Em trânsito**, TLS protege o dado enquanto ele viaja
+entre origem, cluster e storage. Um **KMS** guarda e rotaciona as chaves fora do
+sistema que guarda o dado, e registra cada uso — separar chave de dado é o que faz
+a criptografia valer alguma coisa.
+
+<Callout tipo="erro" titulo="O erro clássico">
+"Está tudo criptografado" não responde à pergunta sobre um analista que vê CPF
+demais. Ele tem permissão: recebe o dado já decifrado. Criptografia e controle de
+acesso resolvem ameaças diferentes.
+</Callout>
+
+## Quem vê o quê: RBAC, ABAC, linha e coluna
+
+<Termo nome="RBAC">Acesso concedido pelo papel do usuário.</Termo> é simples de
+auditar e explode em número de papéis quando as regras ficam finas.
+<Termo nome="ABAC">Acesso decidido por atributos do usuário e do dado no momento da
+consulta.</Termo> escala melhor, custa mais para governar.
+
+Em cima disso vêm os dois recortes: **row-level security** decide quais registros a
+pessoa vê (só a regional dela); **column-level security** decide quais campos ela vê
+dentro dos registros permitidos (e-mail parcialmente oculto).
+
+## Raw, auditoria e retenção
+
+A zona **raw** guarda o dado como veio, com a maior retenção e, normalmente, o menor
+controle. É a pior combinação possível. O tratamento é proteger na entrada:
+tokenizar identificadores na aterrissagem, negociar no contrato de ingestão só os
+campos necessários, e tornar a raw legível por serviço, não por pessoa.
+
+Auditoria fecha o ciclo. Você precisa registrar quem consultou o quê e quando, e
+manter esse log fora do alcance de quem ele audita. Retenção é a outra metade:
+guardar além do necessário é risco, não zelo — e o prazo mínimo de guarda vem de
+obrigação legal e regulatória do domínio [verificar o prazo aplicável ao seu caso].
+
+## Como responder isso em voz alta
+
+Comece separando as duas perguntas: proteger o dado guardado é criptografia e
+chave; controlar quem lê é RBAC, ABAC, linha e coluna. Depois nomeie a técnica
+certa para o caso e diga o que ela **não** resolve. Fechar admitindo o limite da
+sua própria solução é o que soa sênior.
+
+## Erros comuns
+
+- Dizer que dado pseudonimizado está fora da LGPD. Só o dado anonimizado sai do escopo da lei; pseudonimizado continua sendo dado pessoal, porque existe uma chave que reverte a operação.
+- Chamar hash de CPF de anonimização. O hash é determinístico e o universo de CPFs é pequeno e enumerável: dá para montar a tabela inteira por força bruta e reidentificar todo mundo.
+- Tratar mascaramento como se fosse criptografia. Mascaramento age na exibição do dado; criptografia protege o dado armazenado ou em trânsito. Cada um responde a uma ameaça diferente.
+- Achar que criptografia em repouso resolve acesso indevido. Quem tem permissão de leitura recebe o dado já decifrado; contra o analista curioso o controle é RBAC, ABAC e máscara de coluna.
+- Confundir base legal com consentimento. Consentimento é uma das dez hipóteses do art. 7º; em banco a maior parte do tratamento se apoia em execução de contrato, obrigação legal, prevenção à fraude e proteção ao crédito.
+- Despejar tudo cru na zona raw e adiar a proteção para a camada de consumo. A raw costuma ser a zona com menos controle e mais retenção: é ali que o vazamento acontece.
+- Esquecer o direito de eliminação no desenho. Formato imutável, backup e log de auditoria transformam um DELETE simples em projeto se ninguém pensou nisso antes.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Um analista precisa cruzar transações de cartão e de PIX por cliente, mas não pode ver o CPF. Como você resolve?
+
+Primeiro eu confirmo o que ele precisa de verdade: agrupar por titular e juntar as duas bases, não identificar a pessoa. Se for isso, a resposta é tokenizar. Na entrada da camada curada eu troco o CPF por um token estável por titular, gerado de forma consistente entre cartão e PIX, e guardo o de-para em um cofre com acesso separado e auditado. O analista mantém junção e agrupamento e nunca vê o identificador direto. Deixo claro o trade-off: isso ainda é dado pseudonimizado, então continua sob a LGPD, e a reidentificação segue possível para quem tem o cofre. Por isso não basta o token: preciso de controle de acesso na tabela e de proibição explícita de rejuntar com o cadastro. Se o caso de uso fosse só relatório agregado, eu iria mais longe e entregaria agregado, que sai do escopo da lei. Como aqui ele precisa de grão de cliente, tokenizar é o ponto certo.
+
+### Chega um pedido de eliminação de dados de um cliente, encaminhado pelo encarregado. O que acontece no seu pipeline?
+
+Começo verificando o escopo, porque eliminação não é absoluta: o que está sob obrigação legal ou regulatória de guarda continua, e eu preciso saber qual parte é essa antes de apagar qualquer coisa. Feito isso, o problema vira localizar o titular em todas as camadas. É aqui que linhagem e catálogo pagam a conta: sem mapa de onde aquele CPF vive, viram semanas de caça. Com formato de tabela como Delta, eu executo DELETE na bronze, silver e gold, e depois preciso do VACUUM para que os arquivos antigos saiam de fato do storage, senão o dado continua lá em versão anterior. Trato à parte backup e log de auditoria, que têm regra própria. Fecho registrando a execução, porque o encarregado precisa provar o atendimento dentro do prazo. O ponto que eu diria na sabatina é que isso se projeta antes: se o desenho não previu eliminação, ela custa caro.
+
+### Sua zona raw recebe um dump diário completo do cadastro, com CPF, endereço e dados de saúde do seguro. Qual o problema e o que você faz?
+
+O problema é que a raw é a zona com maior retenção e menor controle, então é onde o risco se acumula. Além disso, ingerir a tabela inteira porque é mais fácil fere o princípio da necessidade: não é zelo, é exposição. Eu atacaria em três frentes. Na origem, negocio o contrato de ingestão para trazer só os campos que os casos de uso justificam, e o dado de saúde do seguro provavelmente não é um deles. No caminho, aplico tokenização de CPF já na aterrissagem, com o cofre em conta separada. Na zona, fecho o acesso: a raw passa a ser legível só por serviço, nunca por pessoa, com criptografia por chave dedicada no KMS e log de acesso. Se algum caso de uso realmente exigir o dado sensível, ele vira uma tabela à parte, com base legal declarada e acesso nominal. O trade-off é perder flexibilidade de exploração, e eu aceito esse custo.
+
+---
+
+# Como responder na sabatina
+
+Trilha: Engenharia de Analytics · Módulo: Além da ementa
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/alem-da-ementa/como-responder-na-sabatina/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** A estrutura que faz uma resposta oral pontuar: contexto, opções, trade-offs e recomendação. Como abrir com pergunta de esclarecimento, como admitir que não sabe sem perder ponto e os erros de comunicação que derrubam candidato bom.
+
+**Por que cai na prova.** A sabatina avalia raciocínio em voz alta, não recall. Dois candidatos com o mesmo conhecimento tiram notas diferentes por causa de estrutura de resposta. Este é o único tema que melhora sua nota em todos os outros.
+
+**Como o entrevistador pergunta.** "Você não sabe a resposta. O que faz?"
+
+## Em uma frase
+
+Resposta oral que pontua tem quatro movimentos: **contexto, opções, trade-offs e
+recomendação** — nessa ordem, em até dois minutos.
+
+## A estrutura, passo a passo
+
+<Passos itens={[
+  "Contexto: diga o que entendeu da pergunta e qual premissa está assumindo",
+  "Opções: nomeie dois ou três caminhos reais, mesmo os que você vai descartar",
+  "Trade-offs: diga o que cada caminho custa, não só o que ele entrega",
+  "Recomendação: escolha um, justifique e declare o que te faria mudar de ideia"
+]} />
+
+Parece longo escrito. Falado, cabe em noventa segundos. A vantagem é que a banca
+consegue te acompanhar e marcar a rubrica dela enquanto você fala — e rubrica marcada
+é ponto.
+
+### Como isso soa na prática
+
+Pergunta: *"O banco quer detectar fraude em transações de cartão. Como você
+desenharia?"*
+
+**Contexto:** "Antes de desenhar, a decisão precisa sair durante a autorização, em
+milissegundos, ou é detecção posterior? Vou assumir tempo real, com pico alto."
+
+**Opções:** "Há três caminhos: batch noturno, micro-batch e streaming contínuo."
+
+**Trade-offs:** "Batch é o mais barato e o mais simples de operar, mas não atende: a
+transação já passou. Micro-batch traz a latência para segundos e reaproveita quem já
+conhece Spark. Streaming entrega milissegundos e cobra em operação, estado e evento
+fora de ordem."
+
+**Recomendação:** "Eu iria de streaming para o score na autorização, com batch em
+paralelo para retreino e auditoria. Mudaria de ideia se a latência exigida fosse de
+minutos — aí micro-batch entrega o mesmo valor por muito menos complexidade."
+
+## Comece pela pergunta de esclarecimento
+
+Questão de cenário é ambígua **de propósito**. Ela testa se você desenha para o
+problema certo. Uma ou duas perguntas que realmente mudam a resposta — latência,
+volume, se a origem suporta captura de mudança, quem é o consumidor — valem mais que
+cinco minutos de solução para o problema errado.
+
+<Callout tipo="atencao" titulo="Limite: duas perguntas">
+Três ou mais perguntas de esclarecimento deixam de parecer método e passam a parecer
+fuga. Se não vier resposta, assuma em voz alta: "vou assumir X" — e siga.
+</Callout>
+
+## Trade-off sem parecer indeciso
+
+A diferença é uma frase. Indeciso para em "depende". Sênior diz **de que** depende,
+escolhe, e nomeia a condição de mudança:
+
+<Comparativo
+  colunas={["Soa indeciso", "Soa sênior"]}
+  linhas={[
+    ["Depende de vários fatores", "Depende da latência exigida e do volume de pico"],
+    ["Os dois têm vantagens", "Batch custa menos e não atende milissegundos; streaming atende e cobra operação"],
+    ["Eu ficaria em cima do muro", "Eu iria de streaming; mudaria para micro-batch se a janela for de minutos"]
+  ]}
+/>
+
+## Quando você não sabe
+
+A frase é: **"Não sei, mas raciocinaria assim: ..."** — e então o método. Que
+problema essa coisa provavelmente resolve, o que você testaria, onde procuraria,
+quem consultaria.
+
+Isso pontua mais que chute por dois motivos. Chute errado **contamina o que veio
+antes**: a banca passa a duvidar do que você já tinha acertado. E o que está sendo
+avaliado é raciocínio, que você consegue demonstrar sem conhecer a ferramenta.
+
+<Callout tipo="erro" titulo="O que não fazer">
+Silêncio longo, mudança de assunto e definição inventada que soa plausível. As três
+são lidas como a mesma coisa: você não sabe e não quis dizer.
+</Callout>
+
+## Erros de comunicação que derrubam candidato bom
+
+**Responder rápido demais.** Dois a quatro segundos de pausa são bem vistos. Se
+precisar de mais, verbalize: "deixa eu organizar isso em duas frentes".
+
+**Monólogo.** Ser interrompido é o sinal. Feche em dois minutos e devolva: "eu iria
+por aqui; quer que eu detalhe a parte de X?".
+
+**Jargão sem tradução.** Diga o termo e emende uma frase: "CDC, que é capturar só o
+que mudou na origem em vez de trazer a tabela inteira". Cinco segundos, outra nota.
+
+**Negar a premissa.** "O pipeline está lento" é o cenário, não um convite ao debate.
+Aceite e investigue dentro dele.
+
+## Exemplo da sua experiência
+
+Use o formato **situação, ação, resultado**, em três frases. Caso pequeno e
+verdadeiro vale mais que projeto grande e vago. Assuma o erro quando o exemplo for de
+erro: terceirizar culpa é o que a banca menos quer ouvir. E prepare dois ou três
+casos antes, porque improvisar história sob pressão sai confuso.
+
+## Tempo, voz e corpo
+
+De um a dois minutos por resposta, até três em arquitetura. Se a pergunta tem duas
+partes, anuncie: "vou responder em duas frentes" — isso segura a atenção e evita que
+você esqueça a segunda.
+
+Fale mais devagar do que o instinto pede: ansiedade acelera e a banca perde o fio.
+Faça pausa entre os quatro movimentos, é ela que dá estrutura audível à resposta. Em
+vídeo, olhe para a câmera nos fechamentos, não para a sua própria imagem. Mãos
+visíveis, tronco à frente, e nada de ler resposta pronta — dá para ouvir.
+
+## O último conselho
+
+Ensaie **em voz alta**, cronometrado, respondendo às perguntas orais de cada tema
+desta trilha. Ler a resposta modelo não treina a fala. Gravar sessenta segundos e se
+ouvir é desconfortável e é o exercício que mais melhora a nota em pouco tempo.
+
+## Erros comuns
+
+- Responder rápido demais. Começar a falar em dois segundos sinaliza reflexo, não raciocínio, e você perde a chance de fazer a pergunta que reduziria o escopo.
+- Monólogo de dez minutos. A banca precisa cobrir vários assuntos; quem não devolve a palavra é interrompido e leva a nota de quem não sabe ouvir.
+- Jargão sem explicar. Dizer shuffle, CDC ou idempotência sem uma frase de tradução não prova domínio, prova que você decorou o termo.
+- Negar a premissa da pergunta. Se o entrevistador diz 'o pipeline está lento', responder 'mas não deveria estar' queima tempo. Aceite o cenário e trabalhe dentro dele.
+- Chutar quando não sabe. Um chute errado contamina toda a resposta anterior; dizer o que você faria para descobrir mantém a credibilidade e ainda mostra método.
+- Só teoria, sem exemplo. Resposta correta e genérica pontua menos que resposta correta com um caso que você viveu, mesmo pequeno.
+- Fechar sem recomendar. Listar três opções e não escolher nenhuma é o jeito mais comum de parecer indeciso justamente quando você tinha a resposta certa.
+
+## Perguntas de sabatina e respostas-modelo
+
+### O banco quer detectar fraude em transações de cartão. Como você desenharia isso?
+
+Antes de desenhar, confirmo duas coisas: a decisão precisa sair durante a autorização, em milissegundos, ou pode ser uma detecção posterior para bloqueio e contestação? E qual o volume de pico? Vou assumir autorização em tempo real, com pico alto. Nesse recorte há três caminhos. Batch noturno é o mais barato e mais simples de operar, mas não atende: a transação já passou. Micro-batch reduz a latência para segundos e reaproveita o time que já conhece Spark, o que resolve detecção pós-autorização. Streaming contínuo entrega milissegundos, mas custa mais em operação, exige tratamento de estado, de evento fora de ordem e de reprocessamento. Eu recomendaria streaming para o score na autorização, com um pipeline batch em paralelo para retreinar o modelo e auditar. Mudaria de ideia se a exigência de latência fosse de minutos: aí micro-batch entrega o mesmo valor por muito menos complexidade.
+
+### Vou te perguntar sobre uma tecnologia específica que talvez você não conheça. Se for o caso, o que você faz?
+
+Eu digo que não conheço, sem rodeio, e imediatamente ofereço o raciocínio. Algo assim: não conheço essa ferramenta pelo nome; pelo contexto em que você citou, imagino que ela resolva o problema de X, porque é aí que essa camada costuma doer. Se eu tivesse que avaliá-la, olharia primeiro se ela se integra ao que já temos, qual o custo operacional e se resolve algo que o nosso stack atual não resolve. E eu procuraria a documentação oficial e alguém do time que já usou antes de opinar. Faço assim por dois motivos. Primeiro, chute errado contamina o resto da conversa: você passa a duvidar do que eu disse antes. Segundo, o que está sendo avaliado é raciocínio, e eu consigo demonstrar raciocínio sem conhecer a ferramenta. Prefiro perder um ponto de conhecimento a perder a credibilidade da resposta inteira.
+
+### Me conte uma vez em que você errou em um projeto de dados e o que aconteceu.
+
+Vou usar um caso concreto e curto. Situação: um pipeline que eu mantinha carregava a tabela de transações do dia e eu tratei a carga como append. Tarefa: reprocessar um dia que tinha chegado incompleto. Ação: rodei o reprocessamento e dupliquei todas as transações daquele dia, o que apareceu no relatório de fechamento antes de eu perceber. Resultado: corrigi apagando a partição e recarregando, e mudei a escrita para overwrite por partição, com chave de negócio única testada no pipeline. O aprendizado que eu levo é que idempotência não é refinamento, é requisito: enquanto reprocessar for arriscado, ninguém reprocessa, e o dado errado fica. Depois disso eu passei a tratar 'esse job pode rodar duas vezes?' como pergunta de revisão de código. [verificar: substituir por um caso real seu, com o número e o sistema corretos]
 
 ---
 

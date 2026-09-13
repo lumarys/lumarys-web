@@ -1,0 +1,239 @@
+---
+slug: camada-semantica-e-metricas
+titulo: "Camada semântica e definição de métricas"
+resumo: "O lugar onde a definição de um indicador vive uma vez só: o que é camada semântica, por que a métrica calculada dentro de cada painel produz números divergentes, como escrever uma definição que não admite interpretação, e quem responde por ela."
+minutos: 30
+nivel: avancado
+publicadoEm: "2026-09-12"
+porQue: "É a resposta estrutural para a pergunta que abre quase toda sabatina de Analytics: por que dois relatórios divergem. Reconciliar caso a caso resolve o incidente; camada semântica resolve a classe do problema. Quem só sabe reconciliar mostra operação; quem propõe a camada mostra arquitetura."
+comoCai: "Cada área calcula 'cliente ativo' de um jeito. Como você resolve isso de forma definitiva?"
+feynman: "Explique em um minuto por que a mesma palavra pode significar coisas diferentes em duas áreas da empresa, e o que isso custa."
+preRequisitos: ["source-of-record-vs-source-of-truth", "dashboards-e-indicadores"]
+errosComuns:
+  - "Achar que o problema é técnico. Duas definições de receita convivendo é problema organizacional; a camada semântica dá o lugar para resolvê-lo, mas alguém precisa decidir qual vale."
+  - "Deixar cada painel calcular a métrica. É assim que definições divergentes nascem: a lógica fica duplicada em ferramentas diferentes e evolui separada."
+  - "Escrever definição ambígua. 'Cliente ativo é quem comprou recentemente' não é definição; sem janela, sem critério de compra e sem tratamento de cancelamento, cada pessoa implementa uma coisa."
+  - "Não nomear o dono da métrica. Sem alguém que responda pela definição, qualquer mudança vira discussão sem árbitro."
+  - "Versionar métrica sem avisar. Mudar a definição muda a série histórica; quem olha o gráfico vê uma quebra que parece do negócio e é da régua."
+  - "Confundir camada semântica com dicionário de dados. O dicionário descreve colunas; a camada semântica define métricas e é consultável, entregando o mesmo número a qualquer ferramenta."
+preTeste:
+  - enunciado: "Por que uma métrica calculada dentro de cada painel tende a produzir números divergentes?"
+    alternativas:
+      - texto: "Porque a lógica fica duplicada em lugares diferentes e evolui separadamente, sem ninguém perceber."
+        correta: true
+        explicacao: "Duplicação sem fonte única é a origem estrutural da divergência."
+      - texto: "Porque ferramentas de BI têm precisão numérica diferente."
+        correta: false
+        explicacao: "Não é questão de precisão; é de regra aplicada."
+      - texto: "Porque os painéis atualizam em horários diferentes."
+        correta: false
+        explicacao: "É outra causa de divergência, mas a duplicação de lógica é a estrutural."
+  - enunciado: "Qual definição de indicador é suficientemente precisa para ser implementada sem interpretação?"
+    alternativas:
+      - texto: "'Cliente ativo: quem teve pelo menos uma compra aprovada e não cancelada nos últimos 90 dias, contados a partir da data de faturamento.'"
+        correta: true
+        explicacao: "Tem janela, critério de compra, tratamento de cancelamento e qual data usar."
+      - texto: "'Cliente ativo: quem comprou recentemente.'"
+        correta: false
+        explicacao: "Recentemente não é janela, e nada diz sobre cancelamento ou qual data."
+      - texto: "'Cliente ativo: quem está na base de clientes ativos.'"
+        correta: false
+        explicacao: "Circular: define pelo próprio nome."
+videos:
+  - id: b__WdlLSDII
+    publicadoEm: "2020-06-03"
+    titulo: "Camada Semântica em um projeto de Business Intelligence"
+    canal: "Prof. Claudio Bonel, PhD"
+    duracao: 2
+    porQue: "Dois minutos para fixar o conceito e o lugar dele na arquitetura. Curto; o tema depois trata do que fazer com ele quando as áreas discordam."
+  - id: 6tTOWAbvjvo
+    publicadoEm: "2026-06-06"
+    titulo: "O dicionário da empresa: por que a IA não funciona sem ele"
+    canal: "Tem AI pra isso"
+    duracao: 17
+    porQue: "Complementar, e traz o argumento pelo custo: quando a mesma palavra significa coisas diferentes, o prejuízo deixa de ser reunião chata. Bom para defender a proposta em voz alta."
+artigos:
+  - titulo: "About the dbt Semantic Layer"
+    url: "https://docs.getdbt.com/docs/use-dbt-semantic-layer/dbt-sl"
+    fonte: "dbt"
+  - titulo: "Semantic layer"
+    url: "https://en.wikipedia.org/wiki/Semantic_layer"
+    fonte: "Wikipédia"
+  - titulo: "Data catalog with AWS Glue"
+    url: "https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Camada semântica, em uma linha."
+    verso: "Lugar onde métricas e dimensões são definidas uma única vez, de forma consultável, para que qualquer ferramenta receba o mesmo número com a mesma regra."
+  - frente: "Camada semântica e dicionário de dados são a mesma coisa?"
+    verso: "Não. O dicionário descreve o significado de colunas; a camada semântica define métricas, e é consumida por ferramentas em tempo de consulta."
+  - frente: "O que uma definição de métrica precisa ter?"
+    verso: "Nome, fórmula, janela de tempo, filtros e exclusões, qual data usar, grão, dono e versão. Faltando um, duas pessoas implementam diferente."
+  - frente: "Por que a métrica não deve ser calculada no painel?"
+    verso: "Porque a lógica se duplica em cada ferramenta e evolui separada. É a origem estrutural da divergência entre relatórios."
+  - frente: "O que é uma métrica derivada?"
+    verso: "Métrica construída a partir de outras, como margem sobre receita e custo. Definir na camada evita que cada área componha do seu jeito."
+  - frente: "O que muda quando a definição de uma métrica muda?"
+    verso: "A série histórica inteira, se recalculada. É preciso versionar a definição, datar a mudança e avisar, senão o gráfico mostra uma quebra que parece do negócio."
+  - frente: "Quem é o dono de uma métrica?"
+    verso: "Alguém do negócio, não do time de dados. O time de dados implementa e garante; quem decide o que conta como receita é a área que responde por receita."
+  - frente: "Como a camada semântica se relaciona com Source of Truth?"
+    verso: "Ela é onde a regra de precedência vira executável: a métrica oficial é definida uma vez, sobre a tabela certificada, e qualquer consumidor recebe esse número."
+  - frente: "Qual é o teste de uma boa definição?"
+    verso: "Duas pessoas diferentes implementam a métrica a partir do texto e chegam ao mesmo número. Se não chegam, a definição está ambígua."
+  - frente: "Onde a camada semântica costuma viver?"
+    verso: "Numa ferramenta própria (camada semântica do dbt, por exemplo), no modelo da ferramenta de BI, ou em tabelas certificadas com a métrica pré-calculada. O importante é ser única."
+drills:
+  - titulo: "A definição é implementável?"
+    instrucao: "Para cada definição, diga se ela pode ser implementada sem interpretação."
+    opcoes: ["Implementável", "Ambígua"]
+    itens:
+      - enunciado: "'Receita: soma do valor faturado, líquido de cancelamentos, pela data de emissão da nota.'"
+        resposta: "Implementável"
+        explicacao: "Fórmula, exclusão e data definidas."
+      - enunciado: "'Churn: clientes que deixaram de comprar.'"
+        resposta: "Ambígua"
+        explicacao: "Sem janela nem critério de 'deixar de comprar'."
+      - enunciado: "'Ticket médio: receita líquida dividida pelo número de pedidos aprovados no mesmo período.'"
+        resposta: "Implementável"
+        explicacao: "Numerador, denominador e período alinhados."
+      - enunciado: "'Engajamento: o quanto o usuário usa o produto.'"
+        resposta: "Ambígua"
+        explicacao: "Não há métrica: é um conceito."
+      - enunciado: "'Cliente ativo: pelo menos uma compra aprovada não cancelada nos últimos 90 dias, pela data de faturamento.'"
+        resposta: "Implementável"
+        explicacao: "Janela, critério, exclusão e data."
+perguntas:
+  - tipo: oral
+    enunciado: "Descobrimos que três áreas calculam 'cliente ativo' de formas diferentes. Como você resolve isso de forma definitiva?"
+    respostaModelo: "A primeira coisa que eu digo é que isso não é um problema técnico, é organizacional, e por isso a solução técnica sozinha não resolve. O que eu faço primeiro é levantar as três definições e escrever, lado a lado, exatamente em que elas diferem: janela de tempo, o que conta como compra, se cancelamento entra, qual data é usada. Normalmente as três fazem sentido para o contexto de quem criou, e é isso que eu levo para a mesa: não vou dizer que duas estão erradas, vou pedir uma decisão sobre qual é a oficial da empresa, e nomear um dono para ela, que precisa ser alguém do negócio, não do time de dados. Decidido isso, vem a parte técnica: a definição oficial é implementada uma única vez, na camada semântica, sobre a tabela certificada. Os painéis e as consultas passam a consumir dali em vez de cada um recalcular, que é exatamente como as três nasceram. E eu declaro o custo da mudança: se a definição oficial for diferente da que uma área usa hoje, a série histórica dela muda, e isso precisa ser datado e comunicado, senão a pessoa vai ver uma quebra no gráfico e achar que é do negócio. Se as três definições forem legítimas para propósitos diferentes, a saída não é escolher uma: é nomear as três com nomes distintos, cada uma com dono, e acabar com o uso da palavra genérica."
+    rubrica:
+      - "Classificou como problema organizacional antes de propor solução técnica"
+      - "Levantou e comparou as definições nos eixos concretos (janela, critério, exclusão, data)"
+      - "Pediu decisão e dono de negócio, não do time de dados"
+      - "Implementou uma vez na camada semântica sobre a tabela certificada"
+      - "Declarou o efeito na série histórica e ofereceu a saída de nomear as três quando todas são legítimas"
+  - tipo: oral
+    enunciado: "O que faz uma definição de métrica ser boa, e como você sabe que a sua está?"
+    respostaModelo: "Uma definição boa é a que duas pessoas diferentes implementam a partir do texto e chegam ao mesmo número. Esse é o teste, e é bem mais duro do que parece. Para passar nele, a definição precisa de sete coisas: nome, fórmula, janela de tempo, filtros e exclusões, qual data usar, grão, e o dono. A que mais falta é qual data usar: receita pela data do pedido, do faturamento ou do pagamento dá três números diferentes, e todo mundo acha que é óbvio qual é, até comparar. A segunda que mais falta é exclusão: cancelamento, teste interno, pedido de funcionário. Na prática eu faço assim: escrevo a definição, mando para outra pessoa implementar sem conversar comigo, e comparo. Se der diferente, o problema está no texto, não em quem implementou. Também guardo a definição junto do código, versionada, com data de vigência, porque métrica muda e a série histórica muda junto. E declaro o que a métrica não cobre, porque a maior parte das discussões futuras é sobre casos de borda que ninguém pensou no dia em que a definição foi escrita."
+    rubrica:
+      - "Deu o teste operacional: duas pessoas implementam e chegam ao mesmo número"
+      - "Listou os elementos da definição, incluindo qual data usar e as exclusões"
+      - "Destacou a escolha da data como a omissão mais frequente"
+      - "Descreveu o procedimento de validar a definição com outra pessoa"
+      - "Citou versionamento com data de vigência e declaração do que a métrica não cobre"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre camada semântica é mais defensável?"
+    alternativas:
+      - texto: "Ela dá o lugar onde a métrica é definida uma vez e consumida por qualquer ferramenta, mas não substitui a decisão de negócio sobre qual definição vale."
+        correta: true
+        explicacao: "Reconhece o ganho técnico e o limite: a escolha da definição é organizacional."
+      - texto: "Ela elimina divergências entre relatórios automaticamente."
+        correta: false
+        explicacao: "Só depois que alguém decidiu qual definição é a oficial."
+      - texto: "É outro nome para dicionário de dados."
+        correta: false
+        explicacao: "Dicionário descreve colunas; a camada define métricas e é consultável."
+      - texto: "É desnecessária quando existe uma tabela certificada."
+        correta: false
+        explicacao: "A tabela certificada é o dado; a camada é onde a métrica derivada é definida sobre ele."
+  - tipo: multipla
+    enunciado: "Quais DOIS elementos faltam com mais frequência numa definição de métrica e causam divergência?"
+    alternativas:
+      - texto: "Qual data usar: do pedido, do faturamento ou do pagamento."
+        correta: true
+        explicacao: "Dá três números diferentes, e todo mundo acha que é óbvio qual é."
+      - texto: "As exclusões: cancelamento, teste interno, pedido de funcionário."
+        correta: true
+        explicacao: "Cada implementação exclui um conjunto diferente."
+      - texto: "O nome da métrica."
+        correta: false
+        explicacao: "Costuma existir; o problema é o que ele significa."
+      - texto: "A ferramenta de BI usada."
+        correta: false
+        explicacao: "Não faz parte da definição da métrica."
+      - texto: "A cor usada no gráfico."
+        correta: false
+        explicacao: "Apresentação, não definição."
+---
+
+## Em uma frase
+
+A camada semântica é onde a **definição de uma métrica vive uma vez só** e de
+onde qualquer ferramenta recebe o mesmo número — mas ela não decide **qual**
+definição vale: isso é decisão de negócio.
+
+## Por que os números divergem
+
+A causa estrutural não é cálculo errado: é **duplicação**. Quando cada painel
+implementa a própria versão de "receita", as versões evoluem separadas. Uma
+passa a excluir cancelamento, outra não; uma usa a data do pedido, outra a do
+faturamento. Ninguém errou — e os números não batem.
+
+<Comparativo
+  colunas={["Onde a métrica é definida", "O que acontece"]}
+  linhas={[
+    ["Dentro de cada painel", "Lógica duplicada, evolução separada, divergência garantida"],
+    ["Numa consulta compartilhada por cópia", "Divergem assim que alguém edita a cópia"],
+    ["Na camada semântica", "Definida uma vez, consumida por todos, muda num lugar só"]
+  ]}
+/>
+
+<Termo nome="camada semântica">Lugar onde métricas e dimensões são definidas de forma consultável, para que ferramentas diferentes recebam o mesmo número com a mesma regra.</Termo>
+
+Ela **não** é o dicionário de dados: o dicionário descreve o significado de
+colunas; a camada define **métricas**, e é consumida em tempo de consulta.
+
+## O que uma definição precisa ter
+
+<Passos itens={[
+  "Nome e fórmula.",
+  "Janela de tempo.",
+  "Filtros e exclusões: cancelamento, teste interno, pedido de funcionário.",
+  "Qual data usar: do pedido, do faturamento ou do pagamento.",
+  "Grão a que ela se aplica.",
+  "Dono, que é do negócio.",
+  "Versão, com data de vigência."
+]} />
+
+<Callout tipo="atencao" titulo="As duas omissões que mais causam divergência">
+**Qual data usar** e **quais exclusões**. Receita pela data do pedido, do
+faturamento e do pagamento dá três números — e todo mundo acha óbvio qual é o
+certo, até comparar com a área do lado.
+</Callout>
+
+O teste de uma boa definição é operacional: **duas pessoas implementam a partir
+do texto e chegam ao mesmo número**. Se não chegam, o problema está no texto.
+
+## O problema é organizacional
+
+Três áreas com três definições de "cliente ativo" quase sempre têm três
+definições **legítimas** para contextos diferentes. A camada semântica dá o
+lugar para resolver, mas alguém precisa **decidir**:
+
+- Se uma é a oficial da empresa, ela é implementada uma vez, com dono do
+  negócio, e as outras são aposentadas.
+- Se as três são legítimas, a saída não é escolher: é **dar três nomes
+  distintos**, cada um com dono, e abandonar a palavra genérica.
+
+<Callout tipo="dica" titulo="Mudar a definição muda o passado">
+Redefinir uma métrica altera a série histórica inteira quando recalculada. Sem
+datar a mudança e comunicar, quem olha o gráfico vê uma quebra e acredita que
+ela é do negócio. Versionar a definição não é burocracia: é o que preserva a
+leitura da série.
+</Callout>
+
+## Como isso fecha com o resto da trilha
+
+A camada semântica é onde a **regra de precedência** de Source of Truth vira
+executável: a métrica oficial é definida sobre a **tabela certificada**, e
+todo consumidor — painel, consulta, modelo — recebe esse número. O painel para
+de recalcular, e a divergência deixa de ter por onde nascer.
+
+## Como responder isso em voz alta
+
+Comece dizendo que o problema é organizacional. Mostre as diferenças nos eixos
+concretos (janela, critério, exclusão, data). Peça **decisão e dono de
+negócio**. Só então proponha a implementação única na camada, sobre a tabela
+certificada. E declare o efeito na série histórica — é a parte que o resto das
+pessoas esquece e que, esquecida, gera a próxima crise de confiança.

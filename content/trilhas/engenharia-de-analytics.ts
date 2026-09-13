@@ -12,10 +12,11 @@ import type { Trilha } from "../types";
  * Dados, não copiados — o progresso conta nas duas e a URL canônica fica em
  * Dados, onde nasceram.
  *
- * Os outros seis módulos vieram sem item nenhum. Ficam declarados como "em
- * breve" e entram um por onda, construídos a partir do que o mercado cobra
- * (docs/PLANO.md §5.2), marcados `oficial: false` até o dono validar contra
- * a ementa real.
+ * Os outros seis módulos vieram sem item nenhum. Foram construídos a partir
+ * do que o mercado cobra (docs/PLANO.md §5.2) e seguem marcados
+ * `oficial: false` até o dono validar contra a ementa real. Vários temas são
+ * compartilhados com a trilha de Dados: um tema é um estudo só, e o progresso
+ * conta nas duas.
  *
  * O nome da instituição não aparece em lugar nenhum: não temos autorização
  * para usá-lo, e o conteúdo vale sem ele.
@@ -30,7 +31,7 @@ export const engenhariaDeAnalytics: Trilha = {
   resumo:
     "A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
   formatoProva: "Sabatina oral com banca",
-  prazoSugeridoDias: 30,
+  prazoSugeridoDias: 38,
   status: "disponivel",
   modulos: [
     {
@@ -131,10 +132,16 @@ export const engenhariaDeAnalytics: Trilha = {
       slug: "alem-da-ementa",
       titulo: "Além da ementa",
       resumo:
-        "O núcleo de Analytics Engineering que a ementa não cobre: dbt, camada semântica, modelagem para BI, estatística e reconciliação de números.",
-      status: "em-breve",
+        "O núcleo de Analytics Engineering que a ementa não cobre: dbt, camada semântica e definição de métricas, estatística que impede conclusão errada, privacidade em dashboards e como responder na sabatina.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: [
+        "dbt-e-transformacao-versionada",
+        "camada-semantica-e-metricas",
+        "estatistica-para-analytics",
+        "seguranca-e-privacidade",
+        "como-responder-na-sabatina",
+      ],
     },
   ],
   cronograma: [
@@ -315,10 +322,73 @@ export const engenhariaDeAnalytics: Trilha = {
     },
     {
       dia: 30,
-      titulo: "Revisão leve",
+      titulo: "Revisão e checkpoint de Dataviz",
       temas: [],
       revisao: ["dataviz", "programacao"],
-      nota: "Só cards vencidos e as folhas de revisão. O módulo Além da ementa entra em breve.",
+      nota: "Cards vencidos, folha de revisão e checkpoint do módulo.",
+    },
+    {
+      dia: 31,
+      titulo: "dbt: transformação versionada",
+      temas: ["dbt-e-transformacao-versionada"],
+      revisao: ["dataviz"],
+    },
+    {
+      dia: 32,
+      titulo: "Camada semântica e métricas",
+      temas: ["camada-semantica-e-metricas"],
+      revisao: ["alem-da-ementa"],
+      nota: "Este tema fecha o arco que começou em Source of Record e Source of Truth: é onde a regra de precedência vira executável.",
+    },
+    {
+      dia: 33,
+      titulo: "Estatística para analytics",
+      temas: ["estatistica-para-analytics"],
+      revisao: ["alem-da-ementa"],
+    },
+    {
+      dia: 34,
+      titulo: "Privacidade e dado sensível",
+      temas: ["seguranca-e-privacidade"],
+      revisao: ["alem-da-ementa"],
+      nota: "Tema compartilhado com a trilha de Dados. Aqui a pergunta é o que pode aparecer num painel e para quem.",
+    },
+    {
+      dia: 35,
+      titulo: "Como responder na sabatina",
+      temas: ["como-responder-na-sabatina"],
+      revisao: ["alem-da-ementa"],
+      nota: "Também compartilhado, e é o último tema de conteúdo. Depois dele, só treino.",
+    },
+    {
+      dia: 36,
+      titulo: "Simulado completo",
+      temas: [],
+      revisao: [
+        "big-data",
+        "aws",
+        "banco-de-dados",
+        "devops",
+        "data-mesh",
+        "programacao",
+        "dataviz",
+        "alem-da-ementa",
+      ],
+      nota: "Sabatina simulada com perguntas de todos os módulos. Grave as respostas e avalie pela rubrica, sem consultar nada.",
+    },
+    {
+      dia: 37,
+      titulo: "Atacar os módulos fracos",
+      temas: [],
+      revisao: ["big-data", "alem-da-ementa"],
+      nota: "Olhe a prontidão por módulo e releia só os dois mais fracos. Refaça os drills deles.",
+    },
+    {
+      dia: 38,
+      titulo: "Véspera",
+      temas: [],
+      revisao: ["alem-da-ementa"],
+      nota: "Releia como responder na sabatina, passe os cards vencidos e pare. Não estude conteúdo novo na véspera.",
     },
   ],
 };

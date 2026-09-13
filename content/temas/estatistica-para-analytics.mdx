@@ -1,0 +1,250 @@
+---
+slug: estatistica-para-analytics
+titulo: "Estatística para analytics, sem virar estatístico"
+resumo: "O mínimo que impede conclusão errada: por que a média engana e a distribuição não, correlação que não é causalidade, variação normal confundida com tendência, o paradoxo de Simpson, viés de sobrevivência e o que um teste A/B realmente prova."
+minutos: 35
+nivel: avancado
+publicadoEm: "2026-09-12"
+porQue: "A banca não vai pedir derivação de fórmula. Vai descrever um achado com armadilha estatística e ver se você morde: 'as vendas caíram 8% esta semana' ou 'quem usa o recurso X compra mais'. Quem responde sem perguntar pela variação normal ou pela seleção da amostra entrega uma conclusão que não se sustenta."
+comoCai: "A conversão de quem usa o recurso novo é o dobro. Podemos dizer que o recurso aumenta a conversão?"
+feynman: "Explique em um minuto por que duas coisas andarem juntas não prova que uma causa a outra, com um exemplo do dia a dia."
+preRequisitos: ["storytelling-com-dados"]
+errosComuns:
+  - "Reportar média sem olhar a distribuição. Média em distribuição assimétrica ou com valores extremos descreve mal o típico; mediana e quartis costumam informar melhor."
+  - "Tratar correlação como causalidade. Pode haver causa reversa, terceira variável ou coincidência; afirmar causa exige desenho que isole o efeito."
+  - "Confundir variação normal com tendência. Todo indicador oscila; sem noção da variação habitual, qualquer movimento vira reunião."
+  - "Comparar grupos sem checar se são comparáveis. Quem escolhe usar um recurso costuma ser diferente de quem não escolhe, e essa diferença explica boa parte do resultado."
+  - "Ignorar o paradoxo de Simpson. Um padrão pode existir no agregado e se inverter em cada subgrupo, quando os subgrupos têm tamanhos e taxas diferentes."
+  - "Encerrar teste A/B ao ver resultado favorável. Parar quando deu bom, sem tamanho de amostra e duração definidos antes, é a forma mais comum de fabricar significância."
+preTeste:
+  - enunciado: "A conversão de quem usa um recurso novo é o dobro da de quem não usa. O que se pode afirmar?"
+    alternativas:
+      - texto: "Que há associação; para afirmar causa seria preciso um desenho que torne os grupos comparáveis, como um experimento."
+        correta: true
+        explicacao: "Quem escolhe usar o recurso já é diferente; a diferença pode explicar o resultado sem o recurso causar nada."
+      - texto: "Que o recurso dobra a conversão."
+        correta: false
+        explicacao: "Afirma causalidade a partir de observação com autosseleção."
+      - texto: "Nada, porque dados observacionais não servem para nada."
+        correta: false
+        explicacao: "Servem para gerar hipótese e para estimar efeito com métodos adequados."
+  - enunciado: "As vendas caíram 8% esta semana em relação à anterior. Qual é a primeira verificação?"
+    alternativas:
+      - texto: "Qual é a variação semanal habitual desse indicador, para saber se 8% está dentro do normal."
+        correta: true
+        explicacao: "Sem a variação habitual, não se distingue oscilação de tendência."
+      - texto: "Quem é o responsável pela queda."
+        correta: false
+        explicacao: "Procura culpado antes de confirmar que houve fato."
+      - texto: "Qual campanha começou nesta semana."
+        correta: false
+        explicacao: "Buscar explicação antes de confirmar que há o que explicar."
+videos:
+  - id: YN9-PRUdIV4
+    publicadoEm: "2018-08-18"
+    titulo: "Correlação vs causalidade | Estatística #09"
+    canal: "Canal do Por Quê?"
+    duracao: 8
+    porQue: "Oito minutos sobre a armadilha mais cobrada. Assista pensando em como você responderia se a pergunta viesse com um número convincente do lado."
+  - id: j9pnNCiQz3I
+    publicadoEm: "2022-10-20"
+    titulo: "O que é e para que serve o Teste A/B?"
+    canal: "Meigarom | Comunidade DS"
+    duracao: 25
+    porQue: "Complementar, sobre o desenho que permite afirmar causa. Repare no que precisa ser definido ANTES de começar: é isso que separa experimento de observação disfarçada."
+artigos:
+  - titulo: "Correlação não implica causalidade"
+    url: "https://pt.wikipedia.org/wiki/Correla%C3%A7%C3%A3o_n%C3%A3o_implica_causalidade"
+    fonte: "Wikipédia"
+  - titulo: "Paradoxo de Simpson"
+    url: "https://pt.wikipedia.org/wiki/Paradoxo_de_Simpson"
+    fonte: "Wikipédia"
+  - titulo: "Viés de sobrevivência"
+    url: "https://pt.wikipedia.org/wiki/Vi%C3%A9s_de_sobreviv%C3%AAncia"
+    fonte: "Wikipédia"
+flashcards:
+  - frente: "Quando a média engana?"
+    verso: "Em distribuição assimétrica ou com valores extremos. Renda, ticket e tempo de resposta quase sempre são assim: a mediana descreve melhor o típico."
+  - frente: "O que olhar além da média?"
+    verso: "Mediana, quartis e a forma da distribuição. Um histograma responde perguntas que nenhuma média responde."
+  - frente: "Correlação implica causalidade?"
+    verso: "Não. Pode haver causa reversa, uma terceira variável influenciando as duas, ou coincidência. Afirmar causa exige desenho que isole o efeito."
+  - frente: "O que é autosseleção?"
+    verso: "Quando as pessoas escolhem em qual grupo estar. Quem opta por usar um recurso já é diferente, e essa diferença contamina a comparação."
+  - frente: "O que é variação normal?"
+    verso: "A oscilação habitual do indicador quando nada de especial acontece. Sem conhecê-la, qualquer movimento parece tendência."
+  - frente: "Paradoxo de Simpson, em uma linha."
+    verso: "Um padrão observado no agregado pode se inverter dentro de cada subgrupo, quando os subgrupos têm tamanhos e taxas diferentes. Sempre olhe segmentado."
+  - frente: "Viés de sobrevivência, em uma linha."
+    verso: "Analisar só quem restou e concluir sobre todos. Estudar clientes ativos para entender retenção ignora exatamente quem saiu."
+  - frente: "O que um teste A/B prova?"
+    verso: "Que a diferença observada entre grupos aleatorizados dificilmente ocorreria por acaso, se o desenho e a duração foram definidos antes e respeitados."
+  - frente: "Por que definir tamanho e duração antes?"
+    verso: "Porque olhar repetidamente e parar quando dá bom inflaciona a chance de encontrar diferença que não existe."
+  - frente: "Significância estatística é o mesmo que relevância para o negócio?"
+    verso: "Não. Com amostra grande, diferenças minúsculas ficam significantes. A pergunta seguinte é sempre se o tamanho do efeito muda alguma decisão."
+  - frente: "O que é sazonalidade e por que importa?"
+    verso: "Padrão que se repete por período (dia da semana, mês, feriado). Comparar semanas sem considerar sazonalidade produz conclusão falsa com frequência."
+  - frente: "Qual é a pergunta que desarma quase toda conclusão apressada?"
+    verso: "Comparado com o quê? Período anterior, mesmo período do ano passado, grupo de controle, variação habitual."
+drills:
+  - titulo: "Que armadilha é essa?"
+    instrucao: "Para cada conclusão, diga a armadilha estatística."
+    opcoes: ["Correlação e causalidade", "Média engana", "Variação normal", "Simpson", "Sobrevivência"]
+    itens:
+      - enunciado: "'Nossos clientes estão satisfeitos: a nota média é 8,2.' A distribuição tem metade em 10 e metade em 6."
+        resposta: "Média engana"
+        explicacao: "A média esconde duas populações distintas."
+      - enunciado: "'Quem abre o aplicativo toda semana gasta mais, então vamos fazer todo mundo abrir mais.'"
+        resposta: "Correlação e causalidade"
+        explicacao: "Quem gasta mais talvez abra mais por já ser engajado."
+      - enunciado: "'A conversão caiu 3% ontem, precisamos agir hoje.' Ela oscila 5% todo dia."
+        resposta: "Variação normal"
+        explicacao: "Movimento dentro da oscilação habitual."
+      - enunciado: "'A campanha teve conversão melhor no total, mas foi pior em cada faixa de idade.'"
+        resposta: "Simpson"
+        explicacao: "Composição diferente entre os grupos inverte o agregado."
+      - enunciado: "'Entrevistamos os clientes atuais e todos aprovam a mudança de preço.'"
+        resposta: "Sobrevivência"
+        explicacao: "Quem não aprovou já saiu e não foi entrevistado."
+perguntas:
+  - tipo: oral
+    enunciado: "Um gerente diz: a conversão de quem usa o recurso novo é o dobro, então vamos empurrar o recurso para todos. Como você responde?"
+    respostaModelo: "Eu começo confirmando o que o dado mostra e o que ele não mostra. Ele mostra associação: quem usa converte mais. O que ele não mostra é que o recurso cause isso, e a razão é autosseleção: quem escolheu usar já era diferente. Provavelmente é o cliente mais engajado, que já convertia mais antes de o recurso existir. Se for isso, empurrar o recurso para todo mundo não traz o mesmo resultado, e vamos investir achando que compramos o efeito quando compramos a seleção. Então eu proponho duas coisas. A primeira, barata: olhar se os dois grupos eram diferentes antes, no período anterior ao lançamento. Se quem usa já convertia o dobro antes, a hipótese cai na hora. A segunda, que responde de verdade: um experimento, oferecendo o recurso a uma parcela aleatória e comparando com um controle, com tamanho de amostra e duração definidos antes de começar. Aí a diferença entre grupos comparáveis sustenta causa. E eu declaro o custo do experimento e o prazo, porque a alternativa de decidir agora com o dado observacional não é irracional se a aposta for barata e reversível; é só que ela precisa ser tomada sabendo que é aposta, e não conclusão."
+    rubrica:
+      - "Separou associação de causa, nomeando autosseleção"
+      - "Explicou concretamente por que o grupo que adota já é diferente"
+      - "Ofereceu a checagem barata do período anterior ao lançamento"
+      - "Propôs experimento com aleatorização e desenho definido antes"
+      - "Reconheceu que decidir sem experimento pode ser legítimo, desde que se saiba que é aposta"
+  - tipo: oral
+    enunciado: "As vendas caíram 8% esta semana. O diretor quer saber o que aconteceu. Como você conduz?"
+    respostaModelo: "Antes de procurar causa, eu confirmo que há o que explicar. A primeira pergunta é qual é a variação semanal habitual desse indicador: se ele oscila 10% de uma semana para outra normalmente, 8% não é evento, é ruído, e montar uma investigação em cima disso gasta o tempo do time e cria narrativa para uma coisa que não aconteceu. Olho a série de várias semanas, não só a anterior. Segundo, sazonalidade: comparar com a semana passada pode ser comparação errada se teve feriado, virada de mês ou um pico de campanha. O comparativo mais honesto costuma ser a mesma semana do ano passado, ou a média das últimas semanas equivalentes. Terceiro, se depois disso a queda continua fora do padrão, eu decomponho antes de teorizar: caiu em todas as regiões, canais e categorias, ou está concentrada? Concentração aponta causa; queda uniforme costuma ser algo sistêmico, inclusive falha de dado, e essa é uma hipótese que eu sempre checo: pipeline que rodou parcialmente parece queda de vendas. Só com isso na mão eu levo hipóteses, sempre indicando o que é achado e o que é suposição, e digo o que faria para confirmar cada uma."
+    rubrica:
+      - "Verificou a variação habitual antes de procurar causa"
+      - "Considerou sazonalidade e escolheu o comparativo adequado"
+      - "Decompôs por dimensões para distinguir concentrado de uniforme"
+      - "Levantou falha de dado como hipótese explícita"
+      - "Separou achado de suposição ao reportar e disse como confirmaria"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre testes A/B é mais defensável?"
+    alternativas:
+      - texto: "O tamanho da amostra e a duração precisam ser definidos antes; parar ao ver resultado favorável infla a chance de achar diferença inexistente."
+        correta: true
+        explicacao: "É a forma mais comum de fabricar significância, e reconhecê-la mostra prática real."
+      - texto: "Quando o resultado atinge significância estatística, pode-se encerrar o teste imediatamente."
+        correta: false
+        explicacao: "Olhar repetidamente e parar no melhor momento é exatamente o problema."
+      - texto: "Significância estatística garante que a mudança vale a pena para o negócio."
+        correta: false
+        explicacao: "Com amostra grande, efeito minúsculo fica significante; relevância é outra pergunta."
+      - texto: "Teste A/B dispensa a análise segmentada dos resultados."
+        correta: false
+        explicacao: "Segmentar é o que revela efeitos opostos entre grupos, como no paradoxo de Simpson."
+  - tipo: multipla
+    enunciado: "Quais DUAS verificações deveriam preceder a afirmação de que um indicador mudou de patamar?"
+    alternativas:
+      - texto: "Comparar o movimento com a variação habitual do indicador ao longo de várias semanas."
+        correta: true
+        explicacao: "Sem isso não se distingue oscilação de tendência."
+      - texto: "Conferir efeitos de sazonalidade e escolher um comparativo equivalente."
+        correta: true
+        explicacao: "Feriado, virada de mês e campanha produzem quedas e altas que não são mudança de patamar."
+      - texto: "Aumentar a frequência de atualização do painel."
+        correta: false
+        explicacao: "Mais atualização não informa se o movimento é normal."
+      - texto: "Calcular a média dos últimos doze meses."
+        correta: false
+        explicacao: "Média longa esconde exatamente a variação que se quer avaliar."
+      - texto: "Identificar quem é responsável pelo indicador."
+        correta: false
+        explicacao: "Importa para a ação, não para saber se houve mudança."
+---
+
+## Em uma frase
+
+A estatística que o engenheiro de analytics precisa não é a de derivar
+fórmula: é a que **impede conclusão errada** — variação normal, distribuição
+em vez de média, e a distância entre associação e causa.
+
+## A média engana; a distribuição, não
+
+Renda, ticket, tempo de resposta e duração de sessão quase sempre são
+assimétricos ou têm valores extremos. Nesses casos, a média descreve mal o
+típico.
+
+<Comparativo
+  colunas={["O que reportar", "O que ela responde"]}
+  linhas={[
+    ["Média", "Quanto daria se dividisse igualmente (sensível a extremos)"],
+    ["Mediana", "O valor do caso do meio: o típico"],
+    ["Quartis", "Onde estão os 25% menores e maiores"],
+    ["Histograma", "A forma: há um grupo ou dois?"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O caso das duas populações">
+"A nota média é 8,2, nossos clientes estão satisfeitos" — com metade dando 10 e
+metade dando 6. A média existe, e não descreve **ninguém**. O histograma mostra
+duas populações e muda completamente a conversa.
+</Callout>
+
+## Associação não é causa
+
+<Termo nome="autosseleção">Quando as pessoas escolhem em qual grupo estar. Quem opta por usar um recurso já é diferente de quem não opta, e essa diferença contamina qualquer comparação entre os dois grupos.</Termo>
+
+É a armadilha mais cobrada: "quem usa o recurso converte o dobro". Pode ser o
+recurso causando — ou o cliente engajado, que já convertia mais, sendo o que
+adota o recurso.
+
+Duas saídas, em ordem de custo:
+
+1. **Checagem barata**: os grupos já eram diferentes **antes** do lançamento? Se
+   sim, a hipótese cai sem experimento nenhum.
+2. **Experimento**: oferecer a uma parcela **aleatória**, comparar com controle,
+   com tamanho e duração definidos **antes**.
+
+<Callout tipo="dica" titulo="Parar quando deu bom">
+Olhar o teste todo dia e encerrar quando aparece significância é a forma mais
+comum de **fabricar** um resultado. Por isso tamanho de amostra e duração são
+definidos antes e respeitados — e por isso significância **não** é o mesmo que
+relevância: com amostra grande, diferenças minúsculas ficam significantes.
+</Callout>
+
+## Variação normal: confirmar que houve fato
+
+Antes de explicar uma queda, confirme que ela é diferente do ruído. "Caiu 8%"
+num indicador que oscila 10% por semana não é evento — e investigar isso gera
+narrativa para algo que não aconteceu.
+
+<Passos itens={[
+  "Olhar a série de várias semanas, não só a anterior: qual é a oscilação habitual?",
+  "Considerar sazonalidade: feriado, virada de mês, campanha. O comparativo honesto costuma ser a mesma semana do ano anterior.",
+  "Se continua fora do padrão, decompor: concentrado numa região ou canal aponta causa; queda uniforme costuma ser sistêmico.",
+  "Checar falha de dado. Pipeline que rodou parcialmente parece exatamente queda de vendas."
+]} />
+
+## Duas armadilhas com nome
+
+**Paradoxo de Simpson.** Um padrão no agregado pode **se inverter** em cada
+subgrupo, quando os subgrupos têm tamanhos e taxas diferentes. A campanha pode
+parecer melhor no total e ser pior em todas as faixas de idade. A defesa é
+simples: sempre olhar segmentado.
+
+**Viés de sobrevivência.** Analisar só quem restou e concluir sobre todos.
+Entrevistar clientes atuais sobre a mudança de preço ignora exatamente quem
+saiu por causa dela.
+
+## A pergunta que desarma quase tudo
+
+**Comparado com o quê?** Período anterior, mesmo período do ano passado, grupo
+de controle, variação habitual. Toda conclusão apressada morre nessa pergunta,
+e fazê-la em voz alta na sabatina é mais valioso que qualquer fórmula.
+
+## Como responder isso em voz alta
+
+Separe **o que o dado mostra** do **que ele não mostra**. Ofereça a checagem
+barata antes do experimento caro. Para qualquer movimento de indicador,
+confirme **variação habitual e sazonalidade** antes de procurar causa. E diga
+sempre o que é achado e o que é suposição — é isso que faz alguém confiar no
+próximo número que você trouxer.

@@ -1,0 +1,253 @@
+---
+slug: dbt-e-transformacao-versionada
+titulo: "dbt: transformação versionada em SQL"
+resumo: "A ferramenta que virou padrão na camada de transformação: modelos em SQL com referências que montam o grafo sozinho, testes e documentação junto do código, materialização escolhida por caso, e snapshots para histórico. É o T do ELT com disciplina de engenharia."
+minutos: 35
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "É a ferramenta que o mercado de analytics assumiu, e a banca pergunta não o que ela é, mas o que ela resolve. A resposta boa liga a três coisas que já vieram antes: versionamento e revisão, teste de dado, e linhagem. Quem descreve dbt como 'roda SQL' não mostra por que ele mudou a rotina."
+comoCai: "O que o dbt resolve que rodar scripts SQL agendados não resolve?"
+feynman: "Explique em um minuto por que escrever uma referência em vez do nome da tabela permite ao computador descobrir a ordem de execução sozinho."
+preRequisitos: ["sql-para-dados", "cicd-para-dados-e-dashboards"]
+errosComuns:
+  - "Descrever dbt como orquestrador. Ele transforma dentro do banco e resolve a ordem entre modelos; quem agenda e coordena o resto do pipeline é o orquestrador."
+  - "Achar que dbt move dados. Ele não extrai nem carrega: opera sobre o que já está no warehouse. É o T do ELT."
+  - "Escrever o nome da tabela em vez da referência. Sem a referência, o grafo de dependências não se monta e a ordem de execução volta a ser manual."
+  - "Materializar tudo como tabela. Modelo intermediário costuma ser view; tabela custa armazenamento e tempo de build. Incremental existe para o que é grande e cresce."
+  - "Confundir teste genérico com teste de negócio. Unicidade e não nulo são o mínimo; o teste que pega erro caro compara o total com a origem."
+  - "Usar snapshot achando que é backup. Snapshot captura mudanças de registro ao longo do tempo, implementando dimensão de mudança lenta, e não serve para restaurar ambiente."
+preTeste:
+  - enunciado: "O que a referência entre modelos permite que o dbt faça?"
+    alternativas:
+      - texto: "Montar o grafo de dependências e decidir sozinho a ordem de execução e o que precisa ser reconstruído."
+        correta: true
+        explicacao: "A referência é o que transforma um conjunto de consultas num grafo, e é dela que sai a linhagem."
+      - texto: "Copiar os dados entre bancos diferentes."
+        correta: false
+        explicacao: "dbt não move dados; ele transforma dentro do warehouse."
+      - texto: "Substituir o orquestrador do pipeline."
+        correta: false
+        explicacao: "Ele resolve a ordem interna dos modelos; agendar e coordenar o resto continua sendo do orquestrador."
+  - enunciado: "Um modelo intermediário é consultado apenas por outros modelos, não por painéis, e o dado é pequeno. Qual materialização é adequada?"
+    alternativas:
+      - texto: "View, que não ocupa armazenamento nem exige tempo de construção."
+        correta: true
+        explicacao: "Intermediário pequeno não justifica materializar; a view é resolvida na consulta."
+      - texto: "Tabela, para garantir desempenho."
+        correta: false
+        explicacao: "Paga armazenamento e build por algo que ninguém consulta diretamente."
+      - texto: "Incremental, para processar só o que mudou."
+        correta: false
+        explicacao: "Incremental resolve volume grande; adiciona complexidade sem ganho aqui."
+videos:
+  - id: qUzYC0F2lRc
+    publicadoEm: "2024-07-14"
+    titulo: "Introdução ao dbt: Transformação de Dados Simplificada"
+    canal: "Escola de Inteligência Artificial"
+    duracao: 23
+    porQue: "Cobre modelo, teste e documentação, que são as três coisas que o dbt junta no mesmo lugar. Assista reparando em como a referência entre modelos aparece no código."
+  - id: FjQvONjoBfc
+    publicadoEm: "2022-08-30"
+    titulo: "Você conhece dbt? Vamos falar sobre Data Build Tool"
+    canal: "DADOS BR"
+    duracao: 11
+    porQue: "Complementar e curto, com o porquê antes do como. Bom para conseguir responder 'o que ele resolve', que é a forma como a pergunta chega na sabatina."
+artigos:
+  - titulo: "What is dbt?"
+    url: "https://docs.getdbt.com/docs/introduction"
+    fonte: "dbt"
+  - titulo: "About dbt models"
+    url: "https://docs.getdbt.com/docs/build/models"
+    fonte: "dbt"
+  - titulo: "Materializations"
+    url: "https://docs.getdbt.com/docs/build/materializations"
+    fonte: "dbt"
+  - titulo: "Snapshots"
+    url: "https://docs.getdbt.com/docs/build/snapshots"
+    fonte: "dbt"
+flashcards:
+  - frente: "dbt, em uma linha."
+    verso: "Ferramenta de transformação que executa SQL versionado dentro do warehouse, monta o grafo de dependências pelas referências entre modelos, e traz teste e documentação junto do código."
+  - frente: "Qual letra do ELT o dbt ocupa?"
+    verso: "O T. Ele não extrai nem carrega: opera sobre o que já foi carregado no warehouse."
+  - frente: "O que é um modelo no dbt?"
+    verso: "Um arquivo com uma consulta SELECT que vira uma tabela ou view no warehouse. O nome do arquivo vira o nome do objeto."
+  - frente: "Para que serve a referência entre modelos?"
+    verso: "Para o dbt montar o grafo de dependências, decidir a ordem de execução, saber o que reconstruir e gerar a linhagem automaticamente."
+  - frente: "O que é uma source no dbt?"
+    verso: "A declaração das tabelas cruas que entram no projeto. Permite testar a entrada e checar frescor, além de aparecer na linhagem."
+  - frente: "As materializações e quando usar cada uma."
+    verso: "View: intermediário pequeno, sem custo de armazenamento. Table: consultado com frequência, vale o build. Incremental: volume grande que cresce, processa só o novo. Ephemeral: trecho reutilizado que vira CTE."
+  - frente: "Teste genérico versus teste específico."
+    verso: "Genérico: unicidade, não nulo, conjunto de valores, integridade referencial, declarados em configuração. Específico: consulta própria que afirma uma regra de negócio, como total batendo com a origem."
+  - frente: "O que é um snapshot?"
+    verso: "Mecanismo que captura mudanças de registro ao longo do tempo, implementando dimensão de mudança lenta do tipo 2. Não é backup."
+  - frente: "Como o dbt ajuda na documentação?"
+    verso: "Descrições ficam junto do modelo, no mesmo repositório, e o site gerado traz o dicionário e o grafo de linhagem navegável."
+  - frente: "dbt substitui o orquestrador?"
+    verso: "Não. Ele resolve a ordem entre os modelos dele; agendar a execução e coordenar extração, carga e outros passos continua sendo do orquestrador."
+  - frente: "O que muda no fluxo de trabalho com dbt?"
+    verso: "A transformação passa a ser código versionado, revisado por par, testado na verificação automática e promovido entre ambientes, como qualquer software."
+drills:
+  - titulo: "Qual materialização?"
+    instrucao: "Para cada modelo, diga a materialização esperada."
+    opcoes: ["View", "Table", "Incremental", "Ephemeral"]
+    itens:
+      - enunciado: "Modelo intermediário pequeno, consultado só por outros modelos."
+        resposta: "View"
+        explicacao: "Sem custo de armazenamento nem de build."
+      - enunciado: "Tabela de fato com bilhões de linhas, que recebe dados novos todo dia."
+        resposta: "Incremental"
+        explicacao: "Processa só o período novo em vez de reconstruir tudo."
+      - enunciado: "Dimensão consultada o tempo todo por vários painéis."
+        resposta: "Table"
+        explicacao: "Vale materializar pelo desempenho de leitura."
+      - enunciado: "Trecho de lógica reaproveitado por três modelos e que não precisa existir no banco."
+        resposta: "Ephemeral"
+        explicacao: "Vira CTE dentro de quem o usa."
+      - enunciado: "Modelo de apoio recalculado a cada execução, com poucas linhas."
+        resposta: "View"
+        explicacao: "Barato resolver na hora da consulta."
+perguntas:
+  - tipo: oral
+    enunciado: "O que o dbt resolve que rodar scripts SQL agendados não resolve?"
+    respostaModelo: "Scripts agendados resolvem a execução; o que falta neles é tudo em volta. Primeiro, a ordem: com scripts, alguém precisa saber que o modelo A roda antes do B, e isso vive na cabeça de quem montou ou num nome de arquivo com número na frente. No dbt, eu escrevo uma referência a outro modelo em vez do nome da tabela, e a ferramenta monta o grafo de dependências sozinha, decide a ordem e sabe o que precisa reconstruir quando algo muda. Segundo, teste: no modelo de scripts, teste de dado é um script separado que alguém lembra de rodar. No dbt, o teste é declarado junto do modelo e roda no mesmo comando, então não existe a versão sem teste. Terceiro, documentação e linhagem: a descrição de cada coluna fica ao lado do código, e o grafo vira um site navegável, o que responde 'quem consome esse modelo' sem ninguém garimpar. E quarto, o fluxo de trabalho: como tudo é arquivo de texto versionado, a transformação entra em revisão por par, verificação automática e promoção entre ambientes, igual a software. É isso que muda a rotina: não é que o SQL ficou melhor, é que ele passou a ter as garantias que o código de aplicação já tinha. O que o dbt não faz é mover dado e orquestrar o resto do pipeline; ele é o T do ELT, e o orquestrador continua existindo."
+    rubrica:
+      - "Citou a referência entre modelos gerando grafo, ordem e reconstrução"
+      - "Citou teste declarado junto do modelo, rodando no mesmo comando"
+      - "Citou documentação e linhagem navegável"
+      - "Ligou ao fluxo de trabalho: versionamento, revisão, promoção"
+      - "Delimitou o escopo: não move dado nem substitui o orquestrador"
+  - tipo: oral
+    enunciado: "Como você decide a materialização de cada modelo num projeto dbt?"
+    respostaModelo: "Eu decido por três perguntas: quem consulta, qual o volume e com que frequência muda. Modelo intermediário, que só existe para outro modelo usar e tem pouco dado, fica como view: não ocupa armazenamento e não tem tempo de construção. Modelo consultado com frequência por painéis vira tabela, porque aí vale pagar o build uma vez e ler rápido muitas vezes. Quando a tabela é grande e cresce por período, como fato de transações, eu uso incremental: processo só o que entrou desde a última execução em vez de reconstruir bilhões de linhas todo dia. Incremental tem um custo escondido que eu declaro: preciso definir a chave única e a lógica de atualização, e preciso conseguir refazer tudo do zero quando a regra mudar, senão o histórico fica com dois cálculos diferentes convivendo. E tem ephemeral, para um trecho de lógica que três modelos reaproveitam mas que não precisa existir como objeto no banco: ele vira uma CTE dentro de quem usa. O erro que eu evito é materializar tudo como tabela por reflexo, porque isso infla armazenamento e o tempo total de execução, e a maior parte dos modelos intermediários de um projeto não é consultada por ninguém."
+    rubrica:
+      - "Deu os três critérios: quem consulta, volume e frequência de mudança"
+      - "Associou view a intermediário pequeno e table a consultado com frequência"
+      - "Explicou incremental para volume grande e declarou o custo (chave, lógica, refazer do zero)"
+      - "Citou ephemeral para lógica reaproveitada sem objeto no banco"
+      - "Alertou contra materializar tudo como tabela"
+  - tipo: unica
+    enunciado: "Qual descrição do papel do dbt é mais defensável?"
+    alternativas:
+      - texto: "É a camada de transformação: executa SQL versionado dentro do warehouse, resolve dependências entre modelos e traz teste e documentação junto do código."
+        correta: true
+        explicacao: "Delimita o escopo e nomeia o que ele acrescenta ao SQL puro."
+      - texto: "É um orquestrador que substitui ferramentas de agendamento."
+        correta: false
+        explicacao: "Resolve a ordem interna dos modelos, não o agendamento do pipeline."
+      - texto: "É uma ferramenta de ETL que extrai, transforma e carrega."
+        correta: false
+        explicacao: "Não extrai nem carrega: opera sobre o que já está no warehouse."
+      - texto: "É um banco de dados otimizado para analytics."
+        correta: false
+        explicacao: "Ele usa o warehouse que já existe; não é armazenamento."
+  - tipo: multipla
+    enunciado: "Quais DUAS capacidades do dbt dependem diretamente do uso de referências entre modelos?"
+    alternativas:
+      - texto: "Determinar automaticamente a ordem de execução dos modelos."
+        correta: true
+        explicacao: "A referência é o que forma o grafo de dependências."
+      - texto: "Gerar o grafo de linhagem navegável na documentação."
+        correta: true
+        explicacao: "A linhagem é derivada das mesmas referências."
+      - texto: "Executar os testes genéricos declarados na configuração."
+        correta: false
+        explicacao: "Testes rodam independentemente de como o modelo referencia outros."
+      - texto: "Conectar-se ao warehouse."
+        correta: false
+        explicacao: "Depende da configuração de conexão, não das referências."
+      - texto: "Escolher a materialização de cada modelo."
+        correta: false
+        explicacao: "É configuração explícita do modelo."
+---
+
+## Em uma frase
+
+O dbt dá ao SQL as garantias que o código de aplicação já tinha:
+**versionamento, revisão, teste, documentação e linhagem** — e monta a ordem de
+execução sozinho a partir das referências entre modelos.
+
+## O que ele é, e o que não é
+
+<Comparativo
+  colunas={["É", "Não é"]}
+  linhas={[
+    ["A camada de transformação (o T do ELT)", "Ferramenta de extração ou carga"],
+    ["Executor de SQL versionado dentro do warehouse", "Um banco de dados"],
+    ["Resolvedor da ordem entre modelos", "Orquestrador do pipeline inteiro"],
+    ["Gerador de documentação e linhagem", "Ferramenta de visualização"]
+  ]}
+/>
+
+Delimitar o escopo é metade da resposta na sabatina: quem diz que o dbt
+substitui o orquestrador mostra que não usou.
+
+## A referência: a ideia que sustenta o resto
+
+Em vez de escrever o nome da tabela, o modelo **referencia** outro modelo.
+Dessa mudança pequena saem quatro capacidades:
+
+<Passos itens={[
+  "O grafo de dependências se monta sozinho.",
+  "A ordem de execução é derivada do grafo, não de nomes de arquivo numerados.",
+  "O dbt sabe o que precisa reconstruir quando um modelo muda.",
+  "A linhagem vira um site navegável, respondendo 'quem consome isto' sem garimpo."
+]} />
+
+<Callout tipo="atencao" titulo="Escrever o nome da tabela quebra tudo isso">
+É o erro mais comum de quem começa. O modelo funciona, o SQL roda — e o grafo
+não se forma, a ordem volta a ser manual e a linhagem fica incompleta. O
+sintoma aparece semanas depois, quando alguém confia na linhagem para avaliar
+impacto.
+</Callout>
+
+## Materialização: três perguntas
+
+<Comparativo
+  colunas={["Materialização", "Quando", "Custo"]}
+  linhas={[
+    ["View", "Intermediário pequeno, consultado por outros modelos", "Nenhum de armazenamento; resolve na consulta"],
+    ["Table", "Consultado com frequência por painéis", "Armazenamento e tempo de build"],
+    ["Incremental", "Volume grande que cresce por período", "Complexidade: chave única, lógica de atualização, refazer do zero"],
+    ["Ephemeral", "Lógica reaproveitada que não precisa existir no banco", "Nenhum: vira CTE em quem usa"]
+  ]}
+/>
+
+As perguntas que decidem: **quem consulta**, **qual o volume**, **com que
+frequência muda**. E o erro a evitar é materializar tudo como tabela por
+reflexo — a maior parte dos modelos intermediários de um projeto não é
+consultada por ninguém.
+
+<Callout tipo="dica" titulo="O custo escondido do incremental">
+Ele exige chave única, lógica de atualização e — o que se esquece — a
+capacidade de **refazer tudo do zero** quando a regra mudar. Sem isso, o
+histórico fica com dois cálculos diferentes convivendo na mesma tabela.
+</Callout>
+
+## Teste e documentação no mesmo lugar
+
+**Testes genéricos** (unicidade, não nulo, conjunto de valores, integridade)
+são declarados em configuração ao lado do modelo. **Testes específicos** são
+consultas próprias que afirmam uma regra de negócio — e é aí que mora o teste
+que pega erro caro: o total batendo com a origem.
+
+A **documentação** fica junto do código, e o site gerado traz o dicionário e o
+grafo. Isso resolve, de graça, a pergunta que sempre aparece em governança:
+*o que essa coluna significa e quem depende dela?*
+
+## Snapshot não é backup
+
+<Termo nome="snapshot">Mecanismo que captura mudanças de um registro ao longo do tempo, implementando dimensão de mudança lenta do tipo 2: preserva o valor antigo com data de validade quando o novo chega.</Termo>
+
+Serve para responder "qual era o segmento deste cliente em março". Não serve
+para restaurar ambiente — essa confusão aparece em entrevista e é fácil de
+evitar.
+
+## Como responder isso em voz alta
+
+Para "o que ele resolve": **ordem pelo grafo**, **teste junto do modelo**,
+**documentação e linhagem**, e **o fluxo de trabalho de software aplicado ao
+SQL**. Termine delimitando: não move dado, não substitui orquestrador. Para
+materialização, dê os três critérios e mencione o custo escondido do
+incremental — é o detalhe que mostra uso real.

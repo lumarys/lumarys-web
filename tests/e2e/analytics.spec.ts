@@ -39,20 +39,19 @@ async function semear(page: Page, trilhas: Record<string, Record<string, unknown
   );
 }
 
-test("a trilha abre com Big Data, AWS e banco de dados, e o resto como 'em breve'", async ({
-  page,
-}) => {
+test("a trilha abre completa, com os oito módulos disponíveis", async ({ page }) => {
   await page.goto(AN);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Engenharia de Analytics");
-  await expect(page.getByText("35 temas", { exact: false }).first()).toBeVisible();
+  await expect(page.getByText("40 temas", { exact: false }).first()).toBeVisible();
 
   // Cinco módulos que a ementa nomeia e ainda não têm tema. Aparecem, com o
   // resumo do que vão cobrir, mas não abrem nem oferecem checkpoint. AWS e
   // banco de dados já saíram de "em breve" e têm checkpoint próprio.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(1);
+  // Trilha completa: nenhum módulo em breve.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(0);
   // Seletor de DOM, e não papel: o link mora dentro do <details> do módulo, e
   // acordeão fechado fica fora da árvore de acessibilidade.
-  await expect(page.locator('a[href$="/checkpoint/"]')).toHaveCount(7);
+  await expect(page.locator('a[href$="/checkpoint/"]')).toHaveCount(8);
 });
 
 test("concluir um tema compartilhado em Dados conta em Analytics", async ({ page }) => {
