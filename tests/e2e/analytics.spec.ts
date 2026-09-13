@@ -44,15 +44,15 @@ test("a trilha abre com Big Data, AWS e banco de dados, e o resto como 'em breve
 }) => {
   await page.goto(AN);
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Engenharia de Analytics");
-  await expect(page.getByText("29 temas", { exact: false }).first()).toBeVisible();
+  await expect(page.getByText("32 temas", { exact: false }).first()).toBeVisible();
 
   // Cinco módulos que a ementa nomeia e ainda não têm tema. Aparecem, com o
   // resumo do que vão cobrir, mas não abrem nem oferecem checkpoint. AWS e
   // banco de dados já saíram de "em breve" e têm checkpoint próprio.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(3);
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(2);
   // Seletor de DOM, e não papel: o link mora dentro do <details> do módulo, e
   // acordeão fechado fica fora da árvore de acessibilidade.
-  await expect(page.locator('a[href$="/checkpoint/"]')).toHaveCount(5);
+  await expect(page.locator('a[href$="/checkpoint/"]')).toHaveCount(6);
 });
 
 test("concluir um tema compartilhado em Dados conta em Analytics", async ({ page }) => {

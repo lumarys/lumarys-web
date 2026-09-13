@@ -1,0 +1,233 @@
+---
+slug: python-para-analytics
+titulo: "Python para analytics: pandas sem armadilha"
+resumo: "O Python que o engenheiro de analytics usa de verdade: ler e tipar o dado, tratar nulo sem esconder problema, agrupar e juntar sem duplicar linha, e saber a hora de parar de usar pandas e empurrar o trabalho para o banco."
+minutos: 35
+nivel: fundamental
+publicadoEm: "2026-09-12"
+porQue: "A banca não pede código na sabatina, mas pergunta o que você faria com um arquivo problemático. As respostas que impressionam falam de tipo, de nulo e de grão — os três lugares onde o número sai errado sem ninguém perceber. E a pergunta seguinte é sempre quando NÃO usar pandas."
+comoCai: "Você recebeu um CSV de 4 GB com colunas mal tipadas. O que faz antes de qualquer análise?"
+feynman: "Explique em um minuto por que juntar duas tabelas pode aumentar o número de linhas, e por que isso estraga uma soma."
+preRequisitos: ["classificacao-tipos-dados"]
+errosComuns:
+  - "Deixar o pandas inferir tipo. Coluna de código com zero à esquerda vira número e perde o zero; data vira texto; identificador grande perde precisão. Tipagem explícita na leitura evita tudo isso."
+  - "Preencher nulo com zero por reflexo. Zero é um valor: entra na soma e na média. Nulo é ausência. Trocar um pelo outro muda o indicador sem avisar."
+  - "Juntar tabelas sem conferir o grão. Se a chave não é única do lado direito, a junção multiplica linhas e a soma passa a contar duas vezes. É o erro mais caro e o mais silencioso."
+  - "Usar laço para percorrer linhas. Além de lento, costuma esconder a lógica; operação vetorizada ou groupby diz melhor o que está acontecendo."
+  - "Carregar tudo na memória quando o banco poderia filtrar. Trazer 4 GB para agregar 200 linhas é desperdício: empurre filtro e agregação para onde o dado está."
+  - "Esquecer o fuso horário. Data sem fuso vira comparação errada entre origens diferentes, e o relatório fecha o dia na hora errada."
+preTeste:
+  - enunciado: "Ao ler um CSV, uma coluna de código de produto com zeros à esquerda aparece como número e perde os zeros. Qual é a correção correta?"
+    alternativas:
+      - texto: "Declarar o tipo da coluna como texto na leitura, em vez de deixar a inferência decidir."
+        correta: true
+        explicacao: "Código não é número: é identificador. Tipar na leitura evita a perda, que depois é irreversível."
+      - texto: "Converter a coluna para texto depois de carregada e preencher com zeros."
+        correta: false
+        explicacao: "Os zeros originais já se perderam; recompor por regra chuta o tamanho e erra em casos de borda."
+      - texto: "Ignorar, porque zeros à esquerda não têm significado."
+        correta: false
+        explicacao: "Em código de produto, agência e conta, eles têm significado e quebram a junção."
+  - enunciado: "Depois de juntar pedidos com itens, o total de vendas dobrou. Qual é a causa mais provável?"
+    alternativas:
+      - texto: "A junção mudou o grão: cada pedido passou a aparecer uma vez por item, e a soma do valor do pedido passou a contar repetido."
+        correta: true
+        explicacao: "Junção com o lado direito não único multiplica linhas; qualquer agregação feita depois conta a mais."
+      - texto: "O arquivo de pedidos veio duplicado da origem."
+        correta: false
+        explicacao: "Possível, mas o sintoma aparecer exatamente após a junção aponta para o grão."
+      - texto: "O tipo da coluna de valor estava errado."
+        correta: false
+        explicacao: "Tipo errado costuma gerar erro ou texto concatenado, não duplicação exata."
+videos:
+  - id: 5mD6pDo419Q
+    publicadoEm: "2026-02-14"
+    titulo: "Python - Introdução - Pandas - Ciência de Dados"
+    canal: "Davi Rocha"
+    duracao: 10
+    porQue: "Dez minutos de base para quem não usa pandas no dia a dia. Assista antes; o tema começa onde ele termina, nas armadilhas de tipo, nulo e grão."
+  - id: CBKIzuJPHL8
+    publicadoEm: "2024-04-07"
+    titulo: "Introdução ao Pandas: Iniciando a Análise de Dados em Python"
+    canal: "Silvio Miranda Filho"
+    duracao: 10
+    porQue: "Complementar, com outro ângulo sobre leitura e manipulação. Repare em como os tipos aparecem depois da leitura: é ali que o problema deste tema nasce."
+artigos:
+  - titulo: "pandas - IO tools (text, CSV)"
+    url: "https://pandas.pydata.org/docs/user_guide/io.html"
+    fonte: "pandas"
+  - titulo: "pandas - Working with missing data"
+    url: "https://pandas.pydata.org/docs/user_guide/missing_data.html"
+    fonte: "pandas"
+  - titulo: "pandas - Merge, join, concatenate"
+    url: "https://pandas.pydata.org/docs/user_guide/merging.html"
+    fonte: "pandas"
+flashcards:
+  - frente: "Por que tipar as colunas na leitura?"
+    verso: "Porque a inferência erra onde dói: código com zero à esquerda vira número, data vira texto, identificador grande perde precisão. Depois de carregado, parte da informação já se perdeu."
+  - frente: "Nulo e zero são a mesma coisa?"
+    verso: "Não. Zero é um valor e entra na soma e na média; nulo é ausência e deveria ser excluído ou tratado explicitamente. Trocar um pelo outro muda o indicador em silêncio."
+  - frente: "As três decisões sobre nulo."
+    verso: "Excluir a linha, preencher com um valor justificado, ou manter e tratar na agregação. Qualquer uma serve se for uma decisão consciente e documentada."
+  - frente: "O que é o grão de um DataFrame?"
+    verso: "O que uma linha representa. 'Uma linha por pedido' e 'uma linha por item do pedido' são grãos diferentes, e somar valor do pedido no segundo conta repetido."
+  - frente: "Como conferir se uma junção vai duplicar?"
+    verso: "Verificar se a chave é única do lado direito antes de juntar, e comparar a contagem de linhas antes e depois. O pandas ainda permite validar o tipo de relação na própria chamada."
+  - frente: "Quando parar de usar pandas?"
+    verso: "Quando o dado não cabe confortavelmente na memória, quando a mesma transformação vai virar rotina, ou quando o banco pode filtrar e agregar antes de mandar. Empurre o trabalho para onde o dado está."
+  - frente: "O que é operação vetorizada?"
+    verso: "Aplicar a operação à coluna inteira em vez de percorrer linha a linha. Mais rápido, e costuma expressar melhor a intenção."
+  - frente: "Qual o risco de data sem fuso horário?"
+    verso: "Comparar origens em fusos diferentes e fechar o dia na hora errada. Guardar em UTC e converter só na exibição evita a maior parte dos casos."
+  - frente: "Como garantir que a análise é reproduzível?"
+    verso: "Versionar o código, fixar as versões das bibliotecas, evitar estado escondido em notebook e registrar a origem e o corte do dado usado."
+  - frente: "Por que ler o dado cru e transformar depois?"
+    verso: "Porque o cru é a evidência: se a regra mudar ou o código tiver bug, dá para reprocessar. Transformar na entrada destrói a possibilidade de voltar atrás."
+drills:
+  - titulo: "Onde o número vai sair errado?"
+    instrucao: "Para cada situação, diga qual é a armadilha."
+    opcoes: ["Tipo", "Nulo", "Grão", "Fuso horário"]
+    itens:
+      - enunciado: "O código da agência 00123 virou 123 e a junção com o cadastro não encontra nada."
+        resposta: "Tipo"
+        explicacao: "Inferência converteu identificador em número."
+      - enunciado: "A média de desconto caiu pela metade depois que a coluna vazia foi preenchida com zero."
+        resposta: "Nulo"
+        explicacao: "Zero entra na média; ausência não deveria."
+      - enunciado: "O faturamento total dobrou depois que a tabela de itens entrou na análise."
+        resposta: "Grão"
+        explicacao: "Junção multiplicou linhas de pedido."
+      - enunciado: "O relatório diário mostra movimento de ontem no total de hoje."
+        resposta: "Fuso horário"
+        explicacao: "Corte do dia calculado em fuso diferente do da origem."
+      - enunciado: "O identificador do cliente com 18 dígitos passou a terminar em zeros."
+        resposta: "Tipo"
+        explicacao: "Número de ponto flutuante perde precisão; identificador é texto."
+perguntas:
+  - tipo: oral
+    enunciado: "Você recebeu um arquivo CSV de alguns gigabytes, com colunas mal tipadas e muitos campos vazios. O que você faz antes de qualquer análise?"
+    respostaModelo: "Antes de analisar, eu inspeciono. Leio uma amostra pequena para ver o formato real: separador, codificação, cabeçalho, e como cada coluna se parece. Aí eu declaro os tipos explicitamente na leitura, em vez de deixar a inferência decidir, porque é nela que se perdem zeros à esquerda em código de agência e precisão em identificador grande. Datas eu leio como data, com o fuso declarado, e guardo em UTC. Depois eu olho os vazios com atenção, porque vazio não é um problema só: pode ser ausência legítima, pode ser falha de extração, pode ser um valor que a origem manda como string vazia. Para cada coluna eu decido, e documento: excluo a linha, preencho com um valor justificado, ou mantenho nulo e trato na agregação. O que eu não faço é preencher tudo com zero, porque zero entra na soma e na média e muda o indicador sem avisar ninguém. Sobre o tamanho: alguns gigabytes ainda cabem, mas se isso vai virar rotina eu não fico no pandas. Carrego o cru para o lake, e empurro filtro e agregação para o banco, que já sabe fazer isso melhor. Por fim, eu guardo o arquivo cru como veio, porque ele é a evidência: se eu errar a regra, quero poder reprocessar."
+    rubrica:
+      - "Inspecionou uma amostra antes de carregar tudo"
+      - "Declarou tipos explicitamente e citou pelo menos um caso concreto que a inferência quebra"
+      - "Tratou nulo como decisão por coluna, recusando preencher com zero por reflexo"
+      - "Disse quando sair do pandas e empurrar o trabalho para o banco"
+      - "Preservou o arquivo cru como evidência, ligando a reprocessamento"
+  - tipo: oral
+    enunciado: "Depois que você incluiu a tabela de itens na análise, o faturamento total dobrou. Explique o que aconteceu e como evitar."
+    respostaModelo: "O que aconteceu foi mudança de grão. Antes eu tinha uma linha por pedido, com o valor do pedido nela. Ao juntar com itens, cada pedido passou a aparecer uma vez para cada item, e o valor do pedido foi repetido em todas essas linhas. Quando eu somei, contei o mesmo valor várias vezes. Não é um bug do código: é a junção fazendo exatamente o que foi pedida. Para evitar, eu tenho três hábitos. O primeiro é declarar o grão em voz alta antes de juntar: depois desta junção, uma linha representa o quê? O segundo é conferir a unicidade da chave do lado direito antes de juntar, e comparar a contagem de linhas antes e depois; se mudou e eu não esperava, paro. O terceiro é agregar antes de juntar quando o que eu quero é o total: somo os itens por pedido primeiro, e só então junto, mantendo uma linha por pedido. E, quando o número vai para um indicador de negócio, eu ponho um teste que compara o total com a origem, porque esse erro é silencioso: não estoura exceção, só devolve o dobro."
+    rubrica:
+      - "Nomeou a mudança de grão como causa, e explicou o mecanismo da multiplicação"
+      - "Disse que não é bug, e sim a junção fazendo o que foi pedida"
+      - "Propôs declarar o grão antes de juntar"
+      - "Propôs conferir unicidade da chave e comparar contagem antes e depois"
+      - "Ofereceu agregar antes de juntar, e um teste de total contra a origem"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre tratamento de valores nulos é mais defensável?"
+    alternativas:
+      - texto: "A decisão depende do significado da ausência naquela coluna, e preencher com zero muda somas e médias sem avisar."
+        correta: true
+        explicacao: "Trata o nulo como decisão semântica e nomeia o efeito concreto do preenchimento indevido."
+      - texto: "Preencher nulos com zero é a prática padrão, porque evita erro nas operações."
+        correta: false
+        explicacao: "Evita exceção e cria erro de número, que é pior por ser silencioso."
+      - texto: "Linhas com qualquer nulo devem ser descartadas."
+        correta: false
+        explicacao: "Descarta informação boa e pode enviesar o resultado."
+      - texto: "Nulo e string vazia são equivalentes e podem ser tratados juntos."
+        correta: false
+        explicacao: "String vazia costuma indicar origem diferente do nulo real, e misturar esconde um problema de extração."
+  - tipo: multipla
+    enunciado: "Quais DUAS situações indicam que a transformação deveria sair do pandas e ir para o banco?"
+    alternativas:
+      - texto: "A mesma transformação vai virar rotina diária consumida por outras pessoas."
+        correta: true
+        explicacao: "Rotina compartilhada pede versionamento, teste e orquestração, não script local."
+      - texto: "Só uma fração pequena do dado é necessária, e o banco pode filtrar e agregar antes de enviar."
+        correta: true
+        explicacao: "Trazer tudo para agregar pouco desperdiça rede, memória e tempo."
+      - texto: "O arquivo tem mais de mil linhas."
+        correta: false
+        explicacao: "Volume pequeno; pandas resolve com folga."
+      - texto: "A análise usa junções entre duas tabelas."
+        correta: false
+        explicacao: "Junção não é motivo por si só."
+      - texto: "O time prefere SQL a Python."
+        correta: false
+        explicacao: "Preferência não é critério técnico, ainda que importe para manutenção."
+---
+
+## Em uma frase
+
+Os três lugares onde o número sai errado em silêncio são **tipo**, **nulo** e
+**grão** — e a quarta pergunta é sempre **quando parar de usar pandas** e
+empurrar o trabalho para onde o dado está.
+
+## Tipo: a inferência erra onde dói
+
+Deixar o pandas adivinhar o tipo funciona até encontrar:
+
+<Comparativo
+  colunas={["Coluna", "O que a inferência faz", "Consequência"]}
+  linhas={[
+    ["Código com zero à esquerda", "Converte para número", "00123 vira 123 e a junção com o cadastro não acha nada"],
+    ["Identificador de 18 dígitos", "Converte para ponto flutuante", "Perde precisão e termina em zeros"],
+    ["Data em formato brasileiro", "Deixa como texto", "Ordenação alfabética, comparação errada"],
+    ["Valor com vírgula decimal", "Deixa como texto", "Soma concatena em vez de somar"]
+  ]}
+/>
+
+A correção é **declarar o tipo na leitura**, não converter depois: parte da
+informação já se perdeu no caminho.
+
+## Nulo: ausência não é zero
+
+<Callout tipo="atencao" titulo="O preenchimento que muda o indicador">
+Preencher nulo com zero por reflexo é o erro mais comum e o mais difícil de
+detectar depois. **Zero é um valor**: entra na soma e puxa a média para baixo.
+**Nulo é ausência**: deveria ser excluído da média ou tratado
+explicitamente. A diferença aparece no indicador, não numa exceção.
+</Callout>
+
+Há três decisões legítimas — excluir a linha, preencher com um valor
+justificado, manter nulo e tratar na agregação. Qualquer uma serve **se for
+consciente e documentada**. E vale separar nulo de string vazia: elas
+costumam indicar origens diferentes, e misturá-las esconde uma falha de
+extração.
+
+## Grão: a junção que dobra o faturamento
+
+<Termo nome="grão">O que uma linha representa. "Uma linha por pedido" e "uma linha por item do pedido" são grãos diferentes.</Termo>
+
+Ao juntar pedidos com itens, cada pedido passa a aparecer **uma vez por item**,
+com o valor do pedido repetido em todas. A soma conta repetido. Não é bug: é a
+junção fazendo o que foi pedida.
+
+<Passos itens={[
+  "Declarar o grão em voz alta antes de juntar: depois desta junção, uma linha representa o quê?",
+  "Conferir se a chave é única do lado direito, e comparar a contagem de linhas antes e depois.",
+  "Quando o que se quer é o total, agregar ANTES de juntar: somar itens por pedido e só então juntar.",
+  "Para número que vira indicador, um teste comparando o total com a origem."
+]} />
+
+## Quando sair do pandas
+
+- **O dado não cabe confortavelmente na memória.**
+- **A transformação vai virar rotina** consumida por outras pessoas: aí ela
+  precisa de versionamento, teste e orquestração, não de um script local.
+- **O banco pode filtrar e agregar antes de enviar.** Trazer gigabytes para
+  produzir duzentas linhas desperdiça rede, memória e tempo.
+
+<Callout tipo="dica" titulo="Guarde o cru">
+O arquivo como veio é a evidência. Se a regra mudar ou você errar, dá para
+reprocessar. Transformar na entrada e descartar o original é o que transforma
+um erro de uma tarde em um dado perdido para sempre.
+</Callout>
+
+## Como responder isso em voz alta
+
+Para "o que você faz com este arquivo": **inspecionar amostra**, **tipar na
+leitura**, **decidir o nulo por coluna**, **guardar o cru**. Para qualquer
+número que mudou de repente: **grão** primeiro, depois tipo, depois fuso. E
+termine dizendo onde aquilo deveria morar se virasse rotina — é o que mostra
+que você pensa além do arquivo da vez.

@@ -90,6 +90,12 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
 - [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
 
+### Programação
+
+- [Python para analytics: pandas sem armadilha](https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/python-para-analytics/): O Python que o engenheiro de analytics usa de verdade: ler e tipar o dado, tratar nulo sem esconder problema, agrupar e juntar sem duplicar linha, e saber a hora de parar de usar pandas e empurrar o trabalho para o banco.
+- [Git e revisão de código para quem trabalha com dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/git-e-revisao-de-codigo/): O fluxo que transforma consulta solta em trabalho de equipe: branch por mudança, commit que explica a intenção, pedido de revisão com contexto, e o que um revisor deve olhar quando o que mudou é SQL e não aplicação.
+- [Testes e reprodutibilidade em projetos de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/testes-e-reprodutibilidade/): O que se testa quando o produto é um número: teste de código com pytest, teste do dado na entrada e na saída, e as condições que fazem uma análise ser reproduzível — versão fixada, dado identificado por corte e notebook sem estado escondido.
+
 ### DevOps
 
 - [CI/CD para dados e dashboards](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/cicd-para-dados-e-dashboards/): Por que pipeline de dados também merece integração e entrega contínuas: o que roda na verificação (lint de SQL, teste de transformação, dado de amostra), como promover uma mudança entre ambientes sem quebrar relatório, e o que fazer quando o que quebra não é o código, é o dado.
@@ -5478,6 +5484,321 @@ O grão é uma linha por autorização de cartão. Escolho o evento atômico por
 ### O cliente mudou de endereço. Como você trata isso na dimensão cliente e por quê?
 
 Depende do que o negócio precisa enxergar. Se ninguém analisa endereço no tempo, tipo 1 resolve: sobrescrevo e pronto, é barato e a dimensão não cresce. Mas em banco isso raramente se sustenta, porque risco e prevenção a fraude analisam concentração por região, e sobrescrever reescreve o passado. Então uso tipo 2: encerro a linha vigente preenchendo a data de fim e a flag de corrente, e insiro uma nova linha com nova chave substituta, nova data de início e fim em aberto. O fato passa a apontar para a chave substituta da versão vigente na data do evento, resolvida por busca com faixa de vigência durante a carga. O custo é dimensão maior e carga mais complexa, e todo mundo que consulta precisa saber que existe mais de uma linha por cliente. Tipo 3 eu deixaria só para comparar antes e depois de uma reclassificação pontual.
+
+---
+
+# Python para analytics: pandas sem armadilha
+
+Trilha: Engenharia de Analytics · Módulo: Programação
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/python-para-analytics/
+Tempo estimado: 35 minutos · Nível: fundamental
+
+**Resumo.** O Python que o engenheiro de analytics usa de verdade: ler e tipar o dado, tratar nulo sem esconder problema, agrupar e juntar sem duplicar linha, e saber a hora de parar de usar pandas e empurrar o trabalho para o banco.
+
+**Por que cai na prova.** A banca não pede código na sabatina, mas pergunta o que você faria com um arquivo problemático. As respostas que impressionam falam de tipo, de nulo e de grão — os três lugares onde o número sai errado sem ninguém perceber. E a pergunta seguinte é sempre quando NÃO usar pandas.
+
+**Como o entrevistador pergunta.** "Você recebeu um CSV de 4 GB com colunas mal tipadas. O que faz antes de qualquer análise?"
+
+## Em uma frase
+
+Os três lugares onde o número sai errado em silêncio são **tipo**, **nulo** e
+**grão** — e a quarta pergunta é sempre **quando parar de usar pandas** e
+empurrar o trabalho para onde o dado está.
+
+## Tipo: a inferência erra onde dói
+
+Deixar o pandas adivinhar o tipo funciona até encontrar:
+
+<Comparativo
+  colunas={["Coluna", "O que a inferência faz", "Consequência"]}
+  linhas={[
+    ["Código com zero à esquerda", "Converte para número", "00123 vira 123 e a junção com o cadastro não acha nada"],
+    ["Identificador de 18 dígitos", "Converte para ponto flutuante", "Perde precisão e termina em zeros"],
+    ["Data em formato brasileiro", "Deixa como texto", "Ordenação alfabética, comparação errada"],
+    ["Valor com vírgula decimal", "Deixa como texto", "Soma concatena em vez de somar"]
+  ]}
+/>
+
+A correção é **declarar o tipo na leitura**, não converter depois: parte da
+informação já se perdeu no caminho.
+
+## Nulo: ausência não é zero
+
+<Callout tipo="atencao" titulo="O preenchimento que muda o indicador">
+Preencher nulo com zero por reflexo é o erro mais comum e o mais difícil de
+detectar depois. **Zero é um valor**: entra na soma e puxa a média para baixo.
+**Nulo é ausência**: deveria ser excluído da média ou tratado
+explicitamente. A diferença aparece no indicador, não numa exceção.
+</Callout>
+
+Há três decisões legítimas — excluir a linha, preencher com um valor
+justificado, manter nulo e tratar na agregação. Qualquer uma serve **se for
+consciente e documentada**. E vale separar nulo de string vazia: elas
+costumam indicar origens diferentes, e misturá-las esconde uma falha de
+extração.
+
+## Grão: a junção que dobra o faturamento
+
+<Termo nome="grão">O que uma linha representa. "Uma linha por pedido" e "uma linha por item do pedido" são grãos diferentes.</Termo>
+
+Ao juntar pedidos com itens, cada pedido passa a aparecer **uma vez por item**,
+com o valor do pedido repetido em todas. A soma conta repetido. Não é bug: é a
+junção fazendo o que foi pedida.
+
+<Passos itens={[
+  "Declarar o grão em voz alta antes de juntar: depois desta junção, uma linha representa o quê?",
+  "Conferir se a chave é única do lado direito, e comparar a contagem de linhas antes e depois.",
+  "Quando o que se quer é o total, agregar ANTES de juntar: somar itens por pedido e só então juntar.",
+  "Para número que vira indicador, um teste comparando o total com a origem."
+]} />
+
+## Quando sair do pandas
+
+- **O dado não cabe confortavelmente na memória.**
+- **A transformação vai virar rotina** consumida por outras pessoas: aí ela
+  precisa de versionamento, teste e orquestração, não de um script local.
+- **O banco pode filtrar e agregar antes de enviar.** Trazer gigabytes para
+  produzir duzentas linhas desperdiça rede, memória e tempo.
+
+<Callout tipo="dica" titulo="Guarde o cru">
+O arquivo como veio é a evidência. Se a regra mudar ou você errar, dá para
+reprocessar. Transformar na entrada e descartar o original é o que transforma
+um erro de uma tarde em um dado perdido para sempre.
+</Callout>
+
+## Como responder isso em voz alta
+
+Para "o que você faz com este arquivo": **inspecionar amostra**, **tipar na
+leitura**, **decidir o nulo por coluna**, **guardar o cru**. Para qualquer
+número que mudou de repente: **grão** primeiro, depois tipo, depois fuso. E
+termine dizendo onde aquilo deveria morar se virasse rotina — é o que mostra
+que você pensa além do arquivo da vez.
+
+## Erros comuns
+
+- Deixar o pandas inferir tipo. Coluna de código com zero à esquerda vira número e perde o zero; data vira texto; identificador grande perde precisão. Tipagem explícita na leitura evita tudo isso.
+- Preencher nulo com zero por reflexo. Zero é um valor: entra na soma e na média. Nulo é ausência. Trocar um pelo outro muda o indicador sem avisar.
+- Juntar tabelas sem conferir o grão. Se a chave não é única do lado direito, a junção multiplica linhas e a soma passa a contar duas vezes. É o erro mais caro e o mais silencioso.
+- Usar laço para percorrer linhas. Além de lento, costuma esconder a lógica; operação vetorizada ou groupby diz melhor o que está acontecendo.
+- Carregar tudo na memória quando o banco poderia filtrar. Trazer 4 GB para agregar 200 linhas é desperdício: empurre filtro e agregação para onde o dado está.
+- Esquecer o fuso horário. Data sem fuso vira comparação errada entre origens diferentes, e o relatório fecha o dia na hora errada.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Você recebeu um arquivo CSV de alguns gigabytes, com colunas mal tipadas e muitos campos vazios. O que você faz antes de qualquer análise?
+
+Antes de analisar, eu inspeciono. Leio uma amostra pequena para ver o formato real: separador, codificação, cabeçalho, e como cada coluna se parece. Aí eu declaro os tipos explicitamente na leitura, em vez de deixar a inferência decidir, porque é nela que se perdem zeros à esquerda em código de agência e precisão em identificador grande. Datas eu leio como data, com o fuso declarado, e guardo em UTC. Depois eu olho os vazios com atenção, porque vazio não é um problema só: pode ser ausência legítima, pode ser falha de extração, pode ser um valor que a origem manda como string vazia. Para cada coluna eu decido, e documento: excluo a linha, preencho com um valor justificado, ou mantenho nulo e trato na agregação. O que eu não faço é preencher tudo com zero, porque zero entra na soma e na média e muda o indicador sem avisar ninguém. Sobre o tamanho: alguns gigabytes ainda cabem, mas se isso vai virar rotina eu não fico no pandas. Carrego o cru para o lake, e empurro filtro e agregação para o banco, que já sabe fazer isso melhor. Por fim, eu guardo o arquivo cru como veio, porque ele é a evidência: se eu errar a regra, quero poder reprocessar.
+
+### Depois que você incluiu a tabela de itens na análise, o faturamento total dobrou. Explique o que aconteceu e como evitar.
+
+O que aconteceu foi mudança de grão. Antes eu tinha uma linha por pedido, com o valor do pedido nela. Ao juntar com itens, cada pedido passou a aparecer uma vez para cada item, e o valor do pedido foi repetido em todas essas linhas. Quando eu somei, contei o mesmo valor várias vezes. Não é um bug do código: é a junção fazendo exatamente o que foi pedida. Para evitar, eu tenho três hábitos. O primeiro é declarar o grão em voz alta antes de juntar: depois desta junção, uma linha representa o quê? O segundo é conferir a unicidade da chave do lado direito antes de juntar, e comparar a contagem de linhas antes e depois; se mudou e eu não esperava, paro. O terceiro é agregar antes de juntar quando o que eu quero é o total: somo os itens por pedido primeiro, e só então junto, mantendo uma linha por pedido. E, quando o número vai para um indicador de negócio, eu ponho um teste que compara o total com a origem, porque esse erro é silencioso: não estoura exceção, só devolve o dobro.
+
+---
+
+# Git e revisão de código para quem trabalha com dados
+
+Trilha: Engenharia de Analytics · Módulo: Programação
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/git-e-revisao-de-codigo/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** O fluxo que transforma consulta solta em trabalho de equipe: branch por mudança, commit que explica a intenção, pedido de revisão com contexto, e o que um revisor deve olhar quando o que mudou é SQL e não aplicação.
+
+**Por que cai na prova.** A ementa pede Git, mas a banca pergunta outra coisa: como o seu trabalho vira algo que outra pessoa consegue revisar, repetir e reverter. Quem responde citando comandos perde; quem descreve o fluxo, o que escreve no pedido de revisão e o que olha ao revisar SQL alheio mostra que trabalha em equipe.
+
+**Como o entrevistador pergunta.** "Como uma mudança sua numa transformação chega ao repositório e ao ambiente dos outros?"
+
+## Em uma frase
+
+O fluxo existe para que a sua mudança seja **revisável, repetível e
+reversível** — e, em dados, o revisor humano cuida do que nenhuma automação
+pega: **grão, regra de negócio e impacto em quem consome**.
+
+## O fluxo, e o porquê de cada passo
+
+<Comparativo
+  colunas={["Passo", "Para que serve"]}
+  linhas={[
+    ["Branch por mudança", "Isolar o trabalho e permitir reverter só aquilo depois"],
+    ["Commits pequenos com intenção", "Explicar o porquê, que o diff não mostra"],
+    ["Pedido de revisão com contexto", "Dar ao revisor o que ele precisa para avaliar impacto"],
+    ["Verificação automática", "Sintaxe, construção isolada, testes de dado"],
+    ["Revisão humana", "Grão, regra de negócio, impacto, cobertura de teste"],
+    ["Integração e promoção", "Mesmo artefato avançando entre ambientes"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="A mensagem de commit não descreve o diff">
+"Altera consulta" não informa nada: o diff já mostra o que mudou. A mensagem
+existe para a pergunta que o diff **não** responde — por que mudou. É o que
+salva alguém daqui a seis meses, inclusive você.
+</Callout>
+
+## O que escrever num pedido de revisão de dados
+
+Três perguntas, e elas são diferentes das de um projeto de aplicação:
+
+1. **O que muda no número?** Se a definição de um indicador mudou, isso é a
+   informação mais importante do pedido.
+2. **Quem consome o modelo afetado?** Vem da linhagem, e define quem precisa
+   ser avisado.
+3. **Como você validou?** Testes que rodaram, comparação do total com a origem,
+   o que mais você conferiu.
+
+## Automação e pessoa: dividir por competência
+
+<Comparativo
+  colunas={["Quem pega", "O quê"]}
+  linhas={[
+    ["Ferramenta", "Sintaxe, formatação, construção isolada, testes de dado, cobertura"],
+    ["Pessoa", "Grão mudou? Regra bate com a definição do negócio? Quem quebra? Falta teste?"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Onde a revisão humana realmente rende">
+O erro caro em dados é o **SQL que roda perfeitamente e devolve o número
+errado**. Nenhum linter pega isso. Gastar a revisão com indentação é o jeito
+mais eficiente de deixar esse erro passar.
+</Callout>
+
+## Duas armadilhas específicas de dados
+
+**Credencial no repositório.** O histórico é permanente: apagar num commit
+posterior não remove do histórico, e quem clonou antes já tem. Segredo vai
+para cofre, sempre.
+
+**Notebook versionado sem cuidado.** Ele guarda saídas e a ordem em que as
+células foram executadas, o que polui o diff e esconde estado. Limpe as saídas
+antes de commitar, ou promova a lógica estável para um módulo e deixe o
+notebook como exploração.
+
+## Como responder isso em voz alta
+
+Descreva o **fluxo**, não os comandos. Diga o que vai na descrição do pedido de
+revisão em contexto de dados. E separe explicitamente o que a automação
+verifica do que a pessoa revisa — é essa separação que mostra que você já
+revisou o trabalho de alguém, e não só leu sobre o assunto.
+
+## Erros comuns
+
+- Commitar na branch principal direto. Perde revisão, perde o momento em que alguém poderia ter visto o erro, e dificulta reverter só aquela mudança.
+- Escrever mensagem de commit que descreve o diff. 'Altera consulta' não diz nada; a mensagem existe para explicar a intenção e o porquê, que o diff não mostra.
+- Abrir pedido de revisão gigante. Revisão de 800 linhas vira aprovação sem leitura; mudança pequena e frequente é revisada de verdade.
+- Revisar SQL procurando erro de sintaxe. Isso o computador faz; o revisor humano existe para checar grão, regra de negócio e impacto em quem consome.
+- Versionar credencial junto com o código. Repositório é histórico permanente; apagar em commit posterior não apaga do histórico.
+- Tratar notebook como entregável versionado sem cuidado. Notebook guarda saída e ordem de execução, o que polui o diff e esconde estado; o que vai para o repositório precisa ser limpo ou convertido.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Descreva como uma mudança sua numa transformação chega ao repositório e ao ambiente das outras pessoas.
+
+Eu começo criando uma branch para aquela mudança específica, porque isso isola o trabalho e me permite reverter só ela depois, se precisar. Faço commits pequenos, e cada mensagem explica a intenção, não o diff: o diff já mostra que a linha mudou, o que falta é por que mudou. Quando termino, abro um pedido de revisão, e a descrição é onde eu invisto tempo em dados, porque ela precisa responder três coisas: o que muda no número, quem consome o modelo afetado, e como eu validei. Validar aqui significa dizer que os testes rodaram, que eu comparei o total com a origem, e o que eu olhei além disso. A verificação automática roda sozinha: constrói os modelos num ambiente isolado, executa os testes de dados, e se algo falha eu conserto antes de pedir atenção de alguém. Aí vem a revisão humana, que existe para o que a automação não pega: se o grão continua o mesmo, se a regra de negócio está certa, e se alguém precisa ser avisado. Aprovado, integra na principal e a promoção para os ambientes é automática, com o mesmo artefato. Trabalhando sozinho eu mantenho o mesmo fluxo, menos a revisão de outra pessoa, porque o valor do histórico e do caminho de volta não depende do tamanho do time.
+
+### Você foi revisar a mudança de um colega num modelo que alimenta um indicador. O que você olha?
+
+A primeira coisa que eu olho não é o código, é a descrição: o que ele diz que muda no número e quem consome. Se isso não estiver claro, eu pergunto antes de ler, porque sem saber a intenção eu só consigo revisar sintaxe, que o computador já fez. Depois eu olho três coisas no código. Grão: a mudança alterou o que uma linha representa? Qualquer junção nova é suspeita até eu confirmar que a chave é única do outro lado. Regra de negócio: a definição que ele implementou bate com a definição que a área usa? É aqui que mora o erro caro, porque o SQL roda perfeitamente e devolve o número errado. E impacto: quem consome esse modelo, e a mudança é compatível ou vai quebrar alguém? Se for incompatível, eu peço publicação em paralelo com prazo, não renomeação em cima. Também confiro se os testes cobrem o caso que mudou, porque mudança sem teste novo costuma significar que ninguém vai perceber quando quebrar de novo. O que eu não faço é comentar indentação e nome de variável: isso é trabalho de formatador, e gastar a atenção do revisor com isso é o jeito mais eficiente de deixar passar o que importa.
+
+---
+
+# Testes e reprodutibilidade em projetos de dados
+
+Trilha: Engenharia de Analytics · Módulo: Programação
+URL: https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/testes-e-reprodutibilidade/
+Tempo estimado: 30 minutos · Nível: intermediario
+
+**Resumo.** O que se testa quando o produto é um número: teste de código com pytest, teste do dado na entrada e na saída, e as condições que fazem uma análise ser reproduzível — versão fixada, dado identificado por corte e notebook sem estado escondido.
+
+**Por que cai na prova.** A pergunta chega assim: 'como você sabe que esse número está certo?'. Quem responde 'conferi' não convence. Quem separa teste de código de teste de dado, dá exemplos dos dois e explica como outra pessoa reproduz o mesmo resultado amanhã, mostra maturidade que a maioria dos candidatos não tem.
+
+**Como o entrevistador pergunta.** "Como você garante que o número que você entregou hoje pode ser reproduzido daqui a seis meses?"
+
+## Em uma frase
+
+Em dados, a suíte tem **duas metades** — teste de código e teste do dado — e
+reprodutibilidade tem **três pernas**: ambiente congelado, entrada
+identificada e execução sem estado escondido.
+
+## Por que testar o dado, e não só o código
+
+A transformação pode estar perfeita e o número sair errado, porque **a entrada
+mudou sem o seu código mudar**: coluna passou a vir nula, apareceu categoria
+nova, surgiu duplicata, o arquivo veio vazio.
+
+<Callout tipo="atencao" titulo="A falha mais traiçoeira">
+Um pipeline que processa um **arquivo vazio** termina com sucesso. Nenhuma
+exceção, nenhum alerta, tudo verde — e o relatório zerado. Só um teste de
+**volume mínimo** na entrada pega isso.
+</Callout>
+
+<Comparativo
+  colunas={["Momento", "O que verificar"]}
+  linhas={[
+    ["Entrada", "Volume dentro da faixa, campos obrigatórios não nulos, conjunto de valores aceito, esquema esperado"],
+    ["Saída", "Unicidade da chave, integridade com as dimensões, total batendo com a origem"],
+    ["Código", "Casos de borda das funções: divisão por zero, lista vazia, data inválida"]
+  ]}
+/>
+
+Para **categoria nova** na entrada, prefira **alerta** a falha: categoria nova
+costuma ser legítima, e você quer decidir, não quebrar a madrugada.
+
+## O teste que passa junto com o bug
+
+Um teste que calcula o resultado **do mesmo jeito que o código** não testa
+nada: ele reproduz a lógica, inclusive o erro. Teste bom afirma o **valor
+esperado**, obtido de fora — da regra escrita, de um cálculo manual, da
+origem.
+
+E os melhores testes não são imaginados: **vêm de incidentes**. Cada vez que
+algo quebra, a causa vira teste. A suíte cresce a partir do que aconteceu.
+
+## As três pernas da reprodutibilidade
+
+<Passos itens={[
+  "Ambiente congelado: versões das bibliotecas fixadas em arquivo versionado, porque a mesma análise com outra versão pode arredondar ou ordenar diferente.",
+  "Entrada identificada: não 'a tabela de vendas', mas o corte — data de referência ou versão da tabela. A tabela de hoje não é a de seis meses atrás.",
+  "Execução sem estado escondido: reiniciar e rodar do zero. Notebook que funciona na tela pode não funcionar de cima para baixo."
+]} />
+
+<Callout tipo="dica" titulo="O teste do notebook">
+Reinicie o núcleo e execute tudo de cima para baixo. Se falhar, o notebook
+dependia de uma variável de execução anterior ou de células rodadas fora de
+ordem — e ninguém, incluindo você, reproduz aquele número depois.
+</Callout>
+
+Junto com o número, entregue **o que foi assumido**. Premissa não escrita é o
+que ninguém consegue recuperar seis meses depois.
+
+## Quando sai do notebook
+
+Indicador **recorrente** não mora em notebook. Ele vira transformação
+versionada, com teste, orquestração e dono — exatamente para não depender da
+sua memória nem da sua máquina. O notebook fica onde ele é bom: exploração.
+
+## Como responder isso em voz alta
+
+Separe as **duas metades** da suíte e dê exemplo de cada. Para
+reprodutibilidade, cite as **três pernas** e o teste concreto do notebook.
+Termine dizendo que os melhores testes vêm de incidentes — isso mostra que
+você já operou algo, e não só leu a respeito.
+
+## Erros comuns
+
+- Testar só o código. A transformação pode estar correta e o número errado, porque o dado de entrada mudou. Teste de dado é metade da suíte.
+- Escrever teste que repete a implementação. Se o teste calcula do mesmo jeito que o código, ele passa junto com o bug; teste bom afirma o resultado esperado, de fora.
+- Achar que notebook que roda é reproduzível. Ele carrega estado de execuções anteriores e a ordem das células pode não ser a de cima para baixo; reiniciar e rodar do zero é o teste.
+- Esquecer de fixar a versão das bibliotecas. Mesma análise, biblioteca diferente, resultado diferente, meses depois.
+- Não registrar qual corte do dado foi usado. 'Rodei ontem' não reproduz nada; é preciso a data de corte ou a versão da tabela.
+- Cobrar cobertura de teste como número. Cobertura alta com asserções fracas dá falsa segurança; o que importa é o caso de borda coberto.
+
+## Perguntas de sabatina e respostas-modelo
+
+### Como você garante que o número que entregou hoje pode ser reproduzido daqui a seis meses?
+
+Reprodutibilidade tem três pernas, e faltando uma o número não volta. A primeira é o ambiente: as versões das bibliotecas precisam estar fixadas em arquivo versionado, porque a mesma análise com uma versão diferente pode devolver outro resultado, especialmente em ordenação e arredondamento. A segunda é a entrada: não basta dizer que rodei sobre a tabela de vendas, eu preciso do corte, ou seja, a data de referência ou a versão da tabela, porque a tabela de hoje não é a de seis meses atrás. Em ambiente que suporta, viagem no tempo resolve isso; onde não suporta, eu guardo o recorte usado ou pelo menos registro o carimbo. A terceira é a execução sem estado escondido, e aqui o vilão é o notebook: ele carrega variáveis de execuções anteriores e as células podem ter sido rodadas fora de ordem, então um notebook que 'funciona' na tela pode não funcionar do zero. Meu teste é reiniciar o núcleo e rodar de cima para baixo. Junto com o número eu entrego essas informações e as premissas que assumi, porque premissa não escrita é a coisa que ninguém consegue recuperar depois. E quando o número vira indicador recorrente, ele sai do notebook e vira transformação versionada com teste, exatamente para não depender da minha memória.
+
+### Um pipeline rodou sem nenhum erro e o relatório saiu zerado. O que isso diz sobre a sua suíte de testes, e o que você acrescenta?
+
+Diz que a minha suíte testa o código e não testa o dado. Uma transformação correta sobre um arquivo vazio termina com sucesso, e tudo fica verde: nenhuma exceção, nenhum alerta, e o relatório zerado. O que falta é teste sobre o dado, e ele tem dois momentos. Na entrada, eu verifico volume dentro de uma faixa esperada, campos obrigatórios não nulos, e conjunto de valores aceito para as categorias, esse último com alerta em vez de falha, porque categoria nova é legítima e eu quero decidir, não quebrar. Na saída, eu verifico unicidade da chave, integridade referencial com as dimensões, e um teste de negócio comparando o total com a origem. Esse último é o que pega o erro de grão, que é o mais caro. Depois de corrigir e reprocessar, eu faço a coisa que evita a repetição: transformo essa causa específica em teste. É assim que a suíte cresce, a partir de incidente real, e não de imaginação. E eu tomo o cuidado de não escrever teste que repete a implementação, porque um teste que calcula do mesmo jeito que o código passa junto com o bug.
 
 ---
 

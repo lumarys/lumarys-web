@@ -90,6 +90,12 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-analytics/
 - [SQL para engenharia de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/sql-para-dados/): O SQL que a sabatina cobra não é o do CRUD: é anti-join, CTE, window function para deduplicar e calcular variação, leitura de plano de execução e a diferença entre SQL analítico e transacional.
 - [Modelagem de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/banco-de-dados/modelagem-de-dados/): Normalizar até 3NF serve ao transacional; modelar em estrela serve à análise. O tema cobre grão, fato e dimensão, star contra snowflake, dimensões conformadas, SCD 1, 2 e 3, Data Vault e One Big Table no Lakehouse.
 
+### Programação
+
+- [Python para analytics: pandas sem armadilha](https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/python-para-analytics/): O Python que o engenheiro de analytics usa de verdade: ler e tipar o dado, tratar nulo sem esconder problema, agrupar e juntar sem duplicar linha, e saber a hora de parar de usar pandas e empurrar o trabalho para o banco.
+- [Git e revisão de código para quem trabalha com dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/git-e-revisao-de-codigo/): O fluxo que transforma consulta solta em trabalho de equipe: branch por mudança, commit que explica a intenção, pedido de revisão com contexto, e o que um revisor deve olhar quando o que mudou é SQL e não aplicação.
+- [Testes e reprodutibilidade em projetos de dados](https://lumarys.com.br/trilhas/engenharia-de-analytics/programacao/testes-e-reprodutibilidade/): O que se testa quando o produto é um número: teste de código com pytest, teste do dado na entrada e na saída, e as condições que fazem uma análise ser reproduzível — versão fixada, dado identificado por corte e notebook sem estado escondido.
+
 ### DevOps
 
 - [CI/CD para dados e dashboards](https://lumarys.com.br/trilhas/engenharia-de-analytics/devops/cicd-para-dados-e-dashboards/): Por que pipeline de dados também merece integração e entrega contínuas: o que roda na verificação (lint de SQL, teste de transformação, dado de amostra), como promover uma mudança entre ambientes sem quebrar relatório, e o que fazer quando o que quebra não é o código, é o dado.

@@ -1,0 +1,230 @@
+---
+slug: testes-e-reprodutibilidade
+titulo: "Testes e reprodutibilidade em projetos de dados"
+resumo: "O que se testa quando o produto é um número: teste de código com pytest, teste do dado na entrada e na saída, e as condições que fazem uma análise ser reproduzível — versão fixada, dado identificado por corte e notebook sem estado escondido."
+minutos: 30
+nivel: intermediario
+publicadoEm: "2026-09-12"
+porQue: "A pergunta chega assim: 'como você sabe que esse número está certo?'. Quem responde 'conferi' não convence. Quem separa teste de código de teste de dado, dá exemplos dos dois e explica como outra pessoa reproduz o mesmo resultado amanhã, mostra maturidade que a maioria dos candidatos não tem."
+comoCai: "Como você garante que o número que você entregou hoje pode ser reproduzido daqui a seis meses?"
+feynman: "Explique em um minuto por que um relatório que roda sem erro pode estar errado, e o que se testa para pegar isso."
+preRequisitos: ["python-para-analytics", "data-quality"]
+errosComuns:
+  - "Testar só o código. A transformação pode estar correta e o número errado, porque o dado de entrada mudou. Teste de dado é metade da suíte."
+  - "Escrever teste que repete a implementação. Se o teste calcula do mesmo jeito que o código, ele passa junto com o bug; teste bom afirma o resultado esperado, de fora."
+  - "Achar que notebook que roda é reproduzível. Ele carrega estado de execuções anteriores e a ordem das células pode não ser a de cima para baixo; reiniciar e rodar do zero é o teste."
+  - "Esquecer de fixar a versão das bibliotecas. Mesma análise, biblioteca diferente, resultado diferente, meses depois."
+  - "Não registrar qual corte do dado foi usado. 'Rodei ontem' não reproduz nada; é preciso a data de corte ou a versão da tabela."
+  - "Cobrar cobertura de teste como número. Cobertura alta com asserções fracas dá falsa segurança; o que importa é o caso de borda coberto."
+preTeste:
+  - enunciado: "Um pipeline roda sem erro e o relatório fica zerado. Que tipo de teste pegaria isso?"
+    alternativas:
+      - texto: "Teste de dado na entrada, verificando volume mínimo e não nulo nos campos obrigatórios."
+        correta: true
+        explicacao: "Arquivo vazio ou coluna toda nula passa por qualquer teste de código; só teste sobre o dado detecta."
+      - texto: "Teste unitário da função de transformação."
+        correta: false
+        explicacao: "A função pode estar correta e receber entrada vazia."
+      - texto: "Teste de integração entre os serviços."
+        correta: false
+        explicacao: "A integração funcionou: o dado é que veio vazio."
+  - enunciado: "O que torna uma análise em notebook reproduzível?"
+    alternativas:
+      - texto: "Rodar do zero após reiniciar o núcleo, com versões fixadas e o corte do dado registrado."
+        correta: true
+        explicacao: "Elimina estado escondido, congela o ambiente e identifica a entrada. São as três condições."
+      - texto: "Salvar o notebook com todas as saídas visíveis."
+        correta: false
+        explicacao: "Saída salva mostra o resultado antigo, não garante que ele seja obtido de novo."
+      - texto: "Comentar cada célula em detalhe."
+        correta: false
+        explicacao: "Ajuda a entender, não a reproduzir."
+videos:
+  - id: uVM9vPu2z0g
+    publicadoEm: "2022-11-23"
+    titulo: "Testes automatizados com Pytest - O guia introdutório"
+    canal: "SatellaSoft"
+    duracao: 20
+    porQue: "Base de pytest para quem nunca escreveu teste. Assista para ter o vocabulário; o tema depois trata do que é específico de dados, que nenhum tutorial de pytest cobre."
+  - id: zXxA45nswQk
+    publicadoEm: "2024-07-14"
+    titulo: "Pytest: Fundamentos e Criação do Seu Primeiro Teste"
+    canal: "Escola de Inteligência Artificial"
+    duracao: 20
+    porQue: "Complementar, com outro ritmo e exemplos. Repare na estrutura do teste: preparar, executar, afirmar. É a mesma estrutura que serve para teste de dado."
+artigos:
+  - titulo: "pytest - Get Started"
+    url: "https://docs.pytest.org/en/stable/getting-started.html"
+    fonte: "pytest"
+  - titulo: "About dbt tests"
+    url: "https://docs.getdbt.com/docs/build/data-tests"
+    fonte: "dbt"
+  - titulo: "Great Expectations - Introduction"
+    url: "https://docs.greatexpectations.io/docs/home/"
+    fonte: "Great Expectations"
+flashcards:
+  - frente: "As duas metades da suíte num projeto de dados."
+    verso: "Teste de código (a função faz o que deveria) e teste de dado (a entrada e a saída têm as propriedades esperadas). Sem a segunda, dado que muda passa despercebido."
+  - frente: "Exemplos de teste de dado."
+    verso: "Unicidade da chave, não nulo em campo obrigatório, valores dentro de um conjunto aceito, integridade referencial, volume dentro de uma faixa, e total batendo com a origem."
+  - frente: "Por que testar volume mínimo?"
+    verso: "Porque um pipeline que processa um arquivo vazio termina com sucesso e zera o relatório. É a falha mais traiçoeira, porque tudo fica verde."
+  - frente: "O que é um teste que repete a implementação?"
+    verso: "Teste que calcula o resultado do mesmo jeito que o código. Ele passa junto com o bug. Teste bom afirma o valor esperado, obtido de fora."
+  - frente: "Estrutura de um teste."
+    verso: "Preparar (o cenário e os dados), executar (a função ou a transformação), afirmar (o resultado esperado). Serve para código e para dado."
+  - frente: "As três condições de reprodutibilidade."
+    verso: "Ambiente congelado (versões fixadas), entrada identificada (corte ou versão do dado) e execução sem estado escondido (rodar do zero)."
+  - frente: "Por que notebook que roda pode não ser reproduzível?"
+    verso: "Porque carrega variáveis de execuções anteriores e as células podem ter sido executadas fora de ordem. Reiniciar e rodar de cima para baixo é o teste."
+  - frente: "O que registrar junto com um número entregue?"
+    verso: "A versão do código, o corte do dado, a data da execução e as premissas assumidas. Sem isso, ninguém reproduz o valor depois."
+  - frente: "Cobertura de teste é boa métrica?"
+    verso: "Sozinha, não. Cobertura alta com asserções fracas dá falsa segurança. O que vale é ter caso de borda coberto e teste nascido de incidente real."
+  - frente: "De onde devem vir os melhores testes?"
+    verso: "De incidentes. Toda vez que algo quebrou, a causa vira teste. A suíte cresce a partir do que aconteceu, não do que se imagina."
+  - frente: "Teste com dado real ou sintético?"
+    verso: "Sintético ou amostrado e mascarado para o teste rodar sempre; dado real mascarado para validar casos de borda que só existem na produção."
+drills:
+  - titulo: "Qual teste pega isso?"
+    instrucao: "Para cada falha, diga o tipo de teste que a detectaria."
+    opcoes: ["Teste de código", "Teste de dado na entrada", "Teste de dado na saída", "Nenhum: é revisão humana"]
+    itens:
+      - enunciado: "A função de cálculo de percentual divide por zero quando o denominador é vazio."
+        resposta: "Teste de código"
+        explicacao: "Caso de borda da função, testável isoladamente."
+      - enunciado: "O arquivo de origem chegou vazio e o pipeline terminou com sucesso."
+        resposta: "Teste de dado na entrada"
+        explicacao: "Volume mínimo esperado."
+      - enunciado: "A tabela final tem chaves duplicadas depois de uma junção nova."
+        resposta: "Teste de dado na saída"
+        explicacao: "Unicidade da chave no resultado."
+      - enunciado: "A definição de cliente ativo usada no cálculo não é a que a área usa."
+        resposta: "Nenhum: é revisão humana"
+        explicacao: "Erro semântico; o código está correto para a regra errada."
+      - enunciado: "Uma categoria nova apareceu na origem e não é tratada."
+        resposta: "Teste de dado na entrada"
+        explicacao: "Conjunto de valores aceito, idealmente com alerta em vez de falha."
+perguntas:
+  - tipo: oral
+    enunciado: "Como você garante que o número que entregou hoje pode ser reproduzido daqui a seis meses?"
+    respostaModelo: "Reprodutibilidade tem três pernas, e faltando uma o número não volta. A primeira é o ambiente: as versões das bibliotecas precisam estar fixadas em arquivo versionado, porque a mesma análise com uma versão diferente pode devolver outro resultado, especialmente em ordenação e arredondamento. A segunda é a entrada: não basta dizer que rodei sobre a tabela de vendas, eu preciso do corte, ou seja, a data de referência ou a versão da tabela, porque a tabela de hoje não é a de seis meses atrás. Em ambiente que suporta, viagem no tempo resolve isso; onde não suporta, eu guardo o recorte usado ou pelo menos registro o carimbo. A terceira é a execução sem estado escondido, e aqui o vilão é o notebook: ele carrega variáveis de execuções anteriores e as células podem ter sido rodadas fora de ordem, então um notebook que 'funciona' na tela pode não funcionar do zero. Meu teste é reiniciar o núcleo e rodar de cima para baixo. Junto com o número eu entrego essas informações e as premissas que assumi, porque premissa não escrita é a coisa que ninguém consegue recuperar depois. E quando o número vira indicador recorrente, ele sai do notebook e vira transformação versionada com teste, exatamente para não depender da minha memória."
+    rubrica:
+      - "Nomeou as três condições: ambiente, entrada identificada, execução sem estado"
+      - "Explicou por que versão de biblioteca importa"
+      - "Falou de corte ou versão do dado, não apenas do nome da tabela"
+      - "Citou o teste concreto do notebook: reiniciar e rodar do zero"
+      - "Disse que indicador recorrente sai do notebook e vira transformação versionada"
+  - tipo: oral
+    enunciado: "Um pipeline rodou sem nenhum erro e o relatório saiu zerado. O que isso diz sobre a sua suíte de testes, e o que você acrescenta?"
+    respostaModelo: "Diz que a minha suíte testa o código e não testa o dado. Uma transformação correta sobre um arquivo vazio termina com sucesso, e tudo fica verde: nenhuma exceção, nenhum alerta, e o relatório zerado. O que falta é teste sobre o dado, e ele tem dois momentos. Na entrada, eu verifico volume dentro de uma faixa esperada, campos obrigatórios não nulos, e conjunto de valores aceito para as categorias, esse último com alerta em vez de falha, porque categoria nova é legítima e eu quero decidir, não quebrar. Na saída, eu verifico unicidade da chave, integridade referencial com as dimensões, e um teste de negócio comparando o total com a origem. Esse último é o que pega o erro de grão, que é o mais caro. Depois de corrigir e reprocessar, eu faço a coisa que evita a repetição: transformo essa causa específica em teste. É assim que a suíte cresce, a partir de incidente real, e não de imaginação. E eu tomo o cuidado de não escrever teste que repete a implementação, porque um teste que calcula do mesmo jeito que o código passa junto com o bug."
+    rubrica:
+      - "Diagnosticou a ausência de teste de dado, distinguindo de teste de código"
+      - "Deu exemplos de teste na entrada, incluindo volume mínimo"
+      - "Deu exemplos de teste na saída, incluindo comparação com a origem"
+      - "Diferenciou alerta de falha para categoria nova"
+      - "Propôs transformar a causa em teste e alertou contra teste que repete a implementação"
+  - tipo: unica
+    enunciado: "Qual afirmação sobre testes em projetos de dados é mais defensável?"
+    alternativas:
+      - texto: "A suíte precisa de testes de código e de testes sobre o dado, porque a entrada muda sem o código mudar."
+        correta: true
+        explicacao: "Nomeia o que diferencia dados de software comum e justifica as duas metades."
+      - texto: "Cobertura de teste acima de 80% garante qualidade do número."
+        correta: false
+        explicacao: "Cobertura alta com asserção fraca dá falsa segurança, e não olha o dado."
+      - texto: "Se o pipeline roda sem erro, os testes estão cumprindo o papel."
+        correta: false
+        explicacao: "Arquivo vazio roda sem erro e zera o relatório."
+      - texto: "Testes de dado substituem a revisão humana."
+        correta: false
+        explicacao: "Erro de regra de negócio passa por qualquer teste automático."
+  - tipo: multipla
+    enunciado: "Quais DUAS práticas tornam uma análise reproduzível por outra pessoa?"
+    alternativas:
+      - texto: "Fixar as versões das bibliotecas em arquivo versionado junto com o código."
+        correta: true
+        explicacao: "Congela o ambiente, que é uma das fontes de divergência silenciosa."
+      - texto: "Registrar o corte ou a versão do dado usado, e não apenas o nome da tabela."
+        correta: true
+        explicacao: "A tabela muda; sem o corte, o resultado não volta."
+      - texto: "Salvar o notebook com todas as saídas preenchidas."
+        correta: false
+        explicacao: "Mostra o resultado antigo; não garante que ele seja obtido de novo."
+      - texto: "Aumentar a cobertura de testes para acima de 90%."
+        correta: false
+        explicacao: "Cobertura não tem relação direta com reprodutibilidade."
+      - texto: "Executar a análise sempre na mesma máquina."
+        correta: false
+        explicacao: "Amarra a reprodução a um equipamento, que é o oposto do objetivo."
+---
+
+## Em uma frase
+
+Em dados, a suíte tem **duas metades** — teste de código e teste do dado — e
+reprodutibilidade tem **três pernas**: ambiente congelado, entrada
+identificada e execução sem estado escondido.
+
+## Por que testar o dado, e não só o código
+
+A transformação pode estar perfeita e o número sair errado, porque **a entrada
+mudou sem o seu código mudar**: coluna passou a vir nula, apareceu categoria
+nova, surgiu duplicata, o arquivo veio vazio.
+
+<Callout tipo="atencao" titulo="A falha mais traiçoeira">
+Um pipeline que processa um **arquivo vazio** termina com sucesso. Nenhuma
+exceção, nenhum alerta, tudo verde — e o relatório zerado. Só um teste de
+**volume mínimo** na entrada pega isso.
+</Callout>
+
+<Comparativo
+  colunas={["Momento", "O que verificar"]}
+  linhas={[
+    ["Entrada", "Volume dentro da faixa, campos obrigatórios não nulos, conjunto de valores aceito, esquema esperado"],
+    ["Saída", "Unicidade da chave, integridade com as dimensões, total batendo com a origem"],
+    ["Código", "Casos de borda das funções: divisão por zero, lista vazia, data inválida"]
+  ]}
+/>
+
+Para **categoria nova** na entrada, prefira **alerta** a falha: categoria nova
+costuma ser legítima, e você quer decidir, não quebrar a madrugada.
+
+## O teste que passa junto com o bug
+
+Um teste que calcula o resultado **do mesmo jeito que o código** não testa
+nada: ele reproduz a lógica, inclusive o erro. Teste bom afirma o **valor
+esperado**, obtido de fora — da regra escrita, de um cálculo manual, da
+origem.
+
+E os melhores testes não são imaginados: **vêm de incidentes**. Cada vez que
+algo quebra, a causa vira teste. A suíte cresce a partir do que aconteceu.
+
+## As três pernas da reprodutibilidade
+
+<Passos itens={[
+  "Ambiente congelado: versões das bibliotecas fixadas em arquivo versionado, porque a mesma análise com outra versão pode arredondar ou ordenar diferente.",
+  "Entrada identificada: não 'a tabela de vendas', mas o corte — data de referência ou versão da tabela. A tabela de hoje não é a de seis meses atrás.",
+  "Execução sem estado escondido: reiniciar e rodar do zero. Notebook que funciona na tela pode não funcionar de cima para baixo."
+]} />
+
+<Callout tipo="dica" titulo="O teste do notebook">
+Reinicie o núcleo e execute tudo de cima para baixo. Se falhar, o notebook
+dependia de uma variável de execução anterior ou de células rodadas fora de
+ordem — e ninguém, incluindo você, reproduz aquele número depois.
+</Callout>
+
+Junto com o número, entregue **o que foi assumido**. Premissa não escrita é o
+que ninguém consegue recuperar seis meses depois.
+
+## Quando sai do notebook
+
+Indicador **recorrente** não mora em notebook. Ele vira transformação
+versionada, com teste, orquestração e dono — exatamente para não depender da
+sua memória nem da sua máquina. O notebook fica onde ele é bom: exploração.
+
+## Como responder isso em voz alta
+
+Separe as **duas metades** da suíte e dê exemplo de cada. Para
+reprodutibilidade, cite as **três pernas** e o teste concreto do notebook.
+Termine dizendo que os melhores testes vêm de incidentes — isso mostra que
+você já operou algo, e não só leu a respeito.

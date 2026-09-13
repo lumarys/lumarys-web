@@ -1,0 +1,229 @@
+---
+slug: git-e-revisao-de-codigo
+titulo: "Git e revisão de código para quem trabalha com dados"
+resumo: "O fluxo que transforma consulta solta em trabalho de equipe: branch por mudança, commit que explica a intenção, pedido de revisão com contexto, e o que um revisor deve olhar quando o que mudou é SQL e não aplicação."
+minutos: 30
+nivel: fundamental
+publicadoEm: "2026-09-12"
+porQue: "A ementa pede Git, mas a banca pergunta outra coisa: como o seu trabalho vira algo que outra pessoa consegue revisar, repetir e reverter. Quem responde citando comandos perde; quem descreve o fluxo, o que escreve no pedido de revisão e o que olha ao revisar SQL alheio mostra que trabalha em equipe."
+comoCai: "Como uma mudança sua numa transformação chega ao repositório e ao ambiente dos outros?"
+feynman: "Explique em um minuto por que salvar 'consulta_final_v3_ok.sql' na sua máquina é pior que um histórico de versões, mesmo trabalhando sozinho."
+preRequisitos: []
+errosComuns:
+  - "Commitar na branch principal direto. Perde revisão, perde o momento em que alguém poderia ter visto o erro, e dificulta reverter só aquela mudança."
+  - "Escrever mensagem de commit que descreve o diff. 'Altera consulta' não diz nada; a mensagem existe para explicar a intenção e o porquê, que o diff não mostra."
+  - "Abrir pedido de revisão gigante. Revisão de 800 linhas vira aprovação sem leitura; mudança pequena e frequente é revisada de verdade."
+  - "Revisar SQL procurando erro de sintaxe. Isso o computador faz; o revisor humano existe para checar grão, regra de negócio e impacto em quem consome."
+  - "Versionar credencial junto com o código. Repositório é histórico permanente; apagar em commit posterior não apaga do histórico."
+  - "Tratar notebook como entregável versionado sem cuidado. Notebook guarda saída e ordem de execução, o que polui o diff e esconde estado; o que vai para o repositório precisa ser limpo ou convertido."
+preTeste:
+  - enunciado: "O que uma boa mensagem de commit deve conter?"
+    alternativas:
+      - texto: "A intenção e o motivo da mudança, que o diff não mostra."
+        correta: true
+        explicacao: "O diff já diz o que mudou; a mensagem existe para dizer por quê, que é o que ajuda alguém daqui a seis meses."
+      - texto: "A lista dos arquivos alterados."
+        correta: false
+        explicacao: "Isso o próprio commit já registra."
+      - texto: "O nome de quem pediu a mudança."
+        correta: false
+        explicacao: "Pode ajudar como contexto, mas não substitui o motivo."
+  - enunciado: "Ao revisar uma mudança em um modelo de dados, o que um revisor humano deve priorizar?"
+    alternativas:
+      - texto: "Se o grão continua o mesmo, se a regra de negócio está correta e quem consome aquele modelo é afetado."
+        correta: true
+        explicacao: "São exatamente as coisas que nenhuma verificação automática detecta."
+      - texto: "Indentação e nomes de variáveis."
+        correta: false
+        explicacao: "Formatação é trabalho de ferramenta automática."
+      - texto: "Se o SQL executa sem erro."
+        correta: false
+        explicacao: "A verificação automática já roda isso antes da revisão."
+videos:
+  - id: thtAHpgYVg8
+    publicadoEm: "2020-04-05"
+    titulo: "Git - Pull requests, Code review e contribuição em projetos"
+    canal: "Angelo Luz"
+    duracao: 31
+    porQue: "Cobre o fluxo completo de contribuição e revisão, que é o que a pergunta cobra. Assista pensando em como isso se aplica a uma mudança de SQL, não de aplicação."
+  - id: 7xB6PPKr61w
+    publicadoEm: "2025-07-01"
+    titulo: "Git e GitHub do Zero: Como Fazer seu Primeiro Pull Request na Prática"
+    canal: "Seleghin - SelegaDev"
+    duracao: 19
+    porQue: "Complementar e prático, para quem nunca abriu um pedido de revisão. Repare no que ele escreve na descrição: é ali que o contexto da mudança vive."
+artigos:
+  - titulo: "Sobre pull requests"
+    url: "https://docs.github.com/pt/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests"
+    fonte: "GitHub"
+  - titulo: "Git - Branches em poucas palavras"
+    url: "https://git-scm.com/book/pt-br/v2/Branches-no-Git-Branches-em-poucas-palavras"
+    fonte: "Git"
+  - titulo: "Conventional Commits"
+    url: "https://www.conventionalcommits.org/pt-br/v1.0.0/"
+    fonte: "Conventional Commits"
+flashcards:
+  - frente: "Por que branch por mudança?"
+    verso: "Isola o trabalho em andamento, permite revisão antes de integrar e torna possível reverter só aquela mudança sem desfazer as outras."
+  - frente: "O que uma mensagem de commit deve dizer?"
+    verso: "A intenção e o motivo. O diff já mostra o que mudou; a mensagem responde por que mudou, que é o que falta daqui a seis meses."
+  - frente: "O que escrever na descrição de um pedido de revisão de dados?"
+    verso: "O que muda no número, quem consome o modelo afetado, como você validou (teste, comparação com a origem) e o que fazer se der errado."
+  - frente: "Por que mudanças pequenas são revisadas melhor?"
+    verso: "Porque revisão grande vira aprovação sem leitura. Mudança pequena e frequente cabe na cabeça do revisor."
+  - frente: "O que o revisor humano deve olhar em SQL?"
+    verso: "Grão (uma linha representa o quê), regra de negócio, impacto em quem consome, e se os testes cobrem o caso mudado. Sintaxe e formatação são trabalho de ferramenta."
+  - frente: "O que nunca entra no repositório?"
+    verso: "Credencial, chave, token e dado pessoal. Repositório é histórico permanente: apagar depois não apaga do histórico, e quem clonou já tem."
+  - frente: "Como versionar notebook sem sujar o histórico?"
+    verso: "Limpar as saídas antes de commitar, ou converter a lógica estável para módulo e deixar o notebook só como exploração."
+  - frente: "O que é revisão por par e por que importa em dados?"
+    verso: "Outra pessoa lê a mudança antes de integrar. Em dados, é o único mecanismo que pega erro de regra de negócio, que nenhuma automação detecta."
+  - frente: "Por que usar Conventional Commits?"
+    verso: "Padroniza o tipo da mudança e permite gerar histórico legível e automação. Em time pequeno vale pela disciplina de nomear a intenção."
+  - frente: "Qual a vantagem de histórico versionado mesmo trabalhando sozinho?"
+    verso: "Saber o que mudou e por quê, voltar a um estado que funcionava, e não depender de arquivos com sufixo _final_v3 que ninguém sabe qual é o bom."
+drills:
+  - titulo: "Automação ou pessoa?"
+    instrucao: "Para cada item, diga quem deveria pegar isso."
+    opcoes: ["Ferramenta automática", "Revisor humano"]
+    itens:
+      - enunciado: "Indentação e formatação do SQL."
+        resposta: "Ferramenta automática"
+        explicacao: "Formatador resolve, e discutir isso em revisão desperdiça atenção."
+      - enunciado: "A junção mudou o grão da tabela."
+        resposta: "Revisor humano"
+        explicacao: "Exige entender o que a tabela representa."
+      - enunciado: "Coluna obrigatória ficou nula na saída."
+        resposta: "Ferramenta automática"
+        explicacao: "Teste de dado detecta."
+      - enunciado: "A definição de cliente ativo mudou sem avisar a área de negócio."
+        resposta: "Revisor humano"
+        explicacao: "É julgamento de impacto, não verificação."
+      - enunciado: "O SQL tem erro de sintaxe."
+        resposta: "Ferramenta automática"
+        explicacao: "Falha na verificação antes da revisão."
+perguntas:
+  - tipo: oral
+    enunciado: "Descreva como uma mudança sua numa transformação chega ao repositório e ao ambiente das outras pessoas."
+    respostaModelo: "Eu começo criando uma branch para aquela mudança específica, porque isso isola o trabalho e me permite reverter só ela depois, se precisar. Faço commits pequenos, e cada mensagem explica a intenção, não o diff: o diff já mostra que a linha mudou, o que falta é por que mudou. Quando termino, abro um pedido de revisão, e a descrição é onde eu invisto tempo em dados, porque ela precisa responder três coisas: o que muda no número, quem consome o modelo afetado, e como eu validei. Validar aqui significa dizer que os testes rodaram, que eu comparei o total com a origem, e o que eu olhei além disso. A verificação automática roda sozinha: constrói os modelos num ambiente isolado, executa os testes de dados, e se algo falha eu conserto antes de pedir atenção de alguém. Aí vem a revisão humana, que existe para o que a automação não pega: se o grão continua o mesmo, se a regra de negócio está certa, e se alguém precisa ser avisado. Aprovado, integra na principal e a promoção para os ambientes é automática, com o mesmo artefato. Trabalhando sozinho eu mantenho o mesmo fluxo, menos a revisão de outra pessoa, porque o valor do histórico e do caminho de volta não depende do tamanho do time."
+    rubrica:
+      - "Descreveu branch por mudança e a razão (isolar e reverter)"
+      - "Disse que a mensagem de commit explica intenção, não diff"
+      - "Listou o que a descrição do pedido de revisão precisa responder em contexto de dados"
+      - "Separou o que a automação verifica do que o humano revisa"
+      - "Mencionou promoção com o mesmo artefato, e manteve o fluxo mesmo sozinho"
+  - tipo: oral
+    enunciado: "Você foi revisar a mudança de um colega num modelo que alimenta um indicador. O que você olha?"
+    respostaModelo: "A primeira coisa que eu olho não é o código, é a descrição: o que ele diz que muda no número e quem consome. Se isso não estiver claro, eu pergunto antes de ler, porque sem saber a intenção eu só consigo revisar sintaxe, que o computador já fez. Depois eu olho três coisas no código. Grão: a mudança alterou o que uma linha representa? Qualquer junção nova é suspeita até eu confirmar que a chave é única do outro lado. Regra de negócio: a definição que ele implementou bate com a definição que a área usa? É aqui que mora o erro caro, porque o SQL roda perfeitamente e devolve o número errado. E impacto: quem consome esse modelo, e a mudança é compatível ou vai quebrar alguém? Se for incompatível, eu peço publicação em paralelo com prazo, não renomeação em cima. Também confiro se os testes cobrem o caso que mudou, porque mudança sem teste novo costuma significar que ninguém vai perceber quando quebrar de novo. O que eu não faço é comentar indentação e nome de variável: isso é trabalho de formatador, e gastar a atenção do revisor com isso é o jeito mais eficiente de deixar passar o que importa."
+    rubrica:
+      - "Começou pela descrição e pela intenção, antes do código"
+      - "Citou grão e desconfiança de junção nova"
+      - "Citou regra de negócio como o erro caro que a automação não pega"
+      - "Avaliou impacto em quem consome e pediu publicação em paralelo se incompatível"
+      - "Recusou revisar formatação, atribuindo isso à ferramenta"
+  - tipo: unica
+    enunciado: "Qual prática de revisão de código é mais defensável num time de dados?"
+    alternativas:
+      - texto: "Mudanças pequenas e frequentes, com a automação cuidando de sintaxe e testes e o humano cuidando de grão, regra e impacto."
+        correta: true
+        explicacao: "Divide o trabalho pelo que cada um faz bem e mantém a revisão em tamanho revisável."
+      - texto: "Uma revisão grande por sprint, para não interromper o fluxo das pessoas."
+        correta: false
+        explicacao: "Revisão grande vira aprovação sem leitura."
+      - texto: "Dispensar revisão quando a mudança é só SQL."
+        correta: false
+        explicacao: "SQL válido devolve número errado com facilidade; é justamente onde a revisão humana rende."
+      - texto: "Revisar linha a linha procurando erros de formatação."
+        correta: false
+        explicacao: "Consome a atenção que deveria ir para grão e regra de negócio."
+  - tipo: multipla
+    enunciado: "Quais DUAS informações uma descrição de pedido de revisão em um projeto de dados deve trazer?"
+    alternativas:
+      - texto: "O que muda no número e quais consumidores são afetados."
+        correta: true
+        explicacao: "É o que permite ao revisor avaliar impacto, e não só corretude sintática."
+      - texto: "Como a mudança foi validada, incluindo comparação com a origem."
+        correta: true
+        explicacao: "Mostra que o autor conferiu o resultado, não só que o código roda."
+      - texto: "A lista de arquivos alterados."
+        correta: false
+        explicacao: "O próprio pedido de revisão já mostra."
+      - texto: "O tempo gasto na tarefa."
+        correta: false
+        explicacao: "Irrelevante para a revisão."
+      - texto: "A versão da ferramenta usada localmente."
+        correta: false
+        explicacao: "Relevante só quando a versão é a causa do problema."
+---
+
+## Em uma frase
+
+O fluxo existe para que a sua mudança seja **revisável, repetível e
+reversível** — e, em dados, o revisor humano cuida do que nenhuma automação
+pega: **grão, regra de negócio e impacto em quem consome**.
+
+## O fluxo, e o porquê de cada passo
+
+<Comparativo
+  colunas={["Passo", "Para que serve"]}
+  linhas={[
+    ["Branch por mudança", "Isolar o trabalho e permitir reverter só aquilo depois"],
+    ["Commits pequenos com intenção", "Explicar o porquê, que o diff não mostra"],
+    ["Pedido de revisão com contexto", "Dar ao revisor o que ele precisa para avaliar impacto"],
+    ["Verificação automática", "Sintaxe, construção isolada, testes de dado"],
+    ["Revisão humana", "Grão, regra de negócio, impacto, cobertura de teste"],
+    ["Integração e promoção", "Mesmo artefato avançando entre ambientes"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="A mensagem de commit não descreve o diff">
+"Altera consulta" não informa nada: o diff já mostra o que mudou. A mensagem
+existe para a pergunta que o diff **não** responde — por que mudou. É o que
+salva alguém daqui a seis meses, inclusive você.
+</Callout>
+
+## O que escrever num pedido de revisão de dados
+
+Três perguntas, e elas são diferentes das de um projeto de aplicação:
+
+1. **O que muda no número?** Se a definição de um indicador mudou, isso é a
+   informação mais importante do pedido.
+2. **Quem consome o modelo afetado?** Vem da linhagem, e define quem precisa
+   ser avisado.
+3. **Como você validou?** Testes que rodaram, comparação do total com a origem,
+   o que mais você conferiu.
+
+## Automação e pessoa: dividir por competência
+
+<Comparativo
+  colunas={["Quem pega", "O quê"]}
+  linhas={[
+    ["Ferramenta", "Sintaxe, formatação, construção isolada, testes de dado, cobertura"],
+    ["Pessoa", "Grão mudou? Regra bate com a definição do negócio? Quem quebra? Falta teste?"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Onde a revisão humana realmente rende">
+O erro caro em dados é o **SQL que roda perfeitamente e devolve o número
+errado**. Nenhum linter pega isso. Gastar a revisão com indentação é o jeito
+mais eficiente de deixar esse erro passar.
+</Callout>
+
+## Duas armadilhas específicas de dados
+
+**Credencial no repositório.** O histórico é permanente: apagar num commit
+posterior não remove do histórico, e quem clonou antes já tem. Segredo vai
+para cofre, sempre.
+
+**Notebook versionado sem cuidado.** Ele guarda saídas e a ordem em que as
+células foram executadas, o que polui o diff e esconde estado. Limpe as saídas
+antes de commitar, ou promova a lógica estável para um módulo e deixe o
+notebook como exploração.
+
+## Como responder isso em voz alta
+
+Descreva o **fluxo**, não os comandos. Diga o que vai na descrição do pedido de
+revisão em contexto de dados. E separe explicitamente o que a automação
+verifica do que a pessoa revisa — é essa separação que mostra que você já
+revisou o trabalho de alguém, e não só leu sobre o assunto.

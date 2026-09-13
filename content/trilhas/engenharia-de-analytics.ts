@@ -30,7 +30,7 @@ export const engenhariaDeAnalytics: Trilha = {
   resumo:
     "A ementa oficial de uma carreira de Engenharia de Analytics no mercado financeiro, transformada em estudo ativo. Começa pelo módulo Big Data completo e cresce módulo a módulo: AWS, banco de dados, programação, DevOps, dataviz e Data Mesh.",
   formatoProva: "Sabatina oral com banca",
-  prazoSugeridoDias: 22,
+  prazoSugeridoDias: 26,
   status: "disponivel",
   modulos: [
     {
@@ -82,10 +82,10 @@ export const engenhariaDeAnalytics: Trilha = {
       slug: "programacao",
       titulo: "Programação",
       resumo:
-        "Python para dados, SQL como linguagem principal, Git e o fluxo de revisão, testes e notebooks.",
-      status: "em-breve",
+        "Python para dados sem armadilha de tipo, nulo e grão; Git e revisão de código; testes e reprodutibilidade. SQL e JSON vivem nos módulos de banco de dados e Big Data desta mesma trilha.",
+      status: "disponivel",
       oficial: false,
-      temas: [],
+      temas: ["python-para-analytics", "git-e-revisao-de-codigo", "testes-e-reprodutibilidade"],
     },
     {
       slug: "devops",
@@ -259,10 +259,36 @@ export const engenhariaDeAnalytics: Trilha = {
     },
     {
       dia: 22,
-      titulo: "Revisão leve",
+      titulo: "Revisão e checkpoints",
       temas: [],
       revisao: ["devops", "data-mesh"],
-      nota: "Só cards vencidos e as folhas de revisão. Programação, dataviz e Além da ementa entram em breve.",
+      nota: "Cards vencidos, folhas de revisão e os checkpoints de DevOps e Data Mesh.",
+    },
+    {
+      dia: 23,
+      titulo: "Python para analytics",
+      temas: ["python-para-analytics"],
+      revisao: ["data-mesh"],
+      nota: "Os três lugares onde o número sai errado em silêncio: tipo, nulo e grão.",
+    },
+    {
+      dia: 24,
+      titulo: "Git e revisão de código",
+      temas: ["git-e-revisao-de-codigo"],
+      revisao: ["programacao"],
+    },
+    {
+      dia: 25,
+      titulo: "Testes e reprodutibilidade",
+      temas: ["testes-e-reprodutibilidade"],
+      revisao: ["programacao"],
+    },
+    {
+      dia: 26,
+      titulo: "Revisão leve",
+      temas: [],
+      revisao: ["programacao", "devops"],
+      nota: "Só cards vencidos e as folhas de revisão. Dataviz e Além da ementa entram em breve.",
     },
   ],
 };
