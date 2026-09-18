@@ -39,26 +39,26 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.716.0",
-    "@aws-sdk/client-dynamodb": "^3.716.0",
-    "@aws-sdk/lib-dynamodb": "^3.716.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1132.0",
+    "@aws-sdk/client-dynamodb": "^3.1132.0",
+    "@aws-sdk/lib-dynamodb": "^3.1132.0",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/aws-lambda": "^8.10.147",
     "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "adm-zip": "^0.6.0",
+    "adm-zip": "^0.6.1",
     "esbuild": "^0.28.2",
     "eslint": "^10",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.3.5",
     "jsdom": "^30.0.1",
-    "lefthook": "^2.1.12",
+    "lefthook": "^2.1.14",
     "prettier": "^3.4.2",
     "tailwindcss": "^4",
-    "typescript": "^6.0.3",
-    "vitest": "^5.0.0"
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
   }
 }
