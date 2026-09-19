@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 /**
  * A trilha fundacional de AWS. O que muda em relação à SAA: a CLF ainda está
  * sendo escrita domínio a domínio, então a página da trilha mostra os quatro
- * pesos do exame mas só dois módulos abrem, e a prova simulada sai menor que
+ * pesos do exame mas só três módulos abrem, e a prova simulada sai menor que
  * as 65 questões oficiais, dizendo na tela para quantas o banco dá.
  *
  * Este arquivo nasceu de `saa.spec.ts`: o que é igual continua igual de
@@ -49,9 +49,10 @@ test("a trilha mostra o exame: versão, formato, corte e o peso de cada domínio
 
 test("os domínios ainda não escritos aparecem como 'em breve', sem abrir", async ({ page }) => {
   await page.goto(CLF);
-  // Três domínios em breve: segurança, tecnologia e cobrança. Quando o último
-  // for publicado, esta contagem cai para zero e o teste falha de propósito.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(3);
+  // Dois domínios em breve: tecnologia e cobrança. Segurança saiu do "em breve"
+  // no LUM-144. Quando o último for publicado, esta contagem cai para zero e o
+  // teste falha de propósito.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(2);
   await expect(page.getByText("Conceitos de nuvem").first()).toBeVisible();
 });
 

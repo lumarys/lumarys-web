@@ -26,6 +26,14 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Economia da nuvem](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/economia-da-nuvem/): Despesa de capital contra despesa operacional, custo fixo contra variável, o que entra no custo total de propriedade de um data center, licenciamento próprio ou incluso, dimensionamento correto e o ganho de automatizar. É a tarefa 1.4 do guia da CLF-C02.
 - [Migração: os 7 Rs e o Cloud Adoption Framework](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/migracao-para-a-nuvem-7-rs-e-caf/): As sete estratégias de migração que a AWS nomeia, com o caso que aponta cada uma, as perspectivas do Cloud Adoption Framework e os serviços de apoio à migração no nível de reconhecimento que a CLF-C02 cobra.
 
+### Segurança e conformidade
+
+- [O modelo de responsabilidade compartilhada](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/modelo-de-responsabilidade-compartilhada/): Segurança da nuvem é da AWS, segurança na nuvem é do cliente: onde a linha cai em EC2, RDS, Lambda e S3, o que a AWS nunca faz pelo cliente e como reconhecer o lado certo num enunciado de duas linhas.
+- [IAM: usuários, grupos, roles e políticas](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/iam-usuarios-grupos-roles-e-politicas/): Quem é quem no IAM: usuário raiz e o que fazer com ele, MFA, chaves de acesso, grupos, roles com credenciais temporárias, políticas gerenciadas e inline, privilégio mínimo e onde entra o IAM Identity Center.
+- [Conformidade e governança na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/conformidade-e-governanca-na-aws/): Onde baixar relatório de auditoria, quem responde pela conformidade de cada camada, o que região tem a ver com residência de dados e o papel de Artifact, CloudTrail, Config, Audit Manager e Control Tower no enunciado da prova.
+- [Os serviços de segurança e o que cada um detecta](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/servicos-de-seguranca-da-aws/): GuardDuty, Inspector, Macie, Security Hub, Detective, Shield, WAF, Firewall Manager, Network Firewall e Trusted Advisor: o que cada serviço detecta ou bloqueia, e a palavra do enunciado que aponta para ele.
+- [Criptografia em repouso e em trânsito](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/criptografia-em-repouso-e-em-transito/): KMS e CloudHSM, chaves gerenciadas pela AWS e pelo cliente, criptografia padrão de S3, EBS e RDS, certificados do ACM para TLS e a escolha entre Secrets Manager e Parameter Store, com a pergunta que resolve cada questão: quem tem a chave.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.
@@ -727,6 +735,491 @@ banco, arquivo ou volume grande com rede ruim, cada um tem o seu serviço.
 - Tratar relocate como sinônimo de rehost. Relocate move a plataforma inteira, ou instâncias e objetos entre ambientes, sem comprar hardware nem alterar a operação existente.
 - Misturar o Cloud Adoption Framework com o Well-Architected Framework. O CAF organiza a jornada da organização; o Well-Architected avalia uma carga de trabalho.
 - Achar que o Database Migration Service serve para migrar servidor inteiro. Ele replica banco de dados; servidor é Application Migration Service.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# O modelo de responsabilidade compartilhada
+
+Trilha: AWS Cloud Practitioner · Módulo: Segurança e conformidade
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/modelo-de-responsabilidade-compartilhada/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Segurança da nuvem é da AWS, segurança na nuvem é do cliente: onde a linha cai em EC2, RDS, Lambda e S3, o que a AWS nunca faz pelo cliente e como reconhecer o lado certo num enunciado de duas linhas.
+
+**Por que cai na prova.** É a tarefa 2.1 do guia e abre o domínio de maior peso da prova. O formato é sempre o mesmo: o enunciado cita um serviço e uma atividade e pergunta de quem é a responsabilidade. Quem não sabe que a linha se move conforme o serviço responde no chute.
+
+**Como o entrevistador pergunta.** "Uma empresa executa uma aplicação em instâncias EC2. Quem é responsável por aplicar as correções de segurança do sistema operacional convidado?"
+
+## Em uma frase
+
+A AWS responde pela segurança **da** nuvem, que é a infraestrutura que ela
+opera, e o cliente responde pela segurança **na** nuvem, que é tudo o que ele
+coloca em cima dela; a prova só quer saber de que lado da linha uma atividade
+cai.
+
+## A linha se move com o serviço
+
+Este é o ponto que mais derruba candidato. A divisão não é fixa: quanto mais
+gerenciado o serviço, mais camadas a AWS assume e menos sobra para o cliente na
+infraestrutura.
+
+<Comparativo
+  colunas={["Serviço", "A AWS cuida de", "O cliente cuida de"]}
+  linhas={[
+    ["EC2", "Hipervisor, hardware, rede física, instalações", "Sistema operacional convidado e suas correções, firewall da instância, aplicação, dados"],
+    ["RDS", "Sistema operacional, motor do banco, correções, backup automatizado", "Usuários e permissões do banco, configuração de rede, ativar criptografia, os dados"],
+    ["S3", "Durabilidade, infraestrutura de armazenamento, correção dos servidores", "Quem acessa o bucket, versionamento, escolha de criptografia, os objetos"],
+    ["Lambda", "Ambiente de execução, escala, correção da plataforma", "Código, dependências, role de execução, os dados que a função manipula"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A pergunta que resolve qualquer item">
+Antes de responder, pergunte: **o cliente consegue mexer nisso pelo console, pela
+CLI ou pela API?** Se consegue, a responsabilidade é dele. Se não existe onde
+configurar, é da AWS. Correção do hipervisor não tem botão; permissão de bucket
+tem.
+</Callout>
+
+## O que nunca sai do cliente
+
+Três coisas ficam com o cliente em qualquer serviço, do EC2 ao Lambda:
+
+<Passos itens={[
+  "Os dados: o que são, quão sensíveis são e por quanto tempo ficam guardados. A AWS não olha o conteúdo do cliente.",
+  "As identidades e permissões: quem pode fazer o quê. Criar usuário, role e política é sempre ato do cliente.",
+  "As credenciais de acesso e a configuração de quem alcança o recurso, incluindo a decisão de criptografar."
+]} />
+
+A recíproca também é absoluta. Segurança física das instalações, hardware,
+rede física, descarte de mídia e a camada de virtualização são exclusivas da
+AWS, e o cliente não tem como participar nem como auditar diretamente: ele
+recebe isso na forma de relatório de conformidade.
+
+## Controles herdados e controles compartilhados
+
+O modelo tem três categorias, e a prova costuma citar as duas primeiras pelo
+nome.
+
+<Comparativo
+  colunas={["Categoria", "Quem executa", "Exemplo"]}
+  linhas={[
+    ["Herdado", "AWS inteira", "Segurança física e ambiental dos data centers"],
+    ["Compartilhado", "Os dois, em camadas diferentes", "Gestão de correções, gestão de configuração, conscientização e treinamento"],
+    ["Específico do cliente", "Cliente inteiro", "Proteção do dado, comunicação e zoneamento de rede da aplicação"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Compartilhado não é metade e metade">
+Gestão de correções aparece como controle compartilhado, mas isso não significa
+que a AWS corrige metade do sistema operacional da sua instância. Significa que
+**cada parte corrige a sua camada**: a AWS a infraestrutura, o cliente o que ele
+instalou. A palavra compartilhado descreve o controle, não a tarefa.
+</Callout>
+
+## Como responder o cenário
+
+Leia o serviço citado primeiro, porque é ele que posiciona a linha. Depois
+classifique a atividade em uma das três faixas: infraestrutura física e
+virtualização apontam AWS; dado, identidade e permissão apontam cliente; sistema
+operacional e motor de banco dependem do serviço, e é aí que a questão mora. Se
+o enunciado disser EC2, o sistema operacional é do cliente; se disser RDS,
+Lambda ou qualquer serviço descrito como gerenciado, o sistema operacional é da
+AWS. Quando aparecer conformidade, lembre que ela é das duas partes: a AWS
+certifica a infraestrutura e o cliente responde pelo que construiu sobre ela.
+
+## Erros comuns
+
+- Achar que a linha é fixa. Ela se move com o serviço: no EC2 o cliente cuida do sistema operacional convidado; no RDS quem corrige o sistema operacional e o motor do banco é a AWS.
+- Concluir que a AWS cuida da segurança dos dados porque cuida da infraestrutura. O conteúdo dos dados, a classificação deles e quem tem acesso são sempre do cliente.
+- Confundir segurança da nuvem com segurança na nuvem. Da nuvem é a infraestrutura que a AWS opera; na nuvem é o que o cliente coloca em cima dela.
+- Supor que serviço gerenciado significa nenhuma responsabilidade. Mesmo em S3 e Lambda o cliente continua responsável por permissões, configuração de acesso e criptografia do que grava.
+- Esquecer os controles compartilhados. Gestão de correções, gestão de configuração e conscientização existem dos dois lados, cada um na sua camada.
+- Tratar descarte de hardware e segurança física como algo configurável. São responsabilidades exclusivas da AWS e o cliente não participa delas.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# IAM: usuários, grupos, roles e políticas
+
+Trilha: AWS Cloud Practitioner · Módulo: Segurança e conformidade
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/iam-usuarios-grupos-roles-e-politicas/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** Quem é quem no IAM: usuário raiz e o que fazer com ele, MFA, chaves de acesso, grupos, roles com credenciais temporárias, políticas gerenciadas e inline, privilégio mínimo e onde entra o IAM Identity Center.
+
+**Por que cai na prova.** É a tarefa 2.3 do guia e o tema mais denso do domínio de maior peso. A prova não pede política escrita em JSON: ela descreve uma necessidade de acesso em duas linhas e pergunta qual componente do IAM atende. Usuário, grupo e role parecem intercambiáveis para quem nunca separou os três.
+
+**Como o entrevistador pergunta.** "Uma aplicação em uma instância EC2 precisa ler objetos de um bucket do S3. Qual é a forma recomendada de conceder esse acesso?"
+
+## Em uma frase
+
+O IAM é onde a conta decide **quem pode fazer o quê**, e a prova pede quase
+sempre a mesma coisa: dada uma necessidade de acesso em duas linhas, qual dos
+quatro componentes do IAM (usuário, grupo, role, política) atende.
+
+## Os quatro componentes e a pista de cada um
+
+<Comparativo
+  colunas={["Componente", "O que é", "A pista no enunciado"]}
+  linhas={[
+    ["Usuário", "Identidade permanente, com senha e possivelmente chave de acesso", "Uma pessoa, acesso ao console, conta única"],
+    ["Grupo", "Conjunto de usuários que herdam a mesma política", "Vários funcionários com as mesmas permissões, mudança em um lugar só"],
+    ["Role", "Identidade sem senha, assumida por um tempo, com credencial temporária", "Serviço acessando serviço, acesso entre contas, acesso temporário"],
+    ["Política", "Documento que concede ou nega ações sobre recursos", "Definir o que pode ser feito, reaproveitar permissões"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A regra que resolve metade das questões">
+Se o enunciado diz que **uma aplicação, uma função ou uma instância** precisa
+acessar outro serviço da AWS, a resposta é **role**. Nunca é chave de acesso
+gravada no servidor, e nunca é o usuário raiz. Esse par aparece na prova em
+várias roupagens e a resposta certa não muda.
+</Callout>
+
+## O usuário raiz
+
+O raiz é a identidade criada junto com a conta e tem acesso irrestrito, inclusive
+ao que nenhuma política consegue limitar. A recomendação da AWS é tratá-lo como
+cofre: ative MFA, não gere chave de acesso para ele, não o use no dia a dia e
+crie identidades com privilégio mínimo para o trabalho normal. Ele fica
+reservado para as poucas tarefas que exigem a conta, como alterar o plano de
+suporte ou encerrar a conta.
+
+## Políticas: gerenciada, inline e como a decisão é tomada
+
+Uma política diz quais ações são permitidas sobre quais recursos. A
+**gerenciada** é um objeto independente, anexável a vários usuários, grupos e
+roles, e existe na variedade publicada pela AWS e na criada pelo cliente. A
+**inline** fica embutida em uma única identidade e é apagada junto com ela.
+
+<Callout tipo="atencao" titulo="Negação explícita vence tudo">
+O IAM nega por padrão. Uma permissão explícita libera a ação, mas se **qualquer**
+política aplicável contiver uma negação explícita, o pedido é recusado, por mais
+ampla que seja a permissão concedida em outro lugar. Enunciado que descreve
+acesso negado apesar de política permissiva está apontando para isso.
+</Callout>
+
+## IAM Identity Center
+
+Quando a empresa tem várias contas, criar um usuário por pessoa em cada conta
+não escala. O **IAM Identity Center** conecta o diretório de identidades da
+empresa e dá a cada pessoa um login único, com escolha da conta a acessar e
+credenciais temporárias. O que a pessoa pode fazer dentro da conta continua
+sendo definido por política. Ele resolve **quem entra**; o IAM continua
+resolvendo **o que se pode fazer**.
+
+## Como responder o cenário
+
+Localize o sujeito do acesso. Se for um serviço da AWS, é role. Se for um grupo
+de pessoas com permissões idênticas, é grupo. Se for uma pessoa com acesso a
+muitas contas usando o login corporativo, é IAM Identity Center. Se o enunciado
+pedir a prática recomendada, as respostas de sempre são privilégio mínimo, MFA
+e credencial temporária no lugar de chave permanente. E desconfie de qualquer
+alternativa que proponha usar o raiz, compartilhar credencial ou dar acesso
+administrativo por conveniência: na CLF, essas nunca são a resposta certa.
+
+## Erros comuns
+
+- Dar chave de acesso a uma aplicação que roda na AWS. O recomendado é uma role: a credencial vira temporária e ninguém precisa guardar segredo no código.
+- Confundir grupo com role. Grupo junta usuários para herdarem a mesma política; role é uma identidade sem senha que alguém ou algum serviço assume por um tempo.
+- Usar o usuário raiz no dia a dia. Ele deve ficar protegido com MFA e ser usado só nas poucas tarefas que exigem a conta, como fechar a conta ou mudar o plano de suporte.
+- Achar que MFA substitui senha. MFA é um segundo fator somado à senha, não um troca-troca.
+- Confundir política gerenciada com política inline. A gerenciada é um objeto reutilizável, anexável a vários; a inline vive presa a uma única identidade e some junto com ela.
+- Tratar IAM Identity Center como substituto do IAM. Ele centraliza o acesso de pessoas a várias contas com login único; as permissões dentro da conta continuam sendo políticas do IAM.
+- Achar que negar exige apagar a permissão. Uma negação explícita em qualquer política vence qualquer permissão concedida em outra.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Conformidade e governança na AWS
+
+Trilha: AWS Cloud Practitioner · Módulo: Segurança e conformidade
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/conformidade-e-governanca-na-aws/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Onde baixar relatório de auditoria, quem responde pela conformidade de cada camada, o que região tem a ver com residência de dados e o papel de Artifact, CloudTrail, Config, Audit Manager e Control Tower no enunciado da prova.
+
+**Por que cai na prova.** É a tarefa 2.2 do guia. As questões são curtas e sempre do mesmo tipo: um auditor pede um documento ou um registro, e você aponta o serviço. Os candidatos trocam Artifact por Audit Manager e CloudTrail por Config porque nunca separaram o que cada um entrega.
+
+**Como o entrevistador pergunta.** "Um auditor externo pede o relatório de certificação de conformidade da infraestrutura da AWS. Onde a empresa obtém esse documento?"
+
+## Em uma frase
+
+Conformidade na AWS tem duas metades: a AWS prova que a infraestrutura dela é
+auditada e publica os documentos no **Artifact**, e o cliente prova que o
+ambiente dele está correto usando **CloudTrail**, **Config** e **Audit
+Manager**.
+
+## O que cada serviço entrega
+
+<Comparativo
+  colunas={["Serviço", "Responde à pergunta", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Artifact", "A AWS é certificada? Cadê o documento?", "Auditor externo, relatório ISO, SOC ou PCI, acordo"],
+    ["AWS Audit Manager", "Cadê a evidência do meu ambiente?", "Coletar evidência continuamente, preparar auditoria interna"],
+    ["AWS CloudTrail", "Quem fez isso, quando e de onde?", "Quem apagou, quem criou, histórico de chamada de API"],
+    ["AWS Config", "Como o recurso está configurado e está conforme?", "Verificar continuamente, regra, desvio de configuração"],
+    ["AWS Organizations", "Como limito o que cada conta pode fazer?", "Várias contas, teto de permissão, fatura consolidada"],
+    ["AWS Control Tower", "Como começo um ambiente de várias contas já governado?", "Montar do zero, barreiras prontas, padrão obrigatório"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="As duas trocas que mais custam ponto">
+**Artifact contra Audit Manager**: o primeiro entrega documento que a AWS
+escreveu sobre si; o segundo produz documento sobre o ambiente do cliente.
+**CloudTrail contra Config**: o primeiro responde *quem fez*, o segundo responde
+*como está*. Se o enunciado tem um nome de pessoa ou identidade, é CloudTrail;
+se tem a palavra configuração, conformidade contínua ou regra, é Config.
+</Callout>
+
+## Conformidade acompanha a responsabilidade compartilhada
+
+A certificação da AWS cobre a camada que ela opera. Ela não estende
+automaticamente a conformidade à aplicação do cliente: um ambiente construído
+sobre infraestrutura certificada ainda pode estar fora de conformidade por
+configuração errada. Por isso as duas metades existem, e por isso o auditor
+costuma pedir os dois conjuntos de documento.
+
+## Região, residência de dados e LGPD
+
+O cliente escolhe em qual região colocar os dados, e essa escolha é o que define
+o território onde eles ficam. A AWS não move conteúdo do cliente de uma região
+para outra por conta própria; replicação entre regiões só acontece quando o
+cliente a configura. Exigência de manter dado em determinado país, como as que
+regimes de proteção de dados pessoais impõem, se resolve escolhendo a região e
+controlando o que sai dela.
+
+<Callout tipo="dica" titulo="Política de controle de serviço é teto, não permissão">
+Uma política de controle de serviço no Organizations **não concede nada**. Ela
+define o máximo que as contas daquela unidade organizacional podem ter. Quem
+concede permissão continua sendo o IAM, e o efetivo é a interseção dos dois. Se
+o enunciado fala em impedir que qualquer conta faça algo, mesmo um
+administrador, é aí que ele está apontando.
+</Callout>
+
+## Como responder o cenário
+
+Pergunte de quem é o ambiente em questão. Documento sobre a AWS vem do Artifact;
+evidência sobre o ambiente do cliente vem do Audit Manager. Depois separe as
+duas perguntas de rastreabilidade: autoria de uma ação é CloudTrail, estado de
+configuração é Config. Quando o enunciado falar em várias contas e padrão que
+ninguém pode burlar, pense em Organizations com política de controle de serviço,
+e em Control Tower se o pedido for montar o ambiente inteiro já governado. E
+quando aparecer exigência de território, a resposta é a escolha da região.
+
+## Erros comuns
+
+- Confundir Artifact com Audit Manager. Artifact entrega os relatórios de conformidade que a AWS produz sobre a própria infraestrutura; Audit Manager coleta evidências do ambiente do cliente para uma auditoria dele.
+- Confundir CloudTrail com Config. CloudTrail registra quem chamou qual API e quando; Config registra como o recurso estava configurado e se isso viola uma regra.
+- Achar que a certificação da AWS cobre a aplicação do cliente. A certificação cobre a infraestrutura; o que o cliente construiu em cima dela é auditado à parte.
+- Confundir Control Tower com Organizations. Organizations agrupa contas e aplica políticas de controle de serviço; Control Tower usa o Organizations para montar um ambiente de várias contas já com as barreiras configuradas.
+- Tratar política de controle de serviço como concessão de permissão. Ela define o teto do que pode ser permitido; quem concede continua sendo o IAM.
+- Supor que o dado circula entre regiões sozinho. O cliente escolhe a região, e o conteúdo dele não é movido para outra região pela AWS sem que ele configure isso.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Os serviços de segurança e o que cada um detecta
+
+Trilha: AWS Cloud Practitioner · Módulo: Segurança e conformidade
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/servicos-de-seguranca-da-aws/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** GuardDuty, Inspector, Macie, Security Hub, Detective, Shield, WAF, Firewall Manager, Network Firewall e Trusted Advisor: o que cada serviço detecta ou bloqueia, e a palavra do enunciado que aponta para ele.
+
+**Por que cai na prova.** É a tarefa 2.4 do guia e a maior fonte de distrator sutil da prova. Os serviços têm nomes parecidos e todos dizem proteger; o que separa um do outro é o objeto que cada um observa. Quem não fixa essa palavra fica entre GuardDuty e Inspector em toda questão.
+
+**Como o entrevistador pergunta.** "Uma empresa quer descobrir automaticamente se há dados pessoais armazenados sem controle em buckets do S3. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+Todo serviço de segurança da AWS diz que protege, então o que resolve a questão
+é **o objeto que cada um observa**: ameaça em curso, vulnerabilidade
+conhecida, dado sensível, requisição maliciosa ou volume de tráfego.
+
+## O mapa de reconhecimento
+
+<Comparativo
+  colunas={["Serviço", "O que observa", "A palavra no enunciado"]}
+  linhas={[
+    ["Amazon GuardDuty", "Atividade maliciosa e comportamento anômalo na conta", "Ameaça, atividade suspeita, comportamento fora do normal"],
+    ["Amazon Inspector", "Vulnerabilidade conhecida em instâncias, imagens e funções", "Vulnerabilidade, correção pendente, exposição não intencional"],
+    ["Amazon Macie", "Dado sensível armazenado no S3", "Dado pessoal, informação sigilosa, classificar conteúdo"],
+    ["AWS Security Hub", "Achados dos outros serviços, agregados e priorizados", "Visão única, consolidar alertas, postura de segurança"],
+    ["Amazon Detective", "A origem e o encadeamento de um achado", "Investigar, analisar a causa depois do alerta"],
+    ["AWS Shield", "Volume de tráfego de negação de serviço", "Ataque de negação de serviço, tráfego derrubando o site"],
+    ["AWS WAF", "Conteúdo das requisições web", "Injeção de SQL, cross-site scripting, bloquear requisição"],
+    ["AWS Network Firewall", "Tráfego de rede entrando e saindo da VPC", "Inspecionar tráfego na borda da VPC"],
+    ["AWS Firewall Manager", "As regras de firewall de várias contas", "Aplicar a mesma regra em toda a organização"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="O trio que decide o domínio">
+Guarde os três como uma cena: **GuardDuty** procura quem está atacando,
+**Inspector** procura a porta mal fechada e **Macie** procura o documento
+sigiloso guardado no lugar errado. Praticamente toda questão sobre detecção na
+CLF cai em um desses três papéis.
+</Callout>
+
+## Proteger o tráfego: Shield, WAF e os firewalls
+
+Shield e WAF resolvem problemas diferentes e aparecem juntos como alternativas
+de propósito. O **Shield** trata de **volume**: muitas origens mandando tráfego
+para tirar o serviço do ar. O **WAF** trata de **conteúdo**: uma requisição que
+parece legítima mas carrega um padrão de ataque. Quando o enunciado descreve
+injeção de SQL ou cross-site scripting, é WAF; quando descreve o site caindo
+por excesso de requisições, é Shield.
+
+Para a organização inteira, o **Firewall Manager** distribui e mantém essas
+regras em várias contas, e o **Network Firewall** inspeciona o tráfego na borda
+da VPC.
+
+## Dentro da VPC: security group e lista de controle de acesso
+
+<Comparativo
+  colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
+  linhas={[
+    ["Protege", "O recurso, como uma instância", "A sub-rede inteira"],
+    ["Regras", "Só permitir", "Permitir e negar"],
+    ["Avalia estado", "Sim: resposta de conexão permitida volta sozinha", "Não: é preciso regra para ida e para volta"],
+    ["A pista", "Liberar porta para uma instância específica", "Bloquear um endereço para toda a sub-rede"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Security Hub não detecta">
+Ele **agrega**. Se o enunciado pede descobrir algo, procure quem detecta. Se
+pede ver tudo em um lugar só, com prioridade e pontuação de postura, é o
+Security Hub. A mesma lógica vale para o **Detective**: ele entra depois do
+achado, para entender como aquilo aconteceu.
+</Callout>
+
+## Como responder o cenário
+
+Sublinhe o substantivo do problema antes de olhar as alternativas. Ameaça aponta
+GuardDuty. Vulnerabilidade aponta Inspector. Dado sensível aponta Macie. Volume
+aponta Shield. Requisição maliciosa aponta WAF. Consolidação aponta Security
+Hub. Investigação posterior aponta Detective. Credencial no código aponta
+Secrets Manager. Boas práticas da conta apontam Trusted Advisor. Se duas
+alternativas parecerem servir, escolha a que age sobre o objeto que o enunciado
+nomeou, não a que soa mais completa.
+
+## Erros comuns
+
+- Confundir GuardDuty com Inspector. GuardDuty procura atividade suspeita acontecendo agora; Inspector procura vulnerabilidade conhecida em instâncias, imagens de contêiner e funções.
+- Confundir Macie com GuardDuty. Macie olha o conteúdo do dado no S3 em busca de informação sensível; GuardDuty olha comportamento e telemetria de ameaça.
+- Achar que Security Hub detecta alguma coisa sozinho. Ele agrega e prioriza achados de outros serviços e mede a postura contra padrões; a detecção continua com quem detecta.
+- Trocar Shield por WAF. Shield protege contra ataque de negação de serviço em volume; WAF filtra requisições da camada de aplicação, como injeção de SQL e cross-site scripting.
+- Confundir security group com lista de controle de acesso de rede. O security group é do recurso, avalia estado e só permite; a lista é da sub-rede, não avalia estado e tem regras de permitir e negar.
+- Esperar que o Trusted Advisor substitua um serviço de segurança. Ele verifica boas práticas da conta em várias dimensões e aponta lacunas, sem monitorar ameaça continuamente.
+- Confundir Detective com GuardDuty. GuardDuty gera o achado; Detective ajuda a investigar a origem e o encadeamento dele.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Criptografia em repouso e em trânsito
+
+Trilha: AWS Cloud Practitioner · Módulo: Segurança e conformidade
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/criptografia-em-repouso-e-em-transito/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** KMS e CloudHSM, chaves gerenciadas pela AWS e pelo cliente, criptografia padrão de S3, EBS e RDS, certificados do ACM para TLS e a escolha entre Secrets Manager e Parameter Store, com a pergunta que resolve cada questão: quem tem a chave.
+
+**Por que cai na prova.** Fecha a tarefa 2.4 do guia e é onde a prova separa dois estados do dado que o candidato costuma tratar como um só. As alternativas erradas são sempre serviços vizinhos que também lidam com chave ou segredo, e cada um resolve um problema diferente.
+
+**Como o entrevistador pergunta.** "Uma empresa precisa criar e controlar as próprias chaves de criptografia para os dados armazenados na AWS, com registro de cada uso da chave. Qual serviço atende a esse pedido?"
+
+## Em uma frase
+
+A prova separa dois estados do dado, **em repouso** e **em trânsito**, e para
+cada um pergunta qual serviço protege e **quem tem a chave**.
+
+## Os dois estados e quem cuida de cada um
+
+<Comparativo
+  colunas={["Estado", "O que protege", "Serviço típico", "A pista no enunciado"]}
+  linhas={[
+    ["Em repouso", "Dado gravado: objeto, volume, banco, backup", "KMS, criptografia integrada do S3, EBS e RDS", "Armazenado, gravado, disco, bucket, snapshot"],
+    ["Em trânsito", "Dado viajando pela rede", "TLS com certificado do ACM", "Conexão, navegador, entre o cliente e o serviço, rede"]
+  ]}
+/>
+
+## KMS, CloudHSM e a pergunta que separa os dois
+
+O **KMS** é o serviço padrão de chaves: gerenciado, integrado a praticamente
+todos os serviços de armazenamento e banco, com política por chave e registro
+de uso. Ele resolve a grande maioria dos cenários da prova.
+
+O **CloudHSM** entrega módulos criptográficos de hardware dedicados, que o
+cliente administra sozinho. Ele só é a resposta quando o enunciado pede
+explicitamente **controle exclusivo** do módulo, em geral por exigência
+regulatória.
+
+<Callout tipo="dica" titulo="Duas palavras decidem">
+Se o enunciado disser gerenciar chaves, controlar o uso e auditar, é **KMS**. Se
+disser hardware dedicado, módulo sob controle exclusivo ou exigência
+regulatória sobre a custódia da chave, é **CloudHSM**. Na dúvida, o KMS é o
+caminho comum e o CloudHSM é a exceção justificada.
+</Callout>
+
+## Chave da AWS ou chave do cliente
+
+<Comparativo
+  colunas={["Aspecto", "Chave gerenciada pela AWS", "Chave gerenciada pelo cliente"]}
+  linhas={[
+    ["Quem cria", "O serviço, automaticamente", "O cliente, no KMS"],
+    ["Política de uso", "Não é definida pelo cliente", "Definida pelo cliente, por chave"],
+    ["Rotação", "Controlada pelo serviço", "Configurável pelo cliente"],
+    ["Quando escolher", "Proteção básica sem exigência de controle", "Quando o enunciado pede controle, auditoria ou rotação própria"]
+  ]}
+/>
+
+## Criptografia já ligada e o que ainda é do cliente
+
+O S3 aplica criptografia do lado do servidor aos novos objetos por padrão, e o
+cliente escolhe se usa a chave do próprio serviço ou uma chave do KMS. EBS e RDS
+oferecem criptografia integrada com o KMS, que se estende a snapshots e
+réplicas.
+
+<Callout tipo="atencao" titulo="Criptografia não é controle de acesso">
+Um volume criptografado continua legível para quem tem permissão de usar a
+chave. Se o enunciado descreve alguém lendo dado que não deveria, o problema é
+de permissão do IAM, não de criptografia. Os dois controles se somam; nenhum
+substitui o outro.
+</Callout>
+
+## Segredo de aplicação: Secrets Manager ou Parameter Store
+
+O **Secrets Manager** guarda senha, chave de API e outros segredos, com rotação
+automática integrada. O **Parameter Store**, do Systems Manager, guarda
+parâmetros de configuração e também aceita valor cifrado, mas sem a rotação
+automática que caracteriza o outro. Quando o enunciado cita rotação de senha, a
+resposta é Secrets Manager; quando cita guardar configuração da aplicação, é
+Parameter Store.
+
+## Como responder o cenário
+
+Classifique primeiro o estado do dado: gravado ou viajando. Se estiver viajando,
+pense em TLS e ACM e descarte tudo que fale de disco. Se estiver gravado, veja o
+que o enunciado pede sobre a chave: uso comum aponta KMS, controle exclusivo do
+hardware aponta CloudHSM, política e auditoria próprias apontam chave gerenciada
+pelo cliente. Se o objeto do enunciado não for a chave e sim uma senha de
+aplicação, saia da família de criptografia e vá para o Secrets Manager.
+
+## Erros comuns
+
+- Tratar em repouso e em trânsito como a mesma proteção. Em repouso protege o dado gravado em disco ou objeto; em trânsito protege o dado enquanto viaja pela rede, com TLS.
+- Confundir KMS com CloudHSM. O KMS é gerenciado e multilocatário, integrado aos serviços da AWS; o CloudHSM entrega módulos de hardware dedicados sob controle exclusivo do cliente.
+- Confundir Secrets Manager com KMS. O KMS gerencia chaves de criptografia; o Secrets Manager guarda e rotaciona segredos de aplicação, como senha de banco.
+- Achar que Parameter Store e Secrets Manager são a mesma coisa. O Parameter Store guarda parâmetros de configuração e segredos simples; o Secrets Manager foi feito para segredo, com rotação automática integrada.
+- Usar o ACM para dado em repouso. O ACM emite e renova certificados para TLS, que é proteção em trânsito.
+- Supor que criptografar o volume dispensa controlar acesso. Quem tem permissão de usar a chave lê o dado normalmente; criptografia não substitui privilégio mínimo.
+- Achar que chave gerenciada pela AWS pode ser auditada e controlada como a do cliente. Quem precisa definir política da chave, rotação e registro de uso escolhe chave gerenciada pelo cliente.
 
 ## Perguntas de sabatina e respostas-modelo
 

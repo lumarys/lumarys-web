@@ -1,0 +1,251 @@
+---
+slug: conformidade-e-governanca-na-aws
+titulo: "Conformidade e governança na AWS"
+resumo: "Onde baixar relatório de auditoria, quem responde pela conformidade de cada camada, o que região tem a ver com residência de dados e o papel de Artifact, CloudTrail, Config, Audit Manager e Control Tower no enunciado da prova."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 2.2 do guia. As questões são curtas e sempre do mesmo tipo: um auditor pede um documento ou um registro, e você aponta o serviço. Os candidatos trocam Artifact por Audit Manager e CloudTrail por Config porque nunca separaram o que cada um entrega."
+comoCai: "Um auditor externo pede o relatório de certificação de conformidade da infraestrutura da AWS. Onde a empresa obtém esse documento?"
+feynman: "Explique em um minuto a diferença entre provar que a AWS é confiável e provar que o seu próprio ambiente está configurado corretamente."
+preRequisitos: ["como-ler-uma-questao-clf", "modelo-de-responsabilidade-compartilhada"]
+errosComuns:
+  - "Confundir Artifact com Audit Manager. Artifact entrega os relatórios de conformidade que a AWS produz sobre a própria infraestrutura; Audit Manager coleta evidências do ambiente do cliente para uma auditoria dele."
+  - "Confundir CloudTrail com Config. CloudTrail registra quem chamou qual API e quando; Config registra como o recurso estava configurado e se isso viola uma regra."
+  - "Achar que a certificação da AWS cobre a aplicação do cliente. A certificação cobre a infraestrutura; o que o cliente construiu em cima dela é auditado à parte."
+  - "Confundir Control Tower com Organizations. Organizations agrupa contas e aplica políticas de controle de serviço; Control Tower usa o Organizations para montar um ambiente de várias contas já com as barreiras configuradas."
+  - "Tratar política de controle de serviço como concessão de permissão. Ela define o teto do que pode ser permitido; quem concede continua sendo o IAM."
+  - "Supor que o dado circula entre regiões sozinho. O cliente escolhe a região, e o conteúdo dele não é movido para outra região pela AWS sem que ele configure isso."
+preTeste:
+  - enunciado: "Um auditor externo pede as certificações e os relatórios de conformidade da infraestrutura da AWS, como ISO e SOC. Onde a empresa obtém esses documentos?"
+    alternativas:
+      - texto: "AWS Artifact."
+        correta: true
+        explicacao: "O Artifact é o portal de autoatendimento onde o cliente baixa os relatórios de conformidade e acordos da AWS."
+      - texto: "AWS Audit Manager."
+        correta: false
+        explicacao: "O Audit Manager coleta evidências do ambiente do próprio cliente para uma auditoria dele; não distribui os relatórios da AWS."
+      - texto: "AWS CloudTrail."
+        correta: false
+        explicacao: "O CloudTrail guarda o histórico de chamadas de API da conta, não certificações do provedor."
+  - enunciado: "Uma equipe precisa descobrir qual usuário desligou uma instância EC2 na semana passada e a que horas. Qual serviço responde a essa pergunta?"
+    alternativas:
+      - texto: "AWS CloudTrail."
+        correta: true
+        explicacao: "O CloudTrail registra as chamadas de API da conta, com identidade, ação, horário e origem."
+      - texto: "AWS Config."
+        correta: false
+        explicacao: "O Config mostra o estado e o histórico de configuração do recurso, e se ele viola uma regra, mas a autoria da chamada vem do CloudTrail."
+      - texto: "Amazon CloudWatch."
+        correta: false
+        explicacao: "O CloudWatch acompanha métricas e logs de operação; a pergunta é sobre quem executou a ação."
+videos:
+  - id: 3XyPtWpWgV8
+    publicadoEm: "2026-01-14"
+    titulo: "Ep4 - Conformidade e governançada AWS (CLF-C02)"
+    canal: "PodTechBrasil"
+    duracao: 17
+    porQue: "Percorre o domínio inteiro no nível do exame, ligando conformidade a governança. Anote os serviços conforme aparecem e diga qual pergunta cada um responde antes de a explicação chegar."
+  - id: OcRMdRcGCZM
+    publicadoEm: "2026-07-31"
+    titulo: "aws dominio 2 seguranca conformidade clf c02"
+    canal: "AWS Learning"
+    duracao: 11
+    porQue: "Complementar e direto ao formato da prova. Use para revisar depois de ler o tema, checando se você separa Artifact de Audit Manager sem hesitar."
+artigos:
+  - titulo: "AWS Compliance Programs"
+    url: "https://aws.amazon.com/compliance/programs/"
+    fonte: "AWS"
+  - titulo: "What is AWS Artifact?"
+    url: "https://docs.aws.amazon.com/artifact/latest/ug/what-is-aws-artifact.html"
+    fonte: "AWS"
+  - titulo: "What is AWS CloudTrail?"
+    url: "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Config?"
+    url: "https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Audit Manager?"
+    url: "https://docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "AWS Artifact, em uma linha."
+    verso: "Portal de autoatendimento para baixar relatórios de conformidade da AWS e aceitar acordos. A pista é auditor pedindo documento sobre a AWS."
+  - frente: "AWS Audit Manager, em uma linha."
+    verso: "Coleta evidências do ambiente do cliente de forma contínua e organiza o relatório de auditoria dele. A pista é evidência do meu ambiente."
+  - frente: "Artifact contra Audit Manager."
+    verso: "Artifact entrega documento que a AWS produziu sobre ela mesma. Audit Manager produz documento sobre o ambiente do cliente."
+  - frente: "AWS CloudTrail, em uma linha."
+    verso: "Registro das chamadas de API da conta: quem fez, o quê, quando e de onde. A pista é quem executou a ação."
+  - frente: "AWS Config, em uma linha."
+    verso: "Inventário e histórico de configuração dos recursos, com regras que apontam desvio. A pista é como o recurso está configurado e se está conforme."
+  - frente: "CloudTrail contra Config."
+    verso: "CloudTrail responde quem fez. Config responde como está e se saiu do padrão."
+  - frente: "AWS Organizations, em uma linha."
+    verso: "Agrupa várias contas em unidades organizacionais, consolida a fatura e permite aplicar políticas de controle de serviço."
+  - frente: "Política de controle de serviço, em uma linha."
+    verso: "Define o teto do que pode ser permitido nas contas de uma organização. Não concede permissão; limita o que o IAM pode conceder."
+  - frente: "AWS Control Tower, em uma linha."
+    verso: "Monta e governa um ambiente de várias contas já com as barreiras e os registros configurados. A pista é ponto de partida governado."
+  - frente: "Residência de dados e região."
+    verso: "O cliente escolhe a região, e o conteúdo que ele guarda nela não é movido para outra região pela AWS sem que ele configure isso."
+  - frente: "Programas de conformidade citados na prova."
+    verso: "ISO, SOC e PCI DSS aparecem pelo nome. O ponto cobrado é onde obter o relatório, não o conteúdo da norma."
+  - frente: "Quem responde pela conformidade do ambiente do cliente?"
+    verso: "O cliente. A certificação da AWS cobre a infraestrutura; a aplicação, os dados e as configurações são auditados à parte."
+  - frente: "A pista de governança no enunciado."
+    verso: "Várias contas, padrão obrigatório, barreira que ninguém pode remover. Isso aponta Organizations e Control Tower, não IAM."
+drills:
+  - titulo: "Qual serviço responde ao pedido?"
+    instrucao: "Para cada pedido, indique o serviço de conformidade ou governança que atende."
+    opcoes:
+      ["AWS Artifact", "AWS Audit Manager", "AWS CloudTrail", "AWS Config", "AWS Organizations", "AWS Control Tower"]
+    itens:
+      - enunciado: "Baixar o relatório SOC da infraestrutura da AWS para entregar a um auditor externo."
+        resposta: "AWS Artifact"
+        explicacao: "Documento que a AWS produz sobre ela mesma vem do Artifact."
+      - enunciado: "Descobrir qual identidade apagou um bucket do S3 e em que horário."
+        resposta: "AWS CloudTrail"
+        explicacao: "Autoria e horário de uma chamada de API."
+      - enunciado: "Verificar continuamente se todos os volumes EBS da conta estão criptografados."
+        resposta: "AWS Config"
+        explicacao: "Regra de configuração avaliando o estado dos recursos."
+      - enunciado: "Coletar evidências do ambiente da empresa ao longo do ano para uma auditoria interna."
+        resposta: "AWS Audit Manager"
+        explicacao: "Evidência contínua sobre o ambiente do cliente."
+      - enunciado: "Impedir que qualquer conta da empresa crie recursos fora das regiões aprovadas."
+        resposta: "AWS Organizations"
+        explicacao: "Teto de permissões entre contas é política de controle de serviço."
+      - enunciado: "Criar do zero um ambiente de várias contas já com registro de auditoria e barreiras aplicadas."
+        resposta: "AWS Control Tower"
+        explicacao: "Ponto de partida governado para múltiplas contas."
+perguntas:
+  - tipo: unica
+    enunciado: "Durante uma auditoria, o cliente precisa apresentar a certificação ISO da infraestrutura do provedor de nuvem. Qual serviço fornece esse documento sem abrir chamado?"
+    alternativas:
+      - texto: "AWS Artifact."
+        correta: true
+        explicacao: "É o portal de autoatendimento com os relatórios de conformidade e acordos da AWS, disponível para download imediato."
+      - texto: "AWS Audit Manager."
+        correta: false
+        explicacao: "Vizinho plausível pelo nome, mas ele reúne evidências do ambiente do cliente e não publica as certificações da AWS."
+      - texto: "AWS Trusted Advisor."
+        correta: false
+        explicacao: "Faz verificações de boas práticas na conta, em custo, desempenho e segurança; não entrega certificações."
+      - texto: "AWS Config."
+        correta: false
+        explicacao: "Avalia a configuração dos recursos do cliente contra regras, não a conformidade da infraestrutura da AWS."
+  - tipo: unica
+    enunciado: "Uma equipe de segurança quer saber, de forma contínua, se algum bucket do S3 da conta ficou com acesso público. Qual serviço atende diretamente a essa necessidade?"
+    alternativas:
+      - texto: "AWS Config, com uma regra que avalia a configuração dos buckets."
+        correta: true
+        explicacao: "O Config avalia continuamente o estado de configuração dos recursos e sinaliza os que violam a regra."
+      - texto: "AWS CloudTrail."
+        correta: false
+        explicacao: "Mostraria quem alterou a configuração, mas não avalia o estado atual contra um padrão desejado."
+      - texto: "AWS Artifact."
+        correta: false
+        explicacao: "Entrega relatórios de conformidade da AWS; não olha para os recursos da conta."
+      - texto: "AWS Organizations."
+        correta: false
+        explicacao: "Agrupa contas e define tetos de permissão; não inspeciona configuração de recurso."
+  - tipo: unica
+    enunciado: "Uma empresa precisa garantir que os dados de clientes fiquem armazenados em um país específico por exigência regulatória. O que determina onde esses dados ficam?"
+    alternativas:
+      - texto: "A região da AWS escolhida pelo cliente para armazenar os dados."
+        correta: true
+        explicacao: "O cliente escolhe a região, e o conteúdo guardado nela não é movido para outra região pela AWS sem configuração do cliente."
+      - texto: "O plano de suporte contratado pela empresa."
+        correta: false
+        explicacao: "O plano muda tempo de resposta e acompanhamento, não a localização do dado."
+      - texto: "A zona de disponibilidade escolhida dentro da região."
+        correta: false
+        explicacao: "Zona é um isolamento dentro da região; quem define o território é a região."
+      - texto: "O programa de conformidade em que a carga foi registrada no AWS Artifact."
+        correta: false
+        explicacao: "O Artifact distribui documento e não determina onde o dado reside."
+  - tipo: multipla
+    enunciado: "Uma organização vai operar com dezenas de contas da AWS e quer padrão obrigatório e rastreabilidade desde o início. Quais DUAS opções atendem a esse objetivo de governança?"
+    alternativas:
+      - texto: "Usar o AWS Organizations com políticas de controle de serviço para limitar o que as contas podem fazer."
+        correta: true
+        explicacao: "A política de controle de serviço define o teto de permissões das contas da organização, independente do que o IAM conceda."
+      - texto: "Usar o AWS Control Tower para criar o ambiente de várias contas já com barreiras e registros configurados."
+        correta: true
+        explicacao: "O Control Tower entrega um ponto de partida governado para ambientes de múltiplas contas."
+      - texto: "Criar um usuário do IAM com acesso administrativo em cada conta e combinar o padrão por documento."
+        correta: false
+        explicacao: "Acordo em documento não é controle técnico e o acesso administrativo amplo contraria o privilégio mínimo."
+      - texto: "Baixar os relatórios do AWS Artifact e distribuí-los aos times."
+        correta: false
+        explicacao: "O Artifact entrega documento sobre a AWS; não impõe padrão nas contas do cliente."
+      - texto: "Habilitar o Amazon CloudWatch em todas as contas para bloquear ações fora do padrão."
+        correta: false
+        explicacao: "O CloudWatch observa métricas e logs, e não bloqueia ação."
+---
+
+## Em uma frase
+
+Conformidade na AWS tem duas metades: a AWS prova que a infraestrutura dela é
+auditada e publica os documentos no **Artifact**, e o cliente prova que o
+ambiente dele está correto usando **CloudTrail**, **Config** e **Audit
+Manager**.
+
+## O que cada serviço entrega
+
+<Comparativo
+  colunas={["Serviço", "Responde à pergunta", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Artifact", "A AWS é certificada? Cadê o documento?", "Auditor externo, relatório ISO, SOC ou PCI, acordo"],
+    ["AWS Audit Manager", "Cadê a evidência do meu ambiente?", "Coletar evidência continuamente, preparar auditoria interna"],
+    ["AWS CloudTrail", "Quem fez isso, quando e de onde?", "Quem apagou, quem criou, histórico de chamada de API"],
+    ["AWS Config", "Como o recurso está configurado e está conforme?", "Verificar continuamente, regra, desvio de configuração"],
+    ["AWS Organizations", "Como limito o que cada conta pode fazer?", "Várias contas, teto de permissão, fatura consolidada"],
+    ["AWS Control Tower", "Como começo um ambiente de várias contas já governado?", "Montar do zero, barreiras prontas, padrão obrigatório"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="As duas trocas que mais custam ponto">
+**Artifact contra Audit Manager**: o primeiro entrega documento que a AWS
+escreveu sobre si; o segundo produz documento sobre o ambiente do cliente.
+**CloudTrail contra Config**: o primeiro responde *quem fez*, o segundo responde
+*como está*. Se o enunciado tem um nome de pessoa ou identidade, é CloudTrail;
+se tem a palavra configuração, conformidade contínua ou regra, é Config.
+</Callout>
+
+## Conformidade acompanha a responsabilidade compartilhada
+
+A certificação da AWS cobre a camada que ela opera. Ela não estende
+automaticamente a conformidade à aplicação do cliente: um ambiente construído
+sobre infraestrutura certificada ainda pode estar fora de conformidade por
+configuração errada. Por isso as duas metades existem, e por isso o auditor
+costuma pedir os dois conjuntos de documento.
+
+## Região, residência de dados e LGPD
+
+O cliente escolhe em qual região colocar os dados, e essa escolha é o que define
+o território onde eles ficam. A AWS não move conteúdo do cliente de uma região
+para outra por conta própria; replicação entre regiões só acontece quando o
+cliente a configura. Exigência de manter dado em determinado país, como as que
+regimes de proteção de dados pessoais impõem, se resolve escolhendo a região e
+controlando o que sai dela.
+
+<Callout tipo="dica" titulo="Política de controle de serviço é teto, não permissão">
+Uma política de controle de serviço no Organizations **não concede nada**. Ela
+define o máximo que as contas daquela unidade organizacional podem ter. Quem
+concede permissão continua sendo o IAM, e o efetivo é a interseção dos dois. Se
+o enunciado fala em impedir que qualquer conta faça algo, mesmo um
+administrador, é aí que ele está apontando.
+</Callout>
+
+## Como responder o cenário
+
+Pergunte de quem é o ambiente em questão. Documento sobre a AWS vem do Artifact;
+evidência sobre o ambiente do cliente vem do Audit Manager. Depois separe as
+duas perguntas de rastreabilidade: autoria de uma ação é CloudTrail, estado de
+configuração é Config. Quando o enunciado falar em várias contas e padrão que
+ninguém pode burlar, pense em Organizations com política de controle de serviço,
+e em Control Tower se o pedido for montar o ambiente inteiro já governado. E
+quando aparecer exigência de território, a resposta é a escolha da região.

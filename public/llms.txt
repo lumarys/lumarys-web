@@ -26,6 +26,14 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Economia da nuvem](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/economia-da-nuvem/): Despesa de capital contra despesa operacional, custo fixo contra variável, o que entra no custo total de propriedade de um data center, licenciamento próprio ou incluso, dimensionamento correto e o ganho de automatizar. É a tarefa 1.4 do guia da CLF-C02.
 - [Migração: os 7 Rs e o Cloud Adoption Framework](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/migracao-para-a-nuvem-7-rs-e-caf/): As sete estratégias de migração que a AWS nomeia, com o caso que aponta cada uma, as perspectivas do Cloud Adoption Framework e os serviços de apoio à migração no nível de reconhecimento que a CLF-C02 cobra.
 
+### Segurança e conformidade
+
+- [O modelo de responsabilidade compartilhada](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/modelo-de-responsabilidade-compartilhada/): Segurança da nuvem é da AWS, segurança na nuvem é do cliente: onde a linha cai em EC2, RDS, Lambda e S3, o que a AWS nunca faz pelo cliente e como reconhecer o lado certo num enunciado de duas linhas.
+- [IAM: usuários, grupos, roles e políticas](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/iam-usuarios-grupos-roles-e-politicas/): Quem é quem no IAM: usuário raiz e o que fazer com ele, MFA, chaves de acesso, grupos, roles com credenciais temporárias, políticas gerenciadas e inline, privilégio mínimo e onde entra o IAM Identity Center.
+- [Conformidade e governança na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/conformidade-e-governanca-na-aws/): Onde baixar relatório de auditoria, quem responde pela conformidade de cada camada, o que região tem a ver com residência de dados e o papel de Artifact, CloudTrail, Config, Audit Manager e Control Tower no enunciado da prova.
+- [Os serviços de segurança e o que cada um detecta](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/servicos-de-seguranca-da-aws/): GuardDuty, Inspector, Macie, Security Hub, Detective, Shield, WAF, Firewall Manager, Network Firewall e Trusted Advisor: o que cada serviço detecta ou bloqueia, e a palavra do enunciado que aponta para ele.
+- [Criptografia em repouso e em trânsito](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/criptografia-em-repouso-e-em-transito/): KMS e CloudHSM, chaves gerenciadas pela AWS e pelo cliente, criptografia padrão de S3, EBS e RDS, certificados do ACM para TLS e a escolha entre Secrets Manager e Parameter Store, com a pergunta que resolve cada questão: quem tem a chave.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.

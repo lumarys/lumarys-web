@@ -1,0 +1,262 @@
+---
+slug: servicos-de-seguranca-da-aws
+titulo: "Os serviços de segurança e o que cada um detecta"
+resumo: "GuardDuty, Inspector, Macie, Security Hub, Detective, Shield, WAF, Firewall Manager, Network Firewall e Trusted Advisor: o que cada serviço detecta ou bloqueia, e a palavra do enunciado que aponta para ele."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 2.4 do guia e a maior fonte de distrator sutil da prova. Os serviços têm nomes parecidos e todos dizem proteger; o que separa um do outro é o objeto que cada um observa. Quem não fixa essa palavra fica entre GuardDuty e Inspector em toda questão."
+comoCai: "Uma empresa quer descobrir automaticamente se há dados pessoais armazenados sem controle em buckets do S3. Qual serviço atende a essa necessidade?"
+feynman: "Explique em um minuto para alguém de negócio a diferença entre procurar um invasor, procurar uma porta mal fechada e procurar um documento sigiloso no lugar errado."
+preRequisitos: ["como-ler-uma-questao-clf", "modelo-de-responsabilidade-compartilhada"]
+errosComuns:
+  - "Confundir GuardDuty com Inspector. GuardDuty procura atividade suspeita acontecendo agora; Inspector procura vulnerabilidade conhecida em instâncias, imagens de contêiner e funções."
+  - "Confundir Macie com GuardDuty. Macie olha o conteúdo do dado no S3 em busca de informação sensível; GuardDuty olha comportamento e telemetria de ameaça."
+  - "Achar que Security Hub detecta alguma coisa sozinho. Ele agrega e prioriza achados de outros serviços e mede a postura contra padrões; a detecção continua com quem detecta."
+  - "Trocar Shield por WAF. Shield protege contra ataque de negação de serviço em volume; WAF filtra requisições da camada de aplicação, como injeção de SQL e cross-site scripting."
+  - "Confundir security group com lista de controle de acesso de rede. O security group é do recurso, avalia estado e só permite; a lista é da sub-rede, não avalia estado e tem regras de permitir e negar."
+  - "Esperar que o Trusted Advisor substitua um serviço de segurança. Ele verifica boas práticas da conta em várias dimensões e aponta lacunas, sem monitorar ameaça continuamente."
+  - "Confundir Detective com GuardDuty. GuardDuty gera o achado; Detective ajuda a investigar a origem e o encadeamento dele."
+preTeste:
+  - enunciado: "Uma empresa quer descobrir automaticamente se buckets do S3 guardam informações pessoais sensíveis sem o controle adequado. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon Macie."
+        correta: true
+        explicacao: "O Macie usa aprendizado de máquina e reconhecimento de padrão para encontrar dados sensíveis no S3 e avaliar a exposição deles."
+      - texto: "Amazon GuardDuty."
+        correta: false
+        explicacao: "O GuardDuty detecta atividade maliciosa e comportamento anômalo, não classifica o conteúdo dos arquivos."
+      - texto: "Amazon Inspector."
+        correta: false
+        explicacao: "O Inspector procura vulnerabilidade conhecida em cargas de trabalho, não dado sensível em armazenamento."
+  - enunciado: "Uma aplicação web vem recebendo tentativas de injeção de SQL pela internet. Qual serviço bloqueia esse tipo de requisição antes que ela chegue à aplicação?"
+    alternativas:
+      - texto: "AWS WAF."
+        correta: true
+        explicacao: "O WAF filtra requisições HTTP com regras para padrões de ataque de camada de aplicação, como injeção de SQL e cross-site scripting."
+      - texto: "AWS Shield."
+        correta: false
+        explicacao: "Vizinho plausível: o Shield trata de negação de serviço distribuída, e não de conteúdo malicioso dentro de uma requisição legítima."
+      - texto: "Amazon GuardDuty."
+        correta: false
+        explicacao: "Detecta e informa comportamento suspeito, mas não fica no caminho da requisição bloqueando."
+videos:
+  - id: RcY7YMFFaz8
+    publicadoEm: "2026-08-04"
+    titulo: "recursos seguranca clf c02"
+    canal: "AWS Learning"
+    duracao: 10
+    porQue: "Dez minutos percorrendo exatamente os serviços desta tarefa do guia, com comparações e cenários. Pause em cada serviço e diga em voz alta a palavra que o denuncia no enunciado."
+  - id: gXB6-CJe8Ao
+    publicadoEm: "2026-06-07"
+    titulo: "AWS Security & Compliance Completo  WAF, Shield, GuardDuty, Macie, KMS e Security Hub  SOA C03 Seção"
+    canal: "Jean Diogo"
+    duracao: 31
+    porQue: "Complementar e mais profundo do que a CLF exige, mas cobre os mesmos serviços em sequência. Assista por blocos e pare no nível de para que serve, sem entrar na configuração."
+artigos:
+  - titulo: "O que é o Amazon GuardDuty?"
+    url: "https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Inspector?"
+    url: "https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Macie?"
+    url: "https://docs.aws.amazon.com/macie/latest/user/what-is-macie.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Security Hub?"
+    url: "https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html"
+    fonte: "AWS"
+  - titulo: "What is AWS WAF?"
+    url: "https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon GuardDuty, em uma linha."
+    verso: "Detecção contínua de atividade maliciosa e comportamento anômalo a partir da telemetria da conta. A pista é ameaça, atividade suspeita, comportamento fora do normal."
+  - frente: "Amazon Inspector, em uma linha."
+    verso: "Varredura automática de vulnerabilidade conhecida e exposição não intencional em instâncias, imagens de contêiner e funções. A pista é vulnerabilidade e correção pendente."
+  - frente: "Amazon Macie, em uma linha."
+    verso: "Descoberta e classificação de dados sensíveis armazenados no S3. A pista é dado pessoal, informação sigilosa, conteúdo do arquivo."
+  - frente: "AWS Security Hub, em uma linha."
+    verso: "Painel único que agrega achados de vários serviços e mede a postura de segurança contra padrões. A pista é visão consolidada."
+  - frente: "Amazon Detective, em uma linha."
+    verso: "Investiga a origem e o encadeamento de um achado de segurança. A pista é analisar a causa depois do alerta."
+  - frente: "AWS Shield, em uma linha."
+    verso: "Proteção contra negação de serviço distribuída. A pista é volume de tráfego derrubando o serviço."
+  - frente: "AWS WAF, em uma linha."
+    verso: "Firewall de aplicação web que filtra requisições por regra. A pista é injeção de SQL, cross-site scripting, bloquear requisição."
+  - frente: "AWS Firewall Manager, em uma linha."
+    verso: "Administra centralmente regras de WAF, Shield e firewall de rede em várias contas. A pista é aplicar a mesma regra em toda a organização."
+  - frente: "AWS Network Firewall, em uma linha."
+    verso: "Firewall gerenciado com inspeção de tráfego na borda da VPC. A pista é filtrar tráfego de rede entrando e saindo da VPC."
+  - frente: "AWS Secrets Manager no papel de segurança."
+    verso: "Guarda e rotaciona segredos como senha de banco e chave de API, evitando credencial no código."
+  - frente: "AWS Trusted Advisor no papel de segurança."
+    verso: "Verifica a conta contra boas práticas e aponta lacunas, como bucket exposto ou MFA ausente no raiz. Não monitora ameaça continuamente."
+  - frente: "Security group contra lista de controle de acesso de rede."
+    verso: "Security group protege o recurso, avalia estado e só tem regra de permitir. A lista protege a sub-rede, não avalia estado e tem permitir e negar."
+  - frente: "Shield contra WAF."
+    verso: "Shield trata volume; WAF trata conteúdo da requisição. Negação de serviço aponta Shield, injeção de SQL aponta WAF."
+  - frente: "GuardDuty contra Inspector contra Macie."
+    verso: "GuardDuty procura quem está atacando, Inspector procura a porta mal fechada, Macie procura o documento sigiloso no lugar errado."
+drills:
+  - titulo: "Qual serviço de segurança atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o serviço de segurança que a resolve."
+    opcoes:
+      ["Amazon GuardDuty", "Amazon Inspector", "Amazon Macie", "AWS Security Hub", "AWS Shield", "AWS WAF"]
+    itens:
+      - enunciado: "Identificar instâncias EC2 com pacotes que têm vulnerabilidade conhecida por corrigir."
+        resposta: "Amazon Inspector"
+        explicacao: "Vulnerabilidade conhecida em carga de trabalho."
+      - enunciado: "Receber alerta quando uma instância começar a se comunicar com um endereço associado a mineração de criptomoeda."
+        resposta: "Amazon GuardDuty"
+        explicacao: "Comportamento anômalo e ameaça em andamento."
+      - enunciado: "Descobrir que um bucket do S3 guarda números de documentos de clientes."
+        resposta: "Amazon Macie"
+        explicacao: "Classificação de dado sensível no S3."
+      - enunciado: "Bloquear requisições com padrão de cross-site scripting antes de chegarem à aplicação."
+        resposta: "AWS WAF"
+        explicacao: "Filtro de requisição na camada de aplicação."
+      - enunciado: "Manter o site no ar durante um ataque de negação de serviço em grande volume."
+        resposta: "AWS Shield"
+        explicacao: "Proteção contra negação de serviço distribuída."
+      - enunciado: "Ver em um painel único os achados de segurança de várias contas e serviços, já priorizados."
+        resposta: "AWS Security Hub"
+        explicacao: "Agregação e postura de segurança consolidada."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma equipe de segurança quer ser avisada quando houver atividade maliciosa ou comportamento anômalo nas contas da AWS, analisando continuamente a telemetria do ambiente. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon GuardDuty."
+        correta: true
+        explicacao: "É o serviço de detecção de ameaças que monitora continuamente a conta e as cargas em busca de atividade maliciosa e comportamento anômalo."
+      - texto: "Amazon Inspector."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele procura vulnerabilidade conhecida em cargas de trabalho, e não atividade suspeita em curso."
+      - texto: "Amazon Macie."
+        correta: false
+        explicacao: "Classifica dado sensível no S3; não monitora comportamento de ameaça."
+      - texto: "AWS Security Hub."
+        correta: false
+        explicacao: "Agrega e prioriza achados de outros serviços; a detecção em si vem do GuardDuty."
+  - tipo: unica
+    enunciado: "Uma empresa sofreu uma tentativa de derrubar o site com tráfego em volume muito acima do normal, vindo de milhares de origens. Qual serviço da AWS é feito para esse tipo de proteção?"
+    alternativas:
+      - texto: "AWS Shield."
+        correta: true
+        explicacao: "É o serviço de proteção contra negação de serviço distribuída, que é exatamente o cenário descrito."
+      - texto: "AWS WAF."
+        correta: false
+        explicacao: "Filtra requisições por regra de conteúdo, como injeção de SQL; o problema aqui é volume, não conteúdo."
+      - texto: "Amazon GuardDuty."
+        correta: false
+        explicacao: "Detecta e informa, mas não absorve nem mitiga o tráfego do ataque."
+      - texto: "AWS Network Firewall."
+        correta: false
+        explicacao: "Inspeciona tráfego na borda da VPC; não é o serviço dedicado a mitigar negação de serviço distribuída em escala."
+  - tipo: unica
+    enunciado: "Uma organização com dezenas de contas quer uma visão única e priorizada dos alertas de segurança gerados por vários serviços, além de medir a postura contra padrões reconhecidos. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Security Hub."
+        correta: true
+        explicacao: "Ele centraliza e prioriza achados de vários serviços e contas e avalia a postura contra padrões de segurança."
+      - texto: "Amazon Detective."
+        correta: false
+        explicacao: "Serve para investigar a origem de um achado específico, não para consolidar a visão geral."
+      - texto: "AWS Firewall Manager."
+        correta: false
+        explicacao: "Administra centralmente regras de firewall; não consolida achados de segurança."
+      - texto: "AWS Trusted Advisor."
+        correta: false
+        explicacao: "Verifica boas práticas da conta em várias dimensões, mas não é o painel de achados de segurança das contas."
+  - tipo: multipla
+    enunciado: "Uma equipe precisa proteger uma aplicação web exposta na internet contra ataques da camada de aplicação e também reduzir credenciais guardadas no código. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Colocar o AWS WAF na frente da aplicação com regras para padrões de ataque conhecidos."
+        correta: true
+        explicacao: "O WAF filtra requisições HTTP maliciosas, como injeção de SQL e cross-site scripting, antes de chegarem à aplicação."
+      - texto: "Guardar senhas e chaves no AWS Secrets Manager e recuperá-las em tempo de execução."
+        correta: true
+        explicacao: "O Secrets Manager armazena e rotaciona segredos, tirando credencial do código e do arquivo de configuração."
+      - texto: "Habilitar o Amazon Macie sobre o código-fonte da aplicação."
+        correta: false
+        explicacao: "O Macie classifica dado sensível armazenado no S3 e não é a ferramenta para proteger requisição nem para guardar segredo."
+      - texto: "Usar o Amazon Inspector para bloquear as requisições suspeitas em tempo real."
+        correta: false
+        explicacao: "O Inspector faz varredura de vulnerabilidade e não fica no caminho do tráfego bloqueando requisição."
+      - texto: "Ativar o AWS Trusted Advisor para filtrar o tráfego da aplicação."
+        correta: false
+        explicacao: "O Trusted Advisor faz verificações de boas práticas na conta e não inspeciona tráfego."
+---
+
+## Em uma frase
+
+Todo serviço de segurança da AWS diz que protege, então o que resolve a questão
+é **o objeto que cada um observa**: ameaça em curso, vulnerabilidade
+conhecida, dado sensível, requisição maliciosa ou volume de tráfego.
+
+## O mapa de reconhecimento
+
+<Comparativo
+  colunas={["Serviço", "O que observa", "A palavra no enunciado"]}
+  linhas={[
+    ["Amazon GuardDuty", "Atividade maliciosa e comportamento anômalo na conta", "Ameaça, atividade suspeita, comportamento fora do normal"],
+    ["Amazon Inspector", "Vulnerabilidade conhecida em instâncias, imagens e funções", "Vulnerabilidade, correção pendente, exposição não intencional"],
+    ["Amazon Macie", "Dado sensível armazenado no S3", "Dado pessoal, informação sigilosa, classificar conteúdo"],
+    ["AWS Security Hub", "Achados dos outros serviços, agregados e priorizados", "Visão única, consolidar alertas, postura de segurança"],
+    ["Amazon Detective", "A origem e o encadeamento de um achado", "Investigar, analisar a causa depois do alerta"],
+    ["AWS Shield", "Volume de tráfego de negação de serviço", "Ataque de negação de serviço, tráfego derrubando o site"],
+    ["AWS WAF", "Conteúdo das requisições web", "Injeção de SQL, cross-site scripting, bloquear requisição"],
+    ["AWS Network Firewall", "Tráfego de rede entrando e saindo da VPC", "Inspecionar tráfego na borda da VPC"],
+    ["AWS Firewall Manager", "As regras de firewall de várias contas", "Aplicar a mesma regra em toda a organização"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="O trio que decide o domínio">
+Guarde os três como uma cena: **GuardDuty** procura quem está atacando,
+**Inspector** procura a porta mal fechada e **Macie** procura o documento
+sigiloso guardado no lugar errado. Praticamente toda questão sobre detecção na
+CLF cai em um desses três papéis.
+</Callout>
+
+## Proteger o tráfego: Shield, WAF e os firewalls
+
+Shield e WAF resolvem problemas diferentes e aparecem juntos como alternativas
+de propósito. O **Shield** trata de **volume**: muitas origens mandando tráfego
+para tirar o serviço do ar. O **WAF** trata de **conteúdo**: uma requisição que
+parece legítima mas carrega um padrão de ataque. Quando o enunciado descreve
+injeção de SQL ou cross-site scripting, é WAF; quando descreve o site caindo
+por excesso de requisições, é Shield.
+
+Para a organização inteira, o **Firewall Manager** distribui e mantém essas
+regras em várias contas, e o **Network Firewall** inspeciona o tráfego na borda
+da VPC.
+
+## Dentro da VPC: security group e lista de controle de acesso
+
+<Comparativo
+  colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
+  linhas={[
+    ["Protege", "O recurso, como uma instância", "A sub-rede inteira"],
+    ["Regras", "Só permitir", "Permitir e negar"],
+    ["Avalia estado", "Sim: resposta de conexão permitida volta sozinha", "Não: é preciso regra para ida e para volta"],
+    ["A pista", "Liberar porta para uma instância específica", "Bloquear um endereço para toda a sub-rede"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Security Hub não detecta">
+Ele **agrega**. Se o enunciado pede descobrir algo, procure quem detecta. Se
+pede ver tudo em um lugar só, com prioridade e pontuação de postura, é o
+Security Hub. A mesma lógica vale para o **Detective**: ele entra depois do
+achado, para entender como aquilo aconteceu.
+</Callout>
+
+## Como responder o cenário
+
+Sublinhe o substantivo do problema antes de olhar as alternativas. Ameaça aponta
+GuardDuty. Vulnerabilidade aponta Inspector. Dado sensível aponta Macie. Volume
+aponta Shield. Requisição maliciosa aponta WAF. Consolidação aponta Security
+Hub. Investigação posterior aponta Detective. Credencial no código aponta
+Secrets Manager. Boas práticas da conta apontam Trusted Advisor. Se duas
+alternativas parecerem servir, escolha a que age sobre o objeto que o enunciado
+nomeou, não a que soa mais completa.

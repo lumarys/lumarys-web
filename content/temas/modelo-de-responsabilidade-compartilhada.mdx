@@ -1,0 +1,257 @@
+---
+slug: modelo-de-responsabilidade-compartilhada
+titulo: "O modelo de responsabilidade compartilhada"
+resumo: "Segurança da nuvem é da AWS, segurança na nuvem é do cliente: onde a linha cai em EC2, RDS, Lambda e S3, o que a AWS nunca faz pelo cliente e como reconhecer o lado certo num enunciado de duas linhas."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 2.1 do guia e abre o domínio de maior peso da prova. O formato é sempre o mesmo: o enunciado cita um serviço e uma atividade e pergunta de quem é a responsabilidade. Quem não sabe que a linha se move conforme o serviço responde no chute."
+comoCai: "Uma empresa executa uma aplicação em instâncias EC2. Quem é responsável por aplicar as correções de segurança do sistema operacional convidado?"
+feynman: "Explique em um minuto, para alguém de negócio, por que contratar a AWS não transfere para ela a responsabilidade sobre quem pode ver os dados da empresa."
+preRequisitos: ["como-ler-uma-questao-clf"]
+errosComuns:
+  - "Achar que a linha é fixa. Ela se move com o serviço: no EC2 o cliente cuida do sistema operacional convidado; no RDS quem corrige o sistema operacional e o motor do banco é a AWS."
+  - "Concluir que a AWS cuida da segurança dos dados porque cuida da infraestrutura. O conteúdo dos dados, a classificação deles e quem tem acesso são sempre do cliente."
+  - "Confundir segurança da nuvem com segurança na nuvem. Da nuvem é a infraestrutura que a AWS opera; na nuvem é o que o cliente coloca em cima dela."
+  - "Supor que serviço gerenciado significa nenhuma responsabilidade. Mesmo em S3 e Lambda o cliente continua responsável por permissões, configuração de acesso e criptografia do que grava."
+  - "Esquecer os controles compartilhados. Gestão de correções, gestão de configuração e conscientização existem dos dois lados, cada um na sua camada."
+  - "Tratar descarte de hardware e segurança física como algo configurável. São responsabilidades exclusivas da AWS e o cliente não participa delas."
+preTeste:
+  - enunciado: "Uma empresa executa uma aplicação em instâncias EC2. Quem é responsável por instalar as atualizações de segurança do sistema operacional convidado dessas instâncias?"
+    alternativas:
+      - texto: "O cliente."
+        correta: true
+        explicacao: "No EC2 o sistema operacional convidado fica acima da linha: quem instala, configura e corrige é o cliente."
+      - texto: "A AWS."
+        correta: false
+        explicacao: "A AWS corrige o hipervisor e a infraestrutura física que sustenta a instância, não o sistema operacional que o cliente escolheu rodar dentro dela."
+      - texto: "A responsabilidade é do provedor do sistema operacional, não das duas partes."
+        correta: false
+        explicacao: "O fornecedor publica a correção, mas a decisão de aplicá-la na instância continua sendo do cliente."
+  - enunciado: "Quem é responsável pela segurança física dos data centers, pelo controle de acesso às instalações e pelo descarte seguro dos discos que saem de operação?"
+    alternativas:
+      - texto: "A AWS, sozinha."
+        correta: true
+        explicacao: "Instalação física, hardware, rede física e descarte de mídia compõem a segurança da nuvem, que é integralmente da AWS."
+      - texto: "O cliente, configurando as opções de data center no console."
+        correta: false
+        explicacao: "Não existe configuração de data center no console: o cliente escolhe região e zona, nunca a operação física."
+      - texto: "As duas partes, em um controle compartilhado."
+        correta: false
+        explicacao: "Distrator plausível porque existem controles compartilhados, mas segurança física não é um deles: o cliente não tem acesso às instalações."
+videos:
+  - id: P1wcq0mikWI
+    publicadoEm: "2025-07-21"
+    titulo: "O que é o Modelo de Responsabilidade Compartilhada da AWS? | Segurança na Nuvem AWS #1"
+    canal: "Fast Lane Brasil"
+    duracao: 6
+    porQue: "Seis minutos no nível exato do enunciado da prova. Observe como o instrutor separa as duas frases que decidem toda questão do tema: segurança da nuvem e segurança na nuvem."
+  - id: HghMQgK6LnQ
+    publicadoEm: "2024-10-21"
+    titulo: "Segurança na Cloud AWS: Entenda o Modelo de Responsabilidade Compartilhada"
+    canal: "Douglas Mugnos"
+    duracao: 9
+    porQue: "Complementar, com exemplos por serviço. Pare em cada exemplo e diga antes dele de que lado a atividade cai; é o treino que a questão cobra."
+artigos:
+  - titulo: "Modelo de responsabilidade compartilhada"
+    url: "https://aws.amazon.com/compliance/shared-responsibility-model/"
+    fonte: "AWS"
+  - titulo: "Security and compliance (AWS Overview)"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/security-and-compliance.html"
+    fonte: "AWS"
+  - titulo: "Security pillar do Well-Architected"
+    url: "https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Segurança da nuvem, em uma linha."
+    verso: "O que a AWS protege: instalações físicas, hardware, rede física, virtualização e o software que roda os serviços gerenciados."
+  - frente: "Segurança na nuvem, em uma linha."
+    verso: "O que o cliente protege: os dados, a configuração dos serviços, as identidades e permissões, a rede que ele desenha e o software que ele instala."
+  - frente: "A linha no EC2."
+    verso: "A AWS cuida do hipervisor para baixo. O cliente cuida do sistema operacional convidado, das correções dele, do firewall da instância e da aplicação."
+  - frente: "A linha no RDS."
+    verso: "A AWS corrige o sistema operacional e o motor do banco e cuida do backup automatizado. O cliente cuida dos usuários do banco, das permissões, da rede e de ativar criptografia."
+  - frente: "A linha no S3."
+    verso: "A AWS garante durabilidade e a infraestrutura de armazenamento. O cliente decide quem acessa o bucket, se há versionamento e como o objeto é criptografado."
+  - frente: "A linha no Lambda."
+    verso: "A AWS cuida de todo o ambiente de execução e da escala. O cliente cuida do código, das dependências, da role de execução e do dado que a função manipula."
+  - frente: "O que a AWS nunca faz pelo cliente."
+    verso: "Classificar os dados, criar identidades e permissões, guardar as credenciais de acesso e decidir o que é criptografado. Isso é do cliente em qualquer serviço."
+  - frente: "Controles herdados."
+    verso: "Controles que o cliente herda inteiros da AWS e não configura: segurança física e ambiental dos data centers."
+  - frente: "Controles compartilhados."
+    verso: "Existem dos dois lados, em camadas diferentes: gestão de correções, gestão de configuração e conscientização e treinamento."
+  - frente: "A regra que move a linha."
+    verso: "Quanto mais gerenciado o serviço, menos sobra para o cliente na camada de infraestrutura. O que nunca sai do cliente é dado, identidade e configuração de acesso."
+  - frente: "Responsabilidade por correção do hipervisor."
+    verso: "Sempre da AWS, em qualquer serviço. O cliente não enxerga nem acessa essa camada."
+  - frente: "A pista de responsabilidade compartilhada no enunciado."
+    verso: "Palavras como quem é responsável, de quem é a tarefa, ou o que cabe ao cliente. Aí a pergunta é de que lado da linha a atividade cai."
+  - frente: "Conformidade é responsabilidade de quem?"
+    verso: "Das duas partes. A AWS certifica a infraestrutura e publica os relatórios; o cliente responde pela conformidade do que construiu em cima dela."
+drills:
+  - titulo: "De que lado da linha cai?"
+    instrucao: "Classifique cada atividade como responsabilidade da AWS, do cliente ou compartilhada entre os dois."
+    opcoes: ["AWS", "Cliente", "Compartilhada"]
+    itens:
+      - enunciado: "Trocar e destruir com segurança os discos que saem de operação nos data centers."
+        resposta: "AWS"
+        explicacao: "Descarte de mídia é segurança da nuvem, e o cliente não participa."
+      - enunciado: "Definir quais usuários do IAM podem ler um bucket do S3."
+        resposta: "Cliente"
+        explicacao: "Identidade e permissão são do cliente em qualquer serviço."
+      - enunciado: "Aplicar as correções do sistema operacional convidado de uma instância EC2."
+        resposta: "Cliente"
+        explicacao: "Acima da linha do hipervisor, quem corrige é quem instalou."
+      - enunciado: "Aplicar as correções do motor de banco em uma instância do RDS."
+        resposta: "AWS"
+        explicacao: "No RDS o motor e o sistema operacional são gerenciados pela AWS."
+      - enunciado: "Manter um programa de gestão de correções, cada parte na sua camada."
+        resposta: "Compartilhada"
+        explicacao: "A AWS corrige a infraestrutura, o cliente corrige o que ele instalou. O controle existe dos dois lados."
+      - enunciado: "Classificar quais dados da aplicação são sensíveis e exigem tratamento especial."
+        resposta: "Cliente"
+        explicacao: "A AWS não conhece nem classifica o conteúdo do cliente."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma instituição financeira roda um banco de dados no Amazon RDS. O time de auditoria pergunta quem aplica as correções de segurança do motor do banco e do sistema operacional subjacente. Qual é a resposta correta?"
+    alternativas:
+      - texto: "A AWS, porque o RDS é um serviço gerenciado e essas camadas ficam abaixo da linha do cliente."
+        correta: true
+        explicacao: "No RDS a AWS assume o sistema operacional e o motor do banco; ao cliente restam usuários, permissões, rede e criptografia."
+      - texto: "O cliente, da mesma forma que faria em uma instância EC2."
+        correta: false
+        explicacao: "Esse é o comportamento do EC2, onde o sistema operacional convidado é do cliente. O RDS move a linha para baixo justamente por ser gerenciado."
+      - texto: "O cliente, apenas para o motor do banco; a AWS cuida do sistema operacional."
+        correta: false
+        explicacao: "No RDS as duas camadas são da AWS. Dividir assim descreve um serviço que não existe no catálogo."
+      - texto: "Nenhuma das partes, porque bancos gerenciados não recebem correção."
+        correta: false
+        explicacao: "O RDS recebe janelas de manutenção com correções aplicadas pela AWS."
+  - tipo: unica
+    enunciado: "Uma empresa migrou arquivos para o Amazon S3 e quer saber qual parte da proteção desses arquivos continua sendo dela. Qual atividade é responsabilidade do cliente?"
+    alternativas:
+      - texto: "Definir as permissões de acesso ao bucket e escolher como os objetos são criptografados."
+        correta: true
+        explicacao: "Controle de acesso e decisão de criptografia são do cliente em qualquer serviço de armazenamento."
+      - texto: "Garantir a durabilidade dos objetos replicando-os entre os discos do data center."
+        correta: false
+        explicacao: "Durabilidade da infraestrutura de armazenamento é entregue pela AWS e não é configurada pelo cliente."
+      - texto: "Aplicar correções de segurança nos servidores que armazenam os objetos."
+        correta: false
+        explicacao: "O cliente não enxerga nem acessa esses servidores; isso é segurança da nuvem."
+      - texto: "Manter o controle de acesso físico às instalações onde os discos estão."
+        correta: false
+        explicacao: "Segurança física é exclusiva da AWS."
+  - tipo: unica
+    enunciado: "Um gestor afirma que, ao contratar a AWS, a empresa transferiu toda a responsabilidade de segurança para o provedor. Qual afirmação corrige esse entendimento de acordo com o modelo de responsabilidade compartilhada?"
+    alternativas:
+      - texto: "A AWS é responsável pela segurança da nuvem e o cliente pela segurança na nuvem, incluindo seus dados e acessos."
+        correta: true
+        explicacao: "Essa é a formulação do modelo: infraestrutura para a AWS, conteúdo e configuração para o cliente."
+      - texto: "A AWS assume tudo, exceto o pagamento da fatura."
+        correta: false
+        explicacao: "Contradiz o modelo, que mantém dado, identidade e configuração com o cliente."
+      - texto: "O cliente assume tudo, e a AWS apenas fornece a capacidade computacional."
+        correta: false
+        explicacao: "Inverte o modelo: a AWS responde por instalações, hardware, rede física e virtualização."
+      - texto: "A responsabilidade depende do plano de suporte contratado."
+        correta: false
+        explicacao: "Plano de suporte muda tempo de resposta e acompanhamento, não a divisão de responsabilidades de segurança."
+  - tipo: multipla
+    enunciado: "Uma equipe está montando a política interna de segurança e precisa listar o que permanece com a empresa em qualquer serviço da AWS. Quais DUAS atividades são sempre responsabilidade do cliente?"
+    alternativas:
+      - texto: "Gerenciar identidades, grupos e permissões de acesso aos recursos."
+        correta: true
+        explicacao: "Quem pode fazer o quê é decisão do cliente em todos os serviços, sem exceção."
+      - texto: "Classificar os dados da empresa e decidir quais exigem proteção adicional."
+        correta: true
+        explicacao: "A AWS não conhece o conteúdo do cliente, então classificação e tratamento do dado são sempre dele."
+      - texto: "Aplicar correções de segurança no hipervisor que executa as instâncias."
+        correta: false
+        explicacao: "Camada de virtualização é da AWS e não é acessível ao cliente."
+      - texto: "Controlar o acesso físico às zonas de disponibilidade."
+        correta: false
+        explicacao: "Segurança física é responsabilidade exclusiva da AWS."
+      - texto: "Descartar com segurança as mídias de armazenamento retiradas de operação."
+        correta: false
+        explicacao: "Descarte de hardware faz parte da segurança da nuvem, operada pela AWS."
+---
+
+## Em uma frase
+
+A AWS responde pela segurança **da** nuvem, que é a infraestrutura que ela
+opera, e o cliente responde pela segurança **na** nuvem, que é tudo o que ele
+coloca em cima dela; a prova só quer saber de que lado da linha uma atividade
+cai.
+
+## A linha se move com o serviço
+
+Este é o ponto que mais derruba candidato. A divisão não é fixa: quanto mais
+gerenciado o serviço, mais camadas a AWS assume e menos sobra para o cliente na
+infraestrutura.
+
+<Comparativo
+  colunas={["Serviço", "A AWS cuida de", "O cliente cuida de"]}
+  linhas={[
+    ["EC2", "Hipervisor, hardware, rede física, instalações", "Sistema operacional convidado e suas correções, firewall da instância, aplicação, dados"],
+    ["RDS", "Sistema operacional, motor do banco, correções, backup automatizado", "Usuários e permissões do banco, configuração de rede, ativar criptografia, os dados"],
+    ["S3", "Durabilidade, infraestrutura de armazenamento, correção dos servidores", "Quem acessa o bucket, versionamento, escolha de criptografia, os objetos"],
+    ["Lambda", "Ambiente de execução, escala, correção da plataforma", "Código, dependências, role de execução, os dados que a função manipula"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A pergunta que resolve qualquer item">
+Antes de responder, pergunte: **o cliente consegue mexer nisso pelo console, pela
+CLI ou pela API?** Se consegue, a responsabilidade é dele. Se não existe onde
+configurar, é da AWS. Correção do hipervisor não tem botão; permissão de bucket
+tem.
+</Callout>
+
+## O que nunca sai do cliente
+
+Três coisas ficam com o cliente em qualquer serviço, do EC2 ao Lambda:
+
+<Passos itens={[
+  "Os dados: o que são, quão sensíveis são e por quanto tempo ficam guardados. A AWS não olha o conteúdo do cliente.",
+  "As identidades e permissões: quem pode fazer o quê. Criar usuário, role e política é sempre ato do cliente.",
+  "As credenciais de acesso e a configuração de quem alcança o recurso, incluindo a decisão de criptografar."
+]} />
+
+A recíproca também é absoluta. Segurança física das instalações, hardware,
+rede física, descarte de mídia e a camada de virtualização são exclusivas da
+AWS, e o cliente não tem como participar nem como auditar diretamente: ele
+recebe isso na forma de relatório de conformidade.
+
+## Controles herdados e controles compartilhados
+
+O modelo tem três categorias, e a prova costuma citar as duas primeiras pelo
+nome.
+
+<Comparativo
+  colunas={["Categoria", "Quem executa", "Exemplo"]}
+  linhas={[
+    ["Herdado", "AWS inteira", "Segurança física e ambiental dos data centers"],
+    ["Compartilhado", "Os dois, em camadas diferentes", "Gestão de correções, gestão de configuração, conscientização e treinamento"],
+    ["Específico do cliente", "Cliente inteiro", "Proteção do dado, comunicação e zoneamento de rede da aplicação"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Compartilhado não é metade e metade">
+Gestão de correções aparece como controle compartilhado, mas isso não significa
+que a AWS corrige metade do sistema operacional da sua instância. Significa que
+**cada parte corrige a sua camada**: a AWS a infraestrutura, o cliente o que ele
+instalou. A palavra compartilhado descreve o controle, não a tarefa.
+</Callout>
+
+## Como responder o cenário
+
+Leia o serviço citado primeiro, porque é ele que posiciona a linha. Depois
+classifique a atividade em uma das três faixas: infraestrutura física e
+virtualização apontam AWS; dado, identidade e permissão apontam cliente; sistema
+operacional e motor de banco dependem do serviço, e é aí que a questão mora. Se
+o enunciado disser EC2, o sistema operacional é do cliente; se disser RDS,
+Lambda ou qualquer serviço descrito como gerenciado, o sistema operacional é da
+AWS. Quando aparecer conformidade, lembre que ela é das duas partes: a AWS
+certifica a infraestrutura e o cliente responde pelo que construiu sobre ela.

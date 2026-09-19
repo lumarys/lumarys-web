@@ -1,0 +1,255 @@
+---
+slug: iam-usuarios-grupos-roles-e-politicas
+titulo: "IAM: usuários, grupos, roles e políticas"
+resumo: "Quem é quem no IAM: usuário raiz e o que fazer com ele, MFA, chaves de acesso, grupos, roles com credenciais temporárias, políticas gerenciadas e inline, privilégio mínimo e onde entra o IAM Identity Center."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 2.3 do guia e o tema mais denso do domínio de maior peso. A prova não pede política escrita em JSON: ela descreve uma necessidade de acesso em duas linhas e pergunta qual componente do IAM atende. Usuário, grupo e role parecem intercambiáveis para quem nunca separou os três."
+comoCai: "Uma aplicação em uma instância EC2 precisa ler objetos de um bucket do S3. Qual é a forma recomendada de conceder esse acesso?"
+feynman: "Explique em um minuto, sem jargão, por que dar uma chave de acesso permanente a um servidor é pior do que deixá-lo assumir um papel temporário."
+preRequisitos: ["como-ler-uma-questao-clf", "modelo-de-responsabilidade-compartilhada"]
+errosComuns:
+  - "Dar chave de acesso a uma aplicação que roda na AWS. O recomendado é uma role: a credencial vira temporária e ninguém precisa guardar segredo no código."
+  - "Confundir grupo com role. Grupo junta usuários para herdarem a mesma política; role é uma identidade sem senha que alguém ou algum serviço assume por um tempo."
+  - "Usar o usuário raiz no dia a dia. Ele deve ficar protegido com MFA e ser usado só nas poucas tarefas que exigem a conta, como fechar a conta ou mudar o plano de suporte."
+  - "Achar que MFA substitui senha. MFA é um segundo fator somado à senha, não um troca-troca."
+  - "Confundir política gerenciada com política inline. A gerenciada é um objeto reutilizável, anexável a vários; a inline vive presa a uma única identidade e some junto com ela."
+  - "Tratar IAM Identity Center como substituto do IAM. Ele centraliza o acesso de pessoas a várias contas com login único; as permissões dentro da conta continuam sendo políticas do IAM."
+  - "Achar que negar exige apagar a permissão. Uma negação explícita em qualquer política vence qualquer permissão concedida em outra."
+preTeste:
+  - enunciado: "Uma aplicação executada em uma instância EC2 precisa gravar arquivos em um bucket do S3. Qual é a forma recomendada de conceder esse acesso?"
+    alternativas:
+      - texto: "Anexar uma role do IAM à instância EC2."
+        correta: true
+        explicacao: "A role entrega credenciais temporárias e rotacionadas automaticamente para a instância, sem nenhum segredo guardado no servidor."
+      - texto: "Criar um usuário do IAM e gravar a chave de acesso no código da aplicação."
+        correta: false
+        explicacao: "É a prática que a AWS desaconselha: a chave é permanente, vaza com o código e precisa ser rotacionada à mão."
+      - texto: "Compartilhar as credenciais do usuário raiz com a aplicação."
+        correta: false
+        explicacao: "O raiz tem acesso irrestrito e não deve ser usado por pessoa nem por aplicação em nenhuma hipótese."
+  - enunciado: "Uma empresa quer que trinta analistas recebam exatamente o mesmo conjunto de permissões, e que uma mudança futura nesse conjunto valha para todos de uma vez. Qual recurso do IAM atende a esse pedido?"
+    alternativas:
+      - texto: "Colocar os usuários em um grupo e anexar a política ao grupo."
+        correta: true
+        explicacao: "O grupo existe justamente para aplicar uma política a um conjunto de usuários e manter a mudança em um lugar só."
+      - texto: "Anexar uma política inline a cada usuário."
+        correta: false
+        explicacao: "Funciona, mas obriga a repetir a alteração trinta vezes: é o oposto do que o enunciado pede."
+      - texto: "Criar uma role e pedir que cada analista a assuma no início do expediente."
+        correta: false
+        explicacao: "Role serve para acesso temporário ou para serviços; para permissão permanente e igual de um time o recurso é o grupo."
+videos:
+  - id: Qxy9NcexWnQ
+    publicadoEm: "2025-08-30"
+    titulo: "Fundamentos de AWS IAM - Usuários, Roles e Políticas"
+    canal: "Cloud Café & DevOps"
+    duracao: 22
+    porQue: "Cobre os três componentes que a prova confunde de propósito. Preste atenção na parte em que ele explica por que aplicação não deve usar chave de acesso: é a resposta de várias questões."
+  - id: KsAV_RJpva4
+    publicadoEm: "2025-11-23"
+    titulo: "AWS - Habilitando MFA - Multi-Factor Authentication"
+    canal: "Nelson Dev"
+    duracao: 5
+    porQue: "Complementar e curto, só sobre o segundo fator. Vale para fixar que MFA soma à senha e que o usuário raiz é o primeiro que precisa dele."
+artigos:
+  - titulo: "What is IAM?"
+    url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html"
+    fonte: "AWS"
+  - titulo: "Security best practices in IAM"
+    url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html"
+    fonte: "AWS"
+  - titulo: "Root user best practices"
+    url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/root-user-best-practices.html"
+    fonte: "AWS"
+  - titulo: "What is IAM Identity Center?"
+    url: "https://docs.aws.amazon.com/singlesignon/latest/userguide/what-is.html"
+    fonte: "AWS"
+  - titulo: "AWS Identity and Access Management"
+    url: "https://aws.amazon.com/iam/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Usuário do IAM, em uma linha."
+    verso: "Identidade permanente para uma pessoa ou carga, com senha para o console e, opcionalmente, chave de acesso para a API."
+  - frente: "Grupo do IAM, em uma linha."
+    verso: "Coleção de usuários que herdam a mesma política. Grupo não tem credencial e não pode ser assumido."
+  - frente: "Role do IAM, em uma linha."
+    verso: "Identidade sem senha e sem chave fixa, assumida temporariamente por um serviço, por um usuário ou por outra conta. A credencial vem com prazo."
+  - frente: "A pista de role no enunciado."
+    verso: "Aplicação na AWS que precisa acessar outro serviço, acesso entre contas ou acesso temporário. Se a frase tem serviço acessando serviço, a resposta é role."
+  - frente: "Usuário raiz: o que fazer com ele."
+    verso: "Proteger com MFA, não gerar chave de acesso para ele e não usar no dia a dia. Reserve para as poucas tarefas que exigem a conta."
+  - frente: "MFA, em uma linha."
+    verso: "Segundo fator somado à senha. Reduz o estrago de uma senha vazada e é a primeira recomendação para o raiz."
+  - frente: "Política gerenciada contra política inline."
+    verso: "Gerenciada é um objeto reutilizável, anexável a vários usuários, grupos e roles. Inline vive presa a uma identidade só e é apagada junto com ela."
+  - frente: "Privilégio mínimo, em uma linha."
+    verso: "Conceder só a permissão necessária para a tarefa, e nada além. É a prática que a prova premia em toda questão de acesso."
+  - frente: "Como o IAM decide um pedido."
+    verso: "Nega por padrão. Uma permissão explícita libera; uma negação explícita em qualquer política vence tudo."
+  - frente: "IAM Identity Center, em uma linha."
+    verso: "Login único para pessoas acessarem várias contas da AWS e aplicações, conectado ao diretório corporativo, com acesso por credencial temporária."
+  - frente: "IAM contra IAM Identity Center."
+    verso: "IAM define permissões dentro de uma conta. Identity Center centraliza quem entra e em quais contas, sem criar um usuário por conta."
+  - frente: "Chave de acesso, em uma linha."
+    verso: "Par de credenciais permanentes para chamadas de API fora da AWS. Dentro da AWS prefira role."
+  - frente: "Acesso entre contas, em uma linha."
+    verso: "Uma role na conta de destino que confia na conta de origem. Não se cria usuário duplicado para isso."
+drills:
+  - titulo: "Qual recurso do IAM atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o recurso do IAM que a resolve."
+    opcoes:
+      ["Usuário", "Grupo", "Role", "Política gerenciada", "MFA", "IAM Identity Center"]
+    itens:
+      - enunciado: "Uma função Lambda precisa gravar em uma tabela do DynamoDB."
+        resposta: "Role"
+        explicacao: "Serviço acessando serviço pede credencial temporária, e isso é role."
+      - enunciado: "Doze analistas de dados devem ter o mesmo conjunto de permissões, alterável em um lugar só."
+        resposta: "Grupo"
+        explicacao: "Grupo aplica a mesma política a vários usuários."
+      - enunciado: "Proteger o usuário raiz contra o uso de uma senha vazada."
+        resposta: "MFA"
+        explicacao: "O segundo fator é a primeira recomendação para o raiz."
+      - enunciado: "Dar a uma pessoa acesso a cinco contas da AWS com um login corporativo único."
+        resposta: "IAM Identity Center"
+        explicacao: "Acesso centralizado a várias contas, ligado ao diretório da empresa."
+      - enunciado: "Reaproveitar o mesmo conjunto de permissões em três roles diferentes sem reescrevê-lo."
+        resposta: "Política gerenciada"
+        explicacao: "A gerenciada é um objeto anexável a várias identidades."
+      - enunciado: "Criar uma identidade permanente para uma pessoa que só usa o console desta conta."
+        resposta: "Usuário"
+        explicacao: "Pessoa com acesso a uma conta única é o caso clássico de usuário do IAM."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma aplicação executada em instâncias EC2 precisa ler mensagens de uma fila do SQS. A empresa quer evitar guardar credenciais no servidor. Qual abordagem atende ao pedido?"
+    alternativas:
+      - texto: "Anexar uma role do IAM às instâncias, com permissão de leitura na fila."
+        correta: true
+        explicacao: "A role fornece credenciais temporárias rotacionadas pela própria AWS, sem segredo armazenado na instância."
+      - texto: "Criar um usuário do IAM e distribuir a chave de acesso dele para as instâncias."
+        correta: false
+        explicacao: "A chave é permanente e ficaria guardada no servidor, exatamente o que o enunciado quer evitar."
+      - texto: "Adicionar as instâncias a um grupo do IAM com permissão na fila."
+        correta: false
+        explicacao: "Grupo só recebe usuários; instância não entra em grupo e o recurso não gera credencial."
+      - texto: "Usar as credenciais do usuário raiz da conta na aplicação."
+        correta: false
+        explicacao: "O raiz tem acesso irrestrito e nunca deve ser usado por uma aplicação."
+  - tipo: unica
+    enunciado: "Uma empresa acaba de abrir uma conta na AWS. Qual é a primeira recomendação de segurança em relação ao usuário raiz?"
+    alternativas:
+      - texto: "Ativar autenticação de múltiplos fatores para ele e passar a usar identidades com privilégio mínimo no dia a dia."
+        correta: true
+        explicacao: "Proteger o raiz com MFA e não usá-lo rotineiramente é a primeira prática recomendada para uma conta nova."
+      - texto: "Gerar uma chave de acesso do raiz para automatizar as tarefas administrativas."
+        correta: false
+        explicacao: "A recomendação é o contrário: não criar chave de acesso para o raiz."
+      - texto: "Apagar o usuário raiz depois de criar o primeiro administrador."
+        correta: false
+        explicacao: "O raiz não pode ser apagado enquanto a conta existir; ele é protegido, não removido."
+      - texto: "Compartilhar a senha do raiz com o time de operações para garantir continuidade."
+        correta: false
+        explicacao: "Credencial compartilhada elimina a rastreabilidade e amplia o estrago de um vazamento."
+  - tipo: unica
+    enunciado: "Uma organização mantém seis contas da AWS e quer que os funcionários entrem com o login corporativo existente e escolham a conta a acessar, sem um usuário criado em cada conta. Qual serviço atende diretamente a esse pedido?"
+    alternativas:
+      - texto: "AWS IAM Identity Center."
+        correta: true
+        explicacao: "Ele centraliza o acesso de pessoas a várias contas e aplicações a partir de um diretório de identidades, com credenciais temporárias."
+      - texto: "Criar grupos do IAM iguais nas seis contas."
+        correta: false
+        explicacao: "Grupo organiza usuários dentro de uma conta e não resolve login único entre contas."
+      - texto: "AWS Organizations."
+        correta: false
+        explicacao: "Vizinho plausível: o Organizations agrupa contas e aplica políticas de controle de serviço, mas não faz a autenticação das pessoas."
+      - texto: "Amazon Cognito."
+        correta: false
+        explicacao: "O Cognito trata da identidade de usuários finais de aplicações, não do acesso de funcionários ao ambiente da AWS."
+  - tipo: multipla
+    enunciado: "O time de segurança vai revisar as práticas de acesso da conta. Quais DUAS práticas o IAM recomenda?"
+    alternativas:
+      - texto: "Conceder apenas as permissões necessárias para a tarefa, seguindo o privilégio mínimo."
+        correta: true
+        explicacao: "Privilégio mínimo é a prática central do IAM e a resposta esperada em qualquer questão de acesso."
+      - texto: "Exigir autenticação de múltiplos fatores para as identidades com acesso privilegiado."
+        correta: true
+        explicacao: "MFA para acesso privilegiado, a começar pelo raiz, é prática recomendada explícita."
+      - texto: "Usar o usuário raiz para as operações diárias, por ser a identidade mais confiável da conta."
+        correta: false
+        explicacao: "É o oposto da recomendação: o raiz fica reservado para as poucas tarefas que o exigem."
+      - texto: "Distribuir uma mesma chave de acesso entre os membros do time para simplificar a operação."
+        correta: false
+        explicacao: "Credencial compartilhada destrói a rastreabilidade de quem fez o quê."
+      - texto: "Anexar a política de acesso administrativo a todos os usuários para evitar chamados de permissão."
+        correta: false
+        explicacao: "Permissão ampla por conveniência é o contrário do privilégio mínimo."
+---
+
+## Em uma frase
+
+O IAM é onde a conta decide **quem pode fazer o quê**, e a prova pede quase
+sempre a mesma coisa: dada uma necessidade de acesso em duas linhas, qual dos
+quatro componentes do IAM (usuário, grupo, role, política) atende.
+
+## Os quatro componentes e a pista de cada um
+
+<Comparativo
+  colunas={["Componente", "O que é", "A pista no enunciado"]}
+  linhas={[
+    ["Usuário", "Identidade permanente, com senha e possivelmente chave de acesso", "Uma pessoa, acesso ao console, conta única"],
+    ["Grupo", "Conjunto de usuários que herdam a mesma política", "Vários funcionários com as mesmas permissões, mudança em um lugar só"],
+    ["Role", "Identidade sem senha, assumida por um tempo, com credencial temporária", "Serviço acessando serviço, acesso entre contas, acesso temporário"],
+    ["Política", "Documento que concede ou nega ações sobre recursos", "Definir o que pode ser feito, reaproveitar permissões"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A regra que resolve metade das questões">
+Se o enunciado diz que **uma aplicação, uma função ou uma instância** precisa
+acessar outro serviço da AWS, a resposta é **role**. Nunca é chave de acesso
+gravada no servidor, e nunca é o usuário raiz. Esse par aparece na prova em
+várias roupagens e a resposta certa não muda.
+</Callout>
+
+## O usuário raiz
+
+O raiz é a identidade criada junto com a conta e tem acesso irrestrito, inclusive
+ao que nenhuma política consegue limitar. A recomendação da AWS é tratá-lo como
+cofre: ative MFA, não gere chave de acesso para ele, não o use no dia a dia e
+crie identidades com privilégio mínimo para o trabalho normal. Ele fica
+reservado para as poucas tarefas que exigem a conta, como alterar o plano de
+suporte ou encerrar a conta.
+
+## Políticas: gerenciada, inline e como a decisão é tomada
+
+Uma política diz quais ações são permitidas sobre quais recursos. A
+**gerenciada** é um objeto independente, anexável a vários usuários, grupos e
+roles, e existe na variedade publicada pela AWS e na criada pelo cliente. A
+**inline** fica embutida em uma única identidade e é apagada junto com ela.
+
+<Callout tipo="atencao" titulo="Negação explícita vence tudo">
+O IAM nega por padrão. Uma permissão explícita libera a ação, mas se **qualquer**
+política aplicável contiver uma negação explícita, o pedido é recusado, por mais
+ampla que seja a permissão concedida em outro lugar. Enunciado que descreve
+acesso negado apesar de política permissiva está apontando para isso.
+</Callout>
+
+## IAM Identity Center
+
+Quando a empresa tem várias contas, criar um usuário por pessoa em cada conta
+não escala. O **IAM Identity Center** conecta o diretório de identidades da
+empresa e dá a cada pessoa um login único, com escolha da conta a acessar e
+credenciais temporárias. O que a pessoa pode fazer dentro da conta continua
+sendo definido por política. Ele resolve **quem entra**; o IAM continua
+resolvendo **o que se pode fazer**.
+
+## Como responder o cenário
+
+Localize o sujeito do acesso. Se for um serviço da AWS, é role. Se for um grupo
+de pessoas com permissões idênticas, é grupo. Se for uma pessoa com acesso a
+muitas contas usando o login corporativo, é IAM Identity Center. Se o enunciado
+pedir a prática recomendada, as respostas de sempre são privilégio mínimo, MFA
+e credencial temporária no lugar de chave permanente. E desconfie de qualquer
+alternativa que proponha usar o raiz, compartilhar credencial ou dar acesso
+administrativo por conveniência: na CLF, essas nunca são a resposta certa.

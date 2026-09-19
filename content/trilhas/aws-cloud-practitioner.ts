@@ -14,11 +14,11 @@ import type { Trilha } from "../types";
  * são próprios, e não compartilhados com a SAA: uma questão de arquitetura
  * dentro de uma prova de CLF quebraria a calibração do sorteio por peso.
  *
- * Estado desta trilha: "como funciona a prova" e o Domínio 1 publicados. Os
- * outros três domínios já aparecem como módulos "em breve", com o peso que a
- * AWS declara, e chegam nos cards LUM-144 (Segurança e conformidade),
- * LUM-145 e LUM-146 (Tecnologia e serviços) e LUM-147 (Cobrança, preços e
- * suporte). O `prazoSugeridoDias` acompanha o que existe e cresce com eles.
+ * Estado desta trilha: "como funciona a prova" e os Domínios 1 e 2 publicados.
+ * Os outros dois domínios já aparecem como módulos "em breve", com o peso que
+ * a AWS declara, e chegam nos cards LUM-145 e LUM-146 (Tecnologia e serviços)
+ * e LUM-147 (Cobrança, preços e suporte). O `prazoSugeridoDias` acompanha o
+ * que existe e cresce com eles.
  */
 export const awsCloudPractitioner: Trilha = {
   slug: "aws-cloud-practitioner",
@@ -30,7 +30,7 @@ export const awsCloudPractitioner: Trilha = {
   resumo:
     "O guia oficial do exame CLF-C02 transformado em estudo ativo: um módulo por domínio, cenários curtos no estilo da prova com o porquê de cada alternativa, cards de serviço e pista, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 90 minutos",
-  prazoSugeridoDias: 6,
+  prazoSugeridoDias: 12,
   status: "disponivel",
   exame: {
     codigo: "CLF-C02",
@@ -72,11 +72,17 @@ export const awsCloudPractitioner: Trilha = {
       titulo: "Segurança e conformidade",
       resumo:
         "Responsabilidade compartilhada, IAM, governança e conformidade, os serviços de segurança e o que cada um detecta, criptografia em repouso e em trânsito.",
-      status: "em-breve",
+      status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 2 · Security and Compliance",
       pesoExame: 30,
-      temas: [],
+      temas: [
+        "modelo-de-responsabilidade-compartilhada",
+        "iam-usuarios-grupos-roles-e-politicas",
+        "conformidade-e-governanca-na-aws",
+        "servicos-de-seguranca-da-aws",
+        "criptografia-em-repouso-e-em-transito",
+      ],
     },
     {
       slug: "tecnologia",
@@ -142,6 +148,48 @@ export const awsCloudPractitioner: Trilha = {
       temas: [],
       revisao: ["como-funciona-a-prova", "conceitos"],
       nota: "Checkpoint do módulo e, na sequência, a prova simulada com o banco atual, no ritmo do exame: cerca de 1,4 minuto por questão. Abaixo de 70% no checkpoint, releia o tema apontado antes da prova.",
+    },
+    {
+      dia: 7,
+      titulo: "O modelo de responsabilidade compartilhada",
+      temas: ["modelo-de-responsabilidade-compartilhada"],
+      revisao: ["conceitos"],
+      nota: "Começa o domínio de 30%, o maior da prova. Este tema é a base dos outros quatro: sem a linha entre segurança da nuvem e segurança na nuvem, nenhuma questão do domínio fecha.",
+    },
+    {
+      dia: 8,
+      titulo: "IAM: usuários, grupos, roles e políticas",
+      temas: ["iam-usuarios-grupos-roles-e-politicas"],
+      revisao: ["seguranca"],
+      nota: "O tema mais denso do domínio. Pare quando conseguir dizer, sem pensar, quando a resposta é role e quando é grupo.",
+    },
+    {
+      dia: 9,
+      titulo: "Conformidade e governança na AWS",
+      temas: ["conformidade-e-governanca-na-aws"],
+      revisao: ["seguranca"],
+      nota: "Aqui a questão é sempre um pedido de documento ou de registro. Fixe dois pares: Artifact contra Audit Manager e CloudTrail contra Config.",
+    },
+    {
+      dia: 10,
+      titulo: "Os serviços de segurança e o que cada um detecta",
+      temas: ["servicos-de-seguranca-da-aws"],
+      revisao: ["seguranca"],
+      nota: "Catálogo puro: cada serviço em uma linha e a palavra do enunciado que aponta para ele. GuardDuty, Inspector e Macie respondem por boa parte das questões.",
+    },
+    {
+      dia: 11,
+      titulo: "Criptografia em repouso e em trânsito",
+      temas: ["criptografia-em-repouso-e-em-transito"],
+      revisao: ["seguranca"],
+      nota: "Fecha o Domínio 2. Separe o estado do dado antes de escolher o serviço, e depois responda quem tem a chave.",
+    },
+    {
+      dia: 12,
+      titulo: "Checkpoint do Domínio 2 e segunda prova simulada",
+      temas: [],
+      revisao: ["conceitos", "seguranca"],
+      nota: "Agora com os dois domínios no banco. Compare o resultado por domínio com o da primeira prova: o de 30% precisa subir mais do que o de 24%.",
     },
   ],
 };
