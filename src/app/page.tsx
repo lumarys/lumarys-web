@@ -380,63 +380,72 @@ export default function Home() {
       </section>
 
       {/* ─────────────────────────── Em breve ──────────────────────────── */}
-      <section aria-labelledby="breve">
-        <div className="mx-auto max-w-6xl px-5 py-14">
-          <h2 id="breve" className="font-display text-[26px] font-bold sm:text-[30px]">
-            Próximas trilhas
-          </h2>
-          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[var(--text-2)]">
-            Mesma estrutura, outras ementas:{" "}
-            {trilhasEmBreve.map((t, i) => (
-              <span key={t.slug}>
-                {i > 0 ? (i === trilhasEmBreve.length - 1 ? " e " : ", ") : ""}
-                <strong className="font-semibold text-[var(--text)]">{t.titulo}</strong>
-              </span>
-            ))}
-            . A ordem segue o que a comunidade pedir —{" "}
-            <Link href="/trilhas/">veja o catálogo para pedir a sua</Link>.
-          </p>
-
-          {/* ───────────────────────────── Dúvidas ─────────────────────────── */}
-          <section className="border-t border-[var(--border)]" aria-labelledby="duvidas">
-            <div className="mx-auto max-w-3xl px-5 py-14">
-              <h2 id="duvidas" className="font-display text-[26px] font-bold sm:text-[30px]">
-                Perguntas que todo mundo faz
-              </h2>
-              <div className="mt-6 flex flex-col gap-2">
-                {PERGUNTAS.map((p) => (
-                  <Recolhivel key={p.pergunta} titulo={p.pergunta}>
-                    <p className="text-[15px] leading-relaxed text-[var(--text-2)]">{p.resposta}</p>
-                  </Recolhivel>
-                ))}
-              </div>
-
-              <p className="mt-6 text-[13px] leading-relaxed text-[var(--muted)]">
-                Escrito e mantido por Diego Vieira, na <Link href="/sobre/">Cernyn</Link>. A
-                política editorial e o jeito de apontar um erro estão na página{" "}
-                <Link href="/sobre/">Sobre</Link>.
-              </p>
-            </div>
-          </section>
-
-          <div className="mt-12 rounded-3xl border border-[var(--accent)]/25 bg-[var(--surface)] p-8 text-center">
-            <IconeCards size={26} className="mx-auto text-[var(--accent)]" />
-            <h2 className="font-display mt-4 text-[22px] font-bold sm:text-[26px]">
-              Sua prova tem data. Comece hoje.
+      {/* A seção inteira some quando não há trilha anunciada sem conteúdo.
+          Um título "Próximas trilhas" seguido de nada é pior que silêncio:
+          promete uma lista e entrega um rótulo órfão. */}
+      {trilhasEmBreve.length > 0 ? (
+        <section aria-labelledby="breve">
+          <div className="mx-auto max-w-6xl px-5 pt-14">
+            <h2 id="breve" className="font-display text-[26px] font-bold sm:text-[30px]">
+              Próximas trilhas
             </h2>
-            <p className="mx-auto mt-2.5 max-w-lg text-[15px] leading-relaxed text-[var(--text-2)]">
-              Diga quando é a prova e quantos minutos você tem por dia. O plano se ajusta e a tela
-              Hoje passa a dizer o que fazer.
+            <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-[var(--text-2)]">
+              Mesma estrutura, outras ementas:{" "}
+              {trilhasEmBreve.map((t, i) => (
+                <span key={t.slug}>
+                  {i > 0 ? (i === trilhasEmBreve.length - 1 ? " e " : ", ") : ""}
+                  <strong className="font-semibold text-[var(--text)]">{t.titulo}</strong>
+                </span>
+              ))}
+              . A ordem segue o que a comunidade pedir:{" "}
+              <Link href="/trilhas/">veja o catálogo para pedir a sua</Link>.
             </p>
-            <BotaoLink
-              href={principal ? `/trilhas/${principal.slug}/plano/` : "/trilhas/"}
-              className="mt-6"
-            >
-              Montar meu plano <IconeSeta size={18} />
-            </BotaoLink>
           </div>
+        </section>
+      ) : null}
+
+      {/* Invólucro de layout, não de semântica: as seções nomeadas são as de
+          dentro (dúvidas) e o bloco de chamada final. */}
+      <div className="mx-auto max-w-6xl px-5 pb-14">
+        {/* ───────────────────────────── Dúvidas ─────────────────────────── */}
+        <section className="border-t border-[var(--border)]" aria-labelledby="duvidas">
+          <div className="mx-auto max-w-3xl px-5 py-14">
+            <h2 id="duvidas" className="font-display text-[26px] font-bold sm:text-[30px]">
+              Perguntas que todo mundo faz
+            </h2>
+            <div className="mt-6 flex flex-col gap-2">
+              {PERGUNTAS.map((p) => (
+                <Recolhivel key={p.pergunta} titulo={p.pergunta}>
+                  <p className="text-[15px] leading-relaxed text-[var(--text-2)]">{p.resposta}</p>
+                </Recolhivel>
+              ))}
+            </div>
+
+            <p className="mt-6 text-[13px] leading-relaxed text-[var(--muted)]">
+              Escrito e mantido por Diego Vieira, na <Link href="/sobre/">Cernyn</Link>. A política
+              editorial e o jeito de apontar um erro estão na página{" "}
+              <Link href="/sobre/">Sobre</Link>.
+            </p>
+          </div>
+        </section>
+
+        <div className="mt-12 rounded-3xl border border-[var(--accent)]/25 bg-[var(--surface)] p-8 text-center">
+          <IconeCards size={26} className="mx-auto text-[var(--accent)]" />
+          <h2 className="font-display mt-4 text-[22px] font-bold sm:text-[26px]">
+            Sua prova tem data. Comece hoje.
+          </h2>
+          <p className="mx-auto mt-2.5 max-w-lg text-[15px] leading-relaxed text-[var(--text-2)]">
+            Diga quando é a prova e quantos minutos você tem por dia. O plano se ajusta e a tela
+            Hoje passa a dizer o que fazer.
+          </p>
+          <BotaoLink
+            href={principal ? `/trilhas/${principal.slug}/plano/` : "/trilhas/"}
+            className="mt-6"
+          >
+            Montar meu plano <IconeSeta size={18} />
+          </BotaoLink>
         </div>
-      </section>
+      </div>
       <JsonLd dados={jsonLdFaq(PERGUNTAS)} />
     </AppShell>
   );

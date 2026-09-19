@@ -1,0 +1,269 @@
+---
+slug: economia-da-nuvem
+titulo: "Economia da nuvem"
+resumo: "Despesa de capital contra despesa operacional, custo fixo contra variável, o que entra no custo total de propriedade de um data center, licenciamento próprio ou incluso, dimensionamento correto e o ganho de automatizar. É a tarefa 1.4 do guia da CLF-C02."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É o vocabulário que a prova usa para falar de dinheiro, e ele volta inteiro no Domínio 4. Quem não separa despesa de capital de custo fixo, ou dimensionamento de modelo de compra, erra questões que só pediam a palavra certa."
+comoCai: "Uma empresa quer comparar o custo de manter o data center próprio com o de rodar na AWS. Qual conceito descreve essa comparação?"
+feynman: "Explique em um minuto para alguém de finanças por que o custo de um servidor parado no data center não é zero."
+preRequisitos: ["como-ler-uma-questao-clf"]
+errosComuns:
+  - "Tratar despesa de capital e custo fixo como sinônimos. Capital ou operacional descreve como o dinheiro sai; fixo ou variável descreve se o valor muda com o uso. Um compromisso de um ano na nuvem é despesa operacional e custo fixo ao mesmo tempo."
+  - "Esquecer os custos indiretos do ambiente local no custo total de propriedade: energia, refrigeração, espaço, rede, licenças, equipe de operação e o ciclo de troca do hardware."
+  - "Confundir dimensionamento correto com modelo de compra. Dimensionar é escolher o tamanho do recurso para a carga real; modelo de compra é como se paga pelo recurso escolhido."
+  - "Achar que licenciamento próprio é sempre mais barato. Levar a licença que a empresa já tem faz sentido quando ela está paga e é portável; caso contrário, a licença inclusa evita gestão e risco de conformidade."
+  - "Chamar qualquer redução de fatura de economia de escala. Economia de escala é o preço unitário cair pelo volume agregado de muitos clientes, não a empresa gastar menos porque desligou máquina."
+  - "Ignorar o custo de não automatizar. O guia cita explicitamente os benefícios da automação entre os conceitos de economia da nuvem: trabalho manual repetido é custo recorrente de pessoas."
+preTeste:
+  - enunciado: "Uma empresa comprava servidores a cada três anos, com desembolso grande e antecipado. Depois da migração, passou a pagar mensalmente pelo consumo. Como se descreve essa mudança?"
+    alternativas:
+      - texto: "Troca de despesa de capital por despesa operacional."
+        correta: true
+        explicacao: "Comprar o ativo antes de usar é despesa de capital; pagar pelo consumo ao longo do tempo é despesa operacional."
+      - texto: "Troca de custo variável por custo fixo."
+        correta: false
+        explicacao: "É o contrário: o custo passa a acompanhar o uso. Além disso, fixo contra variável é outro eixo, não o mesmo que capital contra operacional."
+      - texto: "Aplicação de dimensionamento correto."
+        correta: false
+        explicacao: "Dimensionar é ajustar o tamanho do recurso à carga real, e não mudar a forma de desembolso."
+  - enunciado: "Uma equipe percebeu que várias instâncias rodam com uso médio de 8% de processador e as trocou por tipos menores, mantendo a mesma aplicação. Qual conceito descreve essa prática?"
+    alternativas:
+      - texto: "Dimensionamento correto, ou right-sizing."
+        correta: true
+        explicacao: "Ajustar o tamanho do recurso ao consumo real, sem mudar a aplicação, é a definição da prática."
+      - texto: "Economia de escala."
+        correta: false
+        explicacao: "Economia de escala é o preço unitário cair pelo volume agregado do provedor, não pela empresa ajustar o próprio recurso."
+      - texto: "Licenciamento próprio."
+        correta: false
+        explicacao: "Licenciamento trata de trazer ou não a licença que a empresa já possui, assunto diferente do tamanho da instância."
+videos:
+  - id: N0AIgmVZBZc
+    publicadoEm: "2026-09-12"
+    titulo: "Economia na AWS: CapEx, OpEx e FinOps na Prática (Ep. 05)"
+    canal: "Pô, é só isso?"
+    duracao: 5
+    porQue: "Cinco minutos que amarram despesa de capital, despesa operacional e a disciplina de acompanhar gasto. Observe o momento em que ele mostra o custo que continua existindo depois da migração: é o que a prova chama de custo total de propriedade."
+  - id: CFNPu7SM8g0
+    publicadoEm: "2019-12-03"
+    titulo: "A DIFERENÇA ENTRE CAPEX E OPEX"
+    canal: "UpperStack"
+    duracao: 6
+    porQue: "Complementar e direto ao ponto do vocabulário financeiro. Assista para fixar a definição de cada termo antes de tentar separar custo fixo de custo variável, que é o par vizinho que a prova usa como distrator."
+artigos:
+  - titulo: "Cloud economics center"
+    url: "https://aws.amazon.com/economics/"
+    fonte: "AWS"
+  - titulo: "How AWS pricing works"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/welcome.html"
+    fonte: "AWS"
+  - titulo: "Cloud cost optimization"
+    url: "https://aws.amazon.com/pricing/cost-optimization/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Despesa de capital, em uma linha."
+    verso: "Dinheiro gasto na compra de um ativo antes de usá-lo, como comprar servidor e depreciá-lo ao longo dos anos."
+  - frente: "Despesa operacional, em uma linha."
+    verso: "Dinheiro gasto na operação corrente, como a fatura mensal de consumo de um serviço de nuvem."
+  - frente: "Custo fixo e custo variável, em uma linha."
+    verso: "Fixo não muda com o volume de uso; variável acompanha o consumo. Este eixo é independente de capital contra operacional."
+  - frente: "Um compromisso de um ano na nuvem é qual combinação?"
+    verso: "Despesa operacional e custo fixo: paga-se ao longo do tempo, mas o valor não depende do quanto se usa no período."
+  - frente: "Custo total de propriedade, em uma linha."
+    verso: "Tudo que custa manter a solução, e não só o preço do equipamento: energia, refrigeração, espaço, rede, licenças, equipe e o ciclo de troca do hardware."
+  - frente: "Economia de escala, em uma linha."
+    verso: "O preço unitário cai porque o provedor compra e opera em volume muito maior do que qualquer cliente conseguiria sozinho."
+  - frente: "Dimensionamento correto, em uma linha."
+    verso: "Escolher o tamanho do recurso pela carga real medida, em vez de pelo palpite inicial. Corrige tanto o recurso grande demais quanto o pequeno demais."
+  - frente: "Licenciamento próprio, em uma linha."
+    verso: "Levar para a nuvem uma licença que a empresa já comprou, quando o fabricante permite. Evita pagar de novo pelo que já está pago."
+  - frente: "Licença inclusa, em uma linha."
+    verso: "A licença vem embutida no preço do serviço, e a gestão e a conformidade ficam com o provedor. Costuma ser a escolha quando não há licença portável."
+  - frente: "Por que automatizar é assunto de economia da nuvem?"
+    verso: "Tarefa manual repetida é custo recorrente de pessoas e fonte de erro. O guia lista os benefícios da automação entre os conceitos do domínio."
+  - frente: "A pista de 'custo total de propriedade' num enunciado."
+    verso: "Comparação entre manter o ambiente próprio e rodar na nuvem, citando itens além do equipamento, como energia, espaço e equipe."
+  - frente: "A pista de 'dimensionamento correto' num enunciado."
+    verso: "Uso médio baixo, recurso superdimensionado, ajuste de tamanho sem mudar a aplicação."
+  - frente: "Reduzir a fatura desligando máquina é economia de escala?"
+    verso: "Não. É otimização de uso da própria empresa. Economia de escala é o efeito do volume do provedor sobre o preço unitário."
+drills:
+  - titulo: "Qual conceito de economia o enunciado descreve?"
+    instrucao: "Para cada frase, diga qual conceito da tarefa 1.4 está sendo descrito."
+    opcoes:
+      [
+        "Despesa de capital",
+        "Despesa operacional",
+        "Custo total de propriedade",
+        "Economia de escala",
+        "Dimensionamento correto",
+        "Licenciamento próprio",
+      ]
+    itens:
+      - enunciado: "'Compramos o storage de uma vez e vamos deprecia-lo em cinco anos.'"
+        resposta: "Despesa de capital"
+        explicacao: "Ativo comprado antes do uso."
+      - enunciado: "'Nossa conta do mês subiu porque processamos mais pedidos.'"
+        resposta: "Despesa operacional"
+        explicacao: "Gasto corrente, proporcional à operação."
+      - enunciado: "'No cálculo incluímos energia, refrigeração, espaço no prédio e as duas pessoas que cuidam do parque.'"
+        resposta: "Custo total de propriedade"
+        explicacao: "Soma dos custos além do equipamento."
+      - enunciado: "'O preço por gigabyte é menor do que qualquer contrato que fecharíamos com um fornecedor.'"
+        resposta: "Economia de escala"
+        explicacao: "Preço unitário derivado do volume agregado do provedor."
+      - enunciado: "'Metade das instâncias fica abaixo de 10% de uso; vamos trocar por tipos menores.'"
+        resposta: "Dimensionamento correto"
+        explicacao: "Ajuste do tamanho à carga real."
+      - enunciado: "'Já pagamos essas licenças de banco de dados e o fabricante permite usá-las na nuvem.'"
+        resposta: "Licenciamento próprio"
+        explicacao: "Reaproveitar licença existente em vez de contratar de novo."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa está montando a comparação financeira entre manter o data center atual e migrar para a AWS. O diretor pede que o cálculo inclua energia, refrigeração, espaço físico, rede, licenças e a equipe que opera o parque. Qual conceito esse cálculo representa?"
+    alternativas:
+      - texto: "Custo total de propriedade."
+        correta: true
+        explicacao: "Somar todos os custos de manter a solução, e não apenas o preço do equipamento, é a definição de custo total de propriedade."
+      - texto: "Despesa de capital."
+        correta: false
+        explicacao: "Descreve apenas a parcela de compra de ativos, que é um dos itens do cálculo, não o cálculo inteiro."
+      - texto: "Economia de escala."
+        correta: false
+        explicacao: "Explica por que o preço unitário do provedor é menor, e não como se soma o custo de um ambiente próprio."
+      - texto: "Dimensionamento correto."
+        correta: false
+        explicacao: "Trata de ajustar o tamanho de recursos já em uso, e não de comparar dois ambientes."
+  - tipo: unica
+    enunciado: "Uma equipe assumiu um ambiente herdado e encontrou dezenas de instâncias com uso médio de processador abaixo de 10%, todas maiores do que a carga exige. Qual prática de economia da nuvem resolve esse desperdício?"
+    alternativas:
+      - texto: "Dimensionamento correto dos recursos, ajustando o tipo e o tamanho ao consumo medido."
+        correta: true
+        explicacao: "A prática existe exatamente para corrigir recurso superdimensionado, usando dado de uso real em vez de palpite."
+      - texto: "Trocar a despesa de capital por despesa operacional."
+        correta: false
+        explicacao: "Isso já aconteceu ao migrar; o problema descrito é o tamanho do recurso, não a forma de pagamento."
+      - texto: "Adotar licenciamento próprio para as instâncias."
+        correta: false
+        explicacao: "Licenciamento muda quem paga pelo software, sem corrigir instâncias grandes demais."
+      - texto: "Aguardar a economia de escala do provedor reduzir o preço unitário."
+        correta: false
+        explicacao: "Economia de escala é efeito do volume do provedor e não corrige desperdício interno da empresa."
+  - tipo: unica
+    enunciado: "Um analista afirma que, ao migrar para a nuvem, a empresa passou a ter apenas custos variáveis. A equipe de finanças aponta que existe um compromisso anual contratado com desconto. Qual afirmação está correta?"
+    alternativas:
+      - texto: "O compromisso anual é despesa operacional e custo fixo: paga-se ao longo do tempo, mas o valor não varia com o consumo do período."
+        correta: true
+        explicacao: "Os dois eixos são independentes. Sair da despesa de capital não significa que todo custo passou a variar com o uso."
+      - texto: "O compromisso anual é despesa de capital, porque envolve um contrato de longo prazo."
+        correta: false
+        explicacao: "Despesa de capital é a compra de um ativo. Contrato de serviço com pagamento ao longo do tempo é despesa operacional."
+      - texto: "O analista está certo: na nuvem todo custo é variável por definição."
+        correta: false
+        explicacao: "Compromissos com desconto, capacidade reservada e assinaturas produzem custo fixo dentro de um modelo operacional."
+      - texto: "O compromisso anual não é custo, e sim investimento, e por isso fica fora da comparação."
+        correta: false
+        explicacao: "Ele entra na comparação como custo do período. Chamar de investimento não o retira do cálculo."
+  - tipo: multipla
+    enunciado: "Uma empresa quer reduzir o custo do ambiente na AWS sem trocar de aplicação. Quais DUAS ações atacam diretamente conceitos de economia da nuvem descritos no domínio de conceitos?"
+    alternativas:
+      - texto: "Ajustar o tamanho dos recursos ao consumo medido, aplicando dimensionamento correto."
+        correta: true
+        explicacao: "É a prática que corrige recurso superdimensionado sem exigir mudança na aplicação."
+      - texto: "Automatizar tarefas manuais repetitivas de operação."
+        correta: true
+        explicacao: "O guia cita os benefícios da automação entre os conceitos de economia: trabalho manual repetido é custo recorrente e fonte de erro."
+      - texto: "Negociar economia de escala diretamente com o provedor para baixar o preço unitário."
+        correta: false
+        explicacao: "Economia de escala é efeito do volume agregado de todos os clientes, não uma negociação individual."
+      - texto: "Reclassificar a fatura mensal como despesa de capital no orçamento."
+        correta: false
+        explicacao: "Mudar a classificação contábil não reduz o custo, e a natureza da despesa não é escolhida pela empresa."
+      - texto: "Aumentar o tamanho das instâncias para terminar o processamento mais cedo e desligar antes."
+        correta: false
+        explicacao: "Pode até funcionar em casos específicos, mas não é um conceito do domínio e contraria o dimensionamento pela carga medida."
+---
+
+## Em uma frase
+
+Economia da nuvem é o vocabulário financeiro que a prova usa: como o dinheiro
+sai (capital ou operacional), se o valor acompanha o uso (fixo ou variável),
+quanto custa de verdade manter um ambiente (custo total de propriedade) e o que
+se faz para gastar menos sem trocar de aplicação.
+
+## Dois eixos que quase todo mundo mistura
+
+<Comparativo
+  colunas={["Eixo", "Pergunta que ele responde", "Exemplo"]}
+  linhas={[
+    ["Capital contra operacional", "Como o dinheiro sai: compra de ativo ou gasto corrente", "Comprar servidor é capital; fatura mensal do serviço é operacional"],
+    ["Fixo contra variável", "O valor muda com o volume de uso", "Compromisso anual é fixo; cobrança por requisição é variável"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Os dois eixos são independentes">
+Sair da despesa de capital não transforma tudo em custo variável. Um
+compromisso de um ano com desconto é **despesa operacional e custo fixo** ao
+mesmo tempo: paga-se ao longo do período, mas o valor não depende do consumo.
+A prova monta o distrator exatamente aqui, oferecendo "trocou fixo por
+variável" quando a resposta é "trocou capital por operacional".
+</Callout>
+
+## O custo que o ambiente próprio esconde
+
+O custo total de propriedade é a conta completa de manter uma solução, e a
+prova cobra a lista do que entra nela além do equipamento.
+
+<Passos itens={[
+  "Aquisição e o ciclo de troca do hardware, normalmente a cada poucos anos.",
+  "Energia, refrigeração e espaço físico no prédio ou no centro de dados alugado.",
+  "Rede, licenças de software e contratos de suporte do fabricante.",
+  "Pessoas: quem instala, monitora, aplica correção e atende o incidente da madrugada.",
+  "Capacidade ociosa comprada para o pico e paga o ano inteiro."
+]} />
+
+É essa lista que sustenta a comparação com a nuvem. Um servidor parado no data
+center não custa zero: ele ocupa espaço, consome energia e envelhece.
+
+## Licenciamento: própria ou inclusa
+
+Quando o software é licenciado, existem dois caminhos, e o enunciado diz qual
+situação a empresa está vivendo.
+
+<Comparativo
+  colunas={["Caminho", "Quando faz sentido", "O que muda"]}
+  linhas={[
+    ["Licença própria", "A empresa já pagou pela licença e o fabricante permite levá-la", "Evita pagar de novo; a gestão e a conformidade continuam com a empresa"],
+    ["Licença inclusa", "Não há licença portável, ou a empresa quer parar de gerenciar isso", "O preço do serviço embute a licença; a gestão fica com o provedor"]
+  ]}
+/>
+
+## Dimensionar e automatizar
+
+Duas práticas fecham a tarefa, e as duas aparecem com pista clara:
+
+**Dimensionamento correto** é escolher o tamanho do recurso pela carga real
+medida. A pista é sempre um número de uso baixo, como instâncias rodando a
+menos de 10% de processador, ou o oposto, recurso apertado demais.
+
+**Automação** entra como conceito econômico, não técnico: tarefa manual
+repetida é custo recorrente de pessoas e é onde o erro humano nasce.
+
+<Callout tipo="dica" titulo="Otimização de uso não é economia de escala">
+Economia de escala é o preço unitário cair porque o provedor compra e opera em
+volume enorme. Quando a empresa desliga uma máquina ociosa e a fatura cai, isso
+é otimização de uso, não economia de escala. As duas ideias aparecem juntas nas
+alternativas justamente porque as pessoas as trocam.
+</Callout>
+
+## Como responder o cenário
+
+Descubra primeiro se a questão fala de **como se paga** ou de **quanto se
+gasta**. Comprar antes de usar é capital; fatura recorrente é operacional; valor
+que não muda com o uso é fixo. Se o enunciado lista energia, espaço e equipe, a
+resposta é custo total de propriedade. Se cita uso médio baixo, é
+dimensionamento. E se cita preço unitário menor do que a empresa conseguiria
+sozinha, é economia de escala, que é do provedor e não da empresa.

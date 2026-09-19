@@ -3,36 +3,42 @@ import { expect, test } from "@playwright/test";
 /**
  * As trilhas futuras eram três cartões em 70% de opacidade. Isso não é um
  * estado: não diz o que falta, não diz quando, e não dá nada para a pessoa
- * fazer. Quem chega interessado numa delas saía sem deixar rastro.
+ * fazer. Viraram um acordeão por trilha, que admite não ter data e aceita um
+ * pedido nominal.
+ *
+ * Com a AWS Cloud Practitioner publicada, a lista de `trilhasEmBreve` ficou
+ * vazia, e este arquivo mudou de alvo: em vez de conferir o cartão da CLF,
+ * confere que a seção inteira some das duas páginas que a renderizavam. Um
+ * rótulo "Em breve" seguido de nada, ou um "Próximas trilhas" sem nomes, é
+ * pior que silêncio: promete uma lista e entrega um rótulo órfão.
+ *
+ * Quando a próxima certificação entrar em `trilhasEmBreve`, estes testes
+ * falham de propósito, e voltam a ser o que eram: conferir o cartão, o pedido
+ * e a altura do alvo de toque.
  */
-test("cada trilha futura abre, admite que não tem data e aceita um pedido", async ({ page }) => {
+test("o catálogo não mostra rótulo de 'em breve' com a lista vazia", async ({ page }) => {
   await page.goto("/trilhas/");
 
-  const cartao = page.locator("details", { hasText: "AWS Cloud Practitioner" });
-  await expect(cartao).toBeVisible();
-  await expect(cartao.getByText(/não há data marcada/i)).toBeHidden();
-
-  await cartao.locator("summary").click();
-  await expect(cartao.getByText(/não há data marcada/i)).toBeVisible();
-
-  const pedido = cartao.getByRole("button", { name: /quero esta trilha/i });
-  await expect(pedido).toBeVisible();
-  const caixa = await pedido.boundingBox();
-  expect(caixa!.height).toBeGreaterThanOrEqual(44);
+  await expect(page.getByText("Em breve", { exact: true })).toHaveCount(0);
+  // O pedido por trilha morava dentro de cada acordeão da lista.
+  await expect(page.getByRole("button", { name: /quero esta trilha/i })).toHaveCount(0);
+  await expect(page.getByText(/não há data marcada/i)).toHaveCount(0);
 });
 
-test("o pedido nomeia a trilha, para chegar classificado", async ({ page }) => {
-  await page.goto("/trilhas/");
-  const cartao = page.locator("details", { hasText: "AWS Cloud Practitioner" });
-  await cartao.locator("summary").click();
+test("a home não anuncia próximas trilhas quando não há nenhuma anunciada", async ({ page }) => {
+  await page.goto("/");
 
-  // O destino é um mailto: — o navegador de teste não navega para ele e
-  // location.href não é redefinível no Chromium. O que dá para verificar aqui
-  // é que o botão existe e é dessa trilha; o assunto em si é montado por
-  // `enderecoDeContato`, coberto em tests/unit/company.test.ts.
-  await expect(cartao.getByRole("button", { name: /quero esta trilha/i })).toBeVisible();
-  // A outra existe fechada: o pedido é por trilha, não um só no fim da lista,
-  // para o assunto do e-mail dizer qual delas. (Eram três; Analytics saiu do
-  // "em breve" e virou trilha.)
-  await expect(page.locator("details button", { hasText: "Quero esta trilha" })).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: /próximas trilhas/i })).toHaveCount(0);
+  await expect(page.getByText(/mesma estrutura, outras ementas/i)).toHaveCount(0);
+  // A seção seguinte continua no lugar: o que sumiu foi só o bloco vazio.
+  await expect(page.getByRole("heading", { name: /perguntas que todo mundo faz/i })).toBeVisible();
+});
+
+test("toda trilha do catálogo é uma trilha de verdade, com página própria", async ({ page }) => {
+  await page.goto("/trilhas/");
+
+  // Os acordeões da página eram exatamente os cartões de "em breve": sem
+  // lista, não sobra nenhum. O que resta é catálogo navegável.
+  await expect(page.locator("details")).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /cloud practitioner/i }).first()).toBeVisible();
 });

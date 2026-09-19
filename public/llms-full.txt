@@ -8,6 +8,24 @@
 Conteúdo em português do Brasil. Licença do conteúdo: CC BY-NC-SA 4.0.
 Ao citar, atribua a Lumarys e linke a página do tema.
 
+## AWS Cloud Practitioner
+
+O guia oficial do exame CLF-C02 transformado em estudo ativo: um módulo por domínio, cenários curtos no estilo da prova com o porquê de cada alternativa, cards de serviço e pista, e uma prova simulada cronometrada com nota na escala da AWS.
+
+Origem da ementa: AWS · CLF-C02
+Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
+
+### Como funciona a prova
+
+- [Como ler uma questão da CLF](https://lumarys.com.br/trilhas/aws-cloud-practitioner/como-funciona-a-prova/como-ler-uma-questao-clf/): A prova CLF-C02 descreve uma necessidade em duas ou três linhas e pede o serviço, o conceito ou a prática que atende. Este tema é o formato do exame, a pontuação, os dois tipos de questão e o método de achar o pedido antes de olhar as alternativas.
+
+### Conceitos de nuvem
+
+- [O valor da nuvem e os modelos de implantação](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/valor-da-nuvem-e-modelos-de-implantacao/): Os seis benefícios da computação em nuvem que a AWS publica, a diferença entre nuvem, híbrida e local, e o que separa IaaS, PaaS e SaaS com um exemplo da AWS em cada um. É a tarefa 1.1 do guia da CLF-C02.
+- [Well-Architected: os seis pilares](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/well-architected-os-seis-pilares/): Excelência operacional, segurança, confiabilidade, eficiência de desempenho, otimização de custo e sustentabilidade: o que cada pilar do AWS Well-Architected Framework cobre, a pista que o denuncia num enunciado e onde entra a Well-Architected Tool.
+- [Economia da nuvem](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/economia-da-nuvem/): Despesa de capital contra despesa operacional, custo fixo contra variável, o que entra no custo total de propriedade de um data center, licenciamento próprio ou incluso, dimensionamento correto e o ganho de automatizar. É a tarefa 1.4 do guia da CLF-C02.
+- [Migração: os 7 Rs e o Cloud Adoption Framework](https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/migracao-para-a-nuvem-7-rs-e-caf/): As sete estratégias de migração que a AWS nomeia, com o caso que aponta cada uma, as perspectivas do Cloud Adoption Framework e os serviços de apoio à migração no nível de reconhecimento que a CLF-C02 cobra.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.
@@ -193,6 +211,524 @@ Página: https://lumarys.com.br/trilhas/engenharia-de-dados/
 - [O método](https://lumarys.com.br/metodo/): os nove princípios de Ultraaprendizado aplicados ao site.
 - [Sobre](https://lumarys.com.br/sobre/): quem publica, política editorial e como corrigir um erro.
 - [Privacidade](https://lumarys.com.br/privacidade/) · [Termos](https://lumarys.com.br/termos/)
+
+---
+
+# Como ler uma questão da CLF
+
+Trilha: AWS Cloud Practitioner · Módulo: Como funciona a prova
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/como-funciona-a-prova/como-ler-uma-questao-clf/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** A prova CLF-C02 descreve uma necessidade em duas ou três linhas e pede o serviço, o conceito ou a prática que atende. Este tema é o formato do exame, a pontuação, os dois tipos de questão e o método de achar o pedido antes de olhar as alternativas.
+
+**Por que cai na prova.** Na CLF o candidato raramente erra por não conhecer o serviço: erra por escolher o serviço mais familiar em vez do que o enunciado pediu. As alternativas erradas são sempre serviços vizinhos, plausíveis e reais. Aprender a ler o pedido antes de aprender o catálogo é o que mais sobe a nota por hora de estudo.
+
+**Como o entrevistador pergunta.** "Uma empresa precisa de X. Qual serviço da AWS atende a esse requisito?"
+
+## Em uma frase
+
+A CLF-C02 não pede arquitetura: ela descreve uma necessidade em duas ou três
+linhas e pergunta qual serviço, conceito ou prática atende, com quatro
+alternativas que são todas reais e quase todas vizinhas da certa.
+
+## O formato, para não ser surpresa
+
+<Comparativo
+  colunas={["", "Como é"]}
+  linhas={[
+    ["Questões", "65, das quais 50 pontuam; 15 não pontuam e não são identificadas"],
+    ["Tempo", "90 minutos, cerca de 1,4 minuto por questão"],
+    ["Tipos", "Escolha única (1 certa de 4) e múltipla resposta (2 ou mais certas em 5 ou mais)"],
+    ["Nota", "Escala de 100 a 1000, equalizada entre versões; passa com 700"],
+    ["Penalidade", "Nenhuma por erro; questão não respondida conta como errada"],
+    ["Domínios", "Conceitos 24% · Segurança 30% · Tecnologia 34% · Cobrança 12%"]
+  ]}
+/>
+
+A pontuação é **compensatória**: basta passar no total, não em cada domínio.
+O quadro por domínio que vem no resultado serve para você saber onde é fraco,
+não para aprovar ou reprovar.
+
+## O que a questão realmente pergunta
+
+O guia diz quem é o candidato-alvo: alguém com até seis meses de exposição à
+AWS, de qualquer papel. E diz o que está fora: codificar, desenhar arquitetura,
+resolver incidentes, implementar e testar carga. Isso muda tudo na hora de ler.
+
+Uma questão da CLF é quase sempre uma destas três formas:
+
+<Passos itens={[
+  "Necessidade e serviço: 'a equipe precisa de X; qual serviço atende?'. A resposta é um nome do catálogo.",
+  "Prática e conceito: 'qual princípio ou pilar descreve isto?'. A resposta é um conceito, não um produto.",
+  "Responsabilidade e limite: 'de quem é esta tarefa?'. A resposta separa o que a AWS faz do que o cliente faz."
+]} />
+
+Em nenhuma delas você monta solução. Você **reconhece e posiciona**.
+
+## O pedido é o verbo mais o objeto
+
+Na SAA o desempate está numa palavra em maiúsculas. Na CLF o desempate está no
+**verbo** do enunciado, porque os quatro serviços tratam do mesmo assunto e só
+um faz aquele verbo.
+
+<Comparativo
+  colunas={["O enunciado diz", "O pedido é", "O distrator típico"]}
+  linhas={[
+    ["Detectar comportamento suspeito", "Achar ameaça em atividade", "O serviço que acha vulnerabilidade"],
+    ["Saber quanto foi gasto por projeto", "Analisar custo passado", "O serviço que alerta sobre custo futuro"],
+    ["Baixar relatório de conformidade", "Obter documento pronto", "O serviço que audita configuração"],
+    ["Guardar arquivo acessado uma vez por ano", "Arquivar barato", "A classe de acesso frequente"],
+    ["Rodar código sem gerenciar servidor", "Executar sem infraestrutura", "A máquina virtual com script de instalação"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O distrator da CLF é sempre real">
+Nenhuma alternativa da CLF é absurda. Ela cita um serviço que existe, do mesmo
+tema, com propósito ligeiramente diferente. Quem decora o nome sem decorar o
+propósito cai em todas. Por isso cada tema desta trilha traz o serviço em uma
+linha **e** a pista que o aponta no enunciado: são as duas metades da mesma
+resposta.
+</Callout>
+
+## O método, em quatro passos
+
+<Passos itens={[
+  "Leia as duas ou três linhas inteiras antes de olhar as alternativas. É rápido: o enunciado da CLF é curto de propósito.",
+  "Diga em voz baixa o pedido, verbo mais objeto, com as suas palavras. Se você não consegue, releia; não adianta ir para a lista.",
+  "Elimine por propósito, não por familiaridade. Pergunte de cada alternativa: este serviço faz esse verbo?",
+  "Passou de dois minutos: marque para revisar e siga. Nunca deixe em branco, porque não responder conta como errada."
+]} />
+
+<Callout tipo="dica" titulo="Múltipla resposta é onde se perde ponto bobo">
+O enunciado diz quantas escolher, e a correção é pelo conjunto exato. Se você
+tem certeza de duas e uma terceira parece plausível, a terceira é o distrator:
+ela está ali exatamente para isso. Marque o número pedido, nem uma a mais.
+</Callout>
+
+## Como responder o cenário
+
+Leia o verbo, não o assunto. Quatro serviços de segurança numa lista não
+significam quatro respostas possíveis: significam quatro verbos diferentes, e
+só um combina com o do enunciado. Depois confira o nível: se a sua resposta
+exige desenhar algo, dimensionar algo ou investigar um incidente, você saiu do
+escopo da CLF e provavelmente escolheu a alternativa acima do pedido.
+
+## Erros comuns
+
+- Ler as alternativas antes de terminar o enunciado. Na CLF o enunciado é curto, e quem pula direto para a lista de serviços escolhe o nome mais conhecido em vez do que foi pedido.
+- Procurar pegadinha de arquitetura numa prova fundacional. A CLF não pede desenho, dimensionamento nem solução de incidente; se a resposta exige projetar algo, o candidato saiu do nível da prova.
+- Tratar múltipla resposta como 'marque o que achar certo'. O enunciado diz quantas escolher e a correção é pelo conjunto exato: marcar três quando pede duas zera a questão.
+- Deixar questão em branco. O guia é explícito: pergunta não respondida conta como errada e não há penalidade por chute.
+- Achar que a nota é a porcentagem de acertos. A escala vai de 100 a 1000, 700 é o corte, e 15 das 65 questões não pontuam nem são identificadas.
+- Estudar os domínios no mesmo peso. Tecnologia vale 34% e Cobrança vale 12%; tratar os dois igual joga horas fora.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# O valor da nuvem e os modelos de implantação
+
+Trilha: AWS Cloud Practitioner · Módulo: Conceitos de nuvem
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/valor-da-nuvem-e-modelos-de-implantacao/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Os seis benefícios da computação em nuvem que a AWS publica, a diferença entre nuvem, híbrida e local, e o que separa IaaS, PaaS e SaaS com um exemplo da AWS em cada um. É a tarefa 1.1 do guia da CLF-C02.
+
+**Por que cai na prova.** É a primeira tarefa do primeiro domínio e a que mais aparece com enunciado de uma linha: 'a empresa quer parar de comprar servidor', 'a empresa quer manter parte do sistema no data center'. Quem não sabe qual benefício ou qual modelo o enunciado está descrevendo erra sem perceber que era uma questão fácil.
+
+**Como o entrevistador pergunta.** "Uma empresa deixou de comprar servidores e passou a pagar pelo que usa. Qual benefício da nuvem isso descreve?"
+
+## Em uma frase
+
+A nuvem troca o ativo comprado antes da demanda por um serviço pago conforme o
+uso, e a prova cobra isso em três listas curtas: os seis benefícios, os três
+modelos de implantação e os três modelos de serviço.
+
+## Os seis benefícios, com a pista de cada um
+
+A AWS publica seis vantagens da computação em nuvem, e o enunciado da CLF
+costuma descrever uma delas com uma frase de empresa em vez de nomeá-la.
+
+<Comparativo
+  colunas={["Benefício", "O que é", "A pista no enunciado"]}
+  linhas={[
+    ["Despesa variável no lugar de capital", "Pagar pelo consumo em vez de comprar antes", "Parar de comprar servidor, pagar pelo que usar"],
+    ["Economia de escala massiva", "Preço unitário menor pelo volume agregado de muitos clientes", "Preço menor do que a empresa conseguiria sozinha"],
+    ["Parar de adivinhar capacidade", "Escalar para cima e para baixo conforme a demanda real", "Sobrava máquina ociosa, faltou capacidade no pico"],
+    ["Velocidade e agilidade", "Recurso novo em minutos, experimentar fica barato", "Semanas viraram minutos, mais experimentos por trimestre"],
+    ["Parar de operar data center", "Sem rack, energia, refrigeração e manutenção física", "Foco no que diferencia o negócio"],
+    ["Alcance global em minutos", "Implantar em outra região sem abrir instalação lá", "Atender usuários de outro país com menos latência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Agilidade não é elasticidade">
+São dois benefícios vizinhos e a prova os separa. **Agilidade** é o tempo até
+ter o recurso: semanas viram minutos. **Elasticidade** é o recurso acompanhar a
+variação da demanda, que é o benefício de parar de adivinhar capacidade. Se o
+enunciado fala de prazo, é agilidade; se fala de pico e ociosidade, é
+capacidade.
+</Callout>
+
+## Os três modelos de implantação
+
+A pergunta aqui é **onde a carga roda**, e só existem três respostas.
+
+<Passos itens={[
+  "Nuvem: toda a aplicação e os dados vivem em provedor de nuvem, sem parcela no data center próprio.",
+  "Híbrido: parte na nuvem, parte no ambiente local, com ligação entre os dois. A pista é sempre um motivo para algo ficar onde está, como regulação, legado ou latência.",
+  "Local, também chamado de nuvem privada: infraestrutura própria, com virtualização e automação, sem provedor público."
+]} />
+
+## Os três modelos de serviço
+
+A pergunta aqui é outra: **quem cuida de qual camada**. Quanto mais para baixo
+na tabela, menos sobra para o cliente administrar.
+
+<Comparativo
+  colunas={["Modelo", "O cliente cuida de", "Exemplo na AWS"]}
+  linhas={[
+    ["IaaS", "Sistema operacional, atualizações, aplicação e dados", "Amazon EC2"],
+    ["PaaS", "Aplicação e dados; a plataforma provisiona e mantém o resto", "AWS Elastic Beanstalk"],
+    ["SaaS", "Apenas o uso e os próprios dados", "Amazon WorkMail"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Os dois eixos não se misturam">
+Implantação responde **onde** e serviço responde **quem cuida**. Uma questão
+que descreve um data center próprio conectado à AWS está no eixo da
+implantação; uma que descreve alguém entregando só o código está no eixo do
+serviço. Quando as alternativas misturam os dois, metade delas já cai fora só
+por isso.
+</Callout>
+
+## Como responder o cenário
+
+Descubra primeiro de qual das três listas a questão está falando: benefício,
+implantação ou modelo de serviço. Depois procure o verbo. Se a frase é sobre
+dinheiro que deixou de ser desembolsado de uma vez, é despesa variável; se é
+sobre tempo, é agilidade; se é sobre sobra e falta, é capacidade. E se o
+enunciado nomeia alguma coisa que precisa continuar no data center, a resposta
+é híbrido, por mais que o resto do texto fale de nuvem.
+
+## Erros comuns
+
+- Confundir agilidade com elasticidade. Agilidade é levar minutos em vez de semanas para ter um recurso; elasticidade é o recurso crescer e encolher com a demanda. O enunciado usa uma ou outra e as alternativas separam as duas.
+- Chamar de híbrida qualquer coisa que use internet. Híbrida é ter parte da carga na nuvem e parte no ambiente local, com ligação entre as duas; usar um site na nuvem não torna o ambiente híbrido.
+- Achar que IaaS é sempre mais barato que PaaS ou SaaS. O modelo muda quem cuida de quê, não a conta por si só.
+- Tratar 'alcance global em minutos' como marketing. É um dos seis benefícios publicados pela AWS e aparece em questão, com a pista 'atender usuários em outro país sem abrir data center lá'.
+- Dizer que na nuvem não existe mais custo fixo nenhum. O benefício descrito pela AWS é trocar despesa de capital por despesa variável, e compromissos de longo prazo continuam existindo.
+- Posicionar EC2 como PaaS. Quem escolhe o sistema operacional, aplica patch e instala o que quiser está em infraestrutura como serviço.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Well-Architected: os seis pilares
+
+Trilha: AWS Cloud Practitioner · Módulo: Conceitos de nuvem
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/well-architected-os-seis-pilares/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Excelência operacional, segurança, confiabilidade, eficiência de desempenho, otimização de custo e sustentabilidade: o que cada pilar do AWS Well-Architected Framework cobre, a pista que o denuncia num enunciado e onde entra a Well-Architected Tool.
+
+**Por que cai na prova.** É a tarefa 1.2 do guia, e o formato da questão é sempre o mesmo: o enunciado descreve uma prática em uma frase e pede o pilar. Os pilares se tocam, então quem decora a lista sem decorar a fronteira entre eles fica em dúvida entre dois toda vez.
+
+**Como o entrevistador pergunta.** "Uma equipe passou a revisar os gastos mensais e desligar recursos sem uso. Qual pilar do Well-Architected Framework essa prática representa?"
+
+## Em uma frase
+
+O Well-Architected Framework é a lista de perguntas que a AWS usa para avaliar
+uma carga de trabalho, organizada em seis pilares, e a prova cobra sempre a
+mesma coisa: dada uma prática, de qual pilar ela é.
+
+## Os seis pilares e a pista de cada um
+
+<Comparativo
+  colunas={["Pilar", "Objetivo", "A pista no enunciado"]}
+  linhas={[
+    ["Excelência operacional", "Executar, monitorar e melhorar processos e procedimentos", "Revisão de incidente, automação da operação, mudança pequena e reversível"],
+    ["Segurança", "Proteger informação, sistemas e ativos", "Identidade, permissão, criptografia, rastreabilidade, resposta a incidente"],
+    ["Confiabilidade", "Entregar a função esperada e se recuperar de interrupção", "Falha, redundância, recuperação, teste de resiliência"],
+    ["Eficiência de desempenho", "Usar o recurso certo e continuar eficiente quando a demanda muda", "Tipo de recurso, latência, escala, tecnologia adequada"],
+    ["Otimização de custo", "Entregar valor pelo menor preço", "Fatura, recurso ocioso, marcação por projeto, dimensionamento"],
+    ["Sustentabilidade", "Reduzir o impacto ambiental das cargas", "Consumo de energia, eficiência de recurso, impacto ambiental"]
+  ]}
+/>
+
+## As três fronteiras que decidem a questão
+
+Os pilares se tocam de propósito: uma arquitetura boa atende a todos. A prova
+resolve isso com o **objetivo declarado** no enunciado, e três pares concentram
+quase toda a dúvida.
+
+<Passos itens={[
+  "Confiabilidade contra eficiência de desempenho: a primeira pergunta se o sistema continua de pé e volta depois da falha; a segunda, se ele continua rápido e usa o recurso adequado quando a carga cresce.",
+  "Excelência operacional contra confiabilidade: a primeira olha o processo da equipe, a segunda olha o comportamento do sistema. Automatizar a resposta a um alarme é operação; sobreviver à queda de uma zona é confiabilidade.",
+  "Otimização de custo contra sustentabilidade: as duas cortam desperdício. Se o enunciado fala em fatura, é custo; se fala em impacto ambiental ou energia, é sustentabilidade."
+]} />
+
+<Callout tipo="atencao" titulo="A mesma prática, dois pilares">
+Desligar ambientes de teste à noite aparece nas duas listas. Não adianta
+procurar a prática numa tabela decorada: leia o **porquê** que o enunciado dá.
+"Para reduzir a fatura" é otimização de custo. "Para diminuir o consumo de
+energia" é sustentabilidade. A prática é a mesma; o pilar é o do objetivo.
+</Callout>
+
+## A ferramenta, e o que ela não faz
+
+A **AWS Well-Architected Tool** é onde a revisão acontece na prática: você
+descreve a carga de trabalho, responde às perguntas de cada pilar e recebe um
+plano de melhoria com os riscos encontrados. É autosserviço e é a resposta
+quando o enunciado pede avaliar uma carga existente contra as boas práticas.
+
+<Callout tipo="dica" titulo="Não confunda com o CAF">
+Well-Architected avalia **uma carga de trabalho**. O Cloud Adoption Framework
+organiza **a jornada da organização** para a nuvem, com perspectivas de
+negócio, pessoas e governança. Quando o enunciado fala em avaliar uma
+aplicação, é Well-Architected; quando fala em preparar a empresa para adotar a
+nuvem, é CAF.
+</Callout>
+
+## Como responder o cenário
+
+Procure o objetivo, não a tecnologia. A questão descreve uma prática e quase
+sempre oferece dois pilares plausíveis; o que desempata é a frase que diz para
+que a prática foi adotada. Se o enunciado não declara objetivo, use o
+substantivo dominante: falha aponta confiabilidade, permissão aponta segurança,
+latência aponta eficiência, fatura aponta custo, energia aponta
+sustentabilidade, e processo de equipe aponta excelência operacional.
+
+## Erros comuns
+
+- Confundir confiabilidade com eficiência de desempenho. Confiabilidade é continuar funcionando e se recuperar de falha; eficiência de desempenho é usar o recurso certo e continuar rápido quando a demanda cresce.
+- Jogar tudo que envolve automação em excelência operacional. Automação aparece em todos os pilares; o que define excelência operacional é operar, monitorar e melhorar o processo de entrega e de resposta a evento.
+- Esquecer o pilar de sustentabilidade. Ele existe no framework e cai com pistas próprias, como reduzir o impacto ambiental da carga de trabalho ou escolher a região pelo perfil de energia.
+- Tratar otimização de custo como sinônimo de comprar mais barato. Ela inclui medir, atribuir o gasto a quem consome, dimensionar certo e desligar o que não é usado.
+- Achar que a Well-Architected Tool corrige a arquitetura sozinha. Ela conduz a revisão por pilar e devolve um plano de melhoria; a mudança continua sendo feita pela equipe.
+- Procurar um pilar único quando a prática toca dois. A questão sempre descreve o objetivo declarado da prática, e é o objetivo que escolhe o pilar.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Economia da nuvem
+
+Trilha: AWS Cloud Practitioner · Módulo: Conceitos de nuvem
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/economia-da-nuvem/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Despesa de capital contra despesa operacional, custo fixo contra variável, o que entra no custo total de propriedade de um data center, licenciamento próprio ou incluso, dimensionamento correto e o ganho de automatizar. É a tarefa 1.4 do guia da CLF-C02.
+
+**Por que cai na prova.** É o vocabulário que a prova usa para falar de dinheiro, e ele volta inteiro no Domínio 4. Quem não separa despesa de capital de custo fixo, ou dimensionamento de modelo de compra, erra questões que só pediam a palavra certa.
+
+**Como o entrevistador pergunta.** "Uma empresa quer comparar o custo de manter o data center próprio com o de rodar na AWS. Qual conceito descreve essa comparação?"
+
+## Em uma frase
+
+Economia da nuvem é o vocabulário financeiro que a prova usa: como o dinheiro
+sai (capital ou operacional), se o valor acompanha o uso (fixo ou variável),
+quanto custa de verdade manter um ambiente (custo total de propriedade) e o que
+se faz para gastar menos sem trocar de aplicação.
+
+## Dois eixos que quase todo mundo mistura
+
+<Comparativo
+  colunas={["Eixo", "Pergunta que ele responde", "Exemplo"]}
+  linhas={[
+    ["Capital contra operacional", "Como o dinheiro sai: compra de ativo ou gasto corrente", "Comprar servidor é capital; fatura mensal do serviço é operacional"],
+    ["Fixo contra variável", "O valor muda com o volume de uso", "Compromisso anual é fixo; cobrança por requisição é variável"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Os dois eixos são independentes">
+Sair da despesa de capital não transforma tudo em custo variável. Um
+compromisso de um ano com desconto é **despesa operacional e custo fixo** ao
+mesmo tempo: paga-se ao longo do período, mas o valor não depende do consumo.
+A prova monta o distrator exatamente aqui, oferecendo "trocou fixo por
+variável" quando a resposta é "trocou capital por operacional".
+</Callout>
+
+## O custo que o ambiente próprio esconde
+
+O custo total de propriedade é a conta completa de manter uma solução, e a
+prova cobra a lista do que entra nela além do equipamento.
+
+<Passos itens={[
+  "Aquisição e o ciclo de troca do hardware, normalmente a cada poucos anos.",
+  "Energia, refrigeração e espaço físico no prédio ou no centro de dados alugado.",
+  "Rede, licenças de software e contratos de suporte do fabricante.",
+  "Pessoas: quem instala, monitora, aplica correção e atende o incidente da madrugada.",
+  "Capacidade ociosa comprada para o pico e paga o ano inteiro."
+]} />
+
+É essa lista que sustenta a comparação com a nuvem. Um servidor parado no data
+center não custa zero: ele ocupa espaço, consome energia e envelhece.
+
+## Licenciamento: própria ou inclusa
+
+Quando o software é licenciado, existem dois caminhos, e o enunciado diz qual
+situação a empresa está vivendo.
+
+<Comparativo
+  colunas={["Caminho", "Quando faz sentido", "O que muda"]}
+  linhas={[
+    ["Licença própria", "A empresa já pagou pela licença e o fabricante permite levá-la", "Evita pagar de novo; a gestão e a conformidade continuam com a empresa"],
+    ["Licença inclusa", "Não há licença portável, ou a empresa quer parar de gerenciar isso", "O preço do serviço embute a licença; a gestão fica com o provedor"]
+  ]}
+/>
+
+## Dimensionar e automatizar
+
+Duas práticas fecham a tarefa, e as duas aparecem com pista clara:
+
+**Dimensionamento correto** é escolher o tamanho do recurso pela carga real
+medida. A pista é sempre um número de uso baixo, como instâncias rodando a
+menos de 10% de processador, ou o oposto, recurso apertado demais.
+
+**Automação** entra como conceito econômico, não técnico: tarefa manual
+repetida é custo recorrente de pessoas e é onde o erro humano nasce.
+
+<Callout tipo="dica" titulo="Otimização de uso não é economia de escala">
+Economia de escala é o preço unitário cair porque o provedor compra e opera em
+volume enorme. Quando a empresa desliga uma máquina ociosa e a fatura cai, isso
+é otimização de uso, não economia de escala. As duas ideias aparecem juntas nas
+alternativas justamente porque as pessoas as trocam.
+</Callout>
+
+## Como responder o cenário
+
+Descubra primeiro se a questão fala de **como se paga** ou de **quanto se
+gasta**. Comprar antes de usar é capital; fatura recorrente é operacional; valor
+que não muda com o uso é fixo. Se o enunciado lista energia, espaço e equipe, a
+resposta é custo total de propriedade. Se cita uso médio baixo, é
+dimensionamento. E se cita preço unitário menor do que a empresa conseguiria
+sozinha, é economia de escala, que é do provedor e não da empresa.
+
+## Erros comuns
+
+- Tratar despesa de capital e custo fixo como sinônimos. Capital ou operacional descreve como o dinheiro sai; fixo ou variável descreve se o valor muda com o uso. Um compromisso de um ano na nuvem é despesa operacional e custo fixo ao mesmo tempo.
+- Esquecer os custos indiretos do ambiente local no custo total de propriedade: energia, refrigeração, espaço, rede, licenças, equipe de operação e o ciclo de troca do hardware.
+- Confundir dimensionamento correto com modelo de compra. Dimensionar é escolher o tamanho do recurso para a carga real; modelo de compra é como se paga pelo recurso escolhido.
+- Achar que licenciamento próprio é sempre mais barato. Levar a licença que a empresa já tem faz sentido quando ela está paga e é portável; caso contrário, a licença inclusa evita gestão e risco de conformidade.
+- Chamar qualquer redução de fatura de economia de escala. Economia de escala é o preço unitário cair pelo volume agregado de muitos clientes, não a empresa gastar menos porque desligou máquina.
+- Ignorar o custo de não automatizar. O guia cita explicitamente os benefícios da automação entre os conceitos de economia da nuvem: trabalho manual repetido é custo recorrente de pessoas.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Migração: os 7 Rs e o Cloud Adoption Framework
+
+Trilha: AWS Cloud Practitioner · Módulo: Conceitos de nuvem
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/conceitos/migracao-para-a-nuvem-7-rs-e-caf/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** As sete estratégias de migração que a AWS nomeia, com o caso que aponta cada uma, as perspectivas do Cloud Adoption Framework e os serviços de apoio à migração no nível de reconhecimento que a CLF-C02 cobra.
+
+**Por que cai na prova.** É a tarefa 1.3 do guia e a que mais rende questão de uma frase: o enunciado descreve o que a empresa quer fazer com uma aplicação e pede o nome da estratégia. Os sete nomes se parecem entre si, e a diferença entre replatform e refactor decide sozinha várias questões.
+
+**Como o entrevistador pergunta.** "Uma empresa vai mover uma aplicação para a AWS sem alterar o código, apenas trocando o servidor de lugar. Qual estratégia de migração descreve isso?"
+
+## Em uma frase
+
+A AWS nomeia sete estratégias para o que fazer com cada aplicação de um
+inventário, e a prova descreve a decisão em uma frase e pede o nome; o Cloud
+Adoption Framework é a camada acima, que organiza a jornada da organização em
+vez de uma aplicação.
+
+## Os sete Rs, com o caso que aponta cada um
+
+<Comparativo
+  colunas={["Estratégia", "O que se faz", "A pista no enunciado"]}
+  linhas={[
+    ["Rehost", "Move sem alterar a aplicação", "Sair do data center rápido, sem mexer em código"],
+    ["Relocate", "Transfere a plataforma ou as instâncias para outro ambiente", "Sem comprar hardware, sem reescrever, sem mudar a operação"],
+    ["Replatform", "Move e otimiza uma peça da pilha", "Trocar o banco instalado por um gerenciado, manter a aplicação"],
+    ["Repurchase", "Troca a aplicação por outro produto", "Substituir o sistema atual por um contratado como serviço"],
+    ["Refactor", "Redesenha a arquitetura da aplicação", "Monólito que atrasa entregas, limitação que só some com redesenho"],
+    ["Retain", "Mantém onde está, por enquanto", "Dependência física, risco alto, investimento recente"],
+    ["Retire", "Desliga o que não serve mais", "Sem acesso há meses, sem dono, sem valor de negócio"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Os três pares que a prova confunde">
+**Replatform contra refactor**: a primeira troca uma peça e mantém a aplicação;
+a segunda muda a arquitetura da aplicação. **Repurchase contra replatform**: a
+primeira troca a aplicação por outro produto; a segunda mantém a mesma
+aplicação. **Retire contra retain**: a primeira desliga de vez; a segunda adia.
+Em todos os casos a pergunta é a mesma: o que exatamente mudou de dono ou de
+forma?
+</Callout>
+
+## Por que refactor quase nunca é a resposta
+
+A própria AWS descreve o refactor como a estratégia mais complexa e mais cara,
+e recomenda modernizar depois da migração em vez de durante. Numa questão da
+CLF, refactor só é a resposta quando o enunciado diz que a limitação da
+aplicação é o problema a resolver: monólito que trava as entregas, sistema que
+não escala por desenho, código que ninguém consegue manter. Se o objetivo
+declarado é sair do data center, é rehost; se é ganhar um serviço gerenciado no
+caminho, é replatform.
+
+## O Cloud Adoption Framework
+
+O CAF não fala de uma aplicação: fala da **organização**. Ele identifica as
+capacidades que uma empresa precisa desenvolver para usar a nuvem e organiza
+isso em seis perspectivas.
+
+<Passos itens={[
+  "Negócio: ligar o investimento em nuvem a resultados do negócio.",
+  "Pessoas: cultura, papéis e desenvolvimento das equipes.",
+  "Governança: gestão de risco, portfólio e medição de valor.",
+  "Plataforma: a base técnica onde as cargas rodam.",
+  "Segurança: confidencialidade, integridade e disponibilidade.",
+  "Operações: entregar e sustentar serviços no nível acordado."
+]} />
+
+<Callout tipo="dica" titulo="CAF e Well-Architected respondem perguntas diferentes">
+Se o enunciado fala em preparar a empresa, desenvolver capacidades e montar
+roteiro de adoção, a resposta é **CAF**. Se fala em avaliar uma carga de
+trabalho contra boas práticas de arquitetura, a resposta é **Well-Architected**.
+Os dois têm pilares ou perspectivas com nomes parecidos, e é por isso que
+aparecem juntos nas alternativas.
+</Callout>
+
+## Os serviços de apoio, no nível de reconhecimento
+
+A CLF não pede operar nenhum deles, só saber para que servem.
+
+<Comparativo
+  colunas={["Serviço", "Para que serve"]}
+  linhas={[
+    ["AWS Migration Hub", "Acompanhar o andamento da migração num painel único"],
+    ["AWS Application Discovery Service", "Levantar o inventário e as dependências do ambiente atual"],
+    ["AWS Application Migration Service", "Replicar servidores inteiros para a AWS"],
+    ["AWS Database Migration Service", "Migrar e replicar bancos, inclusive entre motores diferentes"],
+    ["AWS DataSync", "Copiar arquivos entre o ambiente local e o armazenamento da AWS, pela rede"],
+    ["Família AWS Snow", "Levar grande volume de dados em dispositivo físico quando a rede é o gargalo"]
+  ]}
+/>
+
+## Como responder o cenário
+
+Pergunte o que mudou. Se nada mudou na aplicação, é rehost. Se mudou uma peça
+da pilha, é replatform. Se mudou a arquitetura, é refactor. Se mudou o produto,
+é repurchase. Se nada foi para a nuvem e a aplicação continua viva, é retain;
+se ela morreu, é retire. Nas questões de ferramenta, leia o objeto: servidor,
+banco, arquivo ou volume grande com rede ruim, cada um tem o seu serviço.
+
+## Erros comuns
+
+- Confundir replatform com refactor. Replatform mantém a aplicação e troca uma peça por serviço gerenciado; refactor redesenha a arquitetura da aplicação.
+- Confundir repurchase com replatform. Repurchase troca a aplicação por outro produto, em geral software como serviço; replatform mantém a mesma aplicação.
+- Achar que retain significa desistir da nuvem. Retain é manter a aplicação onde está por enquanto, por dependência, risco ou investimento recente, com a decisão adiada.
+- Confundir retire com retain. Retire é desligar o que não tem mais valor; retain é manter por enquanto o que ainda é usado.
+- Tratar relocate como sinônimo de rehost. Relocate move a plataforma inteira, ou instâncias e objetos entre ambientes, sem comprar hardware nem alterar a operação existente.
+- Misturar o Cloud Adoption Framework com o Well-Architected Framework. O CAF organiza a jornada da organização; o Well-Architected avalia uma carga de trabalho.
+- Achar que o Database Migration Service serve para migrar servidor inteiro. Ele replica banco de dados; servidor é Application Migration Service.
+
+## Perguntas de sabatina e respostas-modelo
 
 ---
 

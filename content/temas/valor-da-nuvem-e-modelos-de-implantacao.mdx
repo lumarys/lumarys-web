@@ -1,0 +1,260 @@
+---
+slug: valor-da-nuvem-e-modelos-de-implantacao
+titulo: "O valor da nuvem e os modelos de implantação"
+resumo: "Os seis benefícios da computação em nuvem que a AWS publica, a diferença entre nuvem, híbrida e local, e o que separa IaaS, PaaS e SaaS com um exemplo da AWS em cada um. É a tarefa 1.1 do guia da CLF-C02."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a primeira tarefa do primeiro domínio e a que mais aparece com enunciado de uma linha: 'a empresa quer parar de comprar servidor', 'a empresa quer manter parte do sistema no data center'. Quem não sabe qual benefício ou qual modelo o enunciado está descrevendo erra sem perceber que era uma questão fácil."
+comoCai: "Uma empresa deixou de comprar servidores e passou a pagar pelo que usa. Qual benefício da nuvem isso descreve?"
+feynman: "Explique em um minuto para alguém de negócio por que 'parar de adivinhar capacidade' economiza dinheiro dos dois lados, tanto sobrando quanto faltando."
+preRequisitos: ["como-ler-uma-questao-clf"]
+errosComuns:
+  - "Confundir agilidade com elasticidade. Agilidade é levar minutos em vez de semanas para ter um recurso; elasticidade é o recurso crescer e encolher com a demanda. O enunciado usa uma ou outra e as alternativas separam as duas."
+  - "Chamar de híbrida qualquer coisa que use internet. Híbrida é ter parte da carga na nuvem e parte no ambiente local, com ligação entre as duas; usar um site na nuvem não torna o ambiente híbrido."
+  - "Achar que IaaS é sempre mais barato que PaaS ou SaaS. O modelo muda quem cuida de quê, não a conta por si só."
+  - "Tratar 'alcance global em minutos' como marketing. É um dos seis benefícios publicados pela AWS e aparece em questão, com a pista 'atender usuários em outro país sem abrir data center lá'."
+  - "Dizer que na nuvem não existe mais custo fixo nenhum. O benefício descrito pela AWS é trocar despesa de capital por despesa variável, e compromissos de longo prazo continuam existindo."
+  - "Posicionar EC2 como PaaS. Quem escolhe o sistema operacional, aplica patch e instala o que quiser está em infraestrutura como serviço."
+preTeste:
+  - enunciado: "Uma empresa dimensionava seus servidores para o pico da Black Friday e ficava com máquinas ociosas o resto do ano. Ao migrar, passou a subir e descer capacidade conforme a demanda. Qual benefício da nuvem isso descreve?"
+    alternativas:
+      - texto: "Parar de adivinhar a capacidade."
+        correta: true
+        explicacao: "É o benefício que a AWS descreve exatamente assim: você deixa de decidir a capacidade antes de saber a demanda e passa a acompanhar o uso real."
+      - texto: "Economia de escala massiva."
+        correta: false
+        explicacao: "Economia de escala é o preço cair porque muitos clientes somam volume, não a capacidade acompanhar a demanda de um cliente."
+      - texto: "Alcance global em minutos."
+        correta: false
+        explicacao: "Alcance global trata de implantar em outras regiões, não de dimensionar."
+  - enunciado: "Uma companhia mantém o sistema de folha de pagamento no data center próprio por exigência interna e roda o site e o aplicativo na AWS, com ligação entre os dois ambientes. Como esse modelo de implantação é chamado?"
+    alternativas:
+      - texto: "Híbrido."
+        correta: true
+        explicacao: "Parte da carga na nuvem, parte no ambiente local e as duas conectadas: é a definição do modelo híbrido."
+      - texto: "Nuvem."
+        correta: false
+        explicacao: "No modelo de nuvem toda a aplicação vive na nuvem, sem parte no ambiente local."
+      - texto: "Local."
+        correta: false
+        explicacao: "No modelo local tudo fica na infraestrutura própria, o que não é o caso do site e do aplicativo."
+videos:
+  - id: yEW6-G-TxI8
+    publicadoEm: "2023-04-13"
+    titulo: "AWS CLOUD PRACTITIONER - 06 VANTAGENS DA COMPUTAÇÃO EM NUVEM"
+    canal: "Willian Menezes | dev"
+    duracao: 10
+    porQue: "Dez minutos sobre exatamente os seis benefícios que a AWS publica, na ordem em que a prova os cobra. Assista anotando, para cada benefício, a frase de empresa que o denuncia num enunciado."
+  - id: 9r4SESijOmo
+    publicadoEm: "2024-01-06"
+    titulo: "Modelos de Nuvem Privada, Pública, Híbrida e Comunitária"
+    canal: "Dicionário de Informática"
+    duracao: 14
+    porQue: "Complementar, para a segunda metade do tema. Observe a fronteira entre híbrido e local: é ali que a questão separa quem entendeu de quem decorou."
+artigos:
+  - titulo: "Six advantages of cloud computing"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html"
+    fonte: "AWS"
+  - titulo: "Types of cloud computing"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/aws-overview/types-of-cloud-computing.html"
+    fonte: "AWS"
+  - titulo: "O que é computação em nuvem"
+    url: "https://aws.amazon.com/what-is-cloud-computing/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Os seis benefícios da nuvem, na lista da AWS."
+    verso: "Trocar despesa de capital por despesa variável; economia de escala massiva; parar de adivinhar capacidade; aumentar velocidade e agilidade; parar de gastar com operar data center; alcance global em minutos."
+  - frente: "Trocar despesa de capital por despesa variável, em uma linha."
+    verso: "Em vez de comprar hardware antes de saber se vai usar, você paga pelo consumo. A pista no enunciado é 'parar de comprar servidor' ou 'pagar pelo que usar'."
+  - frente: "Economia de escala massiva, em uma linha."
+    verso: "O preço unitário cai porque centenas de milhares de clientes somam volume. A pista é 'preço menor do que a empresa conseguiria sozinha'."
+  - frente: "Parar de adivinhar capacidade, em uma linha."
+    verso: "Você não decide o tamanho antes de conhecer a demanda: escala para cima e para baixo. A pista é 'sobrava máquina ociosa' ou 'faltou capacidade no pico'."
+  - frente: "Aumentar velocidade e agilidade, em uma linha."
+    verso: "Um recurso novo leva minutos em vez de semanas, e experimentar fica barato. A pista é 'reduzir o tempo de semanas para minutos'."
+  - frente: "Parar de gastar com data center, em uma linha."
+    verso: "Some o custo e o trabalho de rack, energia, refrigeração e manutenção física. A pista é 'foco no que diferencia o negócio'."
+  - frente: "Alcance global em minutos, em uma linha."
+    verso: "Implantar em outra região do mundo sem abrir instalação lá, reduzindo latência para o usuário local. A pista é 'atender clientes em outro continente'."
+  - frente: "Os três modelos de implantação."
+    verso: "Nuvem (tudo na nuvem), híbrido (parte na nuvem, parte no ambiente local, conectados) e local, também chamado de nuvem privada."
+  - frente: "IaaS, em uma linha, com exemplo."
+    verso: "Infraestrutura como serviço: você controla o sistema operacional e o que roda nele. Exemplo da AWS: Amazon EC2."
+  - frente: "PaaS, em uma linha, com exemplo."
+    verso: "Plataforma como serviço: você entrega o código e a plataforma cuida do sistema operacional e do provisionamento. Exemplo da AWS: AWS Elastic Beanstalk."
+  - frente: "SaaS, em uma linha, com exemplo."
+    verso: "Software como serviço: você usa a aplicação pronta, sem pensar em infraestrutura. Exemplo da AWS: Amazon WorkMail."
+  - frente: "Agilidade e elasticidade são a mesma coisa?"
+    verso: "Não. Agilidade é a velocidade de obter um recurso novo; elasticidade é o recurso acompanhar a variação da demanda."
+  - frente: "A pista de 'híbrido' num enunciado."
+    verso: "Algo que precisa ficar no data center por exigência regulatória, legado ou latência, com o resto na nuvem e ligação entre os dois."
+drills:
+  - titulo: "Qual benefício ou modelo o enunciado descreve?"
+    instrucao: "Para cada frase de empresa, diga qual item da ementa do Domínio 1 está sendo descrito."
+    opcoes:
+      [
+        "Despesa variável",
+        "Economia de escala",
+        "Parar de adivinhar capacidade",
+        "Velocidade e agilidade",
+        "Alcance global",
+        "Modelo híbrido",
+      ]
+    itens:
+      - enunciado: "'Levávamos seis semanas para receber um servidor novo; agora subimos um em minutos.'"
+        resposta: "Velocidade e agilidade"
+        explicacao: "Tempo até ter o recurso, não custo nem tamanho."
+      - enunciado: "'Deixamos de fazer um desembolso grande a cada três anos e passamos a pagar mês a mês pelo uso.'"
+        resposta: "Despesa variável"
+        explicacao: "Troca de despesa de capital por despesa operacional variável."
+      - enunciado: "'Abrimos atendimento na Europa em uma tarde, sem instalar nada lá.'"
+        resposta: "Alcance global"
+        explicacao: "Implantar em outra região sem infraestrutura local."
+      - enunciado: "'Pagamos menos por gigabyte do que pagávamos comprando disco, porque o provedor compra em volume enorme.'"
+        resposta: "Economia de escala"
+        explicacao: "O preço cai pelo volume agregado de muitos clientes."
+      - enunciado: "'O banco de dados de cadastro segue no nosso data center e o portal roda na AWS, ligados por conexão dedicada.'"
+        resposta: "Modelo híbrido"
+        explicacao: "Parte local, parte na nuvem, conectadas."
+      - enunciado: "'Antes dimensionávamos para o pico e ficávamos com 70% de ociosidade fora dele.'"
+        resposta: "Parar de adivinhar capacidade"
+        explicacao: "Capacidade decidida antes da demanda, que é o que a nuvem elimina."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma startup quer publicar uma aplicação web sem se preocupar com sistema operacional, provisionamento ou balanceamento, entregando apenas o código da aplicação. Qual modelo de serviço em nuvem descreve essa escolha?"
+    alternativas:
+      - texto: "Plataforma como serviço (PaaS)."
+        correta: true
+        explicacao: "Entregar código e deixar a plataforma cuidar de sistema operacional e provisionamento é a definição de PaaS. Na AWS, o exemplo típico é o Elastic Beanstalk."
+      - texto: "Infraestrutura como serviço (IaaS)."
+        correta: false
+        explicacao: "Em IaaS a equipe ainda escolhe e mantém o sistema operacional, que é exatamente o que o enunciado quer evitar."
+      - texto: "Software como serviço (SaaS)."
+        correta: false
+        explicacao: "Em SaaS a aplicação já está pronta e é usada como está; aqui a startup tem código próprio para publicar."
+      - texto: "Modelo de implantação híbrido."
+        correta: false
+        explicacao: "Híbrido é um modelo de implantação, que responde onde a carga roda, e não quem cuida de qual camada."
+  - tipo: unica
+    enunciado: "Uma empresa mantém o sistema de faturamento em servidores próprios por exigência de um contrato e roda a loja online na AWS, com conexão privada entre os dois ambientes. Qual modelo de implantação ela usa?"
+    alternativas:
+      - texto: "Híbrido."
+        correta: true
+        explicacao: "Carga dividida entre nuvem e ambiente local, com ligação entre eles, é a definição de implantação híbrida."
+      - texto: "Nuvem."
+        correta: false
+        explicacao: "No modelo de nuvem toda a aplicação e os dados vivem na nuvem, sem parcela no data center próprio."
+      - texto: "Local."
+        correta: false
+        explicacao: "No modelo local, também chamado de nuvem privada, nada roda em provedor público, o que contradiz a loja online na AWS."
+      - texto: "Software como serviço."
+        correta: false
+        explicacao: "SaaS é modelo de serviço, e a pergunta é sobre onde a carga é implantada."
+  - tipo: unica
+    enunciado: "O diretor de tecnologia diz que a empresa quer parar de dimensionar a infraestrutura com meses de antecedência, porque ora sobra máquina ociosa, ora falta capacidade no pico. Qual benefício da nuvem atende diretamente a essa queixa?"
+    alternativas:
+      - texto: "Parar de adivinhar a capacidade, escalando conforme a demanda real."
+        correta: true
+        explicacao: "O benefício descrito pela AWS é exatamente deixar de decidir a capacidade antes de conhecer a demanda, com escala para cima e para baixo."
+      - texto: "Trocar despesa de capital por despesa variável."
+        correta: false
+        explicacao: "Trata de como se paga, não de acertar o tamanho da infraestrutura. É vizinho, e é o distrator natural aqui."
+      - texto: "Parar de gastar dinheiro operando data centers."
+        correta: false
+        explicacao: "Fala do custo e do trabalho da instalação física, não do dimensionamento da capacidade."
+      - texto: "Alcance global em minutos."
+        correta: false
+        explicacao: "Trata de implantar em outras regiões do mundo, assunto diferente do que foi descrito."
+  - tipo: multipla
+    enunciado: "Uma empresa vai migrar para a AWS e quer justificar a decisão para a diretoria financeira. Quais DUAS afirmações descrevem benefícios da computação em nuvem segundo a AWS?"
+    alternativas:
+      - texto: "A empresa troca a despesa de capital em hardware por uma despesa variável proporcional ao consumo."
+        correta: true
+        explicacao: "É o primeiro benefício da lista publicada pela AWS."
+      - texto: "A empresa se beneficia de economia de escala, com preço unitário menor do que conseguiria comprando sozinha."
+        correta: true
+        explicacao: "É outro dos seis benefícios: o volume agregado de muitos clientes derruba o preço unitário."
+      - texto: "A empresa deixa de ser responsável pela segurança dos dados que coloca na nuvem."
+        correta: false
+        explicacao: "A responsabilidade é compartilhada. O cliente continua responsável pelos próprios dados e pelo controle de acesso."
+      - texto: "A empresa elimina qualquer forma de compromisso financeiro de longo prazo."
+        correta: false
+        explicacao: "Compromissos com desconto continuam existindo e costumam ser a opção mais econômica para uso previsível."
+      - texto: "A empresa passa a ter capacidade ilimitada sem qualquer limite de serviço."
+        correta: false
+        explicacao: "Existem cotas e limites por serviço e por conta. Elasticidade não é ausência de limite."
+---
+
+## Em uma frase
+
+A nuvem troca o ativo comprado antes da demanda por um serviço pago conforme o
+uso, e a prova cobra isso em três listas curtas: os seis benefícios, os três
+modelos de implantação e os três modelos de serviço.
+
+## Os seis benefícios, com a pista de cada um
+
+A AWS publica seis vantagens da computação em nuvem, e o enunciado da CLF
+costuma descrever uma delas com uma frase de empresa em vez de nomeá-la.
+
+<Comparativo
+  colunas={["Benefício", "O que é", "A pista no enunciado"]}
+  linhas={[
+    ["Despesa variável no lugar de capital", "Pagar pelo consumo em vez de comprar antes", "Parar de comprar servidor, pagar pelo que usar"],
+    ["Economia de escala massiva", "Preço unitário menor pelo volume agregado de muitos clientes", "Preço menor do que a empresa conseguiria sozinha"],
+    ["Parar de adivinhar capacidade", "Escalar para cima e para baixo conforme a demanda real", "Sobrava máquina ociosa, faltou capacidade no pico"],
+    ["Velocidade e agilidade", "Recurso novo em minutos, experimentar fica barato", "Semanas viraram minutos, mais experimentos por trimestre"],
+    ["Parar de operar data center", "Sem rack, energia, refrigeração e manutenção física", "Foco no que diferencia o negócio"],
+    ["Alcance global em minutos", "Implantar em outra região sem abrir instalação lá", "Atender usuários de outro país com menos latência"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Agilidade não é elasticidade">
+São dois benefícios vizinhos e a prova os separa. **Agilidade** é o tempo até
+ter o recurso: semanas viram minutos. **Elasticidade** é o recurso acompanhar a
+variação da demanda, que é o benefício de parar de adivinhar capacidade. Se o
+enunciado fala de prazo, é agilidade; se fala de pico e ociosidade, é
+capacidade.
+</Callout>
+
+## Os três modelos de implantação
+
+A pergunta aqui é **onde a carga roda**, e só existem três respostas.
+
+<Passos itens={[
+  "Nuvem: toda a aplicação e os dados vivem em provedor de nuvem, sem parcela no data center próprio.",
+  "Híbrido: parte na nuvem, parte no ambiente local, com ligação entre os dois. A pista é sempre um motivo para algo ficar onde está, como regulação, legado ou latência.",
+  "Local, também chamado de nuvem privada: infraestrutura própria, com virtualização e automação, sem provedor público."
+]} />
+
+## Os três modelos de serviço
+
+A pergunta aqui é outra: **quem cuida de qual camada**. Quanto mais para baixo
+na tabela, menos sobra para o cliente administrar.
+
+<Comparativo
+  colunas={["Modelo", "O cliente cuida de", "Exemplo na AWS"]}
+  linhas={[
+    ["IaaS", "Sistema operacional, atualizações, aplicação e dados", "Amazon EC2"],
+    ["PaaS", "Aplicação e dados; a plataforma provisiona e mantém o resto", "AWS Elastic Beanstalk"],
+    ["SaaS", "Apenas o uso e os próprios dados", "Amazon WorkMail"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Os dois eixos não se misturam">
+Implantação responde **onde** e serviço responde **quem cuida**. Uma questão
+que descreve um data center próprio conectado à AWS está no eixo da
+implantação; uma que descreve alguém entregando só o código está no eixo do
+serviço. Quando as alternativas misturam os dois, metade delas já cai fora só
+por isso.
+</Callout>
+
+## Como responder o cenário
+
+Descubra primeiro de qual das três listas a questão está falando: benefício,
+implantação ou modelo de serviço. Depois procure o verbo. Se a frase é sobre
+dinheiro que deixou de ser desembolsado de uma vez, é despesa variável; se é
+sobre tempo, é agilidade; se é sobre sobra e falta, é capacidade. E se o
+enunciado nomeia alguma coisa que precisa continuar no data center, a resposta
+é híbrido, por mais que o resto do texto fale de nuvem.

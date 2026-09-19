@@ -1,0 +1,275 @@
+---
+slug: como-ler-uma-questao-clf
+titulo: "Como ler uma questão da CLF"
+resumo: "A prova CLF-C02 descreve uma necessidade em duas ou três linhas e pede o serviço, o conceito ou a prática que atende. Este tema é o formato do exame, a pontuação, os dois tipos de questão e o método de achar o pedido antes de olhar as alternativas."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "Na CLF o candidato raramente erra por não conhecer o serviço: erra por escolher o serviço mais familiar em vez do que o enunciado pediu. As alternativas erradas são sempre serviços vizinhos, plausíveis e reais. Aprender a ler o pedido antes de aprender o catálogo é o que mais sobe a nota por hora de estudo."
+comoCai: "Uma empresa precisa de X. Qual serviço da AWS atende a esse requisito?"
+feynman: "Explique em um minuto por que numa questão da CLF quatro alternativas podem citar serviços reais e só uma estar certa."
+preRequisitos: []
+errosComuns:
+  - "Ler as alternativas antes de terminar o enunciado. Na CLF o enunciado é curto, e quem pula direto para a lista de serviços escolhe o nome mais conhecido em vez do que foi pedido."
+  - "Procurar pegadinha de arquitetura numa prova fundacional. A CLF não pede desenho, dimensionamento nem solução de incidente; se a resposta exige projetar algo, o candidato saiu do nível da prova."
+  - "Tratar múltipla resposta como 'marque o que achar certo'. O enunciado diz quantas escolher e a correção é pelo conjunto exato: marcar três quando pede duas zera a questão."
+  - "Deixar questão em branco. O guia é explícito: pergunta não respondida conta como errada e não há penalidade por chute."
+  - "Achar que a nota é a porcentagem de acertos. A escala vai de 100 a 1000, 700 é o corte, e 15 das 65 questões não pontuam nem são identificadas."
+  - "Estudar os domínios no mesmo peso. Tecnologia vale 34% e Cobrança vale 12%; tratar os dois igual joga horas fora."
+preTeste:
+  - enunciado: "Uma questão da CLF diz que a equipe quer saber quanto gastou por projeto no mês passado. Duas alternativas citam serviços reais de custo. Qual critério decide a resposta?"
+    alternativas:
+      - texto: "O verbo do pedido: 'saber quanto gastou' é analisar o passado, não prever nem alertar. A alternativa que analisa histórico é a certa."
+        correta: true
+        explicacao: "Na CLF cada serviço vizinho tem um verbo próprio. O pedido escolhe entre eles, e é por isso que ler o verbo vem antes de ler a lista."
+      - texto: "O serviço mais completo, porque a AWS prefere a solução mais rica."
+        correta: false
+        explicacao: "Não existe preferência por solução mais rica. A prova quer o serviço que faz exatamente o que foi pedido."
+      - texto: "Qualquer um dos dois, porque os dois lidam com custo e a banca aceita ambos."
+        correta: false
+        explicacao: "Há uma resposta por questão. Tratar do mesmo assunto não é o mesmo que atender ao pedido."
+  - enunciado: "O candidato tem certeza de duas alternativas numa questão que pede 'Escolha DUAS', e acha uma terceira plausível. O que fazer?"
+    alternativas:
+      - texto: "Marcar exatamente duas. A correção é pelo conjunto exato, sem crédito parcial."
+        correta: true
+        explicacao: "O número pedido faz parte da questão. Marcar a mais zera o ponto mesmo com as certas dentro."
+      - texto: "Marcar as três, para garantir que as certas estejam incluídas."
+        correta: false
+        explicacao: "Não há crédito parcial. Três marcadas quando se pedem duas é resposta errada."
+      - texto: "Deixar em branco e voltar depois, para não arriscar."
+        correta: false
+        explicacao: "O guia diz que questão não respondida conta como errada. Branco é o único jeito garantido de perder o ponto."
+videos:
+  - id: YuWObS-fMvo
+    publicadoEm: "2023-09-19"
+    titulo: "Tudo o que você precisa saber sobre a nova CLF-C02 da AWS Cloud Practitioner"
+    canal: "Jean Diogo"
+    duracao: 16
+    porQue: "Visão geral do exame e do que mudou na versão C02, em português. Observe a parte dos domínios e dos pesos: é o mapa que decide onde investir as horas de estudo."
+  - id: 9pthP45X0xI
+    publicadoEm: "2023-12-08"
+    titulo: "Preparação Intensiva: Simulado para a Prova AWS Cloud Practitioner - Dicas e Estratégias (CLF-C02)"
+    canal: "Jean Diogo"
+    duracao: 34
+    porQue: "Complementar. Aqui alguém lê questões em voz alta e elimina alternativas na sua frente. Observe o momento em que ele nomeia o pedido do enunciado antes de olhar a lista: é exatamente o hábito que este tema treina."
+artigos:
+  - titulo: "Guia do exame CLF-C02"
+    url: "https://docs.aws.amazon.com/aws-certification/latest/cloud-practitioner-02/cloud-practitioner-02.html"
+    fonte: "AWS"
+  - titulo: "AWS Certified Cloud Practitioner"
+    url: "https://aws.amazon.com/certification/certified-cloud-practitioner/"
+    fonte: "AWS"
+  - titulo: "Políticas de certificação: antes do exame"
+    url: "https://aws.amazon.com/certification/policies/before-testing/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Formato da CLF-C02, em uma linha."
+    verso: "65 questões em 90 minutos, escolha única (1 certa de 4) ou múltipla resposta (2 ou mais certas em 5 ou mais opções). 50 pontuam; 15 não pontuam e não são identificadas."
+  - frente: "Como a nota é reportada e qual é o corte?"
+    verso: "Escala de 100 a 1000, equalizada entre versões da prova. Passa com 700. Não é porcentagem de acertos."
+  - frente: "Há penalidade por errar?"
+    verso: "Não. O guia diz que questão não respondida conta como errada e que não há penalidade por chutar. Nunca deixe em branco."
+  - frente: "Como é corrigida a múltipla resposta?"
+    verso: "Pelo conjunto exato. Marcar a mais ou a menos zera a questão; não existe crédito parcial."
+  - frente: "Os quatro domínios e os pesos."
+    verso: "Conceitos de nuvem 24%, Segurança e conformidade 30%, Tecnologia e serviços 34%, Cobrança, preços e suporte 12%."
+  - frente: "A pontuação é compensatória. O que isso significa?"
+    verso: "Basta passar no total, não em cada domínio. Um domínio fraco não reprova sozinho."
+  - frente: "Quem é o candidato-alvo segundo o guia?"
+    verso: "Alguém com até seis meses de exposição à AWS, de qualquer papel, inclusive fora de TI."
+  - frente: "O que o guia diz estar FORA de escopo?"
+    verso: "Codificar, desenhar arquitetura de nuvem, resolver incidentes, implementar e fazer teste de carga e desempenho."
+  - frente: "Qual é a primeira coisa a fazer numa questão da CLF?"
+    verso: "Achar o pedido: o verbo mais o objeto. 'Detectar ameaça', 'reduzir custo', 'consultar relatório de conformidade'. Ele desempata entre serviços vizinhos."
+  - frente: "Como é o distrator típico da CLF?"
+    verso: "Um serviço real, do mesmo assunto, com propósito ligeiramente diferente. Ele nunca é absurdo: está ali para atrair quem decora nome sem decorar propósito."
+  - frente: "Ritmo de prova na CLF."
+    verso: "90 minutos para 65 questões, cerca de 1,4 minuto por questão. Enunciado curto permite ritmo rápido; passou disso, marque para revisar e siga."
+  - frente: "'Com o MENOR esforço operacional' aponta para quê?"
+    verso: "Serviço gerenciado ou automático no lugar de tarefa manual. Na CLF costuma separar um serviço da AWS de um processo feito pela própria equipe."
+  - frente: "O que fazer com uma alternativa que cita um serviço nunca visto no estudo?"
+    verso: "Desconfiar. Na CLF o catálogo cobrado é conhecido; nome que não apareceu no estudo raramente é a resposta."
+drills:
+  - titulo: "Qual é o pedido?"
+    instrucao: "Para cada trecho de enunciado, diga qual critério vai desempatar entre serviços que tratam do mesmo assunto."
+    opcoes:
+      [
+        "Menor custo",
+        "Menor esforço operacional",
+        "Mais seguro",
+        "Mais disponível",
+        "Mais rápido de começar",
+      ]
+    itens:
+      - enunciado: "'A empresa é pequena e não quer manter ninguém cuidando de atualização de servidor.'"
+        resposta: "Menor esforço operacional"
+        explicacao: "Equipe pequena e recusa de manutenção apontam para serviço gerenciado."
+      - enunciado: "'A diretoria quer reduzir a fatura mensal sem trocar de aplicação.'"
+        resposta: "Menor custo"
+        explicacao: "Sem trocar de aplicação elimina redesenho; sobra modelo de compra e dimensionamento."
+      - enunciado: "'O acesso dos desenvolvedores deve dar apenas o que cada um precisa para o trabalho.'"
+        resposta: "Mais seguro"
+        explicacao: "Apenas o necessário é a descrição de privilégio mínimo."
+      - enunciado: "'A aplicação precisa continuar no ar se um data center da região parar.'"
+        resposta: "Mais disponível"
+        explicacao: "Falha de um data center é o gatilho de mais de uma zona de disponibilidade."
+      - enunciado: "'A equipe quer subir um ambiente de teste ainda esta semana, sem comprar nada.'"
+        resposta: "Mais rápido de começar"
+        explicacao: "Prazo curto e sem compra apontam para provisionar sob demanda em minutos."
+      - enunciado: "'O time de auditoria quer os relatórios de conformidade sem abrir chamado.'"
+        resposta: "Menor esforço operacional"
+        explicacao: "Autosserviço no lugar de pedido manual é redução de esforço operacional."
+perguntas:
+  - tipo: unica
+    enunciado: "Um candidato está fazendo a CLF-C02 e faltam dez minutos para o fim. Restam quatro questões que ele não sabe responder. O que ele deve fazer para maximizar a pontuação?"
+    alternativas:
+      - texto: "Marcar uma alternativa em cada uma das quatro, mesmo sem certeza."
+        correta: true
+        explicacao: "O guia do exame diz que questão não respondida é contada como errada e que não há penalidade por chutar. Marcar dá chance; deixar em branco não dá nenhuma."
+      - texto: "Deixar as quatro em branco, para não baixar a nota com respostas erradas."
+        correta: false
+        explicacao: "Errar não desconta pontos. Branco e errado valem a mesma coisa, então branco só perde a chance."
+      - texto: "Responder só as que forem do domínio de maior peso, porque valem mais."
+        correta: false
+        explicacao: "A prova não mostra a qual domínio a questão pertence, e o peso decide quantas questões existem, não quanto cada uma vale para o candidato."
+      - texto: "Pedir ao aplicador para desconsiderar as questões não respondidas."
+        correta: false
+        explicacao: "Não existe esse pedido. A correção é automática e segue a regra publicada no guia."
+  - tipo: unica
+    enunciado: "Numa questão da CLF, o enunciado descreve uma necessidade em duas linhas e as quatro alternativas citam serviços reais da AWS, todos do mesmo assunto. Qual é o método correto de leitura?"
+    alternativas:
+      - texto: "Identificar o pedido do enunciado, verbo e objeto, e só então comparar as alternativas com ele."
+        correta: true
+        explicacao: "É o desenho da questão: os distratores são vizinhos plausíveis, e só o pedido separa um do outro."
+      - texto: "Escolher o serviço mais conhecido entre os quatro, porque a prova é fundacional."
+        correta: false
+        explicacao: "Familiaridade é exatamente a isca do distrator. O serviço mais conhecido costuma ser o que quase atende."
+      - texto: "Descartar as alternativas com nomes longos, que costumam ser inventadas."
+        correta: false
+        explicacao: "Os nomes nas alternativas da CLF são de serviços reais. Não há regra de tamanho de nome."
+      - texto: "Montar mentalmente a arquitetura que resolve o caso e ver qual alternativa se parece com ela."
+        correta: false
+        explicacao: "Desenhar arquitetura está fora do escopo declarado da CLF. Esse caminho gasta tempo e leva a respostas acima do pedido."
+  - tipo: unica
+    enunciado: "Um candidato recebe o resultado da CLF-C02 com pontuação 690 e um quadro por domínio mostrando desempenho forte em três domínios e fraco em um. O que esse resultado significa?"
+    alternativas:
+      - texto: "Ele foi reprovado, porque o corte é 700 no total, e o modelo compensatório não exige nota mínima por domínio."
+        correta: true
+        explicacao: "A aprovação olha só o total na escala de 100 a 1000. O quadro por domínio é diagnóstico, não critério."
+      - texto: "Ele foi aprovado, porque passou em três dos quatro domínios."
+        correta: false
+        explicacao: "Não existe aprovação por domínio. O guia diz que o modelo é compensatório e só o total decide."
+      - texto: "Ele foi reprovado por causa do domínio fraco, independentemente do total."
+        correta: false
+        explicacao: "Domínio fraco não reprova sozinho, justamente porque o modelo é compensatório."
+      - texto: "O resultado é inconclusivo, porque 690 fica na faixa de revisão."
+        correta: false
+        explicacao: "A prova tem designação de aprovado ou reprovado, sem faixa intermediária."
+  - tipo: multipla
+    enunciado: "Um candidato quer ganhar pontos na CLF-C02 sem aprender conteúdo novo. Quais DUAS práticas de prova têm efeito direto na pontuação?"
+    alternativas:
+      - texto: "Nunca deixar questão em branco, porque não responder conta como errada e não há penalidade por chutar."
+        correta: true
+        explicacao: "É ganho puro: branco tem zero de chance, chute tem alguma."
+      - texto: "Em múltipla resposta, marcar exatamente o número de alternativas que o enunciado pede."
+        correta: true
+        explicacao: "A correção é pelo conjunto exato. Marcar a mais zera a questão mesmo com as certas dentro."
+      - texto: "Identificar as 15 questões que não pontuam e pular todas elas."
+        correta: false
+        explicacao: "As questões não pontuadas não são identificadas na prova. Não há como separá-las."
+      - texto: "Responder as questões na ordem inversa, deixando as de maior peso para o fim."
+        correta: false
+        explicacao: "A prova não informa o domínio de cada questão, e a ordem não altera a pontuação."
+      - texto: "Escolher sempre a alternativa que cita o serviço mais recente da AWS."
+        correta: false
+        explicacao: "Não existe esse padrão. A resposta é a que atende ao pedido do enunciado, seja o serviço novo ou antigo."
+---
+
+## Em uma frase
+
+A CLF-C02 não pede arquitetura: ela descreve uma necessidade em duas ou três
+linhas e pergunta qual serviço, conceito ou prática atende, com quatro
+alternativas que são todas reais e quase todas vizinhas da certa.
+
+## O formato, para não ser surpresa
+
+<Comparativo
+  colunas={["", "Como é"]}
+  linhas={[
+    ["Questões", "65, das quais 50 pontuam; 15 não pontuam e não são identificadas"],
+    ["Tempo", "90 minutos, cerca de 1,4 minuto por questão"],
+    ["Tipos", "Escolha única (1 certa de 4) e múltipla resposta (2 ou mais certas em 5 ou mais)"],
+    ["Nota", "Escala de 100 a 1000, equalizada entre versões; passa com 700"],
+    ["Penalidade", "Nenhuma por erro; questão não respondida conta como errada"],
+    ["Domínios", "Conceitos 24% · Segurança 30% · Tecnologia 34% · Cobrança 12%"]
+  ]}
+/>
+
+A pontuação é **compensatória**: basta passar no total, não em cada domínio.
+O quadro por domínio que vem no resultado serve para você saber onde é fraco,
+não para aprovar ou reprovar.
+
+## O que a questão realmente pergunta
+
+O guia diz quem é o candidato-alvo: alguém com até seis meses de exposição à
+AWS, de qualquer papel. E diz o que está fora: codificar, desenhar arquitetura,
+resolver incidentes, implementar e testar carga. Isso muda tudo na hora de ler.
+
+Uma questão da CLF é quase sempre uma destas três formas:
+
+<Passos itens={[
+  "Necessidade e serviço: 'a equipe precisa de X; qual serviço atende?'. A resposta é um nome do catálogo.",
+  "Prática e conceito: 'qual princípio ou pilar descreve isto?'. A resposta é um conceito, não um produto.",
+  "Responsabilidade e limite: 'de quem é esta tarefa?'. A resposta separa o que a AWS faz do que o cliente faz."
+]} />
+
+Em nenhuma delas você monta solução. Você **reconhece e posiciona**.
+
+## O pedido é o verbo mais o objeto
+
+Na SAA o desempate está numa palavra em maiúsculas. Na CLF o desempate está no
+**verbo** do enunciado, porque os quatro serviços tratam do mesmo assunto e só
+um faz aquele verbo.
+
+<Comparativo
+  colunas={["O enunciado diz", "O pedido é", "O distrator típico"]}
+  linhas={[
+    ["Detectar comportamento suspeito", "Achar ameaça em atividade", "O serviço que acha vulnerabilidade"],
+    ["Saber quanto foi gasto por projeto", "Analisar custo passado", "O serviço que alerta sobre custo futuro"],
+    ["Baixar relatório de conformidade", "Obter documento pronto", "O serviço que audita configuração"],
+    ["Guardar arquivo acessado uma vez por ano", "Arquivar barato", "A classe de acesso frequente"],
+    ["Rodar código sem gerenciar servidor", "Executar sem infraestrutura", "A máquina virtual com script de instalação"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O distrator da CLF é sempre real">
+Nenhuma alternativa da CLF é absurda. Ela cita um serviço que existe, do mesmo
+tema, com propósito ligeiramente diferente. Quem decora o nome sem decorar o
+propósito cai em todas. Por isso cada tema desta trilha traz o serviço em uma
+linha **e** a pista que o aponta no enunciado: são as duas metades da mesma
+resposta.
+</Callout>
+
+## O método, em quatro passos
+
+<Passos itens={[
+  "Leia as duas ou três linhas inteiras antes de olhar as alternativas. É rápido: o enunciado da CLF é curto de propósito.",
+  "Diga em voz baixa o pedido, verbo mais objeto, com as suas palavras. Se você não consegue, releia; não adianta ir para a lista.",
+  "Elimine por propósito, não por familiaridade. Pergunte de cada alternativa: este serviço faz esse verbo?",
+  "Passou de dois minutos: marque para revisar e siga. Nunca deixe em branco, porque não responder conta como errada."
+]} />
+
+<Callout tipo="dica" titulo="Múltipla resposta é onde se perde ponto bobo">
+O enunciado diz quantas escolher, e a correção é pelo conjunto exato. Se você
+tem certeza de duas e uma terceira parece plausível, a terceira é o distrator:
+ela está ali exatamente para isso. Marque o número pedido, nem uma a mais.
+</Callout>
+
+## Como responder o cenário
+
+Leia o verbo, não o assunto. Quatro serviços de segurança numa lista não
+significam quatro respostas possíveis: significam quatro verbos diferentes, e
+só um combina com o do enunciado. Depois confira o nível: se a sua resposta
+exige desenhar algo, dimensionar algo ou investigar um incidente, você saiu do
+escopo da CLF e provavelmente escolheu a alternativa acima do pedido.

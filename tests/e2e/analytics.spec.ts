@@ -113,9 +113,10 @@ test("o Hoje é da trilha em que a pessoa mexeu por último", async ({ page }) =
   await page.goto("/hoje/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Engenharia de Analytics");
 
-  // Com duas trilhas, dá para trocar; a pedida na URL vence o progresso.
+  // Com mais de uma trilha, dá para trocar; a pedida na URL vence o
+  // progresso. São quatro desde que a AWS Cloud Practitioner foi publicada.
   const seletor = page.getByRole("navigation", { name: "Trilha" });
-  await expect(seletor.getByRole("link")).toHaveCount(3);
+  await expect(seletor.getByRole("link")).toHaveCount(4);
   await page.goto("/hoje/?trilha=engenharia-de-dados");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("Engenharia de Dados");
 });

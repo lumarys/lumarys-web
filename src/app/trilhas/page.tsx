@@ -74,34 +74,42 @@ export default function PaginaTrilhas() {
           ))}
         </ul>
 
-        <Rotulo className="mb-2 mt-6">Em breve</Rotulo>
         {/* Eram três cartões apagados que não faziam nada. Um cartão em 70% de
             opacidade não é um estado: não diz o que falta nem o que a pessoa
-            pode fazer. Agora cada um abre, admite que não há data e oferece o
-            único caminho honesto — pedir, e ser avisado. */}
-        <ul className="flex list-none flex-col gap-2 p-0">
-          {trilhasEmBreve.map((t) => (
-            <li key={t.slug}>
-              <Recolhivel titulo={t.titulo} nota="Em breve">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                  {t.origem}
-                </p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-2)]">
-                  {t.resumo}
-                </p>
-                <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
-                  Ainda não há conteúdo publicado, e não há data marcada. Escrever ajuda a decidir
-                  qual sai primeiro, e eu aviso quando esta abrir.
-                </p>
-                <ContatoLink
-                  rotulo="Quero esta trilha"
-                  assunto={`Quero a trilha ${t.titulo}`}
-                  className={classesDeBotao("secundario", "mt-3 w-full")}
-                />
-              </Recolhivel>
-            </li>
-          ))}
-        </ul>
+            pode fazer. Cada um abre, admite que não há data e oferece o único
+            caminho honesto: pedir, e ser avisado.
+
+            Com a Cloud Practitioner publicada a lista ficou vazia, e o rótulo
+            "Em breve" some junto com ela. Rótulo sem lista promete uma coisa
+            que a página não tem. */}
+        {trilhasEmBreve.length > 0 ? (
+          <>
+            <Rotulo className="mb-2 mt-6">Em breve</Rotulo>
+            <ul className="flex list-none flex-col gap-2 p-0">
+              {trilhasEmBreve.map((t) => (
+                <li key={t.slug}>
+                  <Recolhivel titulo={t.titulo} nota="Em breve">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+                      {t.origem}
+                    </p>
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-2)]">
+                      {t.resumo}
+                    </p>
+                    <p className="mt-2 text-[13px] leading-relaxed text-[var(--text-2)]">
+                      Ainda não há conteúdo publicado, e não há data marcada. Escrever ajuda a
+                      decidir qual sai primeiro, e eu aviso quando esta abrir.
+                    </p>
+                    <ContatoLink
+                      rotulo="Quero esta trilha"
+                      assunto={`Quero a trilha ${t.titulo}`}
+                      className={classesDeBotao("secundario", "mt-3 w-full")}
+                    />
+                  </Recolhivel>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
       </div>
     </AppShell>
   );

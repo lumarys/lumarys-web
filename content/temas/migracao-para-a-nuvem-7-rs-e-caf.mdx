@@ -1,0 +1,277 @@
+---
+slug: migracao-para-a-nuvem-7-rs-e-caf
+titulo: "Migração: os 7 Rs e o Cloud Adoption Framework"
+resumo: "As sete estratégias de migração que a AWS nomeia, com o caso que aponta cada uma, as perspectivas do Cloud Adoption Framework e os serviços de apoio à migração no nível de reconhecimento que a CLF-C02 cobra."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 1.3 do guia e a que mais rende questão de uma frase: o enunciado descreve o que a empresa quer fazer com uma aplicação e pede o nome da estratégia. Os sete nomes se parecem entre si, e a diferença entre replatform e refactor decide sozinha várias questões."
+comoCai: "Uma empresa vai mover uma aplicação para a AWS sem alterar o código, apenas trocando o servidor de lugar. Qual estratégia de migração descreve isso?"
+feynman: "Explique em um minuto a diferença entre mover uma aplicação sem mexer nela, ajustá-la um pouco e reescrevê-la para a nuvem, usando o mesmo sistema como exemplo."
+preRequisitos: ["como-ler-uma-questao-clf", "economia-da-nuvem"]
+errosComuns:
+  - "Confundir replatform com refactor. Replatform mantém a aplicação e troca uma peça por serviço gerenciado; refactor redesenha a arquitetura da aplicação."
+  - "Confundir repurchase com replatform. Repurchase troca a aplicação por outro produto, em geral software como serviço; replatform mantém a mesma aplicação."
+  - "Achar que retain significa desistir da nuvem. Retain é manter a aplicação onde está por enquanto, por dependência, risco ou investimento recente, com a decisão adiada."
+  - "Confundir retire com retain. Retire é desligar o que não tem mais valor; retain é manter por enquanto o que ainda é usado."
+  - "Tratar relocate como sinônimo de rehost. Relocate move a plataforma inteira, ou instâncias e objetos entre ambientes, sem comprar hardware nem alterar a operação existente."
+  - "Misturar o Cloud Adoption Framework com o Well-Architected Framework. O CAF organiza a jornada da organização; o Well-Architected avalia uma carga de trabalho."
+  - "Achar que o Database Migration Service serve para migrar servidor inteiro. Ele replica banco de dados; servidor é Application Migration Service."
+preTeste:
+  - enunciado: "Uma empresa vai mover uma aplicação legada para a AWS sem mudar o código nem a arquitetura, apenas levando os servidores para instâncias equivalentes. Qual estratégia de migração descreve essa escolha?"
+    alternativas:
+      - texto: "Rehost."
+        correta: true
+        explicacao: "Mover sem alterar a aplicação é o rehost, também descrito como levantar e mudar de lugar."
+      - texto: "Replatform."
+        correta: false
+        explicacao: "Replatform introduz alguma otimização no caminho, como trocar o banco por um serviço gerenciado. O enunciado diz que nada muda."
+      - texto: "Refactor."
+        correta: false
+        explicacao: "Refactor redesenha a arquitetura da aplicação, o oposto de não mudar o código."
+  - enunciado: "Uma empresa decide substituir o sistema de recursos humanos instalado internamente por um produto equivalente contratado como software como serviço. Qual estratégia descreve essa decisão?"
+    alternativas:
+      - texto: "Repurchase."
+        correta: true
+        explicacao: "Trocar a aplicação atual por outro produto, tipicamente em modelo de assinatura, é o repurchase."
+      - texto: "Retire."
+        correta: false
+        explicacao: "Retire é desligar a aplicação sem substituto, porque ela não tem mais valor para o negócio."
+      - texto: "Relocate."
+        correta: false
+        explicacao: "Relocate transfere a plataforma existente, mantendo a mesma aplicação e a mesma operação."
+videos:
+  - id: 66VzBT1MsaI
+    publicadoEm: "2026-04-24"
+    titulo: "Estratégias de migração para a nuvem: as mais usadas na prática (AWS)"
+    canal: "UpperStack"
+    duracao: 9
+    porQue: "Nove minutos com uma arquiteta da AWS sobre quais estratégias as empresas de fato escolhem e por quê. Observe as justificativas de negócio: é delas que o enunciado da prova é feito."
+  - id: gvIQsCyloIY
+    publicadoEm: "2024-04-16"
+    titulo: "Série AWS - Aulão Migração de Serviços para a AWS - Com Prática (Migrando um servidor Ubuntu)"
+    canal: "Marcelo Ortiz"
+    duracao: 56
+    porQue: "Complementar e longo. A primeira parte percorre os sete Rs um a um; a prática com um servidor mostra o que rehost significa na tela. Pare depois dos Rs se o tempo for curto."
+artigos:
+  - titulo: "Migration strategies (os 7 Rs)"
+    url: "https://docs.aws.amazon.com/prescriptive-guidance/latest/large-migration-guide/migration-strategies.html"
+    fonte: "AWS"
+  - titulo: "AWS Cloud Adoption Framework"
+    url: "https://docs.aws.amazon.com/whitepapers/latest/overview-aws-cloud-adoption-framework/welcome.html"
+    fonte: "AWS"
+  - titulo: "How to migrate to AWS"
+    url: "https://aws.amazon.com/cloud-migration/how-to-migrate/"
+    fonte: "AWS"
+  - titulo: "AWS Application Migration Service"
+    url: "https://aws.amazon.com/application-migration-service/"
+    fonte: "AWS"
+  - titulo: "What is AWS Database Migration Service?"
+    url: "https://docs.aws.amazon.com/dms/latest/userguide/Welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Os sete Rs, na lista da AWS."
+    verso: "Retire, retain, rehost, relocate, repurchase, replatform e refactor, também chamado de rearquitetar."
+  - frente: "Rehost, em uma linha."
+    verso: "Mover a aplicação para a nuvem sem alterá-la. A pista é sair do data center rápido, sem mexer em código."
+  - frente: "Replatform, em uma linha."
+    verso: "Mover e otimizar um pouco, sem redesenhar: trocar o banco instalado por um serviço gerenciado equivalente, por exemplo."
+  - frente: "Refactor, em uma linha."
+    verso: "Redesenhar a arquitetura da aplicação para aproveitar recursos nativos da nuvem. É a estratégia mais cara e mais demorada."
+  - frente: "Repurchase, em uma linha."
+    verso: "Trocar a aplicação por outro produto, em geral software como serviço. A pista é substituir o sistema atual por um contratado."
+  - frente: "Retire, em uma linha."
+    verso: "Desligar o que não tem mais valor para o negócio e parar de pagar por ele. A pista é aplicação sem uso ou sem dono."
+  - frente: "Retain, em uma linha."
+    verso: "Manter onde está por enquanto, por dependência, risco alto ou investimento recente. A decisão é adiada, não cancelada."
+  - frente: "Relocate, em uma linha."
+    verso: "Transferir a plataforma existente, ou instâncias e objetos, para outro ambiente sem comprar hardware, reescrever a aplicação nem mudar a operação."
+  - frente: "A diferença entre replatform e refactor."
+    verso: "Replatform troca uma peça da pilha mantendo a aplicação; refactor muda a arquitetura da própria aplicação."
+  - frente: "A diferença entre retire e retain."
+    verso: "Retire desliga de vez o que não serve mais; retain mantém no lugar o que ainda é usado, adiando a migração."
+  - frente: "Para que serve o Cloud Adoption Framework?"
+    verso: "Organizar a jornada de adoção da nuvem da organização, identificando capacidades a desenvolver e um roteiro de transformação."
+  - frente: "As seis perspectivas do CAF."
+    verso: "Negócio, pessoas, governança, plataforma, segurança e operações."
+  - frente: "Application Migration Service contra Database Migration Service."
+    verso: "O primeiro replica servidores inteiros para a AWS; o segundo replica bancos de dados, inclusive entre motores diferentes."
+  - frente: "Quando a família Snow aparece numa questão de migração?"
+    verso: "Quando há muito dado para transferir e a rede é o gargalo, ou o local é remoto: o dado viaja em dispositivo físico."
+drills:
+  - titulo: "Qual dos 7 Rs o enunciado descreve?"
+    instrucao: "Para cada decisão sobre uma aplicação, diga a estratégia de migração correspondente."
+    opcoes: ["Rehost", "Replatform", "Refactor", "Repurchase", "Retire", "Retain"]
+    itens:
+      - enunciado: "'Vamos levar os servidores para instâncias equivalentes na AWS e seguir operando igual.'"
+        resposta: "Rehost"
+        explicacao: "Sem alteração na aplicação."
+      - enunciado: "'Vamos migrar a aplicação e, de passagem, trocar o banco instalado por um serviço gerenciado.'"
+        resposta: "Replatform"
+        explicacao: "Mesma aplicação, uma peça otimizada."
+      - enunciado: "'Vamos quebrar o sistema monolítico em serviços para acelerar as entregas.'"
+        resposta: "Refactor"
+        explicacao: "Mudança na arquitetura da aplicação."
+      - enunciado: "'Vamos cancelar o sistema próprio de atendimento e assinar um produto pronto.'"
+        resposta: "Repurchase"
+        explicacao: "Troca de aplicação por outro produto."
+      - enunciado: "'Ninguém acessa esse relatório há mais de um ano; vamos desligar.'"
+        resposta: "Retire"
+        explicacao: "Sem valor de negócio, desativa."
+      - enunciado: "'Esse sistema depende de um equipamento que não tem equivalente na nuvem; fica onde está por enquanto.'"
+        resposta: "Retain"
+        explicacao: "Migração adiada por dependência física."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa vai migrar uma aplicação para a AWS e, no mesmo movimento, pretende substituir o banco de dados instalado em um servidor por um serviço de banco gerenciado equivalente, sem alterar o código da aplicação. Qual estratégia de migração descreve essa decisão?"
+    alternativas:
+      - texto: "Replatform."
+        correta: true
+        explicacao: "Mover a aplicação introduzindo alguma otimização na pilha, como sair de um banco autogerenciado para um gerenciado, sem redesenhar a aplicação, é a definição de replatform."
+      - texto: "Rehost."
+        correta: false
+        explicacao: "Rehost não muda nada na pilha: os servidores vão como estão. Aqui há uma troca deliberada de componente."
+      - texto: "Refactor."
+        correta: false
+        explicacao: "Refactor redesenha a arquitetura da aplicação. O enunciado diz explicitamente que o código não muda."
+      - texto: "Repurchase."
+        correta: false
+        explicacao: "Repurchase troca a aplicação inteira por outro produto, o que não acontece aqui."
+  - tipo: unica
+    enunciado: "Durante o inventário para a migração, a equipe encontra uma aplicação interna que não recebe acesso de usuário há muitos meses e cujo processo de negócio foi absorvido por outro sistema. Qual estratégia se aplica?"
+    alternativas:
+      - texto: "Retire."
+        correta: true
+        explicacao: "Sem valor de negócio e sem uso, a aplicação é desativada em vez de migrada, eliminando custo de hospedagem e manutenção."
+      - texto: "Retain."
+        correta: false
+        explicacao: "Retain mantém no lugar algo que ainda é necessário, adiando a decisão. Aqui a aplicação não serve mais a ninguém."
+      - texto: "Rehost."
+        correta: false
+        explicacao: "Levar para a nuvem uma aplicação sem uso apenas muda o lugar onde o custo é gerado."
+      - texto: "Relocate."
+        correta: false
+        explicacao: "Relocate transfere uma plataforma em uso para outro ambiente; não se aplica a algo que será desativado."
+  - tipo: unica
+    enunciado: "Uma organização quer estruturar a adoção da nuvem avaliando capacidades de negócio, pessoas, governança, plataforma, segurança e operações, e montar um roteiro de transformação. Qual recurso da AWS atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Cloud Adoption Framework."
+        correta: true
+        explicacao: "O CAF organiza a jornada de adoção pela organização, nessas perspectivas, e produz um roteiro de transformação."
+      - texto: "AWS Well-Architected Framework."
+        correta: false
+        explicacao: "Avalia uma carga de trabalho específica contra boas práticas de arquitetura, não a prontidão da organização."
+      - texto: "AWS Application Migration Service."
+        correta: false
+        explicacao: "É uma ferramenta de execução que replica servidores para a AWS; não organiza a jornada da organização."
+      - texto: "AWS Trusted Advisor."
+        correta: false
+        explicacao: "Faz verificações sobre a conta e os recursos existentes; não é um modelo de adoção."
+  - tipo: multipla
+    enunciado: "Uma empresa com data center próprio vai migrar para a AWS e precisa transferir vários terabytes de arquivos históricos, além de replicar um banco de dados em produção para outro motor. Quais DUAS opções a AWS oferece para esses dois problemas?"
+    alternativas:
+      - texto: "A família AWS Snow, para levar grandes volumes de dados em dispositivo físico quando a rede é o gargalo."
+        correta: true
+        explicacao: "É o caso de uso declarado da família: transferência de grande volume com limitação de rede ou local remoto."
+      - texto: "AWS Database Migration Service, para replicar o banco de dados, inclusive entre motores diferentes."
+        correta: true
+        explicacao: "O serviço existe para migrar e replicar bancos, com suporte a migração entre motores distintos."
+      - texto: "Amazon CloudFront, para acelerar a cópia dos arquivos históricos para a AWS."
+        correta: false
+        explicacao: "CloudFront distribui conteúdo para usuários finais a partir da AWS; não é ferramenta de ingestão de migração."
+      - texto: "AWS Well-Architected Tool, para transferir os dados com segurança."
+        correta: false
+        explicacao: "A ferramenta conduz revisão de arquitetura e não move dado nenhum."
+      - texto: "AWS Budgets, para replicar o banco de dados durante a janela de corte."
+        correta: false
+        explicacao: "Budgets acompanha gasto e dispara alerta; não tem relação com replicação de dados."
+---
+
+## Em uma frase
+
+A AWS nomeia sete estratégias para o que fazer com cada aplicação de um
+inventário, e a prova descreve a decisão em uma frase e pede o nome; o Cloud
+Adoption Framework é a camada acima, que organiza a jornada da organização em
+vez de uma aplicação.
+
+## Os sete Rs, com o caso que aponta cada um
+
+<Comparativo
+  colunas={["Estratégia", "O que se faz", "A pista no enunciado"]}
+  linhas={[
+    ["Rehost", "Move sem alterar a aplicação", "Sair do data center rápido, sem mexer em código"],
+    ["Relocate", "Transfere a plataforma ou as instâncias para outro ambiente", "Sem comprar hardware, sem reescrever, sem mudar a operação"],
+    ["Replatform", "Move e otimiza uma peça da pilha", "Trocar o banco instalado por um gerenciado, manter a aplicação"],
+    ["Repurchase", "Troca a aplicação por outro produto", "Substituir o sistema atual por um contratado como serviço"],
+    ["Refactor", "Redesenha a arquitetura da aplicação", "Monólito que atrasa entregas, limitação que só some com redesenho"],
+    ["Retain", "Mantém onde está, por enquanto", "Dependência física, risco alto, investimento recente"],
+    ["Retire", "Desliga o que não serve mais", "Sem acesso há meses, sem dono, sem valor de negócio"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Os três pares que a prova confunde">
+**Replatform contra refactor**: a primeira troca uma peça e mantém a aplicação;
+a segunda muda a arquitetura da aplicação. **Repurchase contra replatform**: a
+primeira troca a aplicação por outro produto; a segunda mantém a mesma
+aplicação. **Retire contra retain**: a primeira desliga de vez; a segunda adia.
+Em todos os casos a pergunta é a mesma: o que exatamente mudou de dono ou de
+forma?
+</Callout>
+
+## Por que refactor quase nunca é a resposta
+
+A própria AWS descreve o refactor como a estratégia mais complexa e mais cara,
+e recomenda modernizar depois da migração em vez de durante. Numa questão da
+CLF, refactor só é a resposta quando o enunciado diz que a limitação da
+aplicação é o problema a resolver: monólito que trava as entregas, sistema que
+não escala por desenho, código que ninguém consegue manter. Se o objetivo
+declarado é sair do data center, é rehost; se é ganhar um serviço gerenciado no
+caminho, é replatform.
+
+## O Cloud Adoption Framework
+
+O CAF não fala de uma aplicação: fala da **organização**. Ele identifica as
+capacidades que uma empresa precisa desenvolver para usar a nuvem e organiza
+isso em seis perspectivas.
+
+<Passos itens={[
+  "Negócio: ligar o investimento em nuvem a resultados do negócio.",
+  "Pessoas: cultura, papéis e desenvolvimento das equipes.",
+  "Governança: gestão de risco, portfólio e medição de valor.",
+  "Plataforma: a base técnica onde as cargas rodam.",
+  "Segurança: confidencialidade, integridade e disponibilidade.",
+  "Operações: entregar e sustentar serviços no nível acordado."
+]} />
+
+<Callout tipo="dica" titulo="CAF e Well-Architected respondem perguntas diferentes">
+Se o enunciado fala em preparar a empresa, desenvolver capacidades e montar
+roteiro de adoção, a resposta é **CAF**. Se fala em avaliar uma carga de
+trabalho contra boas práticas de arquitetura, a resposta é **Well-Architected**.
+Os dois têm pilares ou perspectivas com nomes parecidos, e é por isso que
+aparecem juntos nas alternativas.
+</Callout>
+
+## Os serviços de apoio, no nível de reconhecimento
+
+A CLF não pede operar nenhum deles, só saber para que servem.
+
+<Comparativo
+  colunas={["Serviço", "Para que serve"]}
+  linhas={[
+    ["AWS Migration Hub", "Acompanhar o andamento da migração num painel único"],
+    ["AWS Application Discovery Service", "Levantar o inventário e as dependências do ambiente atual"],
+    ["AWS Application Migration Service", "Replicar servidores inteiros para a AWS"],
+    ["AWS Database Migration Service", "Migrar e replicar bancos, inclusive entre motores diferentes"],
+    ["AWS DataSync", "Copiar arquivos entre o ambiente local e o armazenamento da AWS, pela rede"],
+    ["Família AWS Snow", "Levar grande volume de dados em dispositivo físico quando a rede é o gargalo"]
+  ]}
+/>
+
+## Como responder o cenário
+
+Pergunte o que mudou. Se nada mudou na aplicação, é rehost. Se mudou uma peça
+da pilha, é replatform. Se mudou a arquitetura, é refactor. Se mudou o produto,
+é repurchase. Se nada foi para a nuvem e a aplicação continua viva, é retain;
+se ela morreu, é retire. Nas questões de ferramenta, leia o objeto: servidor,
+banco, arquivo ou volume grande com rede ruim, cada um tem o seu serviço.

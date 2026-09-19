@@ -1,0 +1,254 @@
+---
+slug: well-architected-os-seis-pilares
+titulo: "Well-Architected: os seis pilares"
+resumo: "Excelência operacional, segurança, confiabilidade, eficiência de desempenho, otimização de custo e sustentabilidade: o que cada pilar do AWS Well-Architected Framework cobre, a pista que o denuncia num enunciado e onde entra a Well-Architected Tool."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 1.2 do guia, e o formato da questão é sempre o mesmo: o enunciado descreve uma prática em uma frase e pede o pilar. Os pilares se tocam, então quem decora a lista sem decorar a fronteira entre eles fica em dúvida entre dois toda vez."
+comoCai: "Uma equipe passou a revisar os gastos mensais e desligar recursos sem uso. Qual pilar do Well-Architected Framework essa prática representa?"
+feynman: "Explique em um minuto a diferença entre confiabilidade e eficiência de desempenho usando um único exemplo de loja online."
+preRequisitos: ["como-ler-uma-questao-clf"]
+errosComuns:
+  - "Confundir confiabilidade com eficiência de desempenho. Confiabilidade é continuar funcionando e se recuperar de falha; eficiência de desempenho é usar o recurso certo e continuar rápido quando a demanda cresce."
+  - "Jogar tudo que envolve automação em excelência operacional. Automação aparece em todos os pilares; o que define excelência operacional é operar, monitorar e melhorar o processo de entrega e de resposta a evento."
+  - "Esquecer o pilar de sustentabilidade. Ele existe no framework e cai com pistas próprias, como reduzir o impacto ambiental da carga de trabalho ou escolher a região pelo perfil de energia."
+  - "Tratar otimização de custo como sinônimo de comprar mais barato. Ela inclui medir, atribuir o gasto a quem consome, dimensionar certo e desligar o que não é usado."
+  - "Achar que a Well-Architected Tool corrige a arquitetura sozinha. Ela conduz a revisão por pilar e devolve um plano de melhoria; a mudança continua sendo feita pela equipe."
+  - "Procurar um pilar único quando a prática toca dois. A questão sempre descreve o objetivo declarado da prática, e é o objetivo que escolhe o pilar."
+preTeste:
+  - enunciado: "Uma equipe passou a rodar simulações de falha de zona de disponibilidade para confirmar que a aplicação se recupera sozinha. Qual pilar do Well-Architected essa prática representa?"
+    alternativas:
+      - texto: "Confiabilidade."
+        correta: true
+        explicacao: "Recuperar-se de falha e continuar entregando a função esperada é o objetivo declarado do pilar de confiabilidade."
+      - texto: "Eficiência de desempenho."
+        correta: false
+        explicacao: "Eficiência de desempenho trata de usar o recurso certo e manter a resposta rápida com a demanda, não de sobreviver a falha."
+      - texto: "Excelência operacional."
+        correta: false
+        explicacao: "Vizinho e plausível, porque envolve prática de equipe, mas o objetivo aqui é resistir à falha, não melhorar o processo de operação."
+  - enunciado: "O time de infraestrutura começou a marcar todos os recursos com o nome do projeto para saber quanto cada um consome por mês. Qual pilar isso representa?"
+    alternativas:
+      - texto: "Otimização de custo."
+        correta: true
+        explicacao: "Atribuir o gasto a quem consome é uma prática central do pilar de custo: sem medir, não há como otimizar."
+      - texto: "Segurança."
+        correta: false
+        explicacao: "Marcação ajuda em governança, mas o objetivo descrito é saber quanto cada projeto consome, que é custo."
+      - texto: "Sustentabilidade."
+        correta: false
+        explicacao: "Sustentabilidade olha o impacto ambiental da carga, e não a atribuição financeira do consumo."
+videos:
+  - id: EtejeN2V6Eg
+    publicadoEm: "2024-10-07"
+    titulo: "AWS CAF e WAF: Tudo Sobre os Pilares para Passar na Certificação!"
+    canal: "Jean Diogo"
+    duracao: 10
+    porQue: "Dez minutos no nível exato da prova, separando o Well-Architected do Cloud Adoption Framework, que é a confusão mais cara do Domínio 1. Observe como ele nomeia o objetivo de cada pilar em uma frase."
+  - id: BCCe8-1Byoo
+    publicadoEm: "2023-07-25"
+    titulo: "Os 6 pilares da AWS Well Architecture Framework"
+    canal: "DIO"
+    duracao: 72
+    porQue: "Complementar e longo: vale pelos trechos em que cada pilar ganha exemplo concreto. Assista em partes, um pilar por vez, e pare quando conseguir dizer a fronteira entre confiabilidade e eficiência de desempenho."
+artigos:
+  - titulo: "AWS Well-Architected Framework"
+    url: "https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html"
+    fonte: "AWS"
+  - titulo: "The pillars of the framework"
+    url: "https://docs.aws.amazon.com/wellarchitected/latest/framework/the-pillars-of-the-framework.html"
+    fonte: "AWS"
+  - titulo: "Sustainability pillar"
+    url: "https://docs.aws.amazon.com/wellarchitected/latest/sustainability-pillar/sustainability-pillar.html"
+    fonte: "AWS"
+  - titulo: "AWS Well-Architected Tool"
+    url: "https://aws.amazon.com/well-architected-tool/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Os seis pilares do Well-Architected."
+    verso: "Excelência operacional, segurança, confiabilidade, eficiência de desempenho, otimização de custo e sustentabilidade."
+  - frente: "Excelência operacional, em uma linha."
+    verso: "Executar e monitorar sistemas para entregar valor, e melhorar processos e procedimentos continuamente. A pista é processo de operação, resposta a evento e aprendizado com incidente."
+  - frente: "Segurança, em uma linha."
+    verso: "Proteger informação, sistemas e ativos com identidade, criptografia, rastreabilidade e resposta a incidente. A pista é acesso, dado protegido e auditoria."
+  - frente: "Confiabilidade, em uma linha."
+    verso: "Executar a função esperada e se recuperar de interrupção. A pista é falha, recuperação, redundância e teste de resiliência."
+  - frente: "Eficiência de desempenho, em uma linha."
+    verso: "Usar o recurso computacional certo e continuar eficiente quando a demanda muda. A pista é tipo de recurso, latência e escala."
+  - frente: "Otimização de custo, em uma linha."
+    verso: "Entregar valor pelo menor preço, medindo, atribuindo e dimensionando o gasto. A pista é fatura, recurso ocioso, marcação e dimensionamento."
+  - frente: "Sustentabilidade, em uma linha."
+    verso: "Reduzir o impacto ambiental das cargas de trabalho. A pista é consumo de energia, uso eficiente de recurso e impacto ambiental."
+  - frente: "A fronteira entre confiabilidade e eficiência de desempenho."
+    verso: "Confiabilidade é continuar de pé e voltar depois da falha; eficiência é continuar rápido e usar o recurso adequado quando a carga muda."
+  - frente: "A fronteira entre excelência operacional e confiabilidade."
+    verso: "Excelência operacional olha o processo de operar e melhorar; confiabilidade olha o comportamento do sistema diante de falha."
+  - frente: "A fronteira entre otimização de custo e sustentabilidade."
+    verso: "As duas evitam desperdício, mas custo mede em dinheiro e sustentabilidade mede em impacto ambiental. O enunciado diz qual objetivo foi declarado."
+  - frente: "Para que serve a AWS Well-Architected Tool?"
+    verso: "Conduzir uma revisão da carga de trabalho pelas perguntas de cada pilar e devolver um plano de melhoria. A equipe ainda é quem aplica as mudanças."
+  - frente: "Well-Architected é o mesmo que Cloud Adoption Framework?"
+    verso: "Não. O Well-Architected avalia a arquitetura de uma carga de trabalho; o CAF organiza a jornada de adoção da nuvem pela organização."
+  - frente: "A prática toca dois pilares. Como escolher?"
+    verso: "Pelo objetivo declarado no enunciado. Desligar recurso ocioso para baixar a fatura é custo; para reduzir consumo de energia é sustentabilidade."
+drills:
+  - titulo: "Qual pilar a prática representa?"
+    instrucao: "Para cada prática, diga o pilar do Well-Architected correspondente."
+    opcoes:
+      [
+        "Excelência operacional",
+        "Segurança",
+        "Confiabilidade",
+        "Eficiência de desempenho",
+        "Otimização de custo",
+        "Sustentabilidade",
+      ]
+    itens:
+      - enunciado: "Revisar cada incidente em reunião e transformar a causa em melhoria de procedimento."
+        resposta: "Excelência operacional"
+        explicacao: "Aprender com o evento e melhorar o processo de operação."
+      - enunciado: "Exigir autenticação de múltiplos fatores e dar a cada pessoa só a permissão de que precisa."
+        resposta: "Segurança"
+        explicacao: "Identidade e privilégio mínimo."
+      - enunciado: "Distribuir a aplicação por mais de uma zona de disponibilidade e testar o desligamento de uma delas."
+        resposta: "Confiabilidade"
+        explicacao: "Resistir à falha e se recuperar dela."
+      - enunciado: "Trocar o tipo de instância por um mais adequado ao perfil da carga para reduzir a latência."
+        resposta: "Eficiência de desempenho"
+        explicacao: "Recurso certo e resposta rápida."
+      - enunciado: "Marcar recursos por projeto e desligar os ambientes de teste fora do horário comercial para baixar a fatura."
+        resposta: "Otimização de custo"
+        explicacao: "O objetivo declarado é a fatura."
+      - enunciado: "Ajustar a carga para consumir menos recursos e reduzir o impacto ambiental da operação."
+        resposta: "Sustentabilidade"
+        explicacao: "O objetivo declarado é impacto ambiental."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma equipe adota testes automatizados de recuperação e réplicas em mais de uma zona de disponibilidade para que o serviço continue no ar durante uma falha de infraestrutura. Qual pilar do Well-Architected Framework essa decisão representa?"
+    alternativas:
+      - texto: "Confiabilidade."
+        correta: true
+        explicacao: "O objetivo declarado é continuar entregando a função esperada e se recuperar de interrupção, que é a definição do pilar."
+      - texto: "Eficiência de desempenho."
+        correta: false
+        explicacao: "Esse pilar trata de escolher o recurso adequado e manter a eficiência com a variação da demanda, não de sobreviver à falha."
+      - texto: "Excelência operacional."
+        correta: false
+        explicacao: "Vizinho plausível por causa dos testes, mas o alvo aqui é o comportamento do sistema na falha, não a melhoria do processo de operar."
+      - texto: "Segurança."
+        correta: false
+        explicacao: "Nada no enunciado trata de proteger dado, identidade ou acesso."
+  - tipo: unica
+    enunciado: "Uma empresa quer avaliar uma carga de trabalho já em produção contra as boas práticas da AWS e receber um plano de melhoria organizado por pilar, sem contratar consultoria. Qual recurso atende diretamente a esse pedido?"
+    alternativas:
+      - texto: "AWS Well-Architected Tool."
+        correta: true
+        explicacao: "A ferramenta conduz a revisão pelas perguntas de cada pilar e devolve um plano de melhoria para a carga avaliada."
+      - texto: "AWS Cloud Adoption Framework."
+        correta: false
+        explicacao: "O CAF organiza a jornada de adoção da nuvem pela organização; não avalia uma carga específica em produção."
+      - texto: "AWS Pricing Calculator."
+        correta: false
+        explicacao: "Estima custo de uma solução planejada; não avalia arquitetura contra boas práticas."
+      - texto: "Plano de suporte Enterprise."
+        correta: false
+        explicacao: "Traz acompanhamento e tempo de resposta, e o enunciado pede explicitamente uma avaliação sem contratar apoio externo."
+  - tipo: unica
+    enunciado: "Uma equipe começou a medir o consumo de recursos das cargas e a redesenhar processamentos em lote para usar menos capacidade, com o objetivo declarado de reduzir o impacto ambiental da operação. Qual pilar representa essa iniciativa?"
+    alternativas:
+      - texto: "Sustentabilidade."
+        correta: true
+        explicacao: "O objetivo declarado é o impacto ambiental, que é exatamente o escopo do pilar de sustentabilidade."
+      - texto: "Otimização de custo."
+        correta: false
+        explicacao: "É o distrator mais comum, porque usar menos recurso também barateia. O enunciado, porém, declara impacto ambiental, e é o objetivo que escolhe o pilar."
+      - texto: "Eficiência de desempenho."
+        correta: false
+        explicacao: "Esse pilar busca manter a resposta adequada com a demanda, não reduzir o impacto ambiental."
+      - texto: "Excelência operacional."
+        correta: false
+        explicacao: "Trata do processo de operar e melhorar, e não do consumo de recursos como fim."
+  - tipo: multipla
+    enunciado: "Uma diretoria pede exemplos de práticas do pilar de excelência operacional para incluir na política interna. Quais DUAS práticas pertencem a esse pilar?"
+    alternativas:
+      - texto: "Fazer revisões pós-incidente e transformar cada causa identificada em melhoria de procedimento."
+        correta: true
+        explicacao: "Melhorar continuamente processos e procedimentos a partir do que acontece em operação é o núcleo do pilar."
+      - texto: "Manter a operação descrita em código e implantar mudanças pequenas e reversíveis."
+        correta: true
+        explicacao: "Operar com mudanças frequentes, pequenas e reversíveis é uma prática declarada de excelência operacional."
+      - texto: "Criptografar os dados em repouso e em trânsito."
+        correta: false
+        explicacao: "É prática do pilar de segurança."
+      - texto: "Distribuir a aplicação por várias zonas de disponibilidade."
+        correta: false
+        explicacao: "É prática do pilar de confiabilidade."
+      - texto: "Comprar capacidade com compromisso de um ano para reduzir a fatura."
+        correta: false
+        explicacao: "É prática do pilar de otimização de custo."
+---
+
+## Em uma frase
+
+O Well-Architected Framework é a lista de perguntas que a AWS usa para avaliar
+uma carga de trabalho, organizada em seis pilares, e a prova cobra sempre a
+mesma coisa: dada uma prática, de qual pilar ela é.
+
+## Os seis pilares e a pista de cada um
+
+<Comparativo
+  colunas={["Pilar", "Objetivo", "A pista no enunciado"]}
+  linhas={[
+    ["Excelência operacional", "Executar, monitorar e melhorar processos e procedimentos", "Revisão de incidente, automação da operação, mudança pequena e reversível"],
+    ["Segurança", "Proteger informação, sistemas e ativos", "Identidade, permissão, criptografia, rastreabilidade, resposta a incidente"],
+    ["Confiabilidade", "Entregar a função esperada e se recuperar de interrupção", "Falha, redundância, recuperação, teste de resiliência"],
+    ["Eficiência de desempenho", "Usar o recurso certo e continuar eficiente quando a demanda muda", "Tipo de recurso, latência, escala, tecnologia adequada"],
+    ["Otimização de custo", "Entregar valor pelo menor preço", "Fatura, recurso ocioso, marcação por projeto, dimensionamento"],
+    ["Sustentabilidade", "Reduzir o impacto ambiental das cargas", "Consumo de energia, eficiência de recurso, impacto ambiental"]
+  ]}
+/>
+
+## As três fronteiras que decidem a questão
+
+Os pilares se tocam de propósito: uma arquitetura boa atende a todos. A prova
+resolve isso com o **objetivo declarado** no enunciado, e três pares concentram
+quase toda a dúvida.
+
+<Passos itens={[
+  "Confiabilidade contra eficiência de desempenho: a primeira pergunta se o sistema continua de pé e volta depois da falha; a segunda, se ele continua rápido e usa o recurso adequado quando a carga cresce.",
+  "Excelência operacional contra confiabilidade: a primeira olha o processo da equipe, a segunda olha o comportamento do sistema. Automatizar a resposta a um alarme é operação; sobreviver à queda de uma zona é confiabilidade.",
+  "Otimização de custo contra sustentabilidade: as duas cortam desperdício. Se o enunciado fala em fatura, é custo; se fala em impacto ambiental ou energia, é sustentabilidade."
+]} />
+
+<Callout tipo="atencao" titulo="A mesma prática, dois pilares">
+Desligar ambientes de teste à noite aparece nas duas listas. Não adianta
+procurar a prática numa tabela decorada: leia o **porquê** que o enunciado dá.
+"Para reduzir a fatura" é otimização de custo. "Para diminuir o consumo de
+energia" é sustentabilidade. A prática é a mesma; o pilar é o do objetivo.
+</Callout>
+
+## A ferramenta, e o que ela não faz
+
+A **AWS Well-Architected Tool** é onde a revisão acontece na prática: você
+descreve a carga de trabalho, responde às perguntas de cada pilar e recebe um
+plano de melhoria com os riscos encontrados. É autosserviço e é a resposta
+quando o enunciado pede avaliar uma carga existente contra as boas práticas.
+
+<Callout tipo="dica" titulo="Não confunda com o CAF">
+Well-Architected avalia **uma carga de trabalho**. O Cloud Adoption Framework
+organiza **a jornada da organização** para a nuvem, com perspectivas de
+negócio, pessoas e governança. Quando o enunciado fala em avaliar uma
+aplicação, é Well-Architected; quando fala em preparar a empresa para adotar a
+nuvem, é CAF.
+</Callout>
+
+## Como responder o cenário
+
+Procure o objetivo, não a tecnologia. A questão descreve uma prática e quase
+sempre oferece dois pilares plausíveis; o que desempata é a frase que diz para
+que a prática foi adotada. Se o enunciado não declara objetivo, use o
+substantivo dominante: falha aponta confiabilidade, permissão aponta segurança,
+latência aponta eficiência, fatura aponta custo, energia aponta
+sustentabilidade, e processo de equipe aponta excelência operacional.
