@@ -1,0 +1,265 @@
+---
+slug: gestao-monitoramento-e-outros-servicos
+titulo: "Gestão, monitoramento e as demais categorias"
+resumo: "CloudWatch, CloudTrail, Config, Systems Manager, Trusted Advisor, Health Dashboard, Service Catalog e License Manager; e as categorias restantes no nível de nome e propósito, de ferramentas de desenvolvedor a IoT, usuário final e engajamento."
+minutos: 28
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-20"
+porQue: "Fecha a tarefa 3.3 do guia e recolhe tudo o que o exame cita sem aprofundar. É o tema em que o candidato perde ponto por não ter ouvido o nome do serviço uma única vez: a questão é curta, o pedido é claro e a resposta depende só de reconhecer para que aquele serviço serve."
+comoCai: "Uma equipe quer receber um alerta quando o uso de processador de uma instância passar de um limite definido. Qual serviço atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre o painel do carro, que mostra a velocidade agora, e o registro da oficina, que diz quem levou o carro e em que dia."
+preRequisitos: ["como-ler-uma-questao-clf", "infraestrutura-global-da-aws"]
+errosComuns:
+  - "Trocar CloudWatch por CloudTrail. O CloudWatch acompanha métricas, logs e alarmes de operação; o CloudTrail registra quem chamou qual API e quando."
+  - "Responder CloudWatch quando o pedido é recomendação de economia ou de segurança. Recomendação com boas práticas aponta o Trusted Advisor."
+  - "Confundir Health Dashboard com CloudWatch. O Health Dashboard informa eventos da própria AWS que afetam a conta; o CloudWatch mede os recursos do cliente."
+  - "Achar que o Systems Manager é um serviço de monitoramento. Ele opera e administra a frota: aplica patch, executa comando e guarda parâmetros."
+  - "Escolher Service Catalog quando o pedido é controlar licenças de software. Licença de fornecedor aponta o License Manager."
+  - "Responder CodePipeline para qualquer coisa de desenvolvimento. O CodeBuild compila e testa, o CodeDeploy implanta e o CodePipeline liga as etapas em uma esteira."
+  - "Confundir SES com Pinpoint. O SES envia e-mail em volume a partir da aplicação; o Pinpoint trata de campanhas de comunicação e engajamento com clientes."
+  - "Trocar WorkSpaces por AppStream. O WorkSpaces entrega uma área de trabalho completa na nuvem; o AppStream entrega apenas uma aplicação transmitida ao usuário."
+preTeste:
+  - enunciado: "Uma equipe quer ser avisada automaticamente quando o uso de processador de uma instância passar de um limite definido. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon CloudWatch."
+        correta: true
+        explicacao: "O CloudWatch coleta métricas e dispara alarmes quando um valor cruza o limite configurado."
+      - texto: "AWS CloudTrail."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele registra chamadas de API e não acompanha o desempenho da instância."
+      - texto: "AWS Trusted Advisor."
+        correta: false
+        explicacao: "Entrega recomendações com base em boas práticas, e não alarme sobre uma métrica em tempo real."
+  - enunciado: "Uma empresa quer recomendações automáticas sobre economia de custos, segurança e limites de serviço na conta. Qual serviço entrega isso?"
+    alternativas:
+      - texto: "AWS Trusted Advisor."
+        correta: true
+        explicacao: "O Trusted Advisor avalia a conta contra boas práticas e aponta onde melhorar custo, segurança, desempenho e limites."
+      - texto: "Amazon CloudWatch."
+        correta: false
+        explicacao: "Mede e alerta sobre métricas e logs, mas não produz recomendações de boas práticas."
+      - texto: "AWS Systems Manager."
+        correta: false
+        explicacao: "Serve para operar a frota, com patch, execução de comando e parâmetros, e não para recomendar melhorias na conta."
+videos:
+  - id: 1rO0usxdklM
+    publicadoEm: "2026-08-25"
+    titulo: "Aula 15 - Monitoramento e Conformidade | AWS Learning Challenge 2026"
+    canal: "Ka Solution Oficial"
+    duracao: 48
+    porQue: "Aula longa sobre monitoramento, auditoria e conformidade, com CloudWatch, CloudTrail e Config no centro. Assista por blocos e pare quando conseguir dizer a pergunta que cada um responde."
+  - id: VeJxXbIsSls
+    publicadoEm: "2021-04-28"
+    titulo: "Monitoração, cloudwatch, cloudtrail e aws config - Vídeo do minicurso de \"Aprenda AWS\""
+    canal: "Douglas Mugnos"
+    duracao: 8
+    porQue: "Oito minutos com o trio mais confundido do tema, no nível de conceito que a prova cobra. Use como revisão rápida antes de responder as questões."
+artigos:
+  - titulo: "What is Amazon CloudWatch?"
+    url: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Systems Manager?"
+    url: "https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html"
+    fonte: "AWS"
+  - titulo: "AWS Trusted Advisor"
+    url: "https://docs.aws.amazon.com/awssupport/latest/user/trusted-advisor.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Health?"
+    url: "https://docs.aws.amazon.com/health/latest/ug/what-is-aws-health.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Service Catalog?"
+    url: "https://docs.aws.amazon.com/servicecatalog/latest/adminguide/introduction.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon CloudWatch, em uma linha."
+    verso: "Métricas, logs e alarmes sobre os recursos do cliente. A pista é medir, acompanhar desempenho, avisar quando passar de um limite."
+  - frente: "AWS CloudTrail, em uma linha."
+    verso: "Registro de quem chamou qual API, quando e de onde. A pista é auditar ação, descobrir o autor de uma mudança."
+  - frente: "AWS Config, em uma linha."
+    verso: "Histórico de configuração dos recursos e conformidade com regras. A pista é como o recurso estava, saiu do padrão definido."
+  - frente: "AWS Systems Manager, em uma linha."
+    verso: "Opera e administra a frota: patch, execução de comando, inventário e parâmetros. A pista é administrar muitas instâncias de um lugar só."
+  - frente: "AWS Trusted Advisor, em uma linha."
+    verso: "Recomendações contra boas práticas em custo, segurança, desempenho, resiliência e limites. A pista é pedir sugestões de melhoria da conta."
+  - frente: "AWS Health Dashboard, em uma linha."
+    verso: "Eventos da própria AWS que afetam a conta e os serviços usados. A pista é saber se o problema é da AWS e não do ambiente do cliente."
+  - frente: "AWS Service Catalog, em uma linha."
+    verso: "Catálogo de produtos aprovados que as equipes podem implantar. A pista é padronizar o que pode ser criado na organização."
+  - frente: "AWS License Manager, em uma linha."
+    verso: "Controla o uso de licenças de software de fornecedores. A pista é conformidade de licença, contagem de uso."
+  - frente: "As ferramentas de desenvolvedor, em uma linha."
+    verso: "CodeBuild compila e testa, CodeDeploy implanta, CodePipeline liga as etapas em esteira, Cloud9 é o ambiente de desenvolvimento, X-Ray rastreia a requisição entre serviços."
+  - frente: "Engajamento e comunicação, em uma linha."
+    verso: "Amazon Connect é a central de atendimento, SES envia e-mail em volume a partir da aplicação, Pinpoint cuida de campanhas de comunicação com clientes."
+  - frente: "Usuário final, em uma linha."
+    verso: "WorkSpaces entrega uma área de trabalho completa na nuvem; AppStream transmite apenas uma aplicação ao usuário."
+  - frente: "IoT Core e Amplify, em uma linha."
+    verso: "IoT Core conecta e administra dispositivos conectados; Amplify acelera a construção de aplicações web e móveis."
+  - frente: "CloudWatch contra Trusted Advisor."
+    verso: "O CloudWatch mede e alerta sobre o que está acontecendo. O Trusted Advisor recomenda o que deveria mudar."
+  - frente: "A pergunta que decide o tema."
+    verso: "O pedido é medir, auditar, operar, recomendar ou saber de um evento da AWS? Cada verbo aponta um serviço diferente."
+drills:
+  - titulo: "Qual serviço de gestão atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o serviço da AWS que a resolve."
+    opcoes:
+      ["Amazon CloudWatch", "AWS CloudTrail", "AWS Systems Manager", "AWS Trusted Advisor", "AWS Health Dashboard", "AWS License Manager"]
+    itens:
+      - enunciado: "Disparar um alarme quando o uso de memória de um grupo de instâncias passar do limite definido."
+        resposta: "Amazon CloudWatch"
+        explicacao: "Métricas e alarmes."
+      - enunciado: "Descobrir qual usuário apagou um recurso e em que horário isso aconteceu."
+        resposta: "AWS CloudTrail"
+        explicacao: "Registro de chamadas de API."
+      - enunciado: "Aplicar a mesma correção de sistema operacional em centenas de instâncias de um lugar só."
+        resposta: "AWS Systems Manager"
+        explicacao: "Operação e administração da frota."
+      - enunciado: "Receber sugestões de onde a conta pode economizar e onde está exposta a risco."
+        resposta: "AWS Trusted Advisor"
+        explicacao: "Recomendações de boas práticas."
+      - enunciado: "Saber se uma lentidão vem de um evento em andamento na própria AWS que afeta a conta."
+        resposta: "AWS Health Dashboard"
+        explicacao: "Eventos da AWS que afetam a conta."
+      - enunciado: "Acompanhar o consumo das licenças de um software de fornecedor e evitar uso acima do contratado."
+        resposta: "AWS License Manager"
+        explicacao: "Controle de licenças."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma equipe precisa acompanhar o desempenho de suas instâncias e ser avisada quando uma métrica passar de um valor definido. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon CloudWatch."
+        correta: true
+        explicacao: "O CloudWatch coleta métricas e logs e dispara alarmes quando o valor configurado é ultrapassado."
+      - texto: "AWS CloudTrail."
+        correta: false
+        explicacao: "Vizinho plausível, mas registra chamadas de API para auditoria, e não o desempenho dos recursos."
+      - texto: "AWS Config."
+        correta: false
+        explicacao: "Guarda o histórico de configuração dos recursos e a conformidade com regras, não a métrica de uso."
+      - texto: "AWS Health Dashboard."
+        correta: false
+        explicacao: "Mostra eventos da própria AWS que afetam a conta, e não métricas dos recursos do cliente."
+  - tipo: unica
+    enunciado: "Uma equipe de operações precisa aplicar correções de sistema operacional e executar comandos em centenas de instâncias a partir de um único lugar. Qual serviço atende?"
+    alternativas:
+      - texto: "AWS Systems Manager."
+        correta: true
+        explicacao: "É o serviço de operação da frota, com aplicação de patch, execução de comando, inventário e armazenamento de parâmetros."
+      - texto: "Amazon CloudWatch."
+        correta: false
+        explicacao: "Vizinho plausível em questões de operação, mas ele observa e alerta; não executa a manutenção nas instâncias."
+      - texto: "AWS Service Catalog."
+        correta: false
+        explicacao: "Publica um catálogo de produtos aprovados para implantação, e não administra instâncias já em uso."
+      - texto: "AWS Trusted Advisor."
+        correta: false
+        explicacao: "Produz recomendações de boas práticas e não executa correção na frota."
+  - tipo: unica
+    enunciado: "Uma empresa quer que suas equipes só possam implantar configurações previamente aprovadas pela área de arquitetura, escolhendo em uma lista padronizada. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Service Catalog."
+        correta: true
+        explicacao: "É o catálogo de produtos aprovados que as equipes podem implantar, o que padroniza o que pode ser criado."
+      - texto: "AWS License Manager."
+        correta: false
+        explicacao: "Controla o uso de licenças de software de fornecedores, e não o catálogo do que pode ser implantado."
+      - texto: "AWS Systems Manager."
+        correta: false
+        explicacao: "Opera a frota existente e não publica o catálogo do que as equipes podem criar."
+      - texto: "AWS Trusted Advisor."
+        correta: false
+        explicacao: "Recomenda melhorias na conta, sem definir o que cada equipe pode implantar."
+  - tipo: multipla
+    enunciado: "Uma empresa quer saber se uma indisponibilidade tem origem em um evento da própria AWS que afeta a conta e, em outro assunto, quer receber sugestões automáticas de economia e de segurança. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "AWS Health Dashboard para os eventos da AWS que afetam a conta."
+        correta: true
+        explicacao: "O Health Dashboard informa eventos em andamento na AWS e o impacto deles sobre os recursos da conta."
+      - texto: "AWS Trusted Advisor para as sugestões de economia e de segurança."
+        correta: true
+        explicacao: "O Trusted Advisor avalia a conta contra boas práticas e aponta melhorias em custo, segurança, desempenho, resiliência e limites."
+      - texto: "Amazon CloudWatch para as duas necessidades."
+        correta: false
+        explicacao: "Mede e alerta sobre os recursos do cliente, mas não informa eventos da AWS nem produz recomendações de boas práticas."
+      - texto: "AWS CloudTrail para as sugestões de economia."
+        correta: false
+        explicacao: "Registra chamadas de API para auditoria e não sugere onde economizar."
+      - texto: "AWS License Manager para os eventos da AWS."
+        correta: false
+        explicacao: "Controla licenças de software e não informa eventos de serviço da AWS."
+---
+
+## Em uma frase
+
+Este tema recolhe tudo o que o exame cita sem aprofundar, e a questão se decide
+pelo **verbo do pedido**: medir, auditar, operar, recomendar ou saber de um
+evento da própria AWS. Cada verbo aponta um serviço, e só um.
+
+## Os três que sempre aparecem juntos
+
+O **CloudWatch** mede: coleta métricas e logs dos recursos do cliente e dispara
+alarme quando um valor cruza o limite. O **CloudTrail** audita: registra quem
+chamou qual API, quando e de onde. O **Config** acompanha configuração: guarda
+como cada recurso estava e se ele viola uma regra definida. A comparação
+detalhada entre os três, com os pares que a prova monta, está no tema de
+conformidade e governança deste mesmo curso; aqui basta a pergunta que cada um
+responde.
+
+<Callout tipo="dica" titulo="Uma pergunta para cada um">
+**CloudWatch**: está funcionando bem? **CloudTrail**: quem fez isso?
+**Config**: como estava configurado e saiu do padrão?
+</Callout>
+
+## Operar, recomendar e ser avisado
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Systems Manager", "Opera a frota: patch, comando, inventário, parâmetros", "Administrar muitas instâncias de um lugar só"],
+    ["AWS Trusted Advisor", "Recomendações contra boas práticas da AWS", "Sugestões de economia, segurança, desempenho, limites"],
+    ["AWS Health Dashboard", "Eventos da própria AWS que afetam a conta", "Saber se o problema é da AWS, não do cliente"],
+    ["AWS Service Catalog", "Catálogo de produtos aprovados para implantar", "Padronizar o que as equipes podem criar"],
+    ["AWS License Manager", "Controle de uso de licenças de fornecedores", "Conformidade de licença, contagem de uso"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Medir não é recomendar">
+**CloudWatch** e **Trusted Advisor** aparecem na mesma questão com frequência. O
+CloudWatch diz **o que está acontecendo agora** com um recurso. O Trusted
+Advisor diz **o que deveria mudar** na conta, comparando com boas práticas.
+Alerta sobre métrica é CloudWatch; sugestão de melhoria é Trusted Advisor.
+</Callout>
+
+## As demais categorias, no nível de nome e propósito
+
+O exame ainda cita serviços de outras categorias sem cobrar detalhe. Basta
+reconhecer o propósito de cada um.
+
+<Comparativo
+  colunas={["Categoria", "Serviços", "Para que servem em uma linha"]}
+  linhas={[
+    ["Ferramentas de desenvolvedor", "CodeBuild, CodeDeploy, CodePipeline", "Compilar e testar, implantar, e ligar as etapas em uma esteira"],
+    ["Desenvolvimento e diagnóstico", "Cloud9, X-Ray", "Ambiente de desenvolvimento no navegador e rastreamento da requisição entre serviços"],
+    ["Negócio e engajamento", "Amazon Connect, SES, Pinpoint", "Central de atendimento, envio de e-mail em volume e campanhas de comunicação"],
+    ["Computação de usuário final", "WorkSpaces, AppStream", "Área de trabalho completa na nuvem e transmissão de uma aplicação isolada"],
+    ["Dispositivos e aplicações", "IoT Core, Amplify, AppSync", "Conectar dispositivos, acelerar aplicações web e móveis e servir APIs GraphQL"]
+  ]}
+/>
+
+Dois pares dessa lista costumam trocar de lugar. **SES** e **Pinpoint** tratam
+de mensagem para pessoas, mas o SES é o envio de e-mail feito pela aplicação e o
+Pinpoint é a campanha de comunicação com clientes. **WorkSpaces** e
+**AppStream** entregam software pela rede, mas o primeiro entrega a máquina
+inteira e o segundo apenas a aplicação.
+
+## Como responder o cenário
+
+Separe o verbo antes de olhar as alternativas. Medir e alertar é CloudWatch.
+Descobrir o autor de uma ação é CloudTrail. Saber como o recurso estava
+configurado é Config. Aplicar patch e executar comando na frota é Systems
+Manager. Receber sugestão de melhoria é Trusted Advisor. Descobrir se a falha é
+da AWS é Health Dashboard. Padronizar o que pode ser implantado é Service
+Catalog. Controlar licença é License Manager. E se o nome citado for de
+desenvolvimento, atendimento, usuário final ou dispositivo conectado, a resposta
+é reconhecer o propósito: a prova não pede mais do que isso.

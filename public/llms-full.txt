@@ -41,6 +41,10 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Computação na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/computacao-na-aws/): EC2 e as famílias de instância, Auto Scaling e balanceadores no nível de conceito, Lambda, containers com ECS, EKS e Fargate, além de Lightsail e Batch: o que cada um é em uma linha e a pista que o denuncia no enunciado.
 - [Armazenamento na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/armazenamento-na-aws/): S3 e suas classes, ciclo de vida e versionamento; EBS, EFS, FSx, Storage Gateway, AWS Backup e a família Snow; e a pergunta que decide tudo no tema: o dado é objeto, bloco ou arquivo?
 - [Rede e conectividade na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/rede-e-conectividade-na-aws/): VPC, sub-rede pública e privada, internet gateway e NAT, security group contra lista de controle de acesso de rede, VPN site a site, Direct Connect, PrivateLink e endpoints, e o Route 53 como DNS.
+- [Bancos de dados: visão geral](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/bancos-de-dados-na-aws-visao-geral/): RDS e seus motores, Aurora, DynamoDB, Redshift, ElastiCache, Neptune, DocumentDB, MemoryDB e DMS; relacional contra não relacional e a pista de cada serviço em uma linha, no nível que a prova cobra.
+- [Analytics, IA e machine learning](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/analytics-e-ia-na-aws/): Athena, Glue, QuickSight, Kinesis, EMR, OpenSearch e Data Exchange no lado de dados; SageMaker, Rekognition, Lex, Polly, Transcribe, Translate, Comprehend, Textract, Bedrock e Q no lado de IA; cada um posicionado pelo caso de uso.
+- [Integração de aplicações](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/integracao-de-aplicacoes-na-aws/): SQS, SNS, EventBridge, Step Functions, API Gateway, AppSync e Amazon MQ; fila contra tópico contra barramento de eventos em uma frase cada, e a pista que aponta cada um no enunciado da prova.
+- [Gestão, monitoramento e as demais categorias](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/gestao-monitoramento-e-outros-servicos/): CloudWatch, CloudTrail, Config, Systems Manager, Trusted Advisor, Health Dashboard, Service Catalog e License Manager; e as categorias restantes no nível de nome e propósito, de ferramentas de desenvolvedor a IoT, usuário final e engajamento.
 
 ## AWS Solutions Architect Associate
 
@@ -1702,6 +1706,392 @@ resposta é Route 53, não CloudFront.
 - Achar que endpoint da VPC é o mesmo que internet gateway. O endpoint alcança serviços da AWS pela rede interna, sem sair para a internet.
 - Confundir Route 53 com CloudFront. O Route 53 resolve nomes em endereços; o CloudFront entrega conteúdo em cache.
 - Esquecer que a VPC é regional e que as sub-redes ficam cada uma em uma zona de disponibilidade.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Bancos de dados: visão geral
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/bancos-de-dados-na-aws-visao-geral/
+Tempo estimado: 28 minutos · Nível: fundamental
+
+**Resumo.** RDS e seus motores, Aurora, DynamoDB, Redshift, ElastiCache, Neptune, DocumentDB, MemoryDB e DMS; relacional contra não relacional e a pista de cada serviço em uma linha, no nível que a prova cobra.
+
+**Por que cai na prova.** É a tarefa 3.3 do guia e o grupo de serviços com mais alternativas quase idênticas. Quase toda questão de banco traz RDS, DynamoDB e Redshift juntos, e os três só se separam quando você classifica a carga antes de escolher: transação relacional, acesso por chave ou consulta analítica sobre histórico.
+
+**Como o entrevistador pergunta.** "Uma empresa precisa de um banco de dados totalmente gerenciado com esquema fixo e consultas em SQL para um sistema de pedidos. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+Todos os serviços deste tema guardam dado, então a questão se decide antes do
+serviço: a carga é **transacional relacional**, de **acesso por chave** ou
+**analítica sobre histórico**? Respondida essa pergunta, sobra uma alternativa.
+
+## Relacional contra não relacional
+
+O enunciado quase sempre entrega o modelo pelo vocabulário. **Relacional** vem
+com tabelas, relações, esquema fixo, SQL e o nome de um motor conhecido. **Não
+relacional** vem com flexibilidade de formato, escala imprevisível e acesso por
+uma chave. Não é uma escolha de qualidade: é o desenho do dado.
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon RDS", "Banco relacional gerenciado com motores conhecidos", "SQL, esquema fixo, MySQL, PostgreSQL, Oracle, SQL Server"],
+    ["Amazon Aurora", "Motor relacional compatível com MySQL e PostgreSQL", "Compatibilidade com um dos dois mais desempenho e disponibilidade altos"],
+    ["Amazon DynamoDB", "Banco de chave e valor sem servidor", "Não relacional, escala variável, leitura por chave em milissegundos"],
+    ["Amazon Redshift", "Data warehouse para consulta analítica", "Relatório gerencial, análise, histórico de anos, business intelligence"],
+    ["Amazon ElastiCache", "Cache em memória na frente de outro banco", "Acelerar leitura repetida, aliviar o banco principal"],
+    ["Amazon MemoryDB", "Banco em memória durável compatível com Redis", "Velocidade de memória com o dado como fonte primária"],
+    ["Amazon Neptune", "Banco de grafos", "Relações entre pessoas, recomendação por conexão, fraude em cadeia"],
+    ["Amazon DocumentDB", "Banco de documentos compatível com MongoDB", "Documentos JSON, compatibilidade com MongoDB"],
+    ["AWS DMS", "Migração de dados entre bancos", "Migrar, pouca indisponibilidade, sair do datacenter"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="O trio que decide a maior parte das questões">
+**RDS**, **DynamoDB** e **Redshift** aparecem juntos com muita frequência.
+Separe pelo verbo do enunciado: **registrar** um pedido com relações entre
+tabelas é RDS; **buscar** um item pela chave em escala é DynamoDB; **analisar**
+o acumulado de anos é Redshift.
+</Callout>
+
+## Aurora dentro da família RDS
+
+O Aurora não é um serviço paralelo ao RDS: é um dos motores que o RDS oferece,
+compatível com MySQL e com PostgreSQL, com desempenho e disponibilidade maiores
+do que os motores originais. Na prova, ele aparece quando o enunciado pede
+compatibilidade com um desses dois bancos somada a uma exigência explícita de
+alto desempenho ou de tolerância a falhas.
+
+## Memória: cache e banco
+
+<Callout tipo="atencao" titulo="ElastiCache não é o mesmo que MemoryDB">
+Os dois guardam dado em memória e por isso trocam de lugar nas alternativas. O
+**ElastiCache** é **cache**: fica na frente de outro banco, acelera leituras
+repetidas e pode perder o conteúdo sem perda de informação, porque a fonte
+está no banco de trás. O **MemoryDB** é **banco**: o dado que está nele é o
+dado oficial, com durabilidade. Acelerar o que já existe aponta ElastiCache;
+guardar de verdade com velocidade de memória aponta MemoryDB.
+</Callout>
+
+## Os especializados e a migração
+
+Três serviços fecham o mapa. O **Neptune** guarda relações e responde a perguntas
+sobre caminhos entre entidades, então o enunciado fala em rede de contatos,
+recomendação por conexão ou fraude encadeada. O **DocumentDB** guarda documentos
+e costuma vir com a palavra MongoDB no texto. E o **DMS** não guarda nada: ele
+move o dado de um banco para outro, com a origem em uso durante a transferência,
+e é a resposta quando o verbo do enunciado é migrar.
+
+Vale lembrar que gerenciado não significa sem responsabilidade. A AWS cuida do
+servidor, do sistema operacional e das rotinas do banco; a modelagem, o controle
+de acesso e o conteúdo dos dados continuam com o cliente.
+
+## Como responder o cenário
+
+Classifique a carga antes de olhar as alternativas. Se há tabelas, relações e
+SQL, é RDS, e a resposta vira Aurora quando o texto pede compatibilidade com
+MySQL ou PostgreSQL junto de desempenho alto. Se há leitura por chave em escala
+que varia, é DynamoDB. Se há análise sobre anos de dados, é Redshift. Se o
+pedido é acelerar leitura sem trocar o banco, é ElastiCache. Se o dado é grafo,
+é Neptune; se é documento com MongoDB no texto, é DocumentDB. E se o verbo é
+migrar, nenhum banco responde: a resposta é o DMS.
+
+## Erros comuns
+
+- Responder Amazon Redshift para um sistema que registra pedidos o tempo todo. O Redshift é um data warehouse para consulta analítica sobre grande volume histórico, não para o dia a dia transacional.
+- Achar que o DynamoDB é um RDS mais barato. São modelos diferentes: o RDS é relacional com esquema e SQL; o DynamoDB é de chave e valor, sem esquema fixo, acessado pelos padrões de acesso definidos antes.
+- Confundir ElastiCache com MemoryDB. O ElastiCache é cache na frente de outro banco; o MemoryDB é um banco em memória durável, que guarda o dado como fonte primária.
+- Escolher um serviço de banco quando o pedido é mover dados de um banco para outro. Migração com pouca indisponibilidade aponta o Database Migration Service.
+- Responder RDS quando o enunciado descreve relações entre pessoas, rotas ou fraude ligada em rede. Esse desenho de grafo aponta o Amazon Neptune.
+- Tratar Aurora como um serviço separado do RDS. O Aurora é um motor compatível com MySQL e PostgreSQL dentro da família RDS, com desempenho e disponibilidade maiores.
+- Achar que banco gerenciado tira do cliente a responsabilidade pelos dados. A AWS opera a infraestrutura e o software; o dado, o acesso e a modelagem continuam com o cliente.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Analytics, IA e machine learning
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/analytics-e-ia-na-aws/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** Athena, Glue, QuickSight, Kinesis, EMR, OpenSearch e Data Exchange no lado de dados; SageMaker, Rekognition, Lex, Polly, Transcribe, Translate, Comprehend, Textract, Bedrock e Q no lado de IA; cada um posicionado pelo caso de uso.
+
+**Por que cai na prova.** É a tarefa 3.3 do guia na parte de análise e inteligência artificial, e o tema com mais nomes para reconhecer em menos tempo. A prova não pede arquitetura de dados nem treino de modelo: pede o serviço que resolve o pedido descrito em duas linhas, e as alternativas erradas são sempre o serviço de IA vizinho.
+
+**Como o entrevistador pergunta.** "Uma empresa quer extrair automaticamente o texto e os campos de formulários digitalizados enviados por clientes. Qual serviço da AWS atende a essa necessidade?"
+
+## Em uma frase
+
+Este tema tem muitos nomes e pouca profundidade: a prova pede **qual serviço
+faz aquilo**, e as alternativas erradas são sempre o serviço vizinho. A saída é
+decorar cada um por uma linha de função e pela palavra do enunciado que o chama.
+
+## O lado dos dados
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon Athena", "Consulta em SQL sobre dados no Amazon S3", "Consultar o arquivo onde ele está, sem carregar em banco"],
+    ["AWS Glue", "Prepara, transforma e cataloga dados em lote", "Extrair, transformar, carregar, catálogo de dados"],
+    ["Amazon QuickSight", "Painéis e visualização para a área de negócio", "Painel, gráfico, relatório visual para a diretoria"],
+    ["Amazon Kinesis", "Coleta e processa dados em tempo real", "Streaming, clique, sensor, evento conforme acontece"],
+    ["Amazon EMR", "Big data com ferramentas como Spark e Hadoop", "Citar essas ferramentas ou processamento distribuído"],
+    ["Amazon OpenSearch", "Busca e análise sobre logs e texto", "Pesquisar dentro de logs, painel de busca"],
+    ["AWS Data Exchange", "Catálogo de conjuntos de dados de terceiros", "Obter dado de fora da empresa"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Athena, Glue e QuickSight na mesma frase">
+Os três aparecem juntos porque formam uma sequência. O **Glue** arruma e
+cataloga o dado, o **Athena** consulta, o **QuickSight** mostra. Se o verbo do
+enunciado é **preparar**, é Glue; se é **consultar com SQL**, é Athena; se é
+**mostrar em painel**, é QuickSight.
+</Callout>
+
+## O lado da inteligência artificial
+
+Aqui a regra é simples: se existe um serviço pronto para o pedido, a resposta é
+ele, e não o SageMaker. O **SageMaker** entra quando a empresa quer construir e
+treinar um modelo próprio com dados dela.
+
+<Comparativo
+  colunas={["Serviço", "O que faz em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon SageMaker", "Construir, treinar e implantar modelos próprios", "Modelo próprio, treinar com os dados da empresa"],
+    ["Amazon Rekognition", "Analisa imagem e vídeo", "Foto, vídeo, reconhecer objeto, cena ou rosto"],
+    ["Amazon Textract", "Extrai texto e campos de documentos digitalizados", "Documento escaneado, formulário, nota, apólice"],
+    ["Amazon Comprehend", "Entende texto: sentimento, entidades, assunto", "Avaliar comentários, classificar texto, satisfação"],
+    ["Amazon Transcribe", "Transforma voz em texto", "Transcrever ligação, gerar legenda de áudio"],
+    ["Amazon Polly", "Transforma texto em voz", "Ler em voz alta, narrar conteúdo"],
+    ["Amazon Translate", "Traduz texto entre idiomas", "Publicar conteúdo em outro idioma"],
+    ["Amazon Lex", "Constrói interfaces de conversa", "Chatbot, assistente de voz, atendimento automático"],
+    ["Amazon Bedrock", "Acesso a modelos de base para IA generativa", "Construir aplicação de IA generativa sobre modelos prontos"],
+    ["Amazon Q", "Assistente pronto para o trabalho do dia a dia", "Assistente que responde sobre o ambiente ou o código"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O trio que mais troca de lugar">
+**Rekognition**, **Textract** e **Comprehend** vivem juntos nas alternativas
+porque os três analisam alguma coisa. Fixe a entrada de cada um: Rekognition
+olha **imagem e vídeo**, Textract lê **documento digitalizado**, Comprehend
+interpreta **texto que já é texto**.
+</Callout>
+
+## Como responder o cenário
+
+Primeiro decida o lado: o pedido é sobre **dados** ou sobre **inteligência
+artificial**. No lado dos dados, identifique a etapa pelo verbo: preparar é
+Glue, consultar é Athena, mostrar é QuickSight, receber em tempo real é Kinesis,
+processar com Spark ou Hadoop é EMR, procurar dentro de log é OpenSearch. No
+lado da inteligência artificial, identifique a entrada: imagem e vídeo é
+Rekognition, documento digitalizado é Textract, texto é Comprehend, voz virando
+texto é Transcribe, texto virando voz é Polly, idioma é Translate, conversa é
+Lex. E só escolha SageMaker quando o enunciado disser, com todas as letras, que
+a empresa vai treinar um modelo próprio.
+
+## Erros comuns
+
+- Trocar Rekognition por Textract. O Rekognition analisa imagem e vídeo e diz o que há na cena; o Textract lê texto e campos de documentos digitalizados.
+- Trocar Comprehend por Translate. O Comprehend entende o conteúdo do texto, como sentimento e entidades; o Translate passa o texto de um idioma para outro.
+- Responder SageMaker quando o pedido é resolvido por um serviço pronto. O SageMaker é para construir e treinar modelos próprios; se o pedido é reconhecer rosto, transcrever áudio ou ler documento, existe serviço específico.
+- Confundir Polly com Transcribe. O Polly transforma texto em voz; o Transcribe transforma voz em texto.
+- Achar que o Athena é um banco de dados. Ele consulta dados que já estão no Amazon S3 usando SQL, sem carregar o dado em outro lugar.
+- Tratar Glue e Kinesis como equivalentes. O Glue prepara e cataloga dados em lote; o Kinesis coleta e processa dados em tempo real, conforme chegam.
+- Responder QuickSight para qualquer pedido de análise. O QuickSight é a camada de painel e visualização; quem executa a consulta pode ser outro serviço.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Integração de aplicações
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/integracao-de-aplicacoes-na-aws/
+Tempo estimado: 26 minutos · Nível: fundamental
+
+**Resumo.** SQS, SNS, EventBridge, Step Functions, API Gateway, AppSync e Amazon MQ; fila contra tópico contra barramento de eventos em uma frase cada, e a pista que aponta cada um no enunciado da prova.
+
+**Por que cai na prova.** É a tarefa 3.3 do guia na parte de integração, e o tema em que quase todo distrator é o serviço ao lado. SQS, SNS e EventBridge aparecem nas mesmas quatro alternativas com tanta frequência que quem não tem uma regra de desempate pronta decide no chute.
+
+**Como o entrevistador pergunta.** "Uma aplicação precisa enviar pedidos para outro componente processar depois, sem que os dois fiquem disponíveis ao mesmo tempo. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+Todos os serviços deste tema existem para **desacoplar**: fazer dois
+componentes trabalharem sem depender de o outro estar de pé no mesmo instante.
+O que decide a questão é **para quem a mensagem vai**: um, muitos, ou quem a
+regra mandar.
+
+## Fila, tópico e barramento
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon SQS", "Fila: a mensagem espera até um consumidor buscar", "Processar depois, absorver rajada, não perder pedido"],
+    ["Amazon SNS", "Tópico: publica de uma vez para todos os inscritos", "Avisar vários sistemas ao mesmo tempo, notificação"],
+    ["Amazon EventBridge", "Barramento: roteia o evento por regra de conteúdo", "Filtrar, encaminhar conforme o tipo, integrar com terceiro"],
+    ["AWS Step Functions", "Coordena as etapas de um fluxo de trabalho", "Várias etapas, ordem, condição, nova tentativa"],
+    ["Amazon API Gateway", "Porta de entrada de APIs", "Expor API, controle de acesso, limite de chamadas"],
+    ["AWS AppSync", "APIs GraphQL para web e móvel", "GraphQL, aplicação móvel lendo várias fontes"],
+    ["Amazon MQ", "Agente de mensagens gerenciado compatível", "Migrar agente já em uso sem reescrever a aplicação"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A pergunta de desempate entre SQS, SNS e EventBridge">
+Conte os destinos. **Um** consumidor que vem buscar o trabalho é **SQS**.
+**Vários** inscritos recebendo a mesma mensagem de uma vez é **SNS**. Destino
+que **depende de uma regra** sobre o conteúdo do evento é **EventBridge**.
+</Callout>
+
+## Por que a fila resolve pico
+
+O caso mais cobrado do SQS é a rajada. Quando chegam mais pedidos do que o
+consumidor processa, sem fila o excedente se perde ou derruba o sistema. Com
+fila, o excedente fica guardado e o consumidor segue no ritmo que consegue. É
+por isso que o enunciado costuma trazer as palavras pico, rajada ou não perder
+pedido quando a resposta é SQS.
+
+## Orquestração e portas de entrada
+
+Três serviços do tema não movem mensagem entre componentes e por isso são
+distratores fáceis de descartar quando o pedido é assíncrono. O **Step
+Functions** coordena um processo: ele sabe a ordem das etapas, o que fazer em
+cada condição e como repetir uma etapa que falhou. O **API Gateway** é a porta:
+recebe a chamada de um cliente, aplica controle de acesso e limite de uso, e
+encaminha. O **AppSync** faz o mesmo papel de porta, mas para APIs GraphQL de
+aplicações web e móveis.
+
+<Callout tipo="atencao" titulo="Amazon MQ tem uma pista própria">
+O **Amazon MQ** só é a resposta certa quando o enunciado diz que a empresa **já
+usa** um agente de mensagens e quer migrá-lo **sem reescrever** a aplicação. Sem
+essa frase no texto, a fila nativa da AWS é o SQS.
+</Callout>
+
+## Como responder o cenário
+
+Ache primeiro o verbo do pedido. Se é **guardar** trabalho para processar
+depois, é SQS. Se é **avisar** vários destinos ao mesmo tempo, é SNS. Se é
+**rotear** conforme o conteúdo, é EventBridge. Se é **coordenar** etapas com
+ordem e condição, é Step Functions. Se é **expor** uma API, é API Gateway, ou
+AppSync quando GraphQL aparecer no texto. E se é **manter** um agente de
+mensagens que já existe, é Amazon MQ.
+
+## Erros comuns
+
+- Confundir SQS com SNS. O SQS é fila: a mensagem fica guardada e um consumidor vem buscar. O SNS é tópico: a mensagem é enviada de uma vez a todos os inscritos.
+- Responder SNS quando o enunciado fala em rotear eventos por regra. Filtrar e encaminhar evento conforme o conteúdo aponta o EventBridge.
+- Achar que Step Functions é um serviço de mensagens. Ele coordena etapas de um fluxo de trabalho, com ordem, condição e tratamento de erro.
+- Escolher API Gateway quando o pedido é comunicação assíncrona entre componentes internos. O API Gateway publica e administra a porta de entrada de uma API.
+- Ignorar o Amazon MQ quando o enunciado cita um agente de mensagens já em uso, como ActiveMQ ou RabbitMQ. É justamente a pista dele.
+- Achar que desacoplar é sinônimo de fila. Desacoplar é o objetivo; fila, tópico e barramento são três formas diferentes de chegar lá.
+- Confundir AppSync com API Gateway. O AppSync trata de APIs GraphQL para aplicações web e móveis; o API Gateway é a porta de APIs em geral.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Gestão, monitoramento e as demais categorias
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/gestao-monitoramento-e-outros-servicos/
+Tempo estimado: 28 minutos · Nível: fundamental
+
+**Resumo.** CloudWatch, CloudTrail, Config, Systems Manager, Trusted Advisor, Health Dashboard, Service Catalog e License Manager; e as categorias restantes no nível de nome e propósito, de ferramentas de desenvolvedor a IoT, usuário final e engajamento.
+
+**Por que cai na prova.** Fecha a tarefa 3.3 do guia e recolhe tudo o que o exame cita sem aprofundar. É o tema em que o candidato perde ponto por não ter ouvido o nome do serviço uma única vez: a questão é curta, o pedido é claro e a resposta depende só de reconhecer para que aquele serviço serve.
+
+**Como o entrevistador pergunta.** "Uma equipe quer receber um alerta quando o uso de processador de uma instância passar de um limite definido. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+Este tema recolhe tudo o que o exame cita sem aprofundar, e a questão se decide
+pelo **verbo do pedido**: medir, auditar, operar, recomendar ou saber de um
+evento da própria AWS. Cada verbo aponta um serviço, e só um.
+
+## Os três que sempre aparecem juntos
+
+O **CloudWatch** mede: coleta métricas e logs dos recursos do cliente e dispara
+alarme quando um valor cruza o limite. O **CloudTrail** audita: registra quem
+chamou qual API, quando e de onde. O **Config** acompanha configuração: guarda
+como cada recurso estava e se ele viola uma regra definida. A comparação
+detalhada entre os três, com os pares que a prova monta, está no tema de
+conformidade e governança deste mesmo curso; aqui basta a pergunta que cada um
+responde.
+
+<Callout tipo="dica" titulo="Uma pergunta para cada um">
+**CloudWatch**: está funcionando bem? **CloudTrail**: quem fez isso?
+**Config**: como estava configurado e saiu do padrão?
+</Callout>
+
+## Operar, recomendar e ser avisado
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Systems Manager", "Opera a frota: patch, comando, inventário, parâmetros", "Administrar muitas instâncias de um lugar só"],
+    ["AWS Trusted Advisor", "Recomendações contra boas práticas da AWS", "Sugestões de economia, segurança, desempenho, limites"],
+    ["AWS Health Dashboard", "Eventos da própria AWS que afetam a conta", "Saber se o problema é da AWS, não do cliente"],
+    ["AWS Service Catalog", "Catálogo de produtos aprovados para implantar", "Padronizar o que as equipes podem criar"],
+    ["AWS License Manager", "Controle de uso de licenças de fornecedores", "Conformidade de licença, contagem de uso"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="Medir não é recomendar">
+**CloudWatch** e **Trusted Advisor** aparecem na mesma questão com frequência. O
+CloudWatch diz **o que está acontecendo agora** com um recurso. O Trusted
+Advisor diz **o que deveria mudar** na conta, comparando com boas práticas.
+Alerta sobre métrica é CloudWatch; sugestão de melhoria é Trusted Advisor.
+</Callout>
+
+## As demais categorias, no nível de nome e propósito
+
+O exame ainda cita serviços de outras categorias sem cobrar detalhe. Basta
+reconhecer o propósito de cada um.
+
+<Comparativo
+  colunas={["Categoria", "Serviços", "Para que servem em uma linha"]}
+  linhas={[
+    ["Ferramentas de desenvolvedor", "CodeBuild, CodeDeploy, CodePipeline", "Compilar e testar, implantar, e ligar as etapas em uma esteira"],
+    ["Desenvolvimento e diagnóstico", "Cloud9, X-Ray", "Ambiente de desenvolvimento no navegador e rastreamento da requisição entre serviços"],
+    ["Negócio e engajamento", "Amazon Connect, SES, Pinpoint", "Central de atendimento, envio de e-mail em volume e campanhas de comunicação"],
+    ["Computação de usuário final", "WorkSpaces, AppStream", "Área de trabalho completa na nuvem e transmissão de uma aplicação isolada"],
+    ["Dispositivos e aplicações", "IoT Core, Amplify, AppSync", "Conectar dispositivos, acelerar aplicações web e móveis e servir APIs GraphQL"]
+  ]}
+/>
+
+Dois pares dessa lista costumam trocar de lugar. **SES** e **Pinpoint** tratam
+de mensagem para pessoas, mas o SES é o envio de e-mail feito pela aplicação e o
+Pinpoint é a campanha de comunicação com clientes. **WorkSpaces** e
+**AppStream** entregam software pela rede, mas o primeiro entrega a máquina
+inteira e o segundo apenas a aplicação.
+
+## Como responder o cenário
+
+Separe o verbo antes de olhar as alternativas. Medir e alertar é CloudWatch.
+Descobrir o autor de uma ação é CloudTrail. Saber como o recurso estava
+configurado é Config. Aplicar patch e executar comando na frota é Systems
+Manager. Receber sugestão de melhoria é Trusted Advisor. Descobrir se a falha é
+da AWS é Health Dashboard. Padronizar o que pode ser implantado é Service
+Catalog. Controlar licença é License Manager. E se o nome citado for de
+desenvolvimento, atendimento, usuário final ou dispositivo conectado, a resposta
+é reconhecer o propósito: a prova não pede mais do que isso.
+
+## Erros comuns
+
+- Trocar CloudWatch por CloudTrail. O CloudWatch acompanha métricas, logs e alarmes de operação; o CloudTrail registra quem chamou qual API e quando.
+- Responder CloudWatch quando o pedido é recomendação de economia ou de segurança. Recomendação com boas práticas aponta o Trusted Advisor.
+- Confundir Health Dashboard com CloudWatch. O Health Dashboard informa eventos da própria AWS que afetam a conta; o CloudWatch mede os recursos do cliente.
+- Achar que o Systems Manager é um serviço de monitoramento. Ele opera e administra a frota: aplica patch, executa comando e guarda parâmetros.
+- Escolher Service Catalog quando o pedido é controlar licenças de software. Licença de fornecedor aponta o License Manager.
+- Responder CodePipeline para qualquer coisa de desenvolvimento. O CodeBuild compila e testa, o CodeDeploy implanta e o CodePipeline liga as etapas em uma esteira.
+- Confundir SES com Pinpoint. O SES envia e-mail em volume a partir da aplicação; o Pinpoint trata de campanhas de comunicação e engajamento com clientes.
+- Trocar WorkSpaces por AppStream. O WorkSpaces entrega uma área de trabalho completa na nuvem; o AppStream entrega apenas uma aplicação transmitida ao usuário.
 
 ## Perguntas de sabatina e respostas-modelo
 

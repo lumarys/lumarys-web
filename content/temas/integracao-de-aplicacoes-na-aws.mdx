@@ -1,0 +1,249 @@
+---
+slug: integracao-de-aplicacoes-na-aws
+titulo: "Integração de aplicações"
+resumo: "SQS, SNS, EventBridge, Step Functions, API Gateway, AppSync e Amazon MQ; fila contra tópico contra barramento de eventos em uma frase cada, e a pista que aponta cada um no enunciado da prova."
+minutos: 26
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-20"
+porQue: "É a tarefa 3.3 do guia na parte de integração, e o tema em que quase todo distrator é o serviço ao lado. SQS, SNS e EventBridge aparecem nas mesmas quatro alternativas com tanta frequência que quem não tem uma regra de desempate pronta decide no chute."
+comoCai: "Uma aplicação precisa enviar pedidos para outro componente processar depois, sem que os dois fiquem disponíveis ao mesmo tempo. Qual serviço atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre deixar um bilhete na caixa de entrada de alguém, gritar um aviso para todo mundo que quiser ouvir e ter um porteiro que encaminha cada recado para a sala certa conforme uma regra."
+preRequisitos: ["como-ler-uma-questao-clf", "infraestrutura-global-da-aws"]
+errosComuns:
+  - "Confundir SQS com SNS. O SQS é fila: a mensagem fica guardada e um consumidor vem buscar. O SNS é tópico: a mensagem é enviada de uma vez a todos os inscritos."
+  - "Responder SNS quando o enunciado fala em rotear eventos por regra. Filtrar e encaminhar evento conforme o conteúdo aponta o EventBridge."
+  - "Achar que Step Functions é um serviço de mensagens. Ele coordena etapas de um fluxo de trabalho, com ordem, condição e tratamento de erro."
+  - "Escolher API Gateway quando o pedido é comunicação assíncrona entre componentes internos. O API Gateway publica e administra a porta de entrada de uma API."
+  - "Ignorar o Amazon MQ quando o enunciado cita um agente de mensagens já em uso, como ActiveMQ ou RabbitMQ. É justamente a pista dele."
+  - "Achar que desacoplar é sinônimo de fila. Desacoplar é o objetivo; fila, tópico e barramento são três formas diferentes de chegar lá."
+  - "Confundir AppSync com API Gateway. O AppSync trata de APIs GraphQL para aplicações web e móveis; o API Gateway é a porta de APIs em geral."
+preTeste:
+  - enunciado: "Um sistema precisa entregar mensagens a um componente que as processa mais tarde, sem que produtor e consumidor estejam disponíveis ao mesmo tempo. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon SQS."
+        correta: true
+        explicacao: "É a fila gerenciada da AWS: a mensagem fica guardada até que um consumidor a busque e a processe."
+      - texto: "Amazon SNS."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele envia a mensagem de uma vez aos inscritos, sem o armazenamento à espera de um consumidor."
+      - texto: "Amazon API Gateway."
+        correta: false
+        explicacao: "É a porta de entrada de APIs e não guarda mensagens para processamento posterior."
+  - enunciado: "Um aviso precisa chegar de uma só vez a vários destinos diferentes, como endereços de e-mail e outras aplicações inscritas. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon SNS."
+        correta: true
+        explicacao: "É o serviço de tópicos da AWS, que publica a mesma mensagem para todos os inscritos ao mesmo tempo."
+      - texto: "Amazon SQS."
+        correta: false
+        explicacao: "É fila: a mensagem é consumida por um destino, e não entregue a muitos inscritos de uma vez."
+      - texto: "AWS Step Functions."
+        correta: false
+        explicacao: "Coordena etapas de um fluxo de trabalho e não é o serviço de publicação para vários inscritos."
+videos:
+  - id: b8axbUvcooM
+    publicadoEm: "2025-05-06"
+    titulo: "Módulo 16: AWS SQS, SNS e Kinesis: Integração e Mensageria na Nuvem – Guia Developer Associate"
+    canal: "Jean Diogo"
+    duracao: 23
+    porQue: "Vinte e três minutos com o trio de mensageria explicado com exemplos. Assista até conseguir dizer, em uma frase, o que muda entre entregar a um consumidor e publicar para muitos inscritos."
+  - id: 9phzwKOLBM4
+    publicadoEm: "2022-11-05"
+    titulo: "Amazon SNS: O que é, como funciona e qual a diferença do SQS?"
+    canal: "aulasdev"
+    duracao: 20
+    porQue: "Vinte minutos dedicados justamente ao par que mais troca de lugar nas alternativas. Use como reforço depois da tabela de fila, tópico e barramento."
+artigos:
+  - titulo: "What is Amazon Simple Queue Service?"
+    url: "https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon SNS?"
+    url: "https://docs.aws.amazon.com/sns/latest/dg/welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon EventBridge?"
+    url: "https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Step Functions?"
+    url: "https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon API Gateway?"
+    url: "https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon SQS, em uma linha."
+    verso: "Fila gerenciada: a mensagem espera guardada até um consumidor buscar. A pista é processar depois, absorver pico, desacoplar produtor e consumidor."
+  - frente: "Amazon SNS, em uma linha."
+    verso: "Tópico: a mensagem é publicada de uma vez para todos os inscritos. A pista é notificar vários destinos ao mesmo tempo."
+  - frente: "Amazon EventBridge, em uma linha."
+    verso: "Barramento de eventos que roteia por regra, conforme o conteúdo do evento. A pista é filtrar, encaminhar conforme o tipo, integrar com serviço de terceiro."
+  - frente: "AWS Step Functions, em uma linha."
+    verso: "Coordena as etapas de um fluxo de trabalho, com ordem, condição e tratamento de erro. A pista é fluxo com várias etapas, orquestração, passo a passo."
+  - frente: "Amazon API Gateway, em uma linha."
+    verso: "Porta de entrada de APIs, com publicação, controle de acesso e limite de uso. A pista é expor uma API para clientes."
+  - frente: "AWS AppSync, em uma linha."
+    verso: "APIs GraphQL gerenciadas para aplicações web e móveis. A pista é o enunciado citar GraphQL ou aplicação móvel consultando várias fontes."
+  - frente: "Amazon MQ, em uma linha."
+    verso: "Agente de mensagens gerenciado compatível com padrões já usados no mercado. A pista é migrar um agente existente sem reescrever a aplicação."
+  - frente: "Fila contra tópico."
+    verso: "Fila entrega a mensagem a um consumidor que vem buscar. Tópico publica a mesma mensagem para todos os inscritos de uma vez."
+  - frente: "Tópico contra barramento de eventos."
+    verso: "O tópico publica para quem se inscreveu nele. O barramento roteia conforme regras sobre o conteúdo do evento."
+  - frente: "A pergunta que decide o tema."
+    verso: "O destino é um, são vários ou depende de uma regra? Um aponta SQS, vários apontam SNS, regra aponta EventBridge."
+  - frente: "Desacoplar, em uma linha."
+    verso: "Fazer com que dois componentes funcionem sem depender de o outro estar disponível no mesmo instante. É o objetivo comum deste tema."
+  - frente: "SQS absorvendo pico."
+    verso: "Quando chegam mais pedidos do que o consumidor processa, a fila guarda o excedente e o trabalho segue no ritmo possível."
+  - frente: "Amazon MQ contra SQS."
+    verso: "O SQS é a fila nativa da AWS. O Amazon MQ existe para quem já usa um agente de mensagens e quer mantê-lo sem reescrever a aplicação."
+drills:
+  - titulo: "Qual serviço de integração atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o serviço de integração que a resolve."
+    opcoes:
+      ["Amazon SQS", "Amazon SNS", "Amazon EventBridge", "AWS Step Functions", "Amazon API Gateway", "Amazon MQ"]
+    itens:
+      - enunciado: "Guardar pedidos que chegam em rajada para que um componente os processe no próprio ritmo."
+        resposta: "Amazon SQS"
+        explicacao: "Fila que absorve o pico."
+      - enunciado: "Avisar de uma só vez vários sistemas inscritos de que um pagamento foi aprovado."
+        resposta: "Amazon SNS"
+        explicacao: "Tópico com vários inscritos."
+      - enunciado: "Encaminhar cada evento para um destino diferente conforme uma regra sobre o conteúdo do evento."
+        resposta: "Amazon EventBridge"
+        explicacao: "Barramento com roteamento por regra."
+      - enunciado: "Coordenar um processo de cinco etapas com ordem, condição e nova tentativa em caso de erro."
+        resposta: "AWS Step Functions"
+        explicacao: "Orquestração de fluxo de trabalho."
+      - enunciado: "Publicar uma API para clientes externos, com controle de acesso e limite de chamadas."
+        resposta: "Amazon API Gateway"
+        explicacao: "Porta de entrada de APIs."
+      - enunciado: "Manter o agente de mensagens que a aplicação já usa sem reescrever o código dela."
+        resposta: "Amazon MQ"
+        explicacao: "Agente de mensagens gerenciado compatível."
+perguntas:
+  - tipo: unica
+    enunciado: "Um site recebe rajadas de pedidos que o sistema de processamento não dá conta de atender no mesmo instante. A empresa quer guardar os pedidos para processar no ritmo possível, sem perder nenhum. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon SQS."
+        correta: true
+        explicacao: "A fila guarda as mensagens até que o consumidor as busque, o que absorve o pico sem perda."
+      - texto: "Amazon SNS."
+        correta: false
+        explicacao: "Vizinho plausível, mas publica a mensagem aos inscritos em vez de guardá-la à espera de um consumidor."
+      - texto: "Amazon API Gateway."
+        correta: false
+        explicacao: "É a porta de entrada da API e não faz o papel de guardar o trabalho pendente."
+      - texto: "AWS Step Functions."
+        correta: false
+        explicacao: "Coordena as etapas de um fluxo, mas não é o serviço que retém a rajada de pedidos."
+  - tipo: unica
+    enunciado: "Quando um pedido é aprovado, quatro sistemas diferentes precisam ser avisados ao mesmo tempo, e outros podem ser acrescentados depois. Qual serviço atende a essa necessidade?"
+    alternativas:
+      - texto: "Amazon SNS."
+        correta: true
+        explicacao: "O tópico publica a mesma mensagem a todos os inscritos de uma vez, e novos inscritos entram sem mudar quem publica."
+      - texto: "Amazon SQS."
+        correta: false
+        explicacao: "Vizinho plausível, mas a fila foi feita para um consumidor buscar a mensagem, e não para avisar vários destinos de uma vez."
+      - texto: "Amazon MQ."
+        correta: false
+        explicacao: "É o agente de mensagens para quem migra um ambiente existente, e o enunciado não cita compatibilidade com agente já em uso."
+      - texto: "AWS AppSync."
+        correta: false
+        explicacao: "Trata de APIs GraphQL para aplicações web e móveis, e não de notificação para vários sistemas."
+  - tipo: unica
+    enunciado: "Uma empresa quer que cada evento gerado pelos seus sistemas seja encaminhado a um destino diferente conforme uma regra sobre o conteúdo do evento. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon EventBridge."
+        correta: true
+        explicacao: "É o barramento de eventos da AWS, que aplica regras sobre o evento e o roteia ao destino correspondente."
+      - texto: "Amazon SNS."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele publica para quem se inscreveu no tópico, sem o roteamento por regra que o enunciado descreve."
+      - texto: "Amazon SQS."
+        correta: false
+        explicacao: "Guarda mensagens para consumo posterior e não decide destino conforme o conteúdo."
+      - texto: "Amazon API Gateway."
+        correta: false
+        explicacao: "Publica e administra APIs; o roteamento descrito é de eventos internos, não de chamadas de API."
+  - tipo: multipla
+    enunciado: "Uma empresa precisa coordenar um processo com várias etapas, condições e novas tentativas em caso de falha e, em outro projeto, expor uma API para clientes externos com controle de acesso. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "AWS Step Functions para coordenar as etapas do processo."
+        correta: true
+        explicacao: "O Step Functions orquestra fluxos com ordem, condição e tratamento de erro entre as etapas."
+      - texto: "Amazon API Gateway para expor a API aos clientes externos."
+        correta: true
+        explicacao: "O API Gateway é a porta de entrada de APIs, com publicação, controle de acesso e limite de uso."
+      - texto: "Amazon SQS para coordenar as etapas do processo."
+        correta: false
+        explicacao: "A fila transporta mensagens, mas não define ordem, condição nem nova tentativa entre etapas."
+      - texto: "Amazon SNS para expor a API aos clientes externos."
+        correta: false
+        explicacao: "É um serviço de tópicos para notificação e não publica uma API para clientes."
+      - texto: "Amazon MQ para as duas necessidades."
+        correta: false
+        explicacao: "É um agente de mensagens gerenciado e não resolve orquestração de fluxo nem publicação de API."
+---
+
+## Em uma frase
+
+Todos os serviços deste tema existem para **desacoplar**: fazer dois
+componentes trabalharem sem depender de o outro estar de pé no mesmo instante.
+O que decide a questão é **para quem a mensagem vai**: um, muitos, ou quem a
+regra mandar.
+
+## Fila, tópico e barramento
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon SQS", "Fila: a mensagem espera até um consumidor buscar", "Processar depois, absorver rajada, não perder pedido"],
+    ["Amazon SNS", "Tópico: publica de uma vez para todos os inscritos", "Avisar vários sistemas ao mesmo tempo, notificação"],
+    ["Amazon EventBridge", "Barramento: roteia o evento por regra de conteúdo", "Filtrar, encaminhar conforme o tipo, integrar com terceiro"],
+    ["AWS Step Functions", "Coordena as etapas de um fluxo de trabalho", "Várias etapas, ordem, condição, nova tentativa"],
+    ["Amazon API Gateway", "Porta de entrada de APIs", "Expor API, controle de acesso, limite de chamadas"],
+    ["AWS AppSync", "APIs GraphQL para web e móvel", "GraphQL, aplicação móvel lendo várias fontes"],
+    ["Amazon MQ", "Agente de mensagens gerenciado compatível", "Migrar agente já em uso sem reescrever a aplicação"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A pergunta de desempate entre SQS, SNS e EventBridge">
+Conte os destinos. **Um** consumidor que vem buscar o trabalho é **SQS**.
+**Vários** inscritos recebendo a mesma mensagem de uma vez é **SNS**. Destino
+que **depende de uma regra** sobre o conteúdo do evento é **EventBridge**.
+</Callout>
+
+## Por que a fila resolve pico
+
+O caso mais cobrado do SQS é a rajada. Quando chegam mais pedidos do que o
+consumidor processa, sem fila o excedente se perde ou derruba o sistema. Com
+fila, o excedente fica guardado e o consumidor segue no ritmo que consegue. É
+por isso que o enunciado costuma trazer as palavras pico, rajada ou não perder
+pedido quando a resposta é SQS.
+
+## Orquestração e portas de entrada
+
+Três serviços do tema não movem mensagem entre componentes e por isso são
+distratores fáceis de descartar quando o pedido é assíncrono. O **Step
+Functions** coordena um processo: ele sabe a ordem das etapas, o que fazer em
+cada condição e como repetir uma etapa que falhou. O **API Gateway** é a porta:
+recebe a chamada de um cliente, aplica controle de acesso e limite de uso, e
+encaminha. O **AppSync** faz o mesmo papel de porta, mas para APIs GraphQL de
+aplicações web e móveis.
+
+<Callout tipo="atencao" titulo="Amazon MQ tem uma pista própria">
+O **Amazon MQ** só é a resposta certa quando o enunciado diz que a empresa **já
+usa** um agente de mensagens e quer migrá-lo **sem reescrever** a aplicação. Sem
+essa frase no texto, a fila nativa da AWS é o SQS.
+</Callout>
+
+## Como responder o cenário
+
+Ache primeiro o verbo do pedido. Se é **guardar** trabalho para processar
+depois, é SQS. Se é **avisar** vários destinos ao mesmo tempo, é SNS. Se é
+**rotear** conforme o conteúdo, é EventBridge. Se é **coordenar** etapas com
+ordem e condição, é Step Functions. Se é **expor** uma API, é API Gateway, ou
+AppSync quando GraphQL aparecer no texto. E se é **manter** um agente de
+mensagens que já existe, é Amazon MQ.

@@ -1,0 +1,260 @@
+---
+slug: analytics-e-ia-na-aws
+titulo: "Analytics, IA e machine learning"
+resumo: "Athena, Glue, QuickSight, Kinesis, EMR, OpenSearch e Data Exchange no lado de dados; SageMaker, Rekognition, Lex, Polly, Transcribe, Translate, Comprehend, Textract, Bedrock e Q no lado de IA; cada um posicionado pelo caso de uso."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-20"
+porQue: "É a tarefa 3.3 do guia na parte de análise e inteligência artificial, e o tema com mais nomes para reconhecer em menos tempo. A prova não pede arquitetura de dados nem treino de modelo: pede o serviço que resolve o pedido descrito em duas linhas, e as alternativas erradas são sempre o serviço de IA vizinho."
+comoCai: "Uma empresa quer extrair automaticamente o texto e os campos de formulários digitalizados enviados por clientes. Qual serviço da AWS atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre alguém que lê um documento e copia o que está escrito, alguém que olha uma foto e diz o que há nela e alguém que lê um comentário e diz se o cliente está satisfeito."
+preRequisitos:
+  ["como-ler-uma-questao-clf", "infraestrutura-global-da-aws", "bancos-de-dados-na-aws-visao-geral"]
+errosComuns:
+  - "Trocar Rekognition por Textract. O Rekognition analisa imagem e vídeo e diz o que há na cena; o Textract lê texto e campos de documentos digitalizados."
+  - "Trocar Comprehend por Translate. O Comprehend entende o conteúdo do texto, como sentimento e entidades; o Translate passa o texto de um idioma para outro."
+  - "Responder SageMaker quando o pedido é resolvido por um serviço pronto. O SageMaker é para construir e treinar modelos próprios; se o pedido é reconhecer rosto, transcrever áudio ou ler documento, existe serviço específico."
+  - "Confundir Polly com Transcribe. O Polly transforma texto em voz; o Transcribe transforma voz em texto."
+  - "Achar que o Athena é um banco de dados. Ele consulta dados que já estão no Amazon S3 usando SQL, sem carregar o dado em outro lugar."
+  - "Tratar Glue e Kinesis como equivalentes. O Glue prepara e cataloga dados em lote; o Kinesis coleta e processa dados em tempo real, conforme chegam."
+  - "Responder QuickSight para qualquer pedido de análise. O QuickSight é a camada de painel e visualização; quem executa a consulta pode ser outro serviço."
+preTeste:
+  - enunciado: "Uma equipe quer consultar com SQL arquivos que já estão em um bucket do Amazon S3, sem montar nem carregar um banco de dados. Qual serviço atende?"
+    alternativas:
+      - texto: "Amazon Athena."
+        correta: true
+        explicacao: "O Athena executa consultas em SQL diretamente sobre dados guardados no S3, sem servidor para administrar."
+      - texto: "Amazon Redshift."
+        correta: false
+        explicacao: "Vizinho plausível para análise, mas é um data warehouse onde o dado é carregado, e o enunciado pede consultar o arquivo onde ele está."
+      - texto: "Amazon QuickSight."
+        correta: false
+        explicacao: "É a camada de painéis e visualização, e não o motor que executa a consulta em SQL sobre o S3."
+  - enunciado: "Uma seguradora quer extrair texto e os campos preenchidos de apólices digitalizadas em imagem. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon Textract."
+        correta: true
+        explicacao: "O Textract extrai texto, tabelas e campos de formulários a partir de documentos digitalizados."
+      - texto: "Amazon Rekognition."
+        correta: false
+        explicacao: "Analisa imagem e vídeo para identificar objetos, cenas e rostos, e não é o serviço de leitura de formulários."
+      - texto: "Amazon Comprehend."
+        correta: false
+        explicacao: "Analisa o significado de um texto já disponível; ele não faz a extração a partir da imagem do documento."
+videos:
+  - id: Zlqyoouoar8
+    publicadoEm: "2025-04-18"
+    titulo: "Módulo 5: AWS Managed AI Services | Entenda os principais serviços de IA prontos da AWS!"
+    canal: "Jean Diogo"
+    duracao: 10
+    porQue: "Dez minutos passando pelos serviços prontos de IA com exemplos, que é exatamente o recorte cobrado. Ao final, tente dizer a diferença entre Rekognition, Textract e Comprehend sem consultar a tabela."
+  - id: o6t2AmOyw9o
+    publicadoEm: "2025-03-26"
+    titulo: "Módulo 1: Introdução ao Amazon Bedrock | IA Generativa na AWS explicada para AIF-C01!"
+    canal: "Jean Diogo"
+    duracao: 12
+    porQue: "Doze minutos sobre o serviço de IA generativa que entrou no escopo do exame. Assista para fixar o que o Bedrock entrega e por que ele não é o mesmo que o SageMaker."
+artigos:
+  - titulo: "What is Amazon Athena?"
+    url: "https://docs.aws.amazon.com/athena/latest/ug/what-is.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Glue?"
+    url: "https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Rekognition?"
+    url: "https://docs.aws.amazon.com/rekognition/latest/dg/what-is.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Textract?"
+    url: "https://docs.aws.amazon.com/textract/latest/dg/what-is.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Bedrock?"
+    url: "https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon Athena, em uma linha."
+    verso: "Consulta em SQL sobre dados que já estão no Amazon S3, sem servidor. A pista é consultar arquivo onde ele está, sem carregar em banco."
+  - frente: "AWS Glue, em uma linha."
+    verso: "Prepara, transforma e cataloga dados em lote. A pista é extrair, transformar e carregar, catálogo de dados, preparar antes de analisar."
+  - frente: "Amazon QuickSight, em uma linha."
+    verso: "Painéis e visualização de dados para a área de negócio. A pista é painel, gráfico, relatório visual para quem não escreve consulta."
+  - frente: "Amazon Kinesis, em uma linha."
+    verso: "Coleta e processa dados em tempo real, conforme eles chegam. A pista é streaming, clique, sensor, evento contínuo."
+  - frente: "Amazon EMR, em uma linha."
+    verso: "Processamento de grandes volumes com ferramentas de big data como Spark e Hadoop. A pista é citar essas ferramentas ou processamento distribuído."
+  - frente: "Amazon OpenSearch Service, em uma linha."
+    verso: "Busca e análise sobre logs e texto, com painéis próprios. A pista é pesquisar dentro de logs ou de um grande conjunto de texto."
+  - frente: "AWS Data Exchange, em uma linha."
+    verso: "Catálogo para assinar e usar conjuntos de dados de terceiros. A pista é obter dado de fora da empresa de forma organizada."
+  - frente: "Amazon SageMaker, em uma linha."
+    verso: "Plataforma para construir, treinar e implantar modelos próprios de machine learning. A pista é modelo próprio, treinar com dados da empresa."
+  - frente: "Amazon Rekognition, em uma linha."
+    verso: "Analisa imagem e vídeo para identificar objetos, cenas, rostos e conteúdo impróprio. A pista é foto, vídeo, reconhecer o que aparece."
+  - frente: "Amazon Textract, em uma linha."
+    verso: "Extrai texto, tabelas e campos de formulários de documentos digitalizados. A pista é documento escaneado, formulário, nota, apólice."
+  - frente: "Amazon Comprehend, em uma linha."
+    verso: "Entende texto: sentimento, entidades, idioma e assunto. A pista é analisar comentários, avaliar satisfação, classificar texto."
+  - frente: "Polly contra Transcribe contra Translate."
+    verso: "Polly transforma texto em voz. Transcribe transforma voz em texto. Translate passa o texto de um idioma para outro."
+  - frente: "Amazon Lex, em uma linha."
+    verso: "Constrói interfaces de conversa, como chatbots e assistentes de voz. A pista é atendimento automático por conversa."
+  - frente: "Bedrock contra Amazon Q."
+    verso: "O Bedrock dá acesso a modelos de base para construir aplicações de IA generativa. O Amazon Q é o assistente pronto, usado no trabalho do dia a dia."
+drills:
+  - titulo: "Qual serviço de dados ou de IA atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o serviço da AWS que a resolve."
+    opcoes:
+      ["Amazon Athena", "Amazon Kinesis", "Amazon QuickSight", "Amazon Rekognition", "Amazon Textract", "Amazon Comprehend"]
+    itens:
+      - enunciado: "Consultar com SQL arquivos guardados no Amazon S3, sem montar banco de dados."
+        resposta: "Amazon Athena"
+        explicacao: "Consulta direta sobre o S3."
+      - enunciado: "Receber e processar cliques de um site conforme eles acontecem."
+        resposta: "Amazon Kinesis"
+        explicacao: "Dados em tempo real."
+      - enunciado: "Entregar à diretoria um painel com gráficos de vendas atualizados."
+        resposta: "Amazon QuickSight"
+        explicacao: "Painéis e visualização."
+      - enunciado: "Identificar automaticamente os objetos que aparecem nas fotos enviadas pelos usuários."
+        resposta: "Amazon Rekognition"
+        explicacao: "Análise de imagem e vídeo."
+      - enunciado: "Ler os campos preenchidos de notas fiscais digitalizadas."
+        resposta: "Amazon Textract"
+        explicacao: "Extração de texto e campos de documentos."
+      - enunciado: "Descobrir se os comentários deixados pelos clientes são positivos ou negativos."
+        resposta: "Amazon Comprehend"
+        explicacao: "Análise de sentimento em texto."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa quer analisar automaticamente os comentários deixados por clientes para saber se a avaliação é positiva ou negativa. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon Comprehend."
+        correta: true
+        explicacao: "O Comprehend analisa texto e identifica sentimento, entidades e assunto, que é exatamente o pedido."
+      - texto: "Amazon Textract."
+        correta: false
+        explicacao: "Vizinho plausível entre os serviços de linguagem, mas ele extrai texto de documentos digitalizados e não avalia o sentimento."
+      - texto: "Amazon Translate."
+        correta: false
+        explicacao: "Traduz texto entre idiomas e não classifica a opinião expressa no comentário."
+      - texto: "Amazon Polly."
+        correta: false
+        explicacao: "Transforma texto em voz, o que não responde a uma análise de satisfação."
+  - tipo: unica
+    enunciado: "Um aplicativo precisa identificar quais objetos e cenas aparecem nas fotos que os usuários enviam. Qual serviço atende a essa necessidade?"
+    alternativas:
+      - texto: "Amazon Rekognition."
+        correta: true
+        explicacao: "É o serviço de análise de imagem e vídeo da AWS, que identifica objetos, cenas, rostos e conteúdo impróprio."
+      - texto: "Amazon Textract."
+        correta: false
+        explicacao: "Vizinho plausível porque também recebe imagem, mas ele extrai texto e campos de documentos, e não descreve a cena."
+      - texto: "Amazon SageMaker."
+        correta: false
+        explicacao: "Serve para construir e treinar um modelo próprio; o pedido já é atendido por um serviço pronto."
+      - texto: "Amazon Comprehend."
+        correta: false
+        explicacao: "Analisa texto, e o enunciado trata de imagens."
+  - tipo: unica
+    enunciado: "Uma equipe de ciência de dados quer construir, treinar e implantar um modelo próprio de machine learning com os dados da empresa. Qual serviço é feito para isso?"
+    alternativas:
+      - texto: "Amazon SageMaker."
+        correta: true
+        explicacao: "É a plataforma da AWS para construir, treinar e implantar modelos próprios de machine learning."
+      - texto: "Amazon Rekognition."
+        correta: false
+        explicacao: "É um serviço pronto de análise de imagem e vídeo, sem o trabalho de treinar um modelo próprio."
+      - texto: "Amazon Q."
+        correta: false
+        explicacao: "É um assistente pronto para o trabalho do dia a dia, e não uma plataforma de treino de modelos."
+      - texto: "Amazon Athena."
+        correta: false
+        explicacao: "Executa consultas em SQL sobre o S3 e não trata de treino de modelo."
+  - tipo: multipla
+    enunciado: "Uma empresa quer preparar e catalogar dados brutos antes da análise e, depois, entregar à diretoria um painel visual com os resultados. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "AWS Glue para preparar, transformar e catalogar os dados."
+        correta: true
+        explicacao: "O Glue faz a preparação e o catálogo dos dados antes da etapa de análise."
+      - texto: "Amazon QuickSight para montar o painel visual."
+        correta: true
+        explicacao: "O QuickSight é a camada de painéis e visualização voltada à área de negócio."
+      - texto: "Amazon Polly para apresentar os resultados."
+        correta: false
+        explicacao: "Transforma texto em voz e não prepara dados nem monta painel."
+      - texto: "Amazon Lex para catalogar os dados."
+        correta: false
+        explicacao: "Constrói interfaces de conversa e não tem papel na preparação de dados."
+      - texto: "AWS Data Exchange para transformar os dados brutos."
+        correta: false
+        explicacao: "Serve para assinar conjuntos de dados de terceiros, e não para transformar os dados que a empresa já tem."
+---
+
+## Em uma frase
+
+Este tema tem muitos nomes e pouca profundidade: a prova pede **qual serviço
+faz aquilo**, e as alternativas erradas são sempre o serviço vizinho. A saída é
+decorar cada um por uma linha de função e pela palavra do enunciado que o chama.
+
+## O lado dos dados
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon Athena", "Consulta em SQL sobre dados no Amazon S3", "Consultar o arquivo onde ele está, sem carregar em banco"],
+    ["AWS Glue", "Prepara, transforma e cataloga dados em lote", "Extrair, transformar, carregar, catálogo de dados"],
+    ["Amazon QuickSight", "Painéis e visualização para a área de negócio", "Painel, gráfico, relatório visual para a diretoria"],
+    ["Amazon Kinesis", "Coleta e processa dados em tempo real", "Streaming, clique, sensor, evento conforme acontece"],
+    ["Amazon EMR", "Big data com ferramentas como Spark e Hadoop", "Citar essas ferramentas ou processamento distribuído"],
+    ["Amazon OpenSearch", "Busca e análise sobre logs e texto", "Pesquisar dentro de logs, painel de busca"],
+    ["AWS Data Exchange", "Catálogo de conjuntos de dados de terceiros", "Obter dado de fora da empresa"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Athena, Glue e QuickSight na mesma frase">
+Os três aparecem juntos porque formam uma sequência. O **Glue** arruma e
+cataloga o dado, o **Athena** consulta, o **QuickSight** mostra. Se o verbo do
+enunciado é **preparar**, é Glue; se é **consultar com SQL**, é Athena; se é
+**mostrar em painel**, é QuickSight.
+</Callout>
+
+## O lado da inteligência artificial
+
+Aqui a regra é simples: se existe um serviço pronto para o pedido, a resposta é
+ele, e não o SageMaker. O **SageMaker** entra quando a empresa quer construir e
+treinar um modelo próprio com dados dela.
+
+<Comparativo
+  colunas={["Serviço", "O que faz em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon SageMaker", "Construir, treinar e implantar modelos próprios", "Modelo próprio, treinar com os dados da empresa"],
+    ["Amazon Rekognition", "Analisa imagem e vídeo", "Foto, vídeo, reconhecer objeto, cena ou rosto"],
+    ["Amazon Textract", "Extrai texto e campos de documentos digitalizados", "Documento escaneado, formulário, nota, apólice"],
+    ["Amazon Comprehend", "Entende texto: sentimento, entidades, assunto", "Avaliar comentários, classificar texto, satisfação"],
+    ["Amazon Transcribe", "Transforma voz em texto", "Transcrever ligação, gerar legenda de áudio"],
+    ["Amazon Polly", "Transforma texto em voz", "Ler em voz alta, narrar conteúdo"],
+    ["Amazon Translate", "Traduz texto entre idiomas", "Publicar conteúdo em outro idioma"],
+    ["Amazon Lex", "Constrói interfaces de conversa", "Chatbot, assistente de voz, atendimento automático"],
+    ["Amazon Bedrock", "Acesso a modelos de base para IA generativa", "Construir aplicação de IA generativa sobre modelos prontos"],
+    ["Amazon Q", "Assistente pronto para o trabalho do dia a dia", "Assistente que responde sobre o ambiente ou o código"]
+  ]}
+/>
+
+<Callout tipo="atencao" titulo="O trio que mais troca de lugar">
+**Rekognition**, **Textract** e **Comprehend** vivem juntos nas alternativas
+porque os três analisam alguma coisa. Fixe a entrada de cada um: Rekognition
+olha **imagem e vídeo**, Textract lê **documento digitalizado**, Comprehend
+interpreta **texto que já é texto**.
+</Callout>
+
+## Como responder o cenário
+
+Primeiro decida o lado: o pedido é sobre **dados** ou sobre **inteligência
+artificial**. No lado dos dados, identifique a etapa pelo verbo: preparar é
+Glue, consultar é Athena, mostrar é QuickSight, receber em tempo real é Kinesis,
+processar com Spark ou Hadoop é EMR, procurar dentro de log é OpenSearch. No
+lado da inteligência artificial, identifique a entrada: imagem e vídeo é
+Rekognition, documento digitalizado é Textract, texto é Comprehend, voz virando
+texto é Transcribe, texto virando voz é Polly, idioma é Translate, conversa é
+Lex. E só escolha SageMaker quando o enunciado disser, com todas as letras, que
+a empresa vai treinar um modelo próprio.

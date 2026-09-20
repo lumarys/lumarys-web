@@ -14,12 +14,10 @@ import type { Trilha } from "../types";
  * são próprios, e não compartilhados com a SAA: uma questão de arquitetura
  * dentro de uma prova de CLF quebraria a calibração do sorteio por peso.
  *
- * Estado desta trilha: "como funciona a prova" e os Domínios 1 e 2 completos,
- * e o Domínio 3 pela metade: os cinco primeiros temas de Tecnologia e serviços
- * já estão publicados. Faltam os quatro últimos temas desse domínio, no card
- * LUM-146, que também traz o checkpoint do módulo, e o Domínio 4 inteiro, no
- * card LUM-147 (Cobrança, preços e suporte). O `prazoSugeridoDias` acompanha
- * o que existe e cresce com eles.
+ * Estado desta trilha: "como funciona a prova" e os Domínios 1, 2 e 3
+ * completos, com o checkpoint de cada um no cronograma. Resta o Domínio 4
+ * inteiro (Cobrança, preços e suporte), no card LUM-147. O `prazoSugeridoDias`
+ * acompanha o que existe e cresce com ele.
  */
 export const awsCloudPractitioner: Trilha = {
   slug: "aws-cloud-practitioner",
@@ -31,7 +29,7 @@ export const awsCloudPractitioner: Trilha = {
   resumo:
     "O guia oficial do exame CLF-C02 transformado em estudo ativo: um módulo por domínio, cenários curtos no estilo da prova com o porquê de cada alternativa, cards de serviço e pista, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 90 minutos",
-  prazoSugeridoDias: 17,
+  prazoSugeridoDias: 22,
   status: "disponivel",
   exame: {
     codigo: "CLF-C02",
@@ -100,6 +98,10 @@ export const awsCloudPractitioner: Trilha = {
         "computacao-na-aws",
         "armazenamento-na-aws",
         "rede-e-conectividade-na-aws",
+        "bancos-de-dados-na-aws-visao-geral",
+        "analytics-e-ia-na-aws",
+        "integracao-de-aplicacoes-na-aws",
+        "gestao-monitoramento-e-outros-servicos",
       ],
     },
     {
@@ -232,6 +234,41 @@ export const awsCloudPractitioner: Trilha = {
       temas: ["rede-e-conectividade-na-aws"],
       revisao: ["tecnologia"],
       nota: "Dois pares decidem o tema: security group contra lista de controle de acesso de rede, e VPN contra Direct Connect. Tenha as duas perguntas de desempate prontas.",
+    },
+    {
+      dia: 18,
+      titulo: "Bancos de dados: visão geral",
+      temas: ["bancos-de-dados-na-aws-visao-geral"],
+      revisao: ["tecnologia"],
+      nota: "Classifique a carga antes do serviço: transacional relacional aponta RDS ou Aurora, acesso por chave aponta DynamoDB, análise sobre histórico aponta Redshift. Esse trio responde pela maior parte das questões de banco.",
+    },
+    {
+      dia: 19,
+      titulo: "Analytics, IA e machine learning",
+      temas: ["analytics-e-ia-na-aws"],
+      revisao: ["tecnologia"],
+      nota: "O tema com mais nomes e menos profundidade do domínio. Decore cada serviço por uma linha de função e pela entrada que ele recebe: imagem, documento, texto ou voz.",
+    },
+    {
+      dia: 20,
+      titulo: "Integração de aplicações",
+      temas: ["integracao-de-aplicacoes-na-aws"],
+      revisao: ["tecnologia"],
+      nota: "Conte os destinos da mensagem: um consumidor que vem buscar é fila, vários inscritos de uma vez é tópico, destino que depende de regra é barramento de eventos.",
+    },
+    {
+      dia: 21,
+      titulo: "Gestão, monitoramento e as demais categorias",
+      temas: ["gestao-monitoramento-e-outros-servicos"],
+      revisao: ["tecnologia"],
+      nota: "Fecha o Domínio 3. Separe o verbo do pedido antes das alternativas: medir, auditar, operar, recomendar ou saber de um evento da própria AWS.",
+    },
+    {
+      dia: 22,
+      titulo: "Checkpoint do Domínio 3 e terceira prova simulada",
+      temas: [],
+      revisao: ["seguranca", "tecnologia"],
+      nota: "Checkpoint do módulo e, na sequência, a terceira prova simulada, agora com três domínios no banco. Abaixo de 70% no checkpoint, releia o tema apontado antes da prova; depois compare o resultado por domínio com o das duas provas anteriores.",
     },
   ],
 };
