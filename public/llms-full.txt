@@ -595,12 +595,13 @@ center não custa zero: ele ocupa espaço, consome energia e envelhece.
 ## Licenciamento: própria ou inclusa
 
 Quando o software é licenciado, existem dois caminhos, e o enunciado diz qual
-situação a empresa está vivendo.
+situação a empresa está vivendo. O primeiro aparece nas alternativas pelo nome
+em inglês, **bring your own license** (BYOL), e é bom reconhecer a sigla.
 
 <Comparativo
   colunas={["Caminho", "Quando faz sentido", "O que muda"]}
   linhas={[
-    ["Licença própria", "A empresa já pagou pela licença e o fabricante permite levá-la", "Evita pagar de novo; a gestão e a conformidade continuam com a empresa"],
+    ["Licença própria (BYOL)", "A empresa já pagou pela licença e o fabricante permite levá-la", "Evita pagar de novo; a gestão e a conformidade continuam com a empresa"],
     ["Licença inclusa", "Não há licença portável, ou a empresa quer parar de gerenciar isso", "O preço do serviço embute a licença; a gestão fica com o provedor"]
   ]}
 />
@@ -713,6 +714,13 @@ isso em seis perspectivas.
   "Operações: entregar e sustentar serviços no nível acordado."
 ]} />
 
+O guia do exame também descreve os resultados que a jornada de adoção persegue,
+e é assim que eles aparecem no enunciado: **redução do risco do negócio**,
+melhora do desempenho **ambiental, social e de governança (ESG)**, **aumento de
+receita** e **ganho de eficiência operacional**. Quando a questão fala em
+benefício da adoção, e não em uma capacidade a desenvolver, é para esse conjunto
+que ela aponta.
+
 <Callout tipo="dica" titulo="CAF e Well-Architected respondem perguntas diferentes">
 Se o enunciado fala em preparar a empresa, desenvolver capacidades e montar
 roteiro de adoção, a resposta é **CAF**. Se fala em avaliar uma carga de
@@ -731,6 +739,8 @@ A CLF não pede operar nenhum deles, só saber para que servem.
     ["AWS Migration Hub", "Acompanhar o andamento da migração num painel único"],
     ["AWS Application Discovery Service", "Levantar o inventário e as dependências do ambiente atual"],
     ["AWS Application Migration Service", "Replicar servidores inteiros para a AWS"],
+    ["Migration Evaluator", "Estimar o custo na AWS antes de decidir a migração"],
+    ["AWS Elastic Disaster Recovery", "Manter cópia pronta para assumir a operação se o ambiente de origem cair"],
     ["AWS Database Migration Service", "Migrar e replicar bancos, inclusive entre motores diferentes"],
     ["AWS DataSync", "Copiar arquivos entre o ambiente local e o armazenamento da AWS, pela rede"],
     ["Família AWS Snow", "Levar grande volume de dados em dispositivo físico quando a rede é o gargalo"]
@@ -930,6 +940,25 @@ credenciais temporárias. O que a pessoa pode fazer dentro da conta continua
 sendo definido por política. Ele resolve **quem entra**; o IAM continua
 resolvendo **o que se pode fazer**.
 
+Quando as identidades já existem fora da AWS, o caminho é a **federação**: a
+pessoa se autentica no diretório corporativo ou em um provedor externo e recebe
+credenciais temporárias na conta, sem usuário do IAM próprio. O Identity Center
+é a forma gerenciada de federar; a pista no enunciado é aproveitar o login que a
+empresa já tem em vez de criar um novo. Quando o diretório em questão é o Active
+Directory da Microsoft, quem o hospeda ou o conecta na AWS é o
+**AWS Directory Service**.
+
+## Credenciais: senha, chave e segredo
+
+Três controles completam o desenho e a prova cobra cada um pelo nome. A
+**política de senha** da conta define tamanho mínimo, exigência de caracteres,
+troca periódica e proibição de reuso para os usuários do IAM. A **chave de
+acesso** serve ao acesso programático e não deve existir para o raiz. E segredo
+de aplicação, como a senha de um banco, não mora em política do IAM: fica no
+**Secrets Manager**, que ainda gira a credencial sozinho, ou no armazenamento de
+parâmetros do **Systems Manager**. Credencial dentro do código é o erro que o
+enunciado descreve para que a resposta seja um desses dois.
+
 ## Como responder o cenário
 
 Localize o sujeito do acesso. Se for um serviço da AWS, é role. Se for um grupo
@@ -1100,6 +1129,10 @@ da VPC.
 
 ## Dentro da VPC: security group e lista de controle de acesso
 
+O guia cita os dois pelo nome em inglês, **security group** e **network ACL**,
+esta última abreviada como NACL. A prova mistura os dois idiomas, então vale
+reconhecer a sigla junto da tradução.
+
 <Comparativo
   colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
   linhas={[
@@ -1116,6 +1149,17 @@ pede ver tudo em um lugar só, com prioridade e pontuação de postura, é o
 Security Hub. A mesma lógica vale para o **Detective**: ele entra depois do
 achado, para entender como aquilo aconteceu.
 </Callout>
+
+## Onde a AWS publica informação de segurança
+
+Parte do domínio não pergunta qual serviço ativar, e sim onde procurar
+orientação. O **AWS Security Center** reúne a postura de segurança da AWS, as
+boas práticas recomendadas e o material de conformidade. O **AWS Security Blog**
+publica anúncios, análises de incidente e orientação nova. O **Knowledge
+Center** responde às dúvidas mais frequentes que chegam ao suporte. E produtos
+de segurança de terceiros se contratam no **AWS Marketplace**, não com a AWS
+diretamente. Quando o enunciado pede onde se informar, e não o que ligar, a
+resposta está nesse grupo.
 
 ## Como responder o cenário
 
@@ -1400,6 +1444,12 @@ e a resposta esperada combina quatro critérios: **latência** até os usuários
 Quando o enunciado cita lei ou país, o critério é residência de dados. Quando
 cita tempo de resposta, é latência.
 
+Escolher **mais de uma** região é outra pergunta, e o guia lista quatro motivos:
+**recuperação de desastre**, **continuidade de negócio**, **latência baixa** para
+usuários espalhados por continentes diferentes e **soberania de dados**, quando a
+lei obriga a manter o dado dentro de um país. Nenhum desses quatro se resolve
+com zonas de disponibilidade a mais dentro da mesma região.
+
 <Callout tipo="atencao" titulo="CloudFront não é Global Accelerator">
 Os dois aceleram, e por isso aparecem juntos. O CloudFront **guarda uma cópia**
 do conteúdo perto do usuário e brilha com arquivo estático. O Global Accelerator
@@ -1550,6 +1600,7 @@ Respondida essa pergunta, sobra apenas uma alternativa plausível.
   linhas={[
     ["Amazon S3", "Armazenamento de objetos em buckets, acessado por API", "Arquivo, imagem, backup, site estático, acesso pela aplicação"],
     ["Amazon EBS", "Volume de bloco ligado a uma instância EC2 em uma zona", "Disco da instância, sistema operacional, banco instalado na máquina"],
+    ["Instance store", "Disco preso ao hardware da instância, apagado quando ela para", "Rascunho, cache local, dado que pode ser perdido"],
     ["Amazon EFS", "Sistema de arquivos montado por várias instâncias ao mesmo tempo", "Compartilhado entre instâncias, pasta comum, capacidade elástica"],
     ["Amazon FSx", "Sistemas de arquivos de terceiros gerenciados", "Compatível com Windows File Server, computação de alto desempenho"],
     ["AWS Storage Gateway", "Ponte entre o datacenter local e o armazenamento da AWS", "Ambiente híbrido com acesso contínuo, manter protocolos locais"],
@@ -1562,6 +1613,8 @@ Respondida essa pergunta, sobra apenas uma alternativa plausível.
 Conte as instâncias. **Uma** instância com um disco próprio é **EBS**. **Várias**
 instâncias lendo e gravando na mesma pasta é **EFS**. Se o enunciado citar
 compatibilidade com Windows ou alto desempenho de arquivos, sobe para **FSx**.
+O **instance store** também é bloco, mas é efêmero: some quando a instância
+para. Dado que precisa sobreviver ao desligamento vai para EBS.
 </Callout>
 
 ## As classes do S3
@@ -1655,6 +1708,7 @@ privada consiga iniciar uma saída, sem aceitar conexões de fora, entra o
     ["Gateway NAT", "Saída para a internet iniciada de dentro, sem entrada", "Baixar atualização sem expor a instância"],
     ["Endpoint da VPC", "Acesso privado a serviços da AWS pela rede interna", "Falar com o S3 sem tráfego pela internet"],
     ["AWS PrivateLink", "Publica um serviço de forma privada dentro da rede", "Consumir serviço de outra conta sem expor à internet"],
+    ["AWS Transit Gateway", "Concentrador que liga muitas VPCs e redes locais num ponto só", "Dezenas de VPCs, parar de ligar cada uma com cada uma"],
     ["VPN site a site", "Túnel criptografado sobre a internet pública", "Ligar o escritório rápido, custo menor"],
     ["AWS Direct Connect", "Enlace dedicado até a AWS, fora da internet pública", "Banda consistente, conexão dedicada, tráfego sensível"],
     ["Amazon Route 53", "DNS gerenciado com roteamento e verificação de saúde", "Registrar domínio, resolver nome, direcionar visitante"]
@@ -1663,15 +1717,14 @@ privada consiga iniciar uma saída, sem aceitar conexões de fora, entra o
 
 ## Os dois firewalls
 
-<Comparativo
-  colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
-  linhas={[
-    ["Protege", "O recurso, como uma instância", "A sub-rede inteira"],
-    ["Regras", "Só permitir", "Permitir e negar"],
-    ["Avalia estado", "Sim: a resposta volta sem regra extra", "Não: é preciso regra de ida e de volta"],
-    ["A pista", "Liberar porta para uma instância específica", "Bloquear um endereço para toda a sub-rede"]
-  ]}
-/>
+A VPC tem dois controles de tráfego, e o guia os cita em inglês: o
+**security group** protege o recurso, só sabe permitir e avalia estado, então a
+resposta de uma conexão permitida volta sem regra extra. A **network ACL**, a
+lista de controle de acesso de rede, protege a sub-rede inteira, sabe permitir e
+negar e não avalia estado, o que exige regra de ida e de volta. A comparação
+linha a linha entre os dois está no tema de serviços de segurança deste mesmo
+curso; aqui interessa decidir em qual nível o enunciado está pedindo o
+controle.
 
 <Callout tipo="dica" titulo="Duas perguntas prontas">
 Para o par de firewalls, pergunte **o controle é do recurso ou da sub-rede**, e
@@ -1791,7 +1844,10 @@ sobre caminhos entre entidades, então o enunciado fala em rede de contatos,
 recomendação por conexão ou fraude encadeada. O **DocumentDB** guarda documentos
 e costuma vir com a palavra MongoDB no texto. E o **DMS** não guarda nada: ele
 move o dado de um banco para outro, com a origem em uso durante a transferência,
-e é a resposta quando o verbo do enunciado é migrar.
+e é a resposta quando o verbo do enunciado é migrar. Ao lado dele vem o
+**AWS SCT**, a ferramenta de conversão de esquema, que entra quando a migração
+troca de motor, como de Oracle para PostgreSQL: o SCT converte esquema e código,
+o DMS move os dados.
 
 Vale lembrar que gerenciado não significa sem responsabilidade. A AWS cuida do
 servidor, do sistema operacional e das rotinas do banco; a modelagem, o controle
@@ -2045,7 +2101,8 @@ responde.
     ["AWS Trusted Advisor", "Recomendações contra boas práticas da AWS", "Sugestões de economia, segurança, desempenho, limites"],
     ["AWS Health Dashboard", "Eventos da própria AWS que afetam a conta", "Saber se o problema é da AWS, não do cliente"],
     ["AWS Service Catalog", "Catálogo de produtos aprovados para implantar", "Padronizar o que as equipes podem criar"],
-    ["AWS License Manager", "Controle de uso de licenças de fornecedores", "Conformidade de licença, contagem de uso"]
+    ["AWS License Manager", "Controle de uso de licenças de fornecedores", "Conformidade de licença, contagem de uso"],
+    ["Service Quotas", "Consulta e pedido de aumento dos limites de cada serviço", "Bati no limite da conta, preciso de mais"]
   ]}
 />
 
@@ -2055,6 +2112,11 @@ CloudWatch diz **o que está acontecendo agora** com um recurso. O Trusted
 Advisor diz **o que deveria mudar** na conta, comparando com boas práticas.
 Alerta sobre métrica é CloudWatch; sugestão de melhoria é Trusted Advisor.
 </Callout>
+
+O **AWS Health** aparece de duas formas, e a prova cita as duas. O **Health
+Dashboard** é a tela que mostra os eventos da AWS que afetam aquela conta. A
+**AWS Health API** entrega os mesmos eventos de forma programática, para quem
+quer disparar uma reação automática quando um evento aparece.
 
 ## As demais categorias, no nível de nome e propósito
 
@@ -2067,7 +2129,7 @@ reconhecer o propósito de cada um.
     ["Ferramentas de desenvolvedor", "CodeBuild, CodeDeploy, CodePipeline", "Compilar e testar, implantar, e ligar as etapas em uma esteira"],
     ["Desenvolvimento e diagnóstico", "Cloud9, X-Ray", "Ambiente de desenvolvimento no navegador e rastreamento da requisição entre serviços"],
     ["Negócio e engajamento", "Amazon Connect, SES, Pinpoint", "Central de atendimento, envio de e-mail em volume e campanhas de comunicação"],
-    ["Computação de usuário final", "WorkSpaces, AppStream", "Área de trabalho completa na nuvem e transmissão de uma aplicação isolada"],
+    ["Computação de usuário final", "WorkSpaces, WorkSpaces Secure Browser, AppStream", "Área de trabalho completa na nuvem, navegador isolado no navegador do usuário e transmissão de uma aplicação isolada"],
     ["Dispositivos e aplicações", "IoT Core, Amplify, AppSync", "Conectar dispositivos, acelerar aplicações web e móveis e servir APIs GraphQL"]
   ]}
 />
@@ -2132,7 +2194,8 @@ aponta um modelo de compra, e os demais viram distratores.
     ["Instância reservada", "Compromisso de uma configuração por 1 ou 3 anos", "Carga estável na mesma família, tamanho e região"],
     ["Instância Spot", "Capacidade ociosa a preço reduzido, recuperável pela AWS", "Trabalho tolerante a interrupção"],
     ["Host dedicado", "O servidor físico inteiro, com soquetes e núcleos visíveis", "Licença de software amarrada ao hardware"],
-    ["Instância dedicada", "Hardware não compartilhado com outra conta", "Exigência de isolamento, sem licença por hardware"]
+    ["Instância dedicada", "Hardware não compartilhado com outra conta", "Exigência de isolamento, sem licença por hardware"],
+    ["Reserva de capacidade", "Garante capacidade numa zona, sem desconto por prazo", "Assegurar máquina disponível em data crítica"]
   ]}
 />
 
@@ -2143,6 +2206,13 @@ gastar o que prometeu, a configuração pode mudar ao longo do contrato. Quando
 o enunciado cita evolução da aplicação ou troca de família, a resposta é
 Savings Plans; quando descreve uma configuração que vai ficar parada onde
 está, é reserva.
+
+A reserva ainda tem graus de flexibilidade que a prova cita de passagem. A
+**padrão** dá o desconto maior e quase nenhuma liberdade. A **conversível**
+desconta menos e permite trocar por outra configuração durante o contrato. E
+numa organização com faturamento consolidado, a reserva comprada por uma conta
+pode ser aproveitada por outra conta da mesma organização quando sobra
+capacidade, assunto que volta no tema de Organizations.
 
 <Callout tipo="atencao" titulo="Spot não é desconto por prazo">
 O Spot **não pede compromisso nenhum**. O que ele pede é tolerância à
@@ -2234,7 +2304,8 @@ estimar, separar por área ou apontar desvio.
     ["AWS Pricing Calculator", "Quanto vai custar o que ainda não criei?", "Estimar, orçar, proposta, antes de provisionar"],
     ["Tags de alocação de custo", "Quem, dentro da empresa, gastou o quê?", "Separar por projeto, time, ambiente, centro de custo"],
     ["AWS Cost Anomaly Detection", "Apareceu um gasto fora do padrão?", "Aumento inesperado, sem limite definido antes"],
-    ["AWS Billing Conductor", "Como repasso o custo internamente ou a clientes?", "Cobrança personalizada, repasse, revenda"]
+    ["AWS Billing Conductor", "Como repasso o custo internamente ou a clientes?", "Cobrança personalizada, repasse, revenda"],
+    ["AWS Compute Optimizer", "O recurso que criei é do tamanho certo?", "Instância ociosa, recomendação de tamanho, right-sizing"]
   ]}
 />
 
@@ -2377,6 +2448,14 @@ Organizations. Ambiente **novo** que precisa nascer padronizado e governado:
 Control Tower.
 </Callout>
 
+## Compartilhar recurso entre contas
+
+Separar as contas não obriga a duplicar tudo. O
+**AWS Resource Access Manager** (AWS RAM) compartilha recursos como sub-redes e
+regras de resolução de DNS com outras contas da mesma organização, que passam a
+usá-los sem cópia. A pista é **uma conta usa o recurso que outra criou**, e não
+transferir permissão de identidade, que continua sendo assunto do IAM.
+
 ## Como responder o cenário
 
 Procure quantas contas o enunciado menciona e o que ele quer delas. Se quer
@@ -2453,14 +2532,26 @@ sem chegar ao gerente técnico designado, é Enterprise On-Ramp. Se pede o
 
 Antes de pagar por um plano existem caminhos sem custo. O **AWS re:Post** é a
 comunidade de perguntas e respostas. O **Knowledge Center** reúne respostas
-documentadas às dúvidas mais frequentes do suporte. Documentação e
-documentos técnicos também estão abertos a qualquer conta. Quando o enunciado
-insiste em custo zero, a resposta está nesse grupo.
+documentadas às dúvidas mais frequentes do suporte. A
+**AWS Prescriptive Guidance** reúne padrões, guias e roteiros escritos pela AWS
+para problemas recorrentes. Documentação, blogs e documentos técnicos também
+estão abertos a qualquer conta. Quando o enunciado insiste em custo zero, a
+resposta está nesse grupo.
+
+Quando o plano é pago, o chamado técnico se abre no **AWS Support Center**, o
+console de atendimento da conta. Ele é o lugar do chamado, não um plano: a
+questão que pergunta *onde abrir* aponta para ele, a que pergunta *qual
+contratar* aponta para a escada dos cinco planos.
 
 Do lado contratado, três nomes não se misturam. O **AWS Professional Services**
 é a consultoria da própria AWS dentro de um projeto do cliente. O
 **AWS Partner Network** reúne empresas de consultoria e de tecnologia
-credenciadas pela AWS, para quem prefere contratar um parceiro. E o
+credenciadas pela AWS, para quem prefere contratar um parceiro; entre elas estão
+os **fornecedores independentes de software** (ISV), que publicam produto, e os
+**integradores de sistemas**, que conduzem a implantação na casa do cliente. Ser
+parceiro rende treinamento e certificação, acesso a eventos e desconto por
+volume, e é isso que o enunciado descreve quando pergunta pelo benefício de
+entrar na rede. E o
 **AWS Marketplace** é o catálogo de software de terceiros pronto para implantar
 na conta, com a cobrança integrada à fatura da AWS.
 
@@ -2469,6 +2560,14 @@ na conta, com a cobrança integrada à fatura da AWS.
 **Professional Services** entrega gente da AWS dentro de um projeto. Três
 respostas diferentes para três verbos diferentes.
 </Callout>
+
+## Denunciar abuso
+
+Existe um canal que não é suporte nem parceiro. A equipe de
+**Trust and Safety** da AWS recebe denúncia de abuso de recursos da nuvem, como
+spam, varredura de portas ou ataque partindo de um endereço da AWS. O enunciado
+que descreve tráfego malicioso **vindo da** AWS contra alguém de fora está
+pedindo esse canal, e não um plano de suporte nem o GuardDuty.
 
 ## Capacitação
 
