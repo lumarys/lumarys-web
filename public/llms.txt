@@ -46,6 +46,13 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Integração de aplicações](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/integracao-de-aplicacoes-na-aws/): SQS, SNS, EventBridge, Step Functions, API Gateway, AppSync e Amazon MQ; fila contra tópico contra barramento de eventos em uma frase cada, e a pista que aponta cada um no enunciado da prova.
 - [Gestão, monitoramento e as demais categorias](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/gestao-monitoramento-e-outros-servicos/): CloudWatch, CloudTrail, Config, Systems Manager, Trusted Advisor, Health Dashboard, Service Catalog e License Manager; e as categorias restantes no nível de nome e propósito, de ferramentas de desenvolvedor a IoT, usuário final e engajamento.
 
+### Cobrança, preços e suporte
+
+- [Modelos de preço e o nível gratuito](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/modelos-de-preco-e-free-tier/): Sob demanda, Savings Plans, instâncias reservadas, Spot, hosts e instâncias dedicadas; os três tipos de nível gratuito; e o que a AWS cobra na transferência de dados, no nível de conceito que o exame pede.
+- [Ferramentas de custo e orçamento](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/ferramentas-de-custo-e-orcamento/): Cost Explorer, Budgets, Cost and Usage Report, Pricing Calculator, tags de alocação de custo, Cost Anomaly Detection e Billing Conductor: qual ferramenta responde a qual pergunta sobre a fatura.
+- [Organizations e faturamento consolidado](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/organizations-e-faturamento-consolidado/): Várias contas sob uma organização, unidades organizacionais, fatura única com desconto por volume agregado, políticas de controle de serviço no nível de conceito e o Control Tower como ponto de partida de um ambiente novo.
+- [Planos de suporte, Marketplace e parceiros](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/planos-de-suporte-marketplace-e-parceiros/): Os cinco planos de suporte da AWS e o que muda a cada degrau, os canais gratuitos como re:Post e Knowledge Center, e onde entram Professional Services, AWS Marketplace, Partner Network e os programas de treinamento.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.

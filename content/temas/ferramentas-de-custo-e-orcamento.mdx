@@ -1,0 +1,257 @@
+---
+slug: ferramentas-de-custo-e-orcamento
+titulo: "Ferramentas de custo e orçamento"
+resumo: "Cost Explorer, Budgets, Cost and Usage Report, Pricing Calculator, tags de alocação de custo, Cost Anomaly Detection e Billing Conductor: qual ferramenta responde a qual pergunta sobre a fatura."
+minutos: 24
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-20"
+porQue: "É o tema em que o exame separa quem entendeu o fluxo do dinheiro de quem decorou nomes. As sete ferramentas parecem intercambiáveis e não são: cada uma responde a uma pergunta diferente, e a questão entrega essa pergunta no enunciado. Quem sabe ler o verbo acerta sem hesitar."
+comoCai: "Uma empresa quer ser avisada por e-mail assim que o gasto do mês passar de um valor definido. Qual ferramenta atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre olhar o extrato do mês passado, colocar um limite no cartão com aviso por mensagem e pedir o orçamento da loja antes de comprar."
+preRequisitos: ["como-ler-uma-questao-clf", "economia-da-nuvem", "modelos-de-preco-e-free-tier"]
+errosComuns:
+  - "Responder Cost Explorer quando o pedido é alerta. O Cost Explorer analisa e projeta gasto em gráficos; quem avisa ao cruzar um limite é o AWS Budgets."
+  - "Trocar Budgets por Cost Anomaly Detection. O Budgets dispara quando o valor definido pelo cliente é ultrapassado; a detecção de anomalia usa aprendizado de máquina para apontar um gasto fora do padrão, sem que ninguém tenha definido um teto."
+  - "Usar o Pricing Calculator para analisar fatura. Ele estima o custo de uma arquitetura antes da criação dos recursos; fatura já emitida é assunto do Cost Explorer ou do relatório detalhado."
+  - "Achar que o Cost and Usage Report é uma tela. Ele é o conjunto de dados mais detalhado da cobrança, entregue em arquivo para análise, e não um painel pronto."
+  - "Esquecer que as tags precisam ser ativadas como tags de alocação de custo. Marcar recursos não basta: a tag só aparece nos relatórios depois de ativada na cobrança."
+  - "Confundir Billing Conductor com faturamento consolidado. O Organizations consolida a fatura real; o Billing Conductor monta uma visão de cobrança personalizada para repassar custos internamente."
+  - "Responder CloudWatch para pergunta de custo. O CloudWatch mede recursos; a análise e o controle da fatura ficam nas ferramentas de gestão de custos."
+preTeste:
+  - enunciado: "Uma empresa quer receber um aviso automático quando o gasto mensal ultrapassar um valor definido pela área financeira. Qual ferramenta atende?"
+    alternativas:
+      - texto: "AWS Budgets."
+        correta: true
+        explicacao: "O Budgets permite definir um teto de custo ou de uso e notificar quando o valor é ultrapassado ou quando a projeção indica que será."
+      - texto: "AWS Cost Explorer."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele serve para visualizar e analisar o gasto, não para disparar o alerta contra um teto definido."
+      - texto: "AWS Pricing Calculator."
+        correta: false
+        explicacao: "Estima o custo de uma solução antes de criá-la e não acompanha o gasto real da conta."
+  - enunciado: "Uma arquiteta precisa estimar quanto custaria por mês uma solução que ainda não foi criada, para apresentar ao cliente. Qual ferramenta atende?"
+    alternativas:
+      - texto: "AWS Pricing Calculator."
+        correta: true
+        explicacao: "É a calculadora para montar a estimativa de uma arquitetura antes de provisionar qualquer recurso."
+      - texto: "AWS Cost and Usage Report."
+        correta: false
+        explicacao: "Entrega o detalhe do que já foi consumido e cobrado, e não a estimativa de algo que não existe."
+      - texto: "AWS Budgets."
+        correta: false
+        explicacao: "Define teto e alerta sobre gasto real, não produz orçamento prévio de uma arquitetura."
+videos:
+  - id: Jhh4ob9fOR0
+    publicadoEm: "2020-12-15"
+    titulo: "AWS Budgets x AWS Cost Explorer"
+    canal: "Tech with Guilherme Teles"
+    duracao: 5
+    porQue: "Cinco minutos sobre o par que mais troca de lugar na prova. Assista antes das questões e fixe qual dos dois analisa e qual dos dois avisa."
+  - id: XRKInROHgOI
+    publicadoEm: "2023-04-15"
+    titulo: "AWS Budgets para monitorar custos da conta"
+    canal: "Marcus Vinícius Augusto"
+    duracao: 4
+    porQue: "Quatro minutos mostrando o Budgets em uso, com o teto e a notificação. Serve para ancorar o conceito de orçamento com alerta em algo concreto."
+artigos:
+  - titulo: "What is AWS Cost Explorer?"
+    url: "https://docs.aws.amazon.com/cost-management/latest/userguide/ce-what-is.html"
+    fonte: "AWS"
+  - titulo: "Managing your costs with AWS Budgets"
+    url: "https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html"
+    fonte: "AWS"
+  - titulo: "What are AWS Cost and Usage Reports?"
+    url: "https://docs.aws.amazon.com/cur/latest/userguide/what-is-cur.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Pricing Calculator?"
+    url: "https://docs.aws.amazon.com/pricing-calculator/latest/userguide/what-is-pricing-calculator.html"
+    fonte: "AWS"
+  - titulo: "Detecting unusual spend with AWS Cost Anomaly Detection"
+    url: "https://docs.aws.amazon.com/cost-management/latest/userguide/manage-ad.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "AWS Cost Explorer, em uma linha."
+    verso: "Painel para visualizar, filtrar e projetar o gasto ao longo do tempo. A pista é analisar, entender a tendência, ver por serviço ou por conta."
+  - frente: "AWS Budgets, em uma linha."
+    verso: "Teto de custo ou de uso definido pelo cliente, com notificação quando é ultrapassado ou quando a projeção indica que será. A pista é avisar, alertar, limite."
+  - frente: "AWS Cost and Usage Report, em uma linha."
+    verso: "O conjunto de dados mais detalhado da cobrança, entregue em arquivo para análise própria. A pista é detalhe máximo, linha a linha, exportar."
+  - frente: "AWS Pricing Calculator, em uma linha."
+    verso: "Estimativa de custo de uma arquitetura antes de criar os recursos. A pista é planejar, orçar, apresentar proposta."
+  - frente: "Tags de alocação de custo, em uma linha."
+    verso: "Rótulos aplicados aos recursos e ativados na cobrança para quebrar a fatura por projeto, time ou ambiente. A pista é saber quanto cada área gastou."
+  - frente: "AWS Cost Anomaly Detection, em uma linha."
+    verso: "Aprendizado de máquina que aponta gasto fora do padrão da conta, sem teto definido por ninguém. A pista é gasto inesperado, aumento estranho."
+  - frente: "AWS Billing Conductor, em uma linha."
+    verso: "Monta uma visão de cobrança personalizada para repassar custo internamente ou a clientes. A pista é faturar de volta para áreas ou terceiros."
+  - frente: "Cost Explorer contra Budgets."
+    verso: "O Cost Explorer olha para trás e projeta. O Budgets vigia um teto e avisa. Analisar é um, alertar é o outro."
+  - frente: "Budgets contra Cost Anomaly Detection."
+    verso: "No Budgets alguém define o valor. Na detecção de anomalia o modelo aprende o padrão e aponta o desvio sozinho."
+  - frente: "Cost Explorer contra Cost and Usage Report."
+    verso: "O Cost Explorer é o painel com granularidade suficiente para decidir. O relatório é o dado bruto para quem vai processar por fora."
+  - frente: "A pergunta de cada ferramenta."
+    verso: "Quanto gastei e para onde vai? Cost Explorer. Passou do limite? Budgets. Quanto vai custar? Pricing Calculator. Quem gastou? Tags."
+  - frente: "O que as tags exigem para valer."
+    verso: "Ser aplicadas no recurso e ativadas como tags de alocação de custo na cobrança. Sem a ativação elas não aparecem nos relatórios."
+  - frente: "Antes ou depois do gasto."
+    verso: "Antes: Pricing Calculator. Durante: Budgets e detecção de anomalia. Depois: Cost Explorer, relatório detalhado e tags."
+drills:
+  - titulo: "Qual ferramenta de custo responde ao pedido?"
+    instrucao: "Para cada pergunta sobre a fatura, indique a ferramenta da AWS que a responde."
+    opcoes:
+      ["AWS Cost Explorer", "AWS Budgets", "AWS Cost and Usage Report", "AWS Pricing Calculator", "Tags de alocação de custo", "AWS Cost Anomaly Detection"]
+    itens:
+      - enunciado: "Ver em gráfico como o gasto por serviço evoluiu nos últimos seis meses e projetar o próximo."
+        resposta: "AWS Cost Explorer"
+        explicacao: "Análise e projeção do gasto."
+      - enunciado: "Ser notificado assim que o custo do mês passar de um valor definido pela área financeira."
+        resposta: "AWS Budgets"
+        explicacao: "Teto definido pelo cliente e alerta."
+      - enunciado: "Receber um arquivo com o maior nível de detalhe da cobrança para processar em uma ferramenta própria."
+        resposta: "AWS Cost and Usage Report"
+        explicacao: "Dado bruto da cobrança, linha a linha."
+      - enunciado: "Estimar o custo mensal de uma arquitetura que ainda não foi criada, para uma proposta."
+        resposta: "AWS Pricing Calculator"
+        explicacao: "Estimativa antes de provisionar."
+      - enunciado: "Separar na fatura quanto cada projeto e cada ambiente consumiram no mês."
+        resposta: "Tags de alocação de custo"
+        explicacao: "Rótulos ativados na cobrança."
+      - enunciado: "Descobrir automaticamente um aumento de gasto fora do padrão, sem que ninguém tenha definido um limite."
+        resposta: "AWS Cost Anomaly Detection"
+        explicacao: "Desvio detectado por aprendizado de máquina."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma equipe quer entender como o gasto com cada serviço evoluiu nos últimos meses e projetar o custo do próximo trimestre, tudo em uma interface visual. Qual ferramenta atende?"
+    alternativas:
+      - texto: "AWS Cost Explorer."
+        correta: true
+        explicacao: "É o painel de visualização, filtro e projeção do gasto ao longo do tempo, por serviço, conta ou tag."
+      - texto: "AWS Budgets."
+        correta: false
+        explicacao: "Vizinho mais próximo, mas ele existe para vigiar um teto definido e avisar, e não para analisar a série histórica."
+      - texto: "AWS Cost and Usage Report."
+        correta: false
+        explicacao: "Entrega o dado bruto em arquivo para processamento externo, sem a interface de análise que o pedido descreve."
+      - texto: "AWS Pricing Calculator."
+        correta: false
+        explicacao: "Estima custo de algo que ainda não existe, e não analisa o gasto já realizado."
+  - tipo: unica
+    enunciado: "Uma empresa quer ser avisada automaticamente quando o gasto de um mês ficar fora do padrão histórico da conta, sem precisar definir antes qual é o valor aceitável. Qual ferramenta atende?"
+    alternativas:
+      - texto: "AWS Cost Anomaly Detection."
+        correta: true
+        explicacao: "Ela aprende o padrão de gasto da conta e aponta o desvio, justamente o caso em que ninguém definiu um teto."
+      - texto: "AWS Budgets."
+        correta: false
+        explicacao: "Vizinho plausível, mas depende de um valor definido pelo cliente, o que o enunciado descarta."
+      - texto: "AWS Cost Explorer."
+        correta: false
+        explicacao: "Mostra e projeta o gasto, mas não dispara o aviso de desvio por conta própria."
+      - texto: "AWS Billing Conductor."
+        correta: false
+        explicacao: "Monta uma visão de cobrança personalizada para repasse interno, e não detecta anomalia."
+  - tipo: unica
+    enunciado: "Uma empresa precisa saber quanto cada projeto consumiu no mês para repassar o custo às áreas responsáveis. Qual recurso torna essa separação possível na fatura?"
+    alternativas:
+      - texto: "Tags de alocação de custo aplicadas aos recursos e ativadas na cobrança."
+        correta: true
+        explicacao: "A tag rotula o recurso e, depois de ativada como tag de alocação de custo, permite quebrar a fatura por projeto, time ou ambiente."
+      - texto: "AWS Pricing Calculator para cada projeto."
+        correta: false
+        explicacao: "Produz estimativa prévia e não separa o gasto real já cobrado."
+      - texto: "Uma conta da AWS por serviço utilizado."
+        correta: false
+        explicacao: "Separar por serviço não responde por projeto, e multiplicar contas sem necessidade só aumenta a administração."
+      - texto: "AWS Cost Anomaly Detection por projeto."
+        correta: false
+        explicacao: "Aponta gasto fora do padrão, e não faz a alocação do custo entre áreas."
+  - tipo: multipla
+    enunciado: "Uma empresa quer estimar o custo de uma arquitetura antes de criá-la e, em paralelo, receber um alerta quando o gasto real do mês passar de um limite definido pela área financeira. Quais DUAS ferramentas atendem a esses objetivos?"
+    alternativas:
+      - texto: "AWS Pricing Calculator para a estimativa prévia."
+        correta: true
+        explicacao: "É a calculadora que monta o custo esperado de uma solução antes de qualquer recurso ser provisionado."
+      - texto: "AWS Budgets para o alerta ao ultrapassar o limite definido."
+        correta: true
+        explicacao: "O Budgets guarda o teto definido pelo cliente e notifica quando o valor é ultrapassado ou quando a projeção indica que será."
+      - texto: "AWS Cost Explorer para as duas necessidades."
+        correta: false
+        explicacao: "Analisa e projeta gasto já realizado, mas não orça arquitetura futura nem dispara alerta contra teto."
+      - texto: "AWS Cost and Usage Report para a estimativa prévia."
+        correta: false
+        explicacao: "Entrega o detalhe do consumo já cobrado, e não a estimativa do que ainda não existe."
+      - texto: "AWS Billing Conductor para o alerta de limite."
+        correta: false
+        explicacao: "Serve para montar visão de cobrança personalizada e repassar custo, não para alertar sobre teto de gasto."
+---
+
+## Em uma frase
+
+Cada ferramenta de custo responde a **uma pergunta diferente sobre o dinheiro**,
+e o enunciado da CLF entrega a pergunta quase pronta: analisar, alertar, detalhar,
+estimar, separar por área ou apontar desvio.
+
+## A pergunta de cada ferramenta
+
+<Comparativo
+  colunas={["Ferramenta", "A pergunta que responde", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Cost Explorer", "Quanto gastei, com o quê, e para onde a tendência vai?", "Visualizar, analisar, projetar, gráfico"],
+    ["AWS Budgets", "Passei do limite que eu mesmo defini?", "Alertar, notificar, teto, orçamento definido"],
+    ["AWS Cost and Usage Report", "Qual é o detalhe completo da cobrança?", "Dado bruto, linha a linha, exportar para análise"],
+    ["AWS Pricing Calculator", "Quanto vai custar o que ainda não criei?", "Estimar, orçar, proposta, antes de provisionar"],
+    ["Tags de alocação de custo", "Quem, dentro da empresa, gastou o quê?", "Separar por projeto, time, ambiente, centro de custo"],
+    ["AWS Cost Anomaly Detection", "Apareceu um gasto fora do padrão?", "Aumento inesperado, sem limite definido antes"],
+    ["AWS Billing Conductor", "Como repasso o custo internamente ou a clientes?", "Cobrança personalizada, repasse, revenda"]
+  ]}
+/>
+
+## Os três pares que decidem a questão
+
+O primeiro par é **Cost Explorer contra Budgets**, e é o mais frequente. O Cost
+Explorer olha para o passado e projeta o futuro em gráficos; o Budgets guarda um
+número que alguém definiu e avisa quando ele é ultrapassado. Se o verbo é
+analisar, é Cost Explorer; se é alertar, é Budgets.
+
+O segundo par é **Budgets contra Cost Anomaly Detection**. Os dois avisam, mas a
+origem do aviso é diferente: no Budgets o limite vem do cliente, na detecção de
+anomalia o padrão é aprendido pelo próprio serviço. Quando o enunciado diz que
+ninguém definiu um valor aceitável, a resposta é detecção de anomalia.
+
+O terceiro par é **Cost Explorer contra Cost and Usage Report**. O Cost Explorer
+já vem com a interface pronta para decidir; o relatório entrega o conjunto de
+dados mais detalhado da cobrança em arquivo, para quem vai processar em outra
+ferramenta. Detalhe máximo e exportação apontam o relatório.
+
+<Callout tipo="atencao" titulo="Analisar, alertar e estimar são verbos diferentes">
+**Analisar** o gasto que já ocorreu é Cost Explorer. **Alertar** contra um teto
+definido é Budgets. **Estimar** o custo do que ainda não existe é Pricing
+Calculator. Trocar um verbo pelo outro é o erro mais comum do domínio.
+</Callout>
+
+## As tags só valem quando ativadas
+
+Marcar recursos com tags de projeto, time e ambiente é o que permite quebrar a
+fatura por área. O detalhe que a prova cobra é que a tag precisa ser **ativada
+como tag de alocação de custo** na cobrança para aparecer nos relatórios. Tag
+aplicada e não ativada não separa nada, e o custo continua caindo em um bloco
+único.
+
+<Callout tipo="dica" titulo="Antes, durante e depois">
+Antes do gasto existir: Pricing Calculator. Enquanto ele acontece: Budgets e
+detecção de anomalia. Depois que virou fatura: Cost Explorer, relatório
+detalhado e tags de alocação.
+</Callout>
+
+## Como responder o cenário
+
+Localize o verbo antes de olhar as alternativas. Se o pedido é ver e entender o
+gasto, é Cost Explorer. Se é ser avisado contra um valor definido, é Budgets. Se
+é ser avisado sem que ninguém tenha definido valor, é detecção de anomalia. Se é
+obter o detalhe completo para processar fora, é o relatório de custo e uso. Se é
+saber quanto vai custar algo que ainda não existe, é a calculadora de preços. Se
+é separar o custo por área interna, são as tags de alocação, ativadas na
+cobrança. E se é repassar custo para áreas ou clientes com uma visão própria de
+fatura, é o Billing Conductor.

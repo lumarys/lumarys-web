@@ -1,0 +1,257 @@
+---
+slug: modelos-de-preco-e-free-tier
+titulo: "Modelos de preço e o nível gratuito"
+resumo: "Sob demanda, Savings Plans, instâncias reservadas, Spot, hosts e instâncias dedicadas; os três tipos de nível gratuito; e o que a AWS cobra na transferência de dados, no nível de conceito que o exame pede."
+minutos: 26
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-20"
+porQue: "Abre o Domínio 4, que vale 12% da prova e é o mais subestimado de todos. As questões de preço são curtas e se decidem por uma palavra do enunciado: compromisso, interrupção, exigência de licença ou carga imprevisível. Quem não separa Savings Plans de instância reservada perde ponto barato."
+comoCai: "Uma empresa processa lotes de imagens que podem ser interrompidos e retomados a qualquer momento, e quer o menor custo possível de computação. Qual modelo de compra atende?"
+feynman: "Explique em um minuto a diferença entre pagar a diária de um hotel, assinar um ano de aluguel com desconto e pegar o quarto que sobrou com preço de última hora, sabendo que pode ter de sair."
+preRequisitos: ["como-ler-uma-questao-clf", "economia-da-nuvem"]
+errosComuns:
+  - "Trocar instância reservada por Savings Plans. A reserva compromete uma configuração específica de instância em uma região; o Savings Plans compromete um valor por hora e aceita mudar de família, tamanho e até de serviço dentro do tipo contratado."
+  - "Responder Spot para carga que não pode parar. O preço do Spot vem da capacidade ociosa e a instância pode ser recuperada pela AWS; ele só serve para trabalho tolerante a interrupção."
+  - "Confundir host dedicado com instância dedicada. O host dedicado entrega o servidor físico inteiro e dá visibilidade dos soquetes e núcleos, o que atende licença amarrada ao hardware; a instância dedicada apenas garante que o hardware não é compartilhado com outra conta."
+  - "Achar que o nível gratuito é um só. São três formas: teste por tempo limitado, doze meses grátis a partir da criação da conta e ofertas sempre gratuitas dentro de um limite mensal."
+  - "Supor que entrar dados na AWS custa. A entrada de dados para a nuvem em geral não é cobrada; a saída para a internet é o item que aparece na fatura."
+  - "Escolher sob demanda quando o enunciado fala em carga estável por um ou três anos. Estabilidade prevista com compromisso aponta Savings Plans ou reserva, não sob demanda."
+  - "Imaginar que o Spot exige contrato de um ano. O Spot não tem compromisso de prazo: o que ele pede é tolerância à interrupção."
+preTeste:
+  - enunciado: "Uma empresa executa uma carga estável de computação que não muda de volume e quer o maior desconto possível em troca de um compromisso de um ou três anos, mantendo liberdade para trocar a família da instância. Qual opção atende?"
+    alternativas:
+      - texto: "Savings Plans."
+        correta: true
+        explicacao: "O compromisso é de um valor por hora, e não de uma configuração fixa, o que permite mudar de família e de tamanho durante o período."
+      - texto: "Instâncias Spot."
+        correta: false
+        explicacao: "Vizinho plausível por ser barato, mas não há desconto por compromisso e a instância pode ser interrompida pela AWS."
+      - texto: "Instâncias sob demanda."
+        correta: false
+        explicacao: "Não exigem compromisso e por isso não entregam o desconto que o pedido busca."
+  - enunciado: "Uma equipe de pesquisa roda simulações que podem ser interrompidas e reiniciadas sem prejuízo, e quer o menor custo por hora de computação. Qual modelo de compra atende?"
+    alternativas:
+      - texto: "Instâncias Spot."
+        correta: true
+        explicacao: "O Spot usa capacidade ociosa a preço reduzido e é o modelo indicado para trabalho que tolera interrupção."
+      - texto: "Instâncias reservadas."
+        correta: false
+        explicacao: "Dão desconto por compromisso de prazo, mas cobram mesmo quando a carga não roda e não são o menor preço por hora."
+      - texto: "Hosts dedicados."
+        correta: false
+        explicacao: "Servem para isolar o servidor físico e atender licença por hardware, não para baratear carga interrompível."
+videos:
+  - id: Yo25nLyLY1Q
+    publicadoEm: "2021-11-24"
+    titulo: "Modelos de Cobranças EC2 – AWS"
+    canal: "Export Code"
+    duracao: 12
+    porQue: "Doze minutos com os modelos de compra lado a lado, no nível de conceito que a prova cobra. Pare o vídeo quando conseguir dizer qual palavra do enunciado aponta cada modelo."
+  - id: 4y_AQYHIbyA
+    publicadoEm: "2024-11-21"
+    titulo: "Tipos de Instancia, planos e valores EC2"
+    canal: "Raphael Amorim"
+    duracao: 32
+    porQue: "Aula mais longa que liga tipo de instância a plano de pagamento. Assista por blocos e use só a parte de planos se o tempo estiver curto."
+artigos:
+  - titulo: "Instance purchasing options"
+    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html"
+    fonte: "AWS"
+  - titulo: "What are Savings Plans?"
+    url: "https://docs.aws.amazon.com/savingsplans/latest/userguide/what-is-savings-plans.html"
+    fonte: "AWS"
+  - titulo: "AWS Free Tier"
+    url: "https://aws.amazon.com/free/"
+    fonte: "AWS"
+flashcards:
+  - frente: "Sob demanda, em uma linha."
+    verso: "Paga pelo uso, sem compromisso nem desconto. A pista é carga imprevisível, curta ou em fase de teste."
+  - frente: "Savings Plans, em uma linha."
+    verso: "Compromisso de um valor por hora por um ou três anos, com liberdade para mudar família e tamanho. A pista é uso estável com necessidade de flexibilidade."
+  - frente: "Instância reservada, em uma linha."
+    verso: "Compromisso de uma configuração específica por um ou três anos, em troca de desconto. A pista é carga estável e previsível numa configuração que não vai mudar."
+  - frente: "Instância Spot, em uma linha."
+    verso: "Capacidade ociosa a preço reduzido, que a AWS pode recuperar. A pista é trabalho tolerante a interrupção."
+  - frente: "Host dedicado, em uma linha."
+    verso: "O servidor físico inteiro para a sua conta, com visibilidade de soquetes e núcleos. A pista é licença de software amarrada ao hardware."
+  - frente: "Instância dedicada, em uma linha."
+    verso: "Hardware não compartilhado com outra conta, sem entregar o servidor físico nem a contagem de núcleos. A pista é exigência de isolamento, sem licença por hardware."
+  - frente: "Os três tipos de nível gratuito."
+    verso: "Teste por tempo limitado, doze meses grátis a partir da criação da conta e ofertas sempre gratuitas dentro de um limite mensal."
+  - frente: "Transferência de dados, em uma linha."
+    verso: "Entrar dados na nuvem em geral não é cobrado; sair para a internet é o item que aparece na fatura."
+  - frente: "Reserva contra Savings Plans."
+    verso: "A reserva prende a configuração. O Savings Plans prende o valor por hora e deixa a configuração mudar."
+  - frente: "Spot contra reserva."
+    verso: "Spot é preço baixo sem garantia de continuidade. Reserva é desconto em troca de prazo, com a capacidade garantida enquanto durar."
+  - frente: "Host dedicado contra instância dedicada."
+    verso: "Host entrega o servidor e a contagem de núcleos, o que serve para licença. Instância dedicada só garante que ninguém mais divide o hardware."
+  - frente: "A palavra que decide o modelo."
+    verso: "Imprevisível aponta sob demanda. Estável com compromisso aponta Savings Plans ou reserva. Interrompível aponta Spot. Licença por hardware aponta host dedicado."
+  - frente: "O que o nível gratuito não faz."
+    verso: "Não cobre uso acima do limite da oferta. Passar do limite gera cobrança normal, e por isso o orçamento com alerta continua necessário."
+drills:
+  - titulo: "Qual modelo de preço atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o modelo de compra ou o recurso de preço que a resolve."
+    opcoes:
+      ["Sob demanda", "Savings Plans", "Instância reservada", "Instância Spot", "Host dedicado", "Nível gratuito"]
+    itens:
+      - enunciado: "Uma aplicação nova, com volume ainda desconhecido, que pode ser desligada a qualquer momento."
+        resposta: "Sob demanda"
+        explicacao: "Sem compromisso, paga só pelo que usar."
+      - enunciado: "Uso estável de computação por três anos, com liberdade para trocar a família da instância durante o período."
+        resposta: "Savings Plans"
+        explicacao: "Compromisso de valor por hora, não de configuração."
+      - enunciado: "Um banco de dados que roda o ano inteiro na mesma configuração e região, com desconto por compromisso de prazo."
+        resposta: "Instância reservada"
+        explicacao: "Configuração fixa e prazo definido."
+      - enunciado: "Processamento em lote que pode ser interrompido pela AWS e retomado depois, ao menor custo por hora."
+        resposta: "Instância Spot"
+        explicacao: "Capacidade ociosa para carga tolerante a interrupção."
+      - enunciado: "Um software licenciado por soquete físico, que exige visibilidade do servidor onde roda."
+        resposta: "Host dedicado"
+        explicacao: "Servidor físico inteiro, com contagem de soquetes e núcleos."
+      - enunciado: "Um estudante quer experimentar serviços por doze meses sem pagar, dentro de limites definidos."
+        resposta: "Nível gratuito"
+        explicacao: "A oferta de doze meses grátis a partir da criação da conta."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa mantém um servidor de aplicação ligado o ano inteiro, sempre na mesma família e no mesmo tamanho, e aceita um compromisso de três anos para reduzir o custo. Qual opção atende melhor a esse pedido?"
+    alternativas:
+      - texto: "Instância reservada."
+        correta: true
+        explicacao: "A configuração é fixa e o compromisso de prazo está aceito, que é exatamente o caso em que a reserva entrega o maior desconto."
+      - texto: "Instância Spot."
+        correta: false
+        explicacao: "Vizinho plausível por ser barato, mas a instância pode ser recuperada pela AWS e o servidor precisa ficar no ar."
+      - texto: "Instância sob demanda."
+        correta: false
+        explicacao: "Não pede compromisso, e por isso não entrega o desconto que o enunciado busca."
+      - texto: "Host dedicado."
+        correta: false
+        explicacao: "Resolve isolamento físico e licença por hardware, e não o custo de uma carga estável."
+  - tipo: unica
+    enunciado: "Uma empresa quer reduzir o custo de computação com um compromisso de um ano, mas precisa poder mudar a família e o tamanho das instâncias conforme a aplicação evoluir. Qual opção atende?"
+    alternativas:
+      - texto: "Savings Plans."
+        correta: true
+        explicacao: "O compromisso é de um valor por hora, o que preserva a liberdade de mudar família e tamanho durante o período contratado."
+      - texto: "Instância reservada."
+        correta: false
+        explicacao: "Vizinho mais próximo, mas o desconto está amarrado a uma configuração específica, o que conflita com a exigência de mudar de família."
+      - texto: "Instância Spot."
+        correta: false
+        explicacao: "Não envolve compromisso de prazo e não garante continuidade da instância."
+      - texto: "Instância dedicada."
+        correta: false
+        explicacao: "Trata de isolamento de hardware, não de desconto por compromisso."
+  - tipo: unica
+    enunciado: "Uma empresa criou a conta na AWS há dois meses e quer saber o que consegue usar sem pagar. Qual descrição corresponde ao nível gratuito da AWS?"
+    alternativas:
+      - texto: "Três formas de oferta: testes por tempo limitado, doze meses grátis a partir da criação da conta e ofertas sempre gratuitas dentro de um limite mensal."
+        correta: true
+        explicacao: "São exatamente os três tipos de oferta do nível gratuito, e o exame cobra a distinção entre eles."
+      - texto: "Um crédito único em dinheiro aplicado na primeira fatura da conta."
+        correta: false
+        explicacao: "Crédito promocional existe em programas específicos, mas não é o que define o nível gratuito."
+      - texto: "Uso ilimitado de qualquer serviço durante os doze primeiros meses da conta."
+        correta: false
+        explicacao: "A oferta de doze meses cobre serviços e limites definidos, e o uso acima do limite é cobrado normalmente."
+      - texto: "Desconto permanente sobre o preço sob demanda de todos os serviços."
+        correta: false
+        explicacao: "Desconto sobre o preço sob demanda vem de compromisso, como Savings Plans e reservas, e não do nível gratuito."
+  - tipo: multipla
+    enunciado: "Uma empresa precisa rodar um software licenciado por soquete físico, que exige visibilidade do servidor, e também quer baratear um processamento em lote que pode ser interrompido sem prejuízo. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Hosts dedicados para o software licenciado por soquete físico."
+        correta: true
+        explicacao: "O host dedicado entrega o servidor físico inteiro, com visibilidade de soquetes e núcleos, que é o que a licença por hardware exige."
+      - texto: "Instâncias Spot para o processamento em lote interrompível."
+        correta: true
+        explicacao: "O Spot usa capacidade ociosa a preço reduzido e é indicado justamente para trabalho tolerante a interrupção."
+      - texto: "Instâncias dedicadas para o software licenciado por soquete físico."
+        correta: false
+        explicacao: "Garantem hardware não compartilhado, mas não entregam o servidor nem a contagem de soquetes que a licença pede."
+      - texto: "Instâncias reservadas para o processamento em lote interrompível."
+        correta: false
+        explicacao: "Dão desconto por compromisso de prazo, e não o menor preço por hora de uma carga que aceita parar."
+      - texto: "O nível gratuito para as duas necessidades."
+        correta: false
+        explicacao: "O nível gratuito serve para experimentar dentro de limites, e não para sustentar carga de produção ou licença de fornecedor."
+---
+
+## Em uma frase
+
+Na CLF a questão de preço quase sempre se decide por **uma palavra do
+enunciado**: imprevisível, compromisso, interrupção ou licença. Cada palavra
+aponta um modelo de compra, e os demais viram distratores.
+
+## Os modelos de compra, lado a lado
+
+<Comparativo
+  colunas={["Modelo", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Sob demanda", "Paga pelo uso, sem compromisso e sem desconto", "Carga nova, curta ou imprevisível"],
+    ["Savings Plans", "Compromisso de valor por hora por 1 ou 3 anos, com flexibilidade", "Uso estável, mas a configuração pode mudar"],
+    ["Instância reservada", "Compromisso de uma configuração por 1 ou 3 anos", "Carga estável na mesma família, tamanho e região"],
+    ["Instância Spot", "Capacidade ociosa a preço reduzido, recuperável pela AWS", "Trabalho tolerante a interrupção"],
+    ["Host dedicado", "O servidor físico inteiro, com soquetes e núcleos visíveis", "Licença de software amarrada ao hardware"],
+    ["Instância dedicada", "Hardware não compartilhado com outra conta", "Exigência de isolamento, sem licença por hardware"]
+  ]}
+/>
+
+Os dois primeiros com desconto são o par que mais troca de lugar. A **reserva**
+prende a configuração: o desconto vale para aquela família, aquele tamanho e
+aquela região. O **Savings Plans** prende o valor por hora: enquanto a conta
+gastar o que prometeu, a configuração pode mudar ao longo do contrato. Quando
+o enunciado cita evolução da aplicação ou troca de família, a resposta é
+Savings Plans; quando descreve uma configuração que vai ficar parada onde
+está, é reserva.
+
+<Callout tipo="atencao" titulo="Spot não é desconto por prazo">
+O Spot **não pede compromisso nenhum**. O que ele pede é tolerância à
+interrupção, porque a AWS pode recuperar aquela capacidade. Se o enunciado diz
+que o serviço não pode parar, Spot está fora, por mais barato que seja.
+</Callout>
+
+## Os três tipos de nível gratuito
+
+O exame cobra que o candidato saiba que o nível gratuito não é uma coisa só.
+São três formas de oferta. A primeira é o **teste por tempo limitado**, em que
+um serviço fica liberado por um período curto a partir do momento em que é
+ativado. A segunda é a oferta de **doze meses grátis**, contados da criação da
+conta, dentro de limites definidos por serviço. A terceira é a oferta
+**sempre gratuita**, que não expira e vale enquanto o uso ficar abaixo do
+limite mensal publicado.
+
+Nenhuma delas cobre uso acima do limite: passar do teto gera cobrança normal.
+Por isso as questões costumam emendar nível gratuito com orçamento e alerta de
+custo, assunto do próximo tema.
+
+## Transferência de dados, no nível que a prova pede
+
+A prova não pede tabela de preço, pede o princípio: **entrar dados na AWS em
+geral não é cobrado; sair para a internet é**. Tráfego entre recursos dentro da
+mesma zona de disponibilidade tende a custar menos do que tráfego que cruza
+zonas ou regiões, e o item mais caro costuma ser a saída para fora da nuvem.
+Guardar essa direção resolve as questões do tema sem decorar um único número.
+
+<Callout tipo="dica" titulo="A direção é o que importa">
+Entrada barata ou gratuita, saída para a internet cobrada. Sempre que o
+enunciado falar em custo de rede, verifique **para onde** os dados estão indo
+antes de olhar as alternativas.
+</Callout>
+
+## Como responder o cenário
+
+Leia o enunciado procurando a palavra que classifica a carga. Se ela é nova,
+curta ou de volume desconhecido, a resposta é sob demanda. Se é estável e o
+texto aceita compromisso de um ou três anos, decida entre Savings Plans e
+reserva pela presença de flexibilidade: se a configuração pode mudar, Savings
+Plans; se está congelada, reserva. Se o texto diz que o trabalho pode ser
+interrompido e retomado, é Spot. Se aparece licença presa ao hardware, é host
+dedicado; se aparece apenas exigência de não dividir o servidor com outra
+conta, é instância dedicada. E se o pedido é experimentar sem pagar, é nível
+gratuito, lembrando que ele tem limite e que o limite, uma vez ultrapassado,
+vira fatura.

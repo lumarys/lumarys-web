@@ -1,10 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * A trilha fundacional de AWS. O que muda em relação à SAA: a CLF ainda está
- * sendo escrita domínio a domínio, então a página da trilha mostra os quatro
- * pesos do exame mas só três módulos abrem, e a prova simulada sai menor que
- * as 65 questões oficiais, dizendo na tela para quantas o banco dá.
+ * A trilha fundacional de AWS, completa desde o LUM-147: os quatro domínios
+ * abrem, nenhum módulo fica em "em breve" e a prova simulada monta as 65
+ * questões oficiais em 90 minutos, com o peso real de cada domínio.
  *
  * Este arquivo nasceu de `saa.spec.ts`: o que é igual continua igual de
  * propósito, para uma regressão no cabeçalho do exame ou na prova objetiva
@@ -47,30 +46,24 @@ test("a trilha mostra o exame: versão, formato, corte e o peso de cada domínio
   await expect(page.getByRole("link", { name: "Prova simulada" })).toBeVisible();
 });
 
-test("os domínios ainda não escritos aparecem como 'em breve', sem abrir", async ({ page }) => {
+test("com a trilha completa, nenhum domínio aparece como 'em breve'", async ({ page }) => {
   await page.goto(CLF);
-  // Um domínio em breve: cobrança. Tecnologia saiu do "em breve" no LUM-145,
-  // com os cinco primeiros temas do Domínio 3. Quando cobrança for publicada no
-  // LUM-147, esta contagem cai para zero e o teste falha de propósito.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(1);
+  // Trilha completa: nenhum domínio em breve. O último a sair foi cobrança, no
+  // LUM-147, que fechou o Domínio 4.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Conceitos de nuvem").first()).toBeVisible();
 });
 
 test("a prova simulada é objetiva, cronometrada e sem gabarito até o fim", async ({ page }) => {
   await page.goto("/simulado/?trilha=aws-cloud-practitioner");
   await expect(page.getByText(/prova simulada · CLF-C02/i)).toBeVisible();
-  // Só o Domínio 1 tem questões, então o banco não fecha as 65: a tela diz
-  // para quantas dá. Quando os quatro domínios estiverem publicados, passa a
-  // valer a outra frase, e a asserção aceita as duas.
-  // A frase das 65 questões é fixa no cartão; a do banco só aparece enquanto
-  // faltam domínios. `first()` porque hoje as duas convivem na mesma tela.
+  // Com a trilha completa o banco cobre as 65 questões; enquanto faltava
+  // domínio, a tela dizia quantas conseguia montar. Aceita os dois estados.
   await expect(
     page
-      .getByText(/o banco de hoje dá para \d+ questões/i)
-      .or(page.getByText(/65 questões em 90 minutos/i))
-      .first(),
+      .getByText(/65 questões em 90 minutos/i)
+      .or(page.getByText(/o banco de hoje dá para \d+ questões/i)),
   ).toBeVisible();
-  await expect(page.getByText(/o banco de hoje dá para \d+ questões/i)).toBeVisible();
 
   await page.getByRole("button", { name: /começar a prova/i }).click();
   await expect(page.getByText(/questão 1 de \d+/i)).toBeVisible();
@@ -106,7 +99,7 @@ test("a prova entrega sozinha quando o tempo acaba", async ({ page }) => {
   await page.getByRole("button", { name: /começar a prova/i }).click();
   await expect(page.getByText(/questão 1 de/i)).toBeVisible();
 
-  // Mais tempo do que a prova tem: o banco pequeno dá menos de 90 minutos.
+  // Mais tempo do que a prova tem: com os quatro domínios ela dura 90 minutos.
   await page.clock.fastForward("02:15:00");
   await expect(page.getByText(/\/1000/)).toBeVisible();
   await expect(page.getByText(/abaixo do corte/i)).toBeVisible();

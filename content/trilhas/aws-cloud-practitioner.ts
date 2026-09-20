@@ -14,10 +14,11 @@ import type { Trilha } from "../types";
  * são próprios, e não compartilhados com a SAA: uma questão de arquitetura
  * dentro de uma prova de CLF quebraria a calibração do sorteio por peso.
  *
- * Estado desta trilha: "como funciona a prova" e os Domínios 1, 2 e 3
- * completos, com o checkpoint de cada um no cronograma. Resta o Domínio 4
- * inteiro (Cobrança, preços e suporte), no card LUM-147. O `prazoSugeridoDias`
- * acompanha o que existe e cresce com ele.
+ * Estado desta trilha: completa. São 23 temas cobrindo "como funciona a
+ * prova" e os quatro domínios do exame, com o checkpoint de cada domínio e
+ * um cronograma de 30 dias que termina em prova simulada completa, ataque
+ * aos domínios fracos e véspera. A auditoria de ponta a ponta e a
+ * verificação final ficam no card LUM-148.
  */
 export const awsCloudPractitioner: Trilha = {
   slug: "aws-cloud-practitioner",
@@ -29,7 +30,7 @@ export const awsCloudPractitioner: Trilha = {
   resumo:
     "O guia oficial do exame CLF-C02 transformado em estudo ativo: um módulo por domínio, cenários curtos no estilo da prova com o porquê de cada alternativa, cards de serviço e pista, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 90 minutos",
-  prazoSugeridoDias: 22,
+  prazoSugeridoDias: 30,
   status: "disponivel",
   exame: {
     codigo: "CLF-C02",
@@ -109,11 +110,16 @@ export const awsCloudPractitioner: Trilha = {
       titulo: "Cobrança, preços e suporte",
       resumo:
         "Modelos de preço e nível gratuito, ferramentas de custo e orçamento, Organizations e faturamento consolidado, planos de suporte, Marketplace e parceiros.",
-      status: "em-breve",
+      status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 4 · Billing, Pricing, and Support",
       pesoExame: 12,
-      temas: [],
+      temas: [
+        "modelos-de-preco-e-free-tier",
+        "ferramentas-de-custo-e-orcamento",
+        "organizations-e-faturamento-consolidado",
+        "planos-de-suporte-marketplace-e-parceiros",
+      ],
     },
   ],
   cronograma: [
@@ -269,6 +275,62 @@ export const awsCloudPractitioner: Trilha = {
       temas: [],
       revisao: ["seguranca", "tecnologia"],
       nota: "Checkpoint do módulo e, na sequência, a terceira prova simulada, agora com três domínios no banco. Abaixo de 70% no checkpoint, releia o tema apontado antes da prova; depois compare o resultado por domínio com o das duas provas anteriores.",
+    },
+    {
+      dia: 23,
+      titulo: "Modelos de preço e o nível gratuito",
+      temas: ["modelos-de-preco-e-free-tier"],
+      revisao: ["tecnologia"],
+      nota: "Começa o domínio de 12%, o último e o mais subestimado da prova. A questão de preço se decide por uma palavra do enunciado: imprevisível, compromisso, interrupção ou licença.",
+    },
+    {
+      dia: 24,
+      titulo: "Ferramentas de custo e orçamento",
+      temas: ["ferramentas-de-custo-e-orcamento"],
+      revisao: ["tecnologia"],
+      nota: "Separe os verbos antes das alternativas: analisar é Cost Explorer, alertar contra teto definido é Budgets, estimar o que ainda não existe é Pricing Calculator.",
+    },
+    {
+      dia: 25,
+      titulo: "Organizations e faturamento consolidado",
+      temas: ["organizations-e-faturamento-consolidado"],
+      revisao: ["cobranca"],
+      nota: "O Organizations aparece nos Domínios 2 e 4 com rostos diferentes. Aqui vale o lado do dinheiro: fatura única, uso somado para desconto por volume e custo ainda detalhado por conta.",
+    },
+    {
+      dia: 26,
+      titulo: "Planos de suporte, Marketplace e parceiros",
+      temas: ["planos-de-suporte-marketplace-e-parceiros"],
+      revisao: ["cobranca"],
+      nota: "Fecha o conteúdo da trilha. A questão pede o plano mínimo que atende, não o mais completo: suba a escada só até onde o enunciado exige.",
+    },
+    {
+      dia: 27,
+      titulo: "Checkpoint do Domínio 4",
+      temas: [],
+      revisao: ["cobranca"],
+      nota: "Último checkpoint. Abaixo de 70%, releia o tema apontado: amanhã a prova é completa.",
+    },
+    {
+      dia: 28,
+      titulo: "Prova simulada completa",
+      temas: [],
+      revisao: ["conceitos", "seguranca", "tecnologia", "cobranca"],
+      nota: "As 65 questões, 90 minutos, os quatro domínios no peso real. Trate como a prova: sem consultar nada, de uma vez só.",
+    },
+    {
+      dia: 29,
+      titulo: "Atacar os domínios fracos",
+      temas: [],
+      revisao: ["conceitos", "seguranca", "tecnologia", "cobranca"],
+      nota: "Olhe o resultado por domínio da prova de ontem e releia só os temas dos dois domínios mais fracos. Refaça os drills deles.",
+    },
+    {
+      dia: 30,
+      titulo: "Véspera",
+      temas: [],
+      revisao: ["como-funciona-a-prova"],
+      nota: "Releia como ler uma questão, passe os cards vencidos e pare. Não estude conteúdo novo na véspera: durma.",
     },
   ],
 };

@@ -46,6 +46,13 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Integração de aplicações](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/integracao-de-aplicacoes-na-aws/): SQS, SNS, EventBridge, Step Functions, API Gateway, AppSync e Amazon MQ; fila contra tópico contra barramento de eventos em uma frase cada, e a pista que aponta cada um no enunciado da prova.
 - [Gestão, monitoramento e as demais categorias](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/gestao-monitoramento-e-outros-servicos/): CloudWatch, CloudTrail, Config, Systems Manager, Trusted Advisor, Health Dashboard, Service Catalog e License Manager; e as categorias restantes no nível de nome e propósito, de ferramentas de desenvolvedor a IoT, usuário final e engajamento.
 
+### Cobrança, preços e suporte
+
+- [Modelos de preço e o nível gratuito](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/modelos-de-preco-e-free-tier/): Sob demanda, Savings Plans, instâncias reservadas, Spot, hosts e instâncias dedicadas; os três tipos de nível gratuito; e o que a AWS cobra na transferência de dados, no nível de conceito que o exame pede.
+- [Ferramentas de custo e orçamento](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/ferramentas-de-custo-e-orcamento/): Cost Explorer, Budgets, Cost and Usage Report, Pricing Calculator, tags de alocação de custo, Cost Anomaly Detection e Billing Conductor: qual ferramenta responde a qual pergunta sobre a fatura.
+- [Organizations e faturamento consolidado](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/organizations-e-faturamento-consolidado/): Várias contas sob uma organização, unidades organizacionais, fatura única com desconto por volume agregado, políticas de controle de serviço no nível de conceito e o Control Tower como ponto de partida de um ambiente novo.
+- [Planos de suporte, Marketplace e parceiros](https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/planos-de-suporte-marketplace-e-parceiros/): Os cinco planos de suporte da AWS e o que muda a cada degrau, os canais gratuitos como re:Post e Knowledge Center, e onde entram Professional Services, AWS Marketplace, Partner Network e os programas de treinamento.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.
@@ -2092,6 +2099,406 @@ desenvolvimento, atendimento, usuário final ou dispositivo conectado, a respost
 - Responder CodePipeline para qualquer coisa de desenvolvimento. O CodeBuild compila e testa, o CodeDeploy implanta e o CodePipeline liga as etapas em uma esteira.
 - Confundir SES com Pinpoint. O SES envia e-mail em volume a partir da aplicação; o Pinpoint trata de campanhas de comunicação e engajamento com clientes.
 - Trocar WorkSpaces por AppStream. O WorkSpaces entrega uma área de trabalho completa na nuvem; o AppStream entrega apenas uma aplicação transmitida ao usuário.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Modelos de preço e o nível gratuito
+
+Trilha: AWS Cloud Practitioner · Módulo: Cobrança, preços e suporte
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/modelos-de-preco-e-free-tier/
+Tempo estimado: 26 minutos · Nível: fundamental
+
+**Resumo.** Sob demanda, Savings Plans, instâncias reservadas, Spot, hosts e instâncias dedicadas; os três tipos de nível gratuito; e o que a AWS cobra na transferência de dados, no nível de conceito que o exame pede.
+
+**Por que cai na prova.** Abre o Domínio 4, que vale 12% da prova e é o mais subestimado de todos. As questões de preço são curtas e se decidem por uma palavra do enunciado: compromisso, interrupção, exigência de licença ou carga imprevisível. Quem não separa Savings Plans de instância reservada perde ponto barato.
+
+**Como o entrevistador pergunta.** "Uma empresa processa lotes de imagens que podem ser interrompidos e retomados a qualquer momento, e quer o menor custo possível de computação. Qual modelo de compra atende?"
+
+## Em uma frase
+
+Na CLF a questão de preço quase sempre se decide por **uma palavra do
+enunciado**: imprevisível, compromisso, interrupção ou licença. Cada palavra
+aponta um modelo de compra, e os demais viram distratores.
+
+## Os modelos de compra, lado a lado
+
+<Comparativo
+  colunas={["Modelo", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Sob demanda", "Paga pelo uso, sem compromisso e sem desconto", "Carga nova, curta ou imprevisível"],
+    ["Savings Plans", "Compromisso de valor por hora por 1 ou 3 anos, com flexibilidade", "Uso estável, mas a configuração pode mudar"],
+    ["Instância reservada", "Compromisso de uma configuração por 1 ou 3 anos", "Carga estável na mesma família, tamanho e região"],
+    ["Instância Spot", "Capacidade ociosa a preço reduzido, recuperável pela AWS", "Trabalho tolerante a interrupção"],
+    ["Host dedicado", "O servidor físico inteiro, com soquetes e núcleos visíveis", "Licença de software amarrada ao hardware"],
+    ["Instância dedicada", "Hardware não compartilhado com outra conta", "Exigência de isolamento, sem licença por hardware"]
+  ]}
+/>
+
+Os dois primeiros com desconto são o par que mais troca de lugar. A **reserva**
+prende a configuração: o desconto vale para aquela família, aquele tamanho e
+aquela região. O **Savings Plans** prende o valor por hora: enquanto a conta
+gastar o que prometeu, a configuração pode mudar ao longo do contrato. Quando
+o enunciado cita evolução da aplicação ou troca de família, a resposta é
+Savings Plans; quando descreve uma configuração que vai ficar parada onde
+está, é reserva.
+
+<Callout tipo="atencao" titulo="Spot não é desconto por prazo">
+O Spot **não pede compromisso nenhum**. O que ele pede é tolerância à
+interrupção, porque a AWS pode recuperar aquela capacidade. Se o enunciado diz
+que o serviço não pode parar, Spot está fora, por mais barato que seja.
+</Callout>
+
+## Os três tipos de nível gratuito
+
+O exame cobra que o candidato saiba que o nível gratuito não é uma coisa só.
+São três formas de oferta. A primeira é o **teste por tempo limitado**, em que
+um serviço fica liberado por um período curto a partir do momento em que é
+ativado. A segunda é a oferta de **doze meses grátis**, contados da criação da
+conta, dentro de limites definidos por serviço. A terceira é a oferta
+**sempre gratuita**, que não expira e vale enquanto o uso ficar abaixo do
+limite mensal publicado.
+
+Nenhuma delas cobre uso acima do limite: passar do teto gera cobrança normal.
+Por isso as questões costumam emendar nível gratuito com orçamento e alerta de
+custo, assunto do próximo tema.
+
+## Transferência de dados, no nível que a prova pede
+
+A prova não pede tabela de preço, pede o princípio: **entrar dados na AWS em
+geral não é cobrado; sair para a internet é**. Tráfego entre recursos dentro da
+mesma zona de disponibilidade tende a custar menos do que tráfego que cruza
+zonas ou regiões, e o item mais caro costuma ser a saída para fora da nuvem.
+Guardar essa direção resolve as questões do tema sem decorar um único número.
+
+<Callout tipo="dica" titulo="A direção é o que importa">
+Entrada barata ou gratuita, saída para a internet cobrada. Sempre que o
+enunciado falar em custo de rede, verifique **para onde** os dados estão indo
+antes de olhar as alternativas.
+</Callout>
+
+## Como responder o cenário
+
+Leia o enunciado procurando a palavra que classifica a carga. Se ela é nova,
+curta ou de volume desconhecido, a resposta é sob demanda. Se é estável e o
+texto aceita compromisso de um ou três anos, decida entre Savings Plans e
+reserva pela presença de flexibilidade: se a configuração pode mudar, Savings
+Plans; se está congelada, reserva. Se o texto diz que o trabalho pode ser
+interrompido e retomado, é Spot. Se aparece licença presa ao hardware, é host
+dedicado; se aparece apenas exigência de não dividir o servidor com outra
+conta, é instância dedicada. E se o pedido é experimentar sem pagar, é nível
+gratuito, lembrando que ele tem limite e que o limite, uma vez ultrapassado,
+vira fatura.
+
+## Erros comuns
+
+- Trocar instância reservada por Savings Plans. A reserva compromete uma configuração específica de instância em uma região; o Savings Plans compromete um valor por hora e aceita mudar de família, tamanho e até de serviço dentro do tipo contratado.
+- Responder Spot para carga que não pode parar. O preço do Spot vem da capacidade ociosa e a instância pode ser recuperada pela AWS; ele só serve para trabalho tolerante a interrupção.
+- Confundir host dedicado com instância dedicada. O host dedicado entrega o servidor físico inteiro e dá visibilidade dos soquetes e núcleos, o que atende licença amarrada ao hardware; a instância dedicada apenas garante que o hardware não é compartilhado com outra conta.
+- Achar que o nível gratuito é um só. São três formas: teste por tempo limitado, doze meses grátis a partir da criação da conta e ofertas sempre gratuitas dentro de um limite mensal.
+- Supor que entrar dados na AWS custa. A entrada de dados para a nuvem em geral não é cobrada; a saída para a internet é o item que aparece na fatura.
+- Escolher sob demanda quando o enunciado fala em carga estável por um ou três anos. Estabilidade prevista com compromisso aponta Savings Plans ou reserva, não sob demanda.
+- Imaginar que o Spot exige contrato de um ano. O Spot não tem compromisso de prazo: o que ele pede é tolerância à interrupção.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Ferramentas de custo e orçamento
+
+Trilha: AWS Cloud Practitioner · Módulo: Cobrança, preços e suporte
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/ferramentas-de-custo-e-orcamento/
+Tempo estimado: 24 minutos · Nível: fundamental
+
+**Resumo.** Cost Explorer, Budgets, Cost and Usage Report, Pricing Calculator, tags de alocação de custo, Cost Anomaly Detection e Billing Conductor: qual ferramenta responde a qual pergunta sobre a fatura.
+
+**Por que cai na prova.** É o tema em que o exame separa quem entendeu o fluxo do dinheiro de quem decorou nomes. As sete ferramentas parecem intercambiáveis e não são: cada uma responde a uma pergunta diferente, e a questão entrega essa pergunta no enunciado. Quem sabe ler o verbo acerta sem hesitar.
+
+**Como o entrevistador pergunta.** "Uma empresa quer ser avisada por e-mail assim que o gasto do mês passar de um valor definido. Qual ferramenta atende a essa necessidade?"
+
+## Em uma frase
+
+Cada ferramenta de custo responde a **uma pergunta diferente sobre o dinheiro**,
+e o enunciado da CLF entrega a pergunta quase pronta: analisar, alertar, detalhar,
+estimar, separar por área ou apontar desvio.
+
+## A pergunta de cada ferramenta
+
+<Comparativo
+  colunas={["Ferramenta", "A pergunta que responde", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Cost Explorer", "Quanto gastei, com o quê, e para onde a tendência vai?", "Visualizar, analisar, projetar, gráfico"],
+    ["AWS Budgets", "Passei do limite que eu mesmo defini?", "Alertar, notificar, teto, orçamento definido"],
+    ["AWS Cost and Usage Report", "Qual é o detalhe completo da cobrança?", "Dado bruto, linha a linha, exportar para análise"],
+    ["AWS Pricing Calculator", "Quanto vai custar o que ainda não criei?", "Estimar, orçar, proposta, antes de provisionar"],
+    ["Tags de alocação de custo", "Quem, dentro da empresa, gastou o quê?", "Separar por projeto, time, ambiente, centro de custo"],
+    ["AWS Cost Anomaly Detection", "Apareceu um gasto fora do padrão?", "Aumento inesperado, sem limite definido antes"],
+    ["AWS Billing Conductor", "Como repasso o custo internamente ou a clientes?", "Cobrança personalizada, repasse, revenda"]
+  ]}
+/>
+
+## Os três pares que decidem a questão
+
+O primeiro par é **Cost Explorer contra Budgets**, e é o mais frequente. O Cost
+Explorer olha para o passado e projeta o futuro em gráficos; o Budgets guarda um
+número que alguém definiu e avisa quando ele é ultrapassado. Se o verbo é
+analisar, é Cost Explorer; se é alertar, é Budgets.
+
+O segundo par é **Budgets contra Cost Anomaly Detection**. Os dois avisam, mas a
+origem do aviso é diferente: no Budgets o limite vem do cliente, na detecção de
+anomalia o padrão é aprendido pelo próprio serviço. Quando o enunciado diz que
+ninguém definiu um valor aceitável, a resposta é detecção de anomalia.
+
+O terceiro par é **Cost Explorer contra Cost and Usage Report**. O Cost Explorer
+já vem com a interface pronta para decidir; o relatório entrega o conjunto de
+dados mais detalhado da cobrança em arquivo, para quem vai processar em outra
+ferramenta. Detalhe máximo e exportação apontam o relatório.
+
+<Callout tipo="atencao" titulo="Analisar, alertar e estimar são verbos diferentes">
+**Analisar** o gasto que já ocorreu é Cost Explorer. **Alertar** contra um teto
+definido é Budgets. **Estimar** o custo do que ainda não existe é Pricing
+Calculator. Trocar um verbo pelo outro é o erro mais comum do domínio.
+</Callout>
+
+## As tags só valem quando ativadas
+
+Marcar recursos com tags de projeto, time e ambiente é o que permite quebrar a
+fatura por área. O detalhe que a prova cobra é que a tag precisa ser **ativada
+como tag de alocação de custo** na cobrança para aparecer nos relatórios. Tag
+aplicada e não ativada não separa nada, e o custo continua caindo em um bloco
+único.
+
+<Callout tipo="dica" titulo="Antes, durante e depois">
+Antes do gasto existir: Pricing Calculator. Enquanto ele acontece: Budgets e
+detecção de anomalia. Depois que virou fatura: Cost Explorer, relatório
+detalhado e tags de alocação.
+</Callout>
+
+## Como responder o cenário
+
+Localize o verbo antes de olhar as alternativas. Se o pedido é ver e entender o
+gasto, é Cost Explorer. Se é ser avisado contra um valor definido, é Budgets. Se
+é ser avisado sem que ninguém tenha definido valor, é detecção de anomalia. Se é
+obter o detalhe completo para processar fora, é o relatório de custo e uso. Se é
+saber quanto vai custar algo que ainda não existe, é a calculadora de preços. Se
+é separar o custo por área interna, são as tags de alocação, ativadas na
+cobrança. E se é repassar custo para áreas ou clientes com uma visão própria de
+fatura, é o Billing Conductor.
+
+## Erros comuns
+
+- Responder Cost Explorer quando o pedido é alerta. O Cost Explorer analisa e projeta gasto em gráficos; quem avisa ao cruzar um limite é o AWS Budgets.
+- Trocar Budgets por Cost Anomaly Detection. O Budgets dispara quando o valor definido pelo cliente é ultrapassado; a detecção de anomalia usa aprendizado de máquina para apontar um gasto fora do padrão, sem que ninguém tenha definido um teto.
+- Usar o Pricing Calculator para analisar fatura. Ele estima o custo de uma arquitetura antes da criação dos recursos; fatura já emitida é assunto do Cost Explorer ou do relatório detalhado.
+- Achar que o Cost and Usage Report é uma tela. Ele é o conjunto de dados mais detalhado da cobrança, entregue em arquivo para análise, e não um painel pronto.
+- Esquecer que as tags precisam ser ativadas como tags de alocação de custo. Marcar recursos não basta: a tag só aparece nos relatórios depois de ativada na cobrança.
+- Confundir Billing Conductor com faturamento consolidado. O Organizations consolida a fatura real; o Billing Conductor monta uma visão de cobrança personalizada para repassar custos internamente.
+- Responder CloudWatch para pergunta de custo. O CloudWatch mede recursos; a análise e o controle da fatura ficam nas ferramentas de gestão de custos.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Organizations e faturamento consolidado
+
+Trilha: AWS Cloud Practitioner · Módulo: Cobrança, preços e suporte
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/organizations-e-faturamento-consolidado/
+Tempo estimado: 22 minutos · Nível: fundamental
+
+**Resumo.** Várias contas sob uma organização, unidades organizacionais, fatura única com desconto por volume agregado, políticas de controle de serviço no nível de conceito e o Control Tower como ponto de partida de um ambiente novo.
+
+**Por que cai na prova.** O Organizations aparece nos Domínios 2 e 4 com dois rostos diferentes: governança de um lado e dinheiro do outro. Aqui interessa o lado do dinheiro, que é o que o Domínio 4 cobra: uma fatura só, desconto por volume somado e visibilidade do gasto de cada conta. Quem só estudou o lado da política erra a questão de cobrança.
+
+**Como o entrevistador pergunta.** "Um grupo com várias contas da AWS quer pagar uma fatura única e aproveitar descontos por volume sobre o uso somado de todas elas. Qual recurso atende?"
+
+## Em uma frase
+
+O **AWS Organizations** aparece no Domínio 4 pelo lado do dinheiro: várias
+contas sob uma mesma organização pagam **uma fatura só** e têm o uso **somado**
+para alcançar faixas de preço melhores, sem perder a visão de quanto cada conta
+gastou.
+
+## A estrutura, em quatro palavras
+
+A **conta de gerenciamento** cria a organização, recebe a fatura consolidada e
+aplica as políticas. As demais são **contas membro**. Entre uma e outra ficam as
+**unidades organizacionais**, que agrupam contas por ambiente, área ou
+finalidade e permitem aplicar uma regra de uma vez ao grupo inteiro. A conta
+continua sendo o limite mais forte de isolamento da AWS e também a unidade
+natural de cobrança, o que faz da separação em contas uma decisão de segurança e
+de custo ao mesmo tempo.
+
+<Comparativo
+  colunas={["Recurso", "O que entrega", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Organizations", "A organização: contas, grupos e políticas", "Várias contas sob administração comum"],
+    ["Faturamento consolidado", "Uma fatura, custo ainda detalhado por conta", "Pagar de uma vez só, ver o gasto de cada conta"],
+    ["Desconto por volume agregado", "O uso das contas somado para faixas melhores", "Aproveitar escala do grupo, reduzir preço unitário"],
+    ["Unidade organizacional", "Grupo de contas onde a política incide", "Aplicar a mesma regra a um conjunto de contas"],
+    ["Política de controle de serviço", "O teto do que a conta pode fazer", "Impedir uso mesmo do administrador local"],
+    ["AWS Control Tower", "Ambiente de várias contas já governado", "Começar do zero, padronizado e com barreiras"]
+  ]}
+/>
+
+## Por que a fatura única economiza
+
+O ganho não está em receber um boleto em vez de doze. Está na **agregação**: o
+consumo das contas da organização é somado, e faixas de preço que dependem de
+volume ficam ao alcance de um grupo que, conta a conta, nunca chegaria lá.
+Benefícios de compromisso seguem a mesma lógica: Savings Plans e instâncias
+reservadas compradas na organização podem ser aproveitados por outras contas
+quando o compartilhamento está ativado.
+
+<Callout tipo="dica" titulo="Consolidar não é misturar">
+A fatura é uma só, mas o custo continua **detalhado conta a conta** nos
+relatórios de cobrança. Nenhum recurso passa a ser compartilhado por causa da
+consolidação: o isolamento entre contas permanece intacto.
+</Callout>
+
+## Políticas e Control Tower, no nível que o Domínio 4 pede
+
+A **política de controle de serviço** já foi tratada pelo lado da governança no
+tema de conformidade deste curso. Aqui basta reter o efeito prático dentro da
+organização: ela define o **teto** do que uma conta ou uma unidade
+organizacional pode fazer, e não concede nada por conta própria. Permissão
+continua vindo do IAM dentro da conta; a política apenas impede que esse IAM vá
+além do limite.
+
+O **AWS Control Tower** entra quando o enunciado descreve um ambiente que ainda
+não existe. Ele usa o Organizations por baixo e entrega o ambiente de várias
+contas já montado, com estrutura, registro de auditoria e barreiras aplicadas
+desde o início. Quando o pedido é apenas fatura única ou política sobre contas
+que já existem, a resposta é Organizations.
+
+<Callout tipo="atencao" titulo="Organizations ou Control Tower">
+Ambiente **já existente** que precisa de fatura única ou de política central:
+Organizations. Ambiente **novo** que precisa nascer padronizado e governado:
+Control Tower.
+</Callout>
+
+## Como responder o cenário
+
+Procure quantas contas o enunciado menciona e o que ele quer delas. Se quer
+pagar de uma vez e aproveitar escala, é faturamento consolidado no Organizations.
+Se quer aplicar uma regra a um grupo de contas, é unidade organizacional com
+política de controle de serviço. Se quer separar gasto dentro de uma mesma
+conta, aí sim são tags de alocação. E se o ambiente ainda vai ser criado e
+precisa nascer com as barreiras prontas, é Control Tower.
+
+## Erros comuns
+
+- Achar que a fatura consolidada apaga a visibilidade por conta. A fatura é única para pagamento, mas o custo continua detalhado conta a conta nos relatórios.
+- Supor que o desconto por volume vale por conta. O benefício da consolidação é justamente somar o uso de todas as contas para alcançar faixas de preço melhores.
+- Confundir unidade organizacional com conta. A unidade organizacional é o agrupamento onde as contas ficam e onde a política se aplica de uma vez; a conta é o limite de cobrança e de recursos.
+- Achar que política de controle de serviço concede permissão. Ela define o teto do que a conta pode fazer; quem concede permissão continua sendo o IAM dentro da conta.
+- Responder Control Tower para qualquer pedido de várias contas. O Control Tower monta e governa um ambiente novo já com as barreiras prontas; quando o pedido é só a fatura única, a resposta é Organizations.
+- Usar uma conta única com muitas tags no lugar de contas separadas quando o enunciado pede isolamento de ambientes. Conta separada é a fronteira mais forte de isolamento que a AWS oferece.
+- Imaginar que Savings Plans e reservas não atravessam contas. Dentro da organização o benefício de compromisso pode ser compartilhado entre as contas, quando o compartilhamento está ativado.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Planos de suporte, Marketplace e parceiros
+
+Trilha: AWS Cloud Practitioner · Módulo: Cobrança, preços e suporte
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/cobranca/planos-de-suporte-marketplace-e-parceiros/
+Tempo estimado: 24 minutos · Nível: fundamental
+
+**Resumo.** Os cinco planos de suporte da AWS e o que muda a cada degrau, os canais gratuitos como re:Post e Knowledge Center, e onde entram Professional Services, AWS Marketplace, Partner Network e os programas de treinamento.
+
+**Por que cai na prova.** Fecha o Domínio 4 e é o tema mais previsível da prova inteira: a questão descreve uma necessidade de atendimento e pede o plano mínimo que a cobre. Quem tem a escada dos cinco planos na cabeça responde em segundos; quem não tem escolhe o plano mais caro e erra por excesso.
+
+**Como o entrevistador pergunta.** "Uma empresa com cargas de produção quer acesso ao conjunto completo de verificações do Trusted Advisor e suporte técnico por telefone, chat e e-mail. Qual é o plano de suporte mínimo que atende?"
+
+## Em uma frase
+
+A questão de suporte descreve uma necessidade de atendimento e pede o
+**plano mínimo** que a cobre: a escada tem cinco degraus e cada um acrescenta
+algo ao anterior.
+
+## Os cinco planos, degrau a degrau
+
+<Comparativo
+  colunas={["Plano", "Para quem é", "O que acrescenta ao degrau anterior"]}
+  linhas={[
+    ["Basic", "Toda conta da AWS, sem custo adicional", "Atendimento ao cliente e comunidades, documentação, AWS Health e verificações essenciais do Trusted Advisor"],
+    ["Developer", "Ambientes de desenvolvimento e teste", "Abre o chamado técnico, no primeiro nível pago de orientação"],
+    ["Business", "Primeira carga de produção em diante", "Suporte técnico em tempo integral por telefone, chat e e-mail e o conjunto completo do Trusted Advisor"],
+    ["Enterprise On-Ramp", "Cargas críticas sem necessidade do topo", "Acompanhamento e orientação mais próximos do que o Business oferece"],
+    ["Enterprise", "Cargas críticas para o negócio", "Gerente técnico de conta designado e acompanhamento proativo contínuo"]
+  ]}
+/>
+
+Segundo a página de planos da AWS, o **Basic** já inclui atendimento ao cliente
+e acesso às comunidades, documentação, o AWS Health com a visão da saúde dos
+serviços e um conjunto essencial de verificações do Trusted Advisor. O que ele
+não inclui é o chamado técnico, e esse é o corte que decide muitas questões.
+
+O atendimento é organizado por **severidade**, da orientação geral até o sistema
+crítico fora do ar, com prazos de resposta menores quanto maior a severidade e
+mais alto o plano. Os valores exatos mudam com o tempo e ficam na página oficial
+de planos; para a prova basta reter a direção: mais severidade e plano mais alto
+significam resposta mais rápida.
+
+<Callout tipo="atencao" titulo="Business contra Enterprise On-Ramp">
+Esse é o par que mais confunde. Se o enunciado pede **suporte em tempo integral
+para produção**, a resposta é Business. Se pede **acompanhamento mais próximo**
+sem chegar ao gerente técnico designado, é Enterprise On-Ramp. Se pede o
+**profissional designado que conhece a conta**, é Enterprise.
+</Callout>
+
+## O que é gratuito e o que é contratado
+
+Antes de pagar por um plano existem caminhos sem custo. O **AWS re:Post** é a
+comunidade de perguntas e respostas. O **Knowledge Center** reúne respostas
+documentadas às dúvidas mais frequentes do suporte. Documentação e
+documentos técnicos também estão abertos a qualquer conta. Quando o enunciado
+insiste em custo zero, a resposta está nesse grupo.
+
+Do lado contratado, três nomes não se misturam. O **AWS Professional Services**
+é a consultoria da própria AWS dentro de um projeto do cliente. O
+**AWS Partner Network** reúne empresas de consultoria e de tecnologia
+credenciadas pela AWS, para quem prefere contratar um parceiro. E o
+**AWS Marketplace** é o catálogo de software de terceiros pronto para implantar
+na conta, com a cobrança integrada à fatura da AWS.
+
+<Callout tipo="dica" titulo="Produto, empresa ou projeto">
+**Marketplace** vende produto. **Partner Network** indica empresa.
+**Professional Services** entrega gente da AWS dentro de um projeto. Três
+respostas diferentes para três verbos diferentes.
+</Callout>
+
+## Capacitação
+
+O exame também cita os programas de treinamento e certificação da AWS, com
+cursos digitais, treinamento presencial e a própria trilha de certificações. A
+pista no enunciado é **formar pessoas**, e não resolver um incidente nem comprar
+software: quando o pedido é capacitar a equipe, nenhum plano de suporte é a
+resposta.
+
+## Como responder o cenário
+
+Comece perguntando se o pedido é atendimento, produto, empresa, projeto ou
+capacitação. Se é atendimento, suba a escada só até onde o enunciado exige:
+nada pago se a dúvida cabe na comunidade, Developer para desenvolvimento e
+teste, Business assim que aparece produção com suporte em tempo integral,
+Enterprise On-Ramp quando o texto pede acompanhamento mais próximo e Enterprise
+quando cita profissional designado ou carga crítica para o negócio. Se é
+produto, Marketplace. Se é empresa credenciada, Partner Network. Se é projeto
+conduzido pela AWS, Professional Services. E se é formar pessoas, os programas
+de treinamento e certificação.
+
+## Erros comuns
+
+- Responder o plano mais caro sempre. A questão costuma pedir o plano mínimo que atende; escolher acima do necessário é errado tanto na prova quanto na vida.
+- Achar que o Basic não dá nada. Segundo a página de planos da AWS, o Basic inclui atendimento ao cliente e comunidades, documentação, o AWS Health e um conjunto essencial de verificações do Trusted Advisor.
+- Confundir gerente técnico de conta com o suporte que atende chamado. O gerente técnico acompanha a conta de forma proativa; o chamado técnico é atendido pela equipe de suporte segundo a severidade.
+- Misturar AWS Marketplace com AWS Partner Network. O Marketplace é a loja de software de terceiros para implantar na conta; a rede de parceiros reúne empresas de consultoria e tecnologia credenciadas pela AWS.
+- Trocar Professional Services por suporte. O Professional Services é a consultoria da própria AWS em um projeto; o suporte atende dúvidas e incidentes da operação.
+- Achar que o re:Post é canal oficial de chamado. O re:Post é a comunidade de perguntas e respostas, gratuita; chamado técnico depende de um plano pago.
+- Supor que Enterprise On-Ramp é o mesmo que Enterprise. O On-Ramp é o degrau intermediário entre Business e Enterprise, com acompanhamento mais leve do que o do Enterprise.
 
 ## Perguntas de sabatina e respostas-modelo
 

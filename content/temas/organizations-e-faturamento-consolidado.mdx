@@ -1,0 +1,259 @@
+---
+slug: organizations-e-faturamento-consolidado
+titulo: "Organizations e faturamento consolidado"
+resumo: "Várias contas sob uma organização, unidades organizacionais, fatura única com desconto por volume agregado, políticas de controle de serviço no nível de conceito e o Control Tower como ponto de partida de um ambiente novo."
+minutos: 22
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-20"
+porQue: "O Organizations aparece nos Domínios 2 e 4 com dois rostos diferentes: governança de um lado e dinheiro do outro. Aqui interessa o lado do dinheiro, que é o que o Domínio 4 cobra: uma fatura só, desconto por volume somado e visibilidade do gasto de cada conta. Quem só estudou o lado da política erra a questão de cobrança."
+comoCai: "Um grupo com várias contas da AWS quer pagar uma fatura única e aproveitar descontos por volume sobre o uso somado de todas elas. Qual recurso atende?"
+feynman: "Explique em um minuto por que cinco lojas da mesma rede comprando juntas pagam menos por unidade do que cada uma comprando por conta própria, e por que a matriz ainda consegue ver quanto cada loja consumiu."
+preRequisitos: ["como-ler-uma-questao-clf", "economia-da-nuvem", "conformidade-e-governanca-na-aws"]
+errosComuns:
+  - "Achar que a fatura consolidada apaga a visibilidade por conta. A fatura é única para pagamento, mas o custo continua detalhado conta a conta nos relatórios."
+  - "Supor que o desconto por volume vale por conta. O benefício da consolidação é justamente somar o uso de todas as contas para alcançar faixas de preço melhores."
+  - "Confundir unidade organizacional com conta. A unidade organizacional é o agrupamento onde as contas ficam e onde a política se aplica de uma vez; a conta é o limite de cobrança e de recursos."
+  - "Achar que política de controle de serviço concede permissão. Ela define o teto do que a conta pode fazer; quem concede permissão continua sendo o IAM dentro da conta."
+  - "Responder Control Tower para qualquer pedido de várias contas. O Control Tower monta e governa um ambiente novo já com as barreiras prontas; quando o pedido é só a fatura única, a resposta é Organizations."
+  - "Usar uma conta única com muitas tags no lugar de contas separadas quando o enunciado pede isolamento de ambientes. Conta separada é a fronteira mais forte de isolamento que a AWS oferece."
+  - "Imaginar que Savings Plans e reservas não atravessam contas. Dentro da organização o benefício de compromisso pode ser compartilhado entre as contas, quando o compartilhamento está ativado."
+preTeste:
+  - enunciado: "Um grupo mantém oito contas da AWS e quer receber uma fatura única, aproveitando desconto por volume sobre o uso somado das oito. Qual recurso atende?"
+    alternativas:
+      - texto: "AWS Organizations com faturamento consolidado."
+        correta: true
+        explicacao: "A organização junta as contas sob uma conta de gerenciamento, emite fatura única e soma o uso para alcançar faixas de preço melhores."
+      - texto: "Tags de alocação de custo em cada conta."
+        correta: false
+        explicacao: "Separam o gasto para análise, mas não unificam a fatura nem agregam volume para desconto."
+      - texto: "AWS Budgets em cada conta."
+        correta: false
+        explicacao: "Define teto e alerta de gasto, sem relação com fatura única ou desconto por volume."
+  - enunciado: "Uma empresa vai criar do zero um ambiente com várias contas e quer que ele já nasça com estrutura organizacional, registro de auditoria e barreiras de segurança configuradas. Qual serviço atende?"
+    alternativas:
+      - texto: "AWS Control Tower."
+        correta: true
+        explicacao: "Ele monta e governa um ambiente de várias contas seguindo um modelo pronto, com as barreiras já aplicadas."
+      - texto: "AWS Organizations sozinho."
+        correta: false
+        explicacao: "Vizinho direto e base do Control Tower, mas sozinho ele não entrega o ambiente pré-configurado que o pedido descreve."
+      - texto: "AWS Identity and Access Management."
+        correta: false
+        explicacao: "Trata de identidades e permissões dentro de uma conta, e não da montagem de um ambiente com várias contas."
+videos:
+  - id: kqUuFWdLrJs
+    publicadoEm: "2025-05-22"
+    titulo: "Como funciona o AWS Organizations para gerenciar suas contas"
+    canal: "AprendaAWS"
+    duracao: 21
+    porQue: "Vinte minutos sobre a estrutura da organização, com contas, unidades organizacionais e o efeito no faturamento. É o nível de profundidade que a prova pede."
+  - id: QLb9rhs3gu0
+    publicadoEm: "2021-05-18"
+    titulo: "AWS Organizations | organize suas contas AWS"
+    canal: "Full Cloud Channel"
+    duracao: 13
+    porQue: "Treze minutos com a organização montada na prática. Use como revisão rápida do vocabulário: conta de gerenciamento, conta membro e unidade organizacional."
+artigos:
+  - titulo: "What is AWS Organizations?"
+    url: "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html"
+    fonte: "AWS"
+  - titulo: "Consolidated billing for AWS Organizations"
+    url: "https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html"
+    fonte: "AWS"
+  - titulo: "Service control policies (SCPs)"
+    url: "https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Control Tower?"
+    url: "https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "AWS Organizations, no lado do dinheiro."
+    verso: "Junta várias contas sob uma conta de gerenciamento, emite fatura única e soma o uso das contas para desconto por volume."
+  - frente: "Conta de gerenciamento, em uma linha."
+    verso: "A conta que cria a organização, recebe a fatura consolidada e aplica as políticas. As demais são contas membro."
+  - frente: "Unidade organizacional, em uma linha."
+    verso: "Agrupamento de contas dentro da organização, onde a política se aplica de uma vez a todas as contas do grupo."
+  - frente: "Faturamento consolidado, em uma linha."
+    verso: "Uma fatura para pagamento, com o custo de cada conta ainda detalhado nos relatórios."
+  - frente: "Desconto por volume agregado, em uma linha."
+    verso: "O uso das contas da organização é somado, o que ajuda a alcançar faixas de preço melhores do que cada conta alcançaria sozinha."
+  - frente: "Política de controle de serviço, em uma linha."
+    verso: "Define o teto do que uma conta ou unidade organizacional pode fazer. Não concede nada: quem concede é o IAM dentro da conta."
+  - frente: "AWS Control Tower, em uma linha."
+    verso: "Monta e governa um ambiente de várias contas já com estrutura, auditoria e barreiras configuradas. A pista é ambiente novo, começar certo."
+  - frente: "Organizations contra Control Tower."
+    verso: "Organizations é a base: contas, grupos, políticas e fatura. Control Tower usa essa base para entregar um ambiente pronto e governado."
+  - frente: "Por que separar em contas."
+    verso: "A conta é a fronteira mais forte de isolamento da AWS e também a unidade natural de cobrança, o que separa ambientes e custos de uma vez."
+  - frente: "O que a fatura consolidada não faz."
+    verso: "Não esconde o gasto de cada conta e não mistura recursos: o isolamento entre contas continua valendo."
+  - frente: "Benefício de compromisso na organização."
+    verso: "Savings Plans e reservas podem ser compartilhados entre as contas da organização quando o compartilhamento está ativado."
+  - frente: "A pista de Organizations no enunciado."
+    verso: "Várias contas, fatura única, desconto por volume somado, política que vale para um grupo inteiro de contas."
+  - frente: "A pista de Control Tower no enunciado."
+    verso: "Ambiente novo de várias contas que precisa nascer padronizado, com barreiras e auditoria já configuradas."
+drills:
+  - titulo: "Organizations, fatura e governança: o que atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o recurso ou conceito da AWS que a resolve."
+    opcoes:
+      ["AWS Organizations", "Faturamento consolidado", "Unidade organizacional", "Política de controle de serviço", "AWS Control Tower", "Tags de alocação de custo"]
+    itens:
+      - enunciado: "Reunir contas de várias áreas da empresa sob uma única estrutura administrativa."
+        resposta: "AWS Organizations"
+        explicacao: "O serviço que cria e administra a organização."
+      - enunciado: "Pagar uma fatura só pelas contas do grupo e aproveitar desconto sobre o uso somado."
+        resposta: "Faturamento consolidado"
+        explicacao: "Fatura única com agregação de volume."
+      - enunciado: "Aplicar a mesma regra de uma vez a todas as contas do ambiente de produção."
+        resposta: "Unidade organizacional"
+        explicacao: "O agrupamento onde a política incide."
+      - enunciado: "Impedir que qualquer conta de um grupo use serviços fora das regiões aprovadas, sem depender da boa vontade do administrador local."
+        resposta: "Política de controle de serviço"
+        explicacao: "Teto de permissão que a conta não consegue ultrapassar."
+      - enunciado: "Criar do zero um ambiente de várias contas já com estrutura, auditoria e barreiras configuradas."
+        resposta: "AWS Control Tower"
+        explicacao: "Ambiente pronto e governado desde o início."
+      - enunciado: "Separar, dentro de uma mesma conta, quanto cada projeto consumiu no mês."
+        resposta: "Tags de alocação de custo"
+        explicacao: "Rótulos ativados na cobrança."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa mantém doze contas da AWS em áreas diferentes e quer reduzir o custo total aproveitando faixas de preço melhores, sem perder a visão de quanto cada área consome. Qual recurso atende?"
+    alternativas:
+      - texto: "AWS Organizations com faturamento consolidado."
+        correta: true
+        explicacao: "A consolidação soma o uso das contas para alcançar faixas de preço melhores e mantém o custo detalhado por conta nos relatórios."
+      - texto: "Instâncias reservadas compradas em cada conta separadamente."
+        correta: false
+        explicacao: "Reduz custo de computação específica, mas não agrega volume entre contas nem unifica a fatura."
+      - texto: "AWS Cost Explorer em cada conta."
+        correta: false
+        explicacao: "Vizinho plausível por tratar de custo, mas ele analisa o gasto e não altera o preço nem consolida a fatura."
+      - texto: "AWS Budgets com um teto por área."
+        correta: false
+        explicacao: "Controla e alerta sobre gasto, sem gerar desconto por volume agregado."
+  - tipo: unica
+    enunciado: "Dentro de uma organização, a área de segurança quer garantir que nenhuma conta do grupo de produção consiga usar serviços fora das regiões aprovadas, mesmo que o administrador daquela conta tente liberar. Qual recurso atende?"
+    alternativas:
+      - texto: "Política de controle de serviço aplicada à unidade organizacional de produção."
+        correta: true
+        explicacao: "A política define o teto do que as contas daquele grupo podem fazer, e o administrador local não consegue ultrapassar esse teto."
+      - texto: "Uma política do IAM em cada conta do grupo."
+        correta: false
+        explicacao: "Vizinho direto, mas ela é administrada dentro da conta e pode ser alterada por quem tem permissão ali."
+      - texto: "Faturamento consolidado para as contas de produção."
+        correta: false
+        explicacao: "Trata de fatura única e desconto por volume, sem restringir o que a conta pode usar."
+      - texto: "Tags de alocação de custo no grupo de produção."
+        correta: false
+        explicacao: "Servem para separar o gasto nos relatórios e não impõem restrição de uso."
+  - tipo: unica
+    enunciado: "Uma empresa vai iniciar sua adoção da AWS e quer que o ambiente já nasça com várias contas organizadas, registro de auditoria centralizado e barreiras de segurança aplicadas por padrão. Qual serviço atende melhor?"
+    alternativas:
+      - texto: "AWS Control Tower."
+        correta: true
+        explicacao: "Ele monta e governa o ambiente de várias contas seguindo um modelo pronto, o que é exatamente o pedido de começar padronizado."
+      - texto: "AWS Organizations, apenas."
+        correta: false
+        explicacao: "É a base sobre a qual o Control Tower trabalha, mas sozinho não entrega o ambiente já configurado com auditoria e barreiras."
+      - texto: "AWS Config em cada conta."
+        correta: false
+        explicacao: "Acompanha configuração e conformidade dos recursos, mas não cria a estrutura de contas do ambiente."
+      - texto: "AWS IAM Identity Center."
+        correta: false
+        explicacao: "Centraliza o acesso das pessoas às contas, e não a montagem governada do ambiente."
+  - tipo: multipla
+    enunciado: "Um grupo com várias contas quer reduzir o esforço de pagamento e, ao mesmo tempo, garantir que um conjunto de contas nunca exceda um limite de permissões definido centralmente. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Faturamento consolidado no AWS Organizations para pagar em uma fatura única."
+        correta: true
+        explicacao: "A consolidação reúne o pagamento em uma fatura só, preservando o detalhe de custo por conta."
+      - texto: "Política de controle de serviço aplicada à unidade organizacional que reúne essas contas."
+        correta: true
+        explicacao: "A política define centralmente o teto de permissões e vale para todas as contas do grupo de uma vez."
+      - texto: "Uma conta da AWS única para todo o grupo, com tags por área."
+        correta: false
+        explicacao: "Tags separam o custo nos relatórios, mas juntar tudo em uma conta elimina o isolamento que o enunciado pressupõe."
+      - texto: "AWS Budgets configurado em cada conta membro."
+        correta: false
+        explicacao: "Alerta sobre gasto, sem unificar pagamento nem limitar permissões."
+      - texto: "Políticas do IAM replicadas manualmente em cada conta."
+        correta: false
+        explicacao: "Dependem do administrador de cada conta e não formam um teto central que ninguém consegue ultrapassar."
+---
+
+## Em uma frase
+
+O **AWS Organizations** aparece no Domínio 4 pelo lado do dinheiro: várias
+contas sob uma mesma organização pagam **uma fatura só** e têm o uso **somado**
+para alcançar faixas de preço melhores, sem perder a visão de quanto cada conta
+gastou.
+
+## A estrutura, em quatro palavras
+
+A **conta de gerenciamento** cria a organização, recebe a fatura consolidada e
+aplica as políticas. As demais são **contas membro**. Entre uma e outra ficam as
+**unidades organizacionais**, que agrupam contas por ambiente, área ou
+finalidade e permitem aplicar uma regra de uma vez ao grupo inteiro. A conta
+continua sendo o limite mais forte de isolamento da AWS e também a unidade
+natural de cobrança, o que faz da separação em contas uma decisão de segurança e
+de custo ao mesmo tempo.
+
+<Comparativo
+  colunas={["Recurso", "O que entrega", "A pista no enunciado"]}
+  linhas={[
+    ["AWS Organizations", "A organização: contas, grupos e políticas", "Várias contas sob administração comum"],
+    ["Faturamento consolidado", "Uma fatura, custo ainda detalhado por conta", "Pagar de uma vez só, ver o gasto de cada conta"],
+    ["Desconto por volume agregado", "O uso das contas somado para faixas melhores", "Aproveitar escala do grupo, reduzir preço unitário"],
+    ["Unidade organizacional", "Grupo de contas onde a política incide", "Aplicar a mesma regra a um conjunto de contas"],
+    ["Política de controle de serviço", "O teto do que a conta pode fazer", "Impedir uso mesmo do administrador local"],
+    ["AWS Control Tower", "Ambiente de várias contas já governado", "Começar do zero, padronizado e com barreiras"]
+  ]}
+/>
+
+## Por que a fatura única economiza
+
+O ganho não está em receber um boleto em vez de doze. Está na **agregação**: o
+consumo das contas da organização é somado, e faixas de preço que dependem de
+volume ficam ao alcance de um grupo que, conta a conta, nunca chegaria lá.
+Benefícios de compromisso seguem a mesma lógica: Savings Plans e instâncias
+reservadas compradas na organização podem ser aproveitados por outras contas
+quando o compartilhamento está ativado.
+
+<Callout tipo="dica" titulo="Consolidar não é misturar">
+A fatura é uma só, mas o custo continua **detalhado conta a conta** nos
+relatórios de cobrança. Nenhum recurso passa a ser compartilhado por causa da
+consolidação: o isolamento entre contas permanece intacto.
+</Callout>
+
+## Políticas e Control Tower, no nível que o Domínio 4 pede
+
+A **política de controle de serviço** já foi tratada pelo lado da governança no
+tema de conformidade deste curso. Aqui basta reter o efeito prático dentro da
+organização: ela define o **teto** do que uma conta ou uma unidade
+organizacional pode fazer, e não concede nada por conta própria. Permissão
+continua vindo do IAM dentro da conta; a política apenas impede que esse IAM vá
+além do limite.
+
+O **AWS Control Tower** entra quando o enunciado descreve um ambiente que ainda
+não existe. Ele usa o Organizations por baixo e entrega o ambiente de várias
+contas já montado, com estrutura, registro de auditoria e barreiras aplicadas
+desde o início. Quando o pedido é apenas fatura única ou política sobre contas
+que já existem, a resposta é Organizations.
+
+<Callout tipo="atencao" titulo="Organizations ou Control Tower">
+Ambiente **já existente** que precisa de fatura única ou de política central:
+Organizations. Ambiente **novo** que precisa nascer padronizado e governado:
+Control Tower.
+</Callout>
+
+## Como responder o cenário
+
+Procure quantas contas o enunciado menciona e o que ele quer delas. Se quer
+pagar de uma vez e aproveitar escala, é faturamento consolidado no Organizations.
+Se quer aplicar uma regra a um grupo de contas, é unidade organizacional com
+política de controle de serviço. Se quer separar gasto dentro de uma mesma
+conta, aí sim são tags de alocação. E se o ambiente ainda vai ser criado e
+precisa nascer com as barreiras prontas, é Control Tower.
