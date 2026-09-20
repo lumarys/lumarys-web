@@ -1,0 +1,255 @@
+---
+slug: infraestrutura-global-da-aws
+titulo: "A infraestrutura global da AWS"
+resumo: "Regiões, zonas de disponibilidade, Local Zones, Wavelength, Outposts e edge locations; CloudFront, Route 53 e Global Accelerator no nível de para que serve; e os quatro critérios que decidem em qual região implantar."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 3.2 do guia e o vocabulário que sustenta o resto do domínio. Alta disponibilidade, latência e residência de dados aparecem em questões de computação, armazenamento e rede, e todas elas supõem que região e zona de disponibilidade já estão claras. Sem essa base, o candidato responde região quando o pedido é zona."
+comoCai: "Uma empresa quer que a aplicação continue no ar mesmo se um datacenter falhar, sem sair da mesma região. O que ela deve fazer?"
+feynman: "Explique em um minuto para alguém de negócio a diferença entre estar em duas cidades, estar em dois prédios da mesma cidade e ter uma cópia do conteúdo na esquina de quem acessa."
+preRequisitos: ["como-ler-uma-questao-clf"]
+errosComuns:
+  - "Confundir região com zona de disponibilidade. Região é a área geográfica; a zona é um ou mais datacenters isolados dentro dela, e toda região tem várias zonas."
+  - "Achar que usar duas zonas de disponibilidade protege contra a falha de uma região inteira. Para isso é preciso uma segunda região."
+  - "Trocar CloudFront por Global Accelerator. O CloudFront guarda cópia do conteúdo perto de quem acessa; o Global Accelerator melhora o caminho de rede até a aplicação, sem guardar conteúdo."
+  - "Achar que edge location é uma zona de disponibilidade menor. Edge location é ponto de presença para entrega de conteúdo e DNS, não um lugar onde se roda instância comum."
+  - "Confundir Local Zones com Outposts. A Local Zone é infraestrutura da AWS perto de um grande centro urbano; o Outposts é um rack da AWS instalado no datacenter do cliente."
+  - "Esquecer que preço e disponibilidade de serviço variam por região, e que nem todo serviço existe em todas elas."
+  - "Achar que residência de dados se resolve com edge location. Ela se resolve escolhendo a região onde o dado fica."
+preTeste:
+  - enunciado: "Uma aplicação precisa continuar disponível mesmo se um datacenter falhar, sem que a empresa queira sair da região onde já opera. Qual é a recomendação?"
+    alternativas:
+      - texto: "Distribuir a aplicação por várias zonas de disponibilidade da mesma região."
+        correta: true
+        explicacao: "As zonas de disponibilidade são isoladas entre si em energia e refrigeração, e são exatamente o mecanismo de alta disponibilidade dentro de uma região."
+      - texto: "Implantar a aplicação em uma segunda região."
+        correta: false
+        explicacao: "Resolveria, mas contraria o pedido de permanecer na mesma região e adiciona complexidade desnecessária para falha de um datacenter."
+      - texto: "Publicar a aplicação por edge locations do CloudFront."
+        correta: false
+        explicacao: "Edge location entrega conteúdo em cache perto do usuário; ela não executa a aplicação nem substitui a redundância de zonas."
+  - enunciado: "Um site atende usuários no mundo inteiro e sofre com lentidão ao servir imagens e vídeos a quem está longe da região de origem. Qual serviço resolve isso?"
+    alternativas:
+      - texto: "Amazon CloudFront."
+        correta: true
+        explicacao: "É a rede de entrega de conteúdo da AWS: guarda cópia do conteúdo em edge locations perto de quem acessa e reduz a latência de entrega."
+      - texto: "AWS Global Accelerator."
+        correta: false
+        explicacao: "Vizinho plausível: ele melhora o caminho de rede até a aplicação, mas não armazena conteúdo em cache, que é o que o enunciado descreve."
+      - texto: "Amazon Route 53."
+        correta: false
+        explicacao: "É o serviço de DNS: resolve nomes em endereços, sem entregar o arquivo em si."
+videos:
+  - id: Nutn3mlsMYg
+    publicadoEm: "2026-08-20"
+    titulo: "Arquitetura Global AWS: Regiões, AZs, Local Zones e Outposts | SAA-C03"
+    canal: "Biano da TI"
+    duracao: 8
+    porQue: "Oito minutos percorrendo região, zona de disponibilidade, Local Zone e Outposts na ordem em que a prova cobra. Pare em cada termo e diga onde ele fica no mapa antes de seguir."
+  - id: 5tCfifnHpNU
+    publicadoEm: "2026-08-26"
+    titulo: "Nuvem para Iniciantes #02 - Regiões e Zonas de Disponibilidade na AWS"
+    canal: "Fabricio Barros"
+    duracao: 10
+    porQue: "Cobre o mesmo par no nível de iniciante, com foco em alta disponibilidade. Bom para fixar por que duas zonas resolvem falha de datacenter e não resolvem falha de região."
+artigos:
+  - titulo: "Regions and Availability Zones"
+    url: "https://docs.aws.amazon.com/global-infrastructure/latest/regions/aws-regions.html"
+    fonte: "AWS"
+  - titulo: "Global Infrastructure"
+    url: "https://aws.amazon.com/about-aws/global-infrastructure/"
+    fonte: "AWS"
+  - titulo: "What is Amazon CloudFront?"
+    url: "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Global Accelerator?"
+    url: "https://docs.aws.amazon.com/global-accelerator/latest/dg/what-is-global-accelerator.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Outposts?"
+    url: "https://docs.aws.amazon.com/outposts/latest/userguide/what-is-outposts.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Região da AWS, em uma linha."
+    verso: "Área geográfica com várias zonas de disponibilidade, isolada das demais regiões. A pista é residência de dados, país, preço e disponibilidade de serviço."
+  - frente: "Zona de disponibilidade, em uma linha."
+    verso: "Um ou mais datacenters isolados dentro de uma região, com energia e refrigeração próprias. A pista é alta disponibilidade sem sair da região."
+  - frente: "Edge location, em uma linha."
+    verso: "Ponto de presença usado para entregar conteúdo em cache e resolver DNS perto do usuário. A pista é latência de entrega de conteúdo."
+  - frente: "AWS Local Zones, em uma linha."
+    verso: "Extensão da região perto de um grande centro urbano, para cargas que precisam de latência de poucos milissegundos. A pista é usuário em uma cidade específica."
+  - frente: "AWS Wavelength, em uma linha."
+    verso: "Infraestrutura da AWS dentro da rede de operadoras móveis, para aplicações que atendem dispositivos 5G. A pista é rede móvel e latência muito baixa."
+  - frente: "AWS Outposts, em uma linha."
+    verso: "Rack com infraestrutura da AWS instalado no datacenter do cliente. A pista é dado que não pode sair do prédio, mas com as mesmas APIs da AWS."
+  - frente: "Amazon CloudFront, em uma linha."
+    verso: "Rede de entrega de conteúdo que guarda cópia em edge locations perto de quem acessa. A pista é acelerar entrega de arquivo, imagem ou vídeo."
+  - frente: "AWS Global Accelerator, em uma linha."
+    verso: "Melhora o caminho de rede até a aplicação usando a rede da AWS e endereços fixos. A pista é acelerar tráfego que não é conteúdo estático."
+  - frente: "Amazon Route 53, em uma linha."
+    verso: "Serviço de DNS gerenciado, com registro de domínio e políticas de roteamento. A pista é resolver nome, direcionar por região ou por saúde."
+  - frente: "CloudFront contra Global Accelerator."
+    verso: "CloudFront guarda o conteúdo perto do usuário; Global Accelerator encurta o caminho de rede até a aplicação, sem cache."
+  - frente: "Local Zones contra Outposts."
+    verso: "Local Zone é infraestrutura da AWS na cidade; Outposts é infraestrutura da AWS dentro do datacenter do cliente."
+  - frente: "Os quatro critérios para escolher uma região."
+    verso: "Latência até os usuários, residência de dados e exigência legal, preço do serviço naquela região e disponibilidade do serviço desejado ali."
+  - frente: "A pista de multirregião no enunciado."
+    verso: "Continuar operando mesmo se uma região inteira ficar indisponível, ou atender usuários de outro continente a partir dali."
+drills:
+  - titulo: "Qual peça da infraestrutura global atende ao pedido?"
+    instrucao: "Para cada necessidade, indique a peça da infraestrutura global ou o serviço de borda que a resolve."
+    opcoes:
+      ["Zona de disponibilidade", "Região", "Amazon CloudFront", "AWS Global Accelerator", "AWS Outposts", "AWS Local Zones"]
+    itens:
+      - enunciado: "Manter a aplicação no ar se um datacenter falhar, permanecendo onde já se opera."
+        resposta: "Zona de disponibilidade"
+        explicacao: "Redundância dentro da mesma região."
+      - enunciado: "Guardar os dados de clientes dentro de um país específico por exigência legal."
+        resposta: "Região"
+        explicacao: "Residência de dados se decide escolhendo a região."
+      - enunciado: "Reduzir o tempo de carregamento de imagens e vídeos para visitantes de outro continente."
+        resposta: "Amazon CloudFront"
+        explicacao: "Cache de conteúdo em edge location."
+      - enunciado: "Melhorar a latência de um jogo em tempo real que usa TCP e UDP, sem conteúdo para guardar em cache."
+        resposta: "AWS Global Accelerator"
+        explicacao: "Otimização de caminho de rede até a aplicação."
+      - enunciado: "Rodar serviços da AWS dentro do datacenter da empresa, porque o dado não pode sair do prédio."
+        resposta: "AWS Outposts"
+        explicacao: "Infraestrutura da AWS instalada no cliente."
+      - enunciado: "Atender usuários de uma grande capital com poucos milissegundos de latência, sem criar uma região nova."
+        resposta: "AWS Local Zones"
+        explicacao: "Extensão da região perto do centro urbano."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma equipe quer aumentar a disponibilidade de uma aplicação para que ela resista à falha de um datacenter, sem mudar de região por causa de exigência de residência de dados. Qual é a recomendação da AWS?"
+    alternativas:
+      - texto: "Implantar a aplicação em várias zonas de disponibilidade da mesma região."
+        correta: true
+        explicacao: "As zonas são isoladas em energia, refrigeração e rede, e são o mecanismo de alta disponibilidade dentro de uma região."
+      - texto: "Implantar a aplicação em uma segunda região."
+        correta: false
+        explicacao: "Vizinho plausível, mas o enunciado proíbe sair da região por causa da residência de dados."
+      - texto: "Publicar a aplicação em edge locations do CloudFront."
+        correta: false
+        explicacao: "Edge location entrega conteúdo em cache; ela não executa a aplicação nem dá redundância de computação."
+      - texto: "Instalar um AWS Outposts no datacenter da empresa."
+        correta: false
+        explicacao: "Outposts leva infraestrutura da AWS para o ambiente do cliente e não resolve a redundância pedida dentro da região."
+  - tipo: unica
+    enunciado: "Uma empresa vai lançar um serviço novo e precisa escolher a região da AWS. Ela quer o menor tempo de resposta para usuários concentrados em um país e precisa manter os dados dentro desse país. Quais critérios são os decisivos aqui?"
+    alternativas:
+      - texto: "Latência até os usuários e residência de dados."
+        correta: true
+        explicacao: "São exatamente os dois requisitos do enunciado, e ambos se resolvem na escolha da região."
+      - texto: "Número de zonas de disponibilidade e tipo de instância disponível."
+        correta: false
+        explicacao: "São considerações reais, mas não é o que o enunciado pede; ele fala de tempo de resposta e de onde o dado fica."
+      - texto: "Quantidade de edge locations próximas e política de roteamento do DNS."
+        correta: false
+        explicacao: "Tratam de entrega de conteúdo e de resolução de nomes, não da localização dos dados."
+      - texto: "Disponibilidade de suporte em português e fuso horário da equipe."
+        correta: false
+        explicacao: "Não são critérios de escolha de região previstos pela AWS para esse cenário."
+  - tipo: unica
+    enunciado: "Uma aplicação usa protocolos TCP e UDP e não tem conteúdo estático para armazenar em cache. A empresa quer reduzir a latência dos usuários globais e ter endereços de entrada fixos. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Global Accelerator."
+        correta: true
+        explicacao: "Ele direciona o tráfego pela rede global da AWS até a aplicação e oferece endereços fixos, sem depender de cache de conteúdo."
+      - texto: "Amazon CloudFront."
+        correta: false
+        explicacao: "Vizinho plausível, mas o valor dele está em guardar conteúdo em cache, e o enunciado diz que não há conteúdo estático."
+      - texto: "Amazon Route 53."
+        correta: false
+        explicacao: "Resolve nomes em endereços e pode rotear por latência, mas não transporta o tráfego pela rede da AWS."
+      - texto: "AWS Local Zones."
+        correta: false
+        explicacao: "Aproxima a computação de uma cidade específica; não é a resposta para usuários espalhados pelo mundo."
+  - tipo: multipla
+    enunciado: "Uma empresa precisa manter parte do processamento dentro do próprio datacenter por exigência regulatória e, ao mesmo tempo, atender usuários de uma capital distante com latência de poucos milissegundos. Quais DUAS opções da infraestrutura global atendem a esses objetivos?"
+    alternativas:
+      - texto: "Usar AWS Outposts no datacenter da empresa para o processamento que não pode sair."
+        correta: true
+        explicacao: "O Outposts leva infraestrutura e APIs da AWS para o ambiente do cliente, mantendo o dado no local exigido."
+      - texto: "Usar AWS Local Zones para aproximar a computação dos usuários daquela capital."
+        correta: true
+        explicacao: "A Local Zone é uma extensão da região perto de um grande centro urbano, feita para latência muito baixa."
+      - texto: "Criar zonas de disponibilidade próprias dentro do datacenter da empresa."
+        correta: false
+        explicacao: "Zonas de disponibilidade são infraestrutura da AWS dentro de uma região e não podem ser criadas pelo cliente."
+      - texto: "Configurar edge locations do CloudFront para executar o processamento regulado."
+        correta: false
+        explicacao: "Edge location entrega conteúdo em cache e não é o lugar onde se executa processamento regulado."
+      - texto: "Contratar AWS Wavelength para manter o dado dentro do datacenter."
+        correta: false
+        explicacao: "O Wavelength fica na rede de operadoras móveis, para aplicações 5G, e não mantém dado no datacenter do cliente."
+---
+
+## Em uma frase
+
+A infraestrutura global é uma hierarquia de lugares, da **região** à **zona de
+disponibilidade** e à **edge location**, e quase toda questão do tema se resolve
+identificando em qual desses níveis está o problema descrito.
+
+## Região, zona e borda
+
+A **região** é a área geográfica, isolada das outras, e é onde se decide
+residência de dados, preço e quais serviços estão disponíveis. Dentro dela, a
+**zona de disponibilidade** é um ou mais datacenters com energia, refrigeração e
+rede próprias, separados o bastante para não caírem juntos e perto o bastante
+para responderem rápido entre si. A **edge location** não fica nesse mesmo
+tabuleiro: é um ponto de presença para entregar conteúdo e resolver DNS perto de
+quem acessa.
+
+<Callout tipo="dica" titulo="A regra que resolve metade das questões">
+Falha de datacenter se resolve com **mais zonas**. Falha de região inteira se
+resolve com **mais regiões**. Lentidão de entrega de arquivo se resolve na
+**borda**. Antes de olhar as alternativas, decida em qual desses três níveis
+está o problema do enunciado.
+</Callout>
+
+## O catálogo da borda e dos lugares especiais
+
+<Comparativo
+  colunas={["Serviço ou peça", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Região", "Área geográfica com várias zonas de disponibilidade", "Residência de dados, país, preço, serviço disponível"],
+    ["Zona de disponibilidade", "Datacenters isolados dentro de uma região", "Resistir à falha de um datacenter sem sair da região"],
+    ["Edge location", "Ponto de presença para conteúdo em cache e DNS", "Entregar arquivo rápido a quem está longe"],
+    ["Amazon CloudFront", "Rede de entrega de conteúdo sobre as edge locations", "Imagem, vídeo, site estático, latência de download"],
+    ["AWS Global Accelerator", "Caminho otimizado pela rede da AWS, com endereços fixos", "TCP e UDP, sem conteúdo para cache, endereço de entrada fixo"],
+    ["Amazon Route 53", "DNS gerenciado com registro de domínio e roteamento", "Resolver nome, rotear por latência, por região ou por saúde"],
+    ["AWS Local Zones", "Extensão da região perto de um grande centro urbano", "Usuários de uma cidade específica, poucos milissegundos"],
+    ["AWS Wavelength", "Infraestrutura da AWS na rede de operadoras móveis", "Aplicação para dispositivos 5G"],
+    ["AWS Outposts", "Rack da AWS instalado no datacenter do cliente", "Dado que não pode sair do prédio, mesmas APIs da AWS"]
+  ]}
+/>
+
+## Escolher a região
+
+A prova costuma perguntar por que uma empresa escolheria uma região e não outra,
+e a resposta esperada combina quatro critérios: **latência** até os usuários,
+**residência de dados** e exigência legal, **preço**, que varia por região, e
+**disponibilidade do serviço**, porque nem todo serviço existe em toda região.
+Quando o enunciado cita lei ou país, o critério é residência de dados. Quando
+cita tempo de resposta, é latência.
+
+<Callout tipo="atencao" titulo="CloudFront não é Global Accelerator">
+Os dois aceleram, e por isso aparecem juntos. O CloudFront **guarda uma cópia**
+do conteúdo perto do usuário e brilha com arquivo estático. O Global Accelerator
+**encurta o caminho** até a aplicação e brilha com tráfego que não dá para
+guardar, como uma API interativa ou um jogo. Sem conteúdo em cache no enunciado,
+é Global Accelerator.
+</Callout>
+
+## Como responder o cenário
+
+Localize o nível antes do serviço. Se o problema é um datacenter, a resposta tem
+zona de disponibilidade. Se é a região inteira, a resposta tem uma segunda
+região. Se é lentidão para quem está longe, olhe se há conteúdo a guardar: com
+conteúdo é CloudFront, sem conteúdo é Global Accelerator. Se o dado não pode
+sair do prédio, é Outposts. Se o usuário está em uma cidade e a exigência é
+latência mínima, é Local Zone. E se o enunciado fala em lei ou país, a decisão é
+a escolha da região.

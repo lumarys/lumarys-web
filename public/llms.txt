@@ -34,6 +34,14 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Os serviços de segurança e o que cada um detecta](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/servicos-de-seguranca-da-aws/): GuardDuty, Inspector, Macie, Security Hub, Detective, Shield, WAF, Firewall Manager, Network Firewall e Trusted Advisor: o que cada serviço detecta ou bloqueia, e a palavra do enunciado que aponta para ele.
 - [Criptografia em repouso e em trânsito](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/criptografia-em-repouso-e-em-transito/): KMS e CloudHSM, chaves gerenciadas pela AWS e pelo cliente, criptografia padrão de S3, EBS e RDS, certificados do ACM para TLS e a escolha entre Secrets Manager e Parameter Store, com a pergunta que resolve cada questão: quem tem a chave.
 
+### Tecnologia e serviços
+
+- [Formas de implantar e operar na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/formas-de-operar-na-aws/): Console, CLI, SDK e API como formas de falar com a AWS; CloudFormation, CDK e Elastic Beanstalk como formas de implantar; e as opções de implantação pública, privada e híbrida no nível que a prova cobra.
+- [A infraestrutura global da AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/infraestrutura-global-da-aws/): Regiões, zonas de disponibilidade, Local Zones, Wavelength, Outposts e edge locations; CloudFront, Route 53 e Global Accelerator no nível de para que serve; e os quatro critérios que decidem em qual região implantar.
+- [Computação na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/computacao-na-aws/): EC2 e as famílias de instância, Auto Scaling e balanceadores no nível de conceito, Lambda, containers com ECS, EKS e Fargate, além de Lightsail e Batch: o que cada um é em uma linha e a pista que o denuncia no enunciado.
+- [Armazenamento na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/armazenamento-na-aws/): S3 e suas classes, ciclo de vida e versionamento; EBS, EFS, FSx, Storage Gateway, AWS Backup e a família Snow; e a pergunta que decide tudo no tema: o dado é objeto, bloco ou arquivo?
+- [Rede e conectividade na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/rede-e-conectividade-na-aws/): VPC, sub-rede pública e privada, internet gateway e NAT, security group contra lista de controle de acesso de rede, VPN site a site, Direct Connect, PrivateLink e endpoints, e o Route 53 como DNS.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.

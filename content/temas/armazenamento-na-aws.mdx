@@ -1,0 +1,259 @@
+---
+slug: armazenamento-na-aws
+titulo: "Armazenamento na AWS"
+resumo: "S3 e suas classes, ciclo de vida e versionamento; EBS, EFS, FSx, Storage Gateway, AWS Backup e a família Snow; e a pergunta que decide tudo no tema: o dado é objeto, bloco ou arquivo?"
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 3.4 do guia e o tema em que a alternativa errada é sempre um armazenamento vizinho. S3, EBS e EFS guardam dado e aparecem juntos em quase toda questão; o que separa os três é o tipo de acesso que a carga precisa. Quem não classifica o dado antes de escolher o serviço erra por associação."
+comoCai: "Uma empresa precisa de um volume que várias instâncias EC2 montem ao mesmo tempo como um sistema de arquivos compartilhado. Qual serviço atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre guardar uma caixa etiquetada em um depósito, ter um HD ligado no seu computador e usar uma pasta de rede que o escritório inteiro acessa."
+preRequisitos: ["como-ler-uma-questao-clf", "infraestrutura-global-da-aws"]
+errosComuns:
+  - "Responder S3 quando o enunciado pede um volume montado em uma instância. O S3 é armazenamento de objetos, acessado por API, e não aparece como disco no sistema operacional."
+  - "Confundir EBS com EFS. O EBS é um volume de bloco ligado a uma instância por vez na mesma zona; o EFS é um sistema de arquivos que várias instâncias montam ao mesmo tempo."
+  - "Achar que classe de armazenamento do S3 muda a durabilidade do dado. O que muda entre as classes é o padrão de acesso, o custo e o tempo de recuperação."
+  - "Escolher a classe de arquivamento profundo para dado que pode ser pedido a qualquer momento com resposta imediata."
+  - "Confundir versionamento com backup. O versionamento guarda versões anteriores de objetos dentro do bucket; o AWS Backup coordena e centraliza cópias de vários serviços."
+  - "Responder Storage Gateway quando o enunciado descreve transferência única de um volume grande. Transferência única e pontual, principalmente sem rede boa, aponta a família Snow."
+  - "Achar que o FSx é uma alternativa genérica ao EFS. O FSx entrega sistemas de arquivos de terceiros, como Windows File Server e Lustre, e o enunciado costuma citar essa compatibilidade."
+preTeste:
+  - enunciado: "Várias instâncias EC2 precisam ler e gravar no mesmo sistema de arquivos ao mesmo tempo, com acesso compartilhado. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon EFS."
+        correta: true
+        explicacao: "É o sistema de arquivos elástico da AWS, montado por várias instâncias simultaneamente."
+      - texto: "Amazon EBS."
+        correta: false
+        explicacao: "Vizinho plausível: é armazenamento de bloco ligado a uma instância, e não o caminho natural para acesso compartilhado por muitas instâncias."
+      - texto: "Amazon S3."
+        correta: false
+        explicacao: "Guarda objetos acessados por API e não é montado como sistema de arquivos pelo sistema operacional."
+  - enunciado: "Uma empresa guarda registros que quase nunca são acessados, mas que precisam ficar retidos por anos com o menor custo possível de armazenamento. Qual opção do S3 atende a esse pedido?"
+    alternativas:
+      - texto: "Uma classe de arquivamento do S3 Glacier."
+        correta: true
+        explicacao: "As classes de arquivamento são feitas para retenção longa de dado raramente acessado, com custo de armazenamento menor e recuperação mais lenta."
+      - texto: "A classe S3 Standard."
+        correta: false
+        explicacao: "É a classe para dado acessado com frequência e custa mais para guardar do que as classes de arquivamento."
+      - texto: "O Amazon EBS."
+        correta: false
+        explicacao: "É volume de bloco para uma instância e não é a opção de arquivamento de longo prazo."
+videos:
+  - id: "-vpa9FsCSCc"
+    publicadoEm: "2025-01-28"
+    titulo: "O que são classes de armazenamento no AWS S3?"
+    canal: "DevCloud"
+    duracao: 13
+    porQue: "Treze minutos só sobre as classes do S3 e o caso de cada uma, que é o recorte mais cobrado do tema. Ao final, tente dizer a classe certa para três cenários sem olhar."
+  - id: uQoSxLz7oH0
+    publicadoEm: "2025-05-30"
+    titulo: "Armazenamento na AWS: S3, EBS, EFS e Quando Usar Cada Um"
+    canal: "UpperStack"
+    duracao: 62
+    porQue: "Conversa longa comparando o trio que mais aparece como distrator. Assista por blocos e pare quando conseguir dizer, em uma frase, para que serve cada um."
+artigos:
+  - titulo: "What is Amazon S3?"
+    url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "Understanding and managing Amazon S3 storage classes"
+    url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-class-intro.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Elastic Block Store?"
+    url: "https://docs.aws.amazon.com/ebs/latest/userguide/what-is-ebs.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Elastic File System?"
+    url: "https://docs.aws.amazon.com/efs/latest/ug/whatisefs.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Backup?"
+    url: "https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon S3, em uma linha."
+    verso: "Armazenamento de objetos acessado por API, organizado em buckets. A pista é arquivo, imagem, backup, site estático, dado acessado por aplicação e não montado como disco."
+  - frente: "Amazon EBS, em uma linha."
+    verso: "Volume de bloco ligado a uma instância EC2, dentro de uma zona de disponibilidade. A pista é disco da instância, sistema operacional, banco instalado na máquina."
+  - frente: "Amazon EFS, em uma linha."
+    verso: "Sistema de arquivos elástico que várias instâncias montam ao mesmo tempo. A pista é compartilhado entre instâncias, pasta comum."
+  - frente: "Amazon FSx, em uma linha."
+    verso: "Sistemas de arquivos de terceiros gerenciados, como Windows File Server e Lustre. A pista é compatibilidade com Windows ou computação de alto desempenho."
+  - frente: "AWS Storage Gateway, em uma linha."
+    verso: "Liga o ambiente local ao armazenamento da AWS, mantendo o acesso familiar no datacenter. A pista é ambiente híbrido com acesso contínuo à nuvem."
+  - frente: "AWS Backup, em uma linha."
+    verso: "Centraliza e agenda cópias de segurança de vários serviços, com política única. A pista é backup coordenado de vários serviços."
+  - frente: "Família Snow, em uma linha."
+    verso: "Dispositivos físicos para mover grandes volumes de dados quando a rede não dá conta. A pista é transferência única de muitos dados, local remoto, banda insuficiente."
+  - frente: "A pergunta que decide o tema."
+    verso: "O dado é objeto, bloco ou arquivo? Objeto aponta S3, bloco aponta EBS, arquivo compartilhado aponta EFS ou FSx."
+  - frente: "S3 Standard contra S3 Standard-IA."
+    verso: "Standard para dado acessado com frequência; Standard-IA para dado acessado com pouca frequência mas que precisa voltar rápido quando pedido."
+  - frente: "S3 Intelligent-Tiering, em uma linha."
+    verso: "Move o objeto entre camadas automaticamente conforme o padrão de acesso observado. A pista é acesso imprevisível ou desconhecido."
+  - frente: "As classes de arquivamento do S3 Glacier."
+    verso: "Para retenção longa de dado raramente acessado, com custo de armazenamento menor e recuperação mais lenta conforme a classe escolhida."
+  - frente: "Ciclo de vida no S3, em uma linha."
+    verso: "Regra que muda o objeto de classe ou o apaga depois de um tempo. A pista é reduzir custo automaticamente com o passar dos dias."
+  - frente: "Versionamento no S3, em uma linha."
+    verso: "Guarda versões anteriores do objeto no mesmo bucket. A pista é proteger contra exclusão ou sobrescrita acidental."
+  - frente: "EBS contra EFS contra S3."
+    verso: "EBS é o disco de uma instância, EFS é a pasta que várias instâncias compartilham, S3 é o depósito de objetos acessado por API."
+drills:
+  - titulo: "Qual serviço de armazenamento atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o serviço de armazenamento que a resolve."
+    opcoes:
+      ["Amazon S3", "Amazon EBS", "Amazon EFS", "Amazon FSx", "AWS Storage Gateway", "Família Snow"]
+    itens:
+      - enunciado: "Guardar imagens que a aplicação lê por API, com custo baixo e sem montar disco."
+        resposta: "Amazon S3"
+        explicacao: "Armazenamento de objetos."
+      - enunciado: "Fornecer o disco onde o sistema operacional de uma instância EC2 está instalado."
+        resposta: "Amazon EBS"
+        explicacao: "Volume de bloco ligado à instância."
+      - enunciado: "Permitir que dez instâncias montem a mesma pasta e gravem nela ao mesmo tempo."
+        resposta: "Amazon EFS"
+        explicacao: "Sistema de arquivos compartilhado."
+      - enunciado: "Oferecer um compartilhamento compatível com Windows File Server para aplicações que dependem dele."
+        resposta: "Amazon FSx"
+        explicacao: "Sistema de arquivos de terceiro gerenciado."
+      - enunciado: "Dar ao datacenter local acesso contínuo ao armazenamento da AWS, mantendo os protocolos que a equipe já usa."
+        resposta: "AWS Storage Gateway"
+        explicacao: "Ponte híbrida entre local e nuvem."
+      - enunciado: "Levar um volume muito grande de dados de um local remoto sem banda suficiente para a AWS, de uma só vez."
+        resposta: "Família Snow"
+        explicacao: "Transferência física pontual."
+perguntas:
+  - tipo: unica
+    enunciado: "Um grupo de instâncias EC2 precisa acessar o mesmo conjunto de arquivos ao mesmo tempo, montado como um sistema de arquivos, com a capacidade crescendo conforme o uso. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon EFS."
+        correta: true
+        explicacao: "É o sistema de arquivos elástico da AWS, montado simultaneamente por várias instâncias e com capacidade que acompanha o uso."
+      - texto: "Amazon EBS."
+        correta: false
+        explicacao: "Vizinho plausível, mas é volume de bloco pensado para servir uma instância, e não para compartilhamento entre muitas."
+      - texto: "Amazon S3."
+        correta: false
+        explicacao: "Guarda objetos acessados por API e não é montado como sistema de arquivos pelo sistema operacional."
+      - texto: "AWS Storage Gateway."
+        correta: false
+        explicacao: "Liga o ambiente local ao armazenamento da AWS; não é o compartilhamento entre instâncias dentro da nuvem."
+  - tipo: unica
+    enunciado: "Uma empresa guarda relatórios no S3 que são muito acessados no primeiro mês e quase nunca depois. Ela quer reduzir o custo sem que alguém tenha de mover arquivo manualmente. O que ela deve configurar?"
+    alternativas:
+      - texto: "Uma regra de ciclo de vida que mude a classe dos objetos com o tempo."
+        correta: true
+        explicacao: "O ciclo de vida faz a transição automática de classe conforme a idade do objeto, que é exatamente o pedido."
+      - texto: "O versionamento do bucket."
+        correta: false
+        explicacao: "O versionamento guarda versões anteriores e protege contra exclusão acidental; ele não reduz o custo por mudança de classe."
+      - texto: "A replicação do bucket para outra região."
+        correta: false
+        explicacao: "Copia os objetos para outra região e tende a aumentar o custo, não a reduzi-lo."
+      - texto: "A migração dos relatórios para volumes do Amazon EBS."
+        correta: false
+        explicacao: "Traria os arquivos para um volume de bloco ligado a uma instância, sem resolver a redução automática de custo."
+  - tipo: unica
+    enunciado: "Uma filial em uma área remota tem um volume muito grande de dados históricos para enviar à AWS e uma conexão de internet limitada, que levaria meses para transferir tudo. Qual opção atende a esse pedido?"
+    alternativas:
+      - texto: "A família Snow, com dispositivo físico enviado pela AWS."
+        correta: true
+        explicacao: "É a opção feita para transferir grandes volumes de dados quando a rede não é suficiente, por meio de dispositivo físico."
+      - texto: "AWS Storage Gateway."
+        correta: false
+        explicacao: "Vizinho plausível para ambiente híbrido, mas ele depende da rede e é para acesso contínuo, não para uma migração única de grande volume."
+      - texto: "Amazon S3 com carregamento em várias partes pela internet."
+        correta: false
+        explicacao: "Continua limitado pela mesma conexão, que o enunciado diz ser insuficiente."
+      - texto: "AWS Backup apontando para o servidor da filial."
+        correta: false
+        explicacao: "Centraliza políticas de cópia de segurança e também dependeria da rede disponível."
+  - tipo: multipla
+    enunciado: "Uma empresa quer proteger objetos importantes de um bucket contra exclusão acidental e, ao mesmo tempo, centralizar as cópias de segurança de vários serviços em uma política única. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Habilitar o versionamento no bucket do S3."
+        correta: true
+        explicacao: "Com versionamento, uma exclusão ou sobrescrita não elimina as versões anteriores do objeto."
+      - texto: "Usar o AWS Backup para definir e aplicar políticas de cópia em vários serviços."
+        correta: true
+        explicacao: "O AWS Backup centraliza o agendamento e a retenção das cópias de segurança de diferentes serviços."
+      - texto: "Trocar a classe dos objetos para uma classe de arquivamento."
+        correta: false
+        explicacao: "Muda custo e tempo de recuperação, mas não protege contra exclusão nem centraliza cópias."
+      - texto: "Criar instantâneos manuais de volumes do EBS quando alguém lembrar."
+        correta: false
+        explicacao: "Cópia manual e ocasional é o oposto de uma política única e coordenada."
+      - texto: "Ativar o AWS Storage Gateway na conta."
+        correta: false
+        explicacao: "Ele conecta o ambiente local ao armazenamento da AWS e não trata de versionamento nem de política de backup."
+---
+
+## Em uma frase
+
+Todo serviço de armazenamento da AWS guarda dado, então a questão se decide
+antes do serviço: o dado é **objeto**, **bloco** ou **arquivo compartilhado**?
+Respondida essa pergunta, sobra apenas uma alternativa plausível.
+
+## Objeto, bloco e arquivo
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon S3", "Armazenamento de objetos em buckets, acessado por API", "Arquivo, imagem, backup, site estático, acesso pela aplicação"],
+    ["Amazon EBS", "Volume de bloco ligado a uma instância EC2 em uma zona", "Disco da instância, sistema operacional, banco instalado na máquina"],
+    ["Amazon EFS", "Sistema de arquivos montado por várias instâncias ao mesmo tempo", "Compartilhado entre instâncias, pasta comum, capacidade elástica"],
+    ["Amazon FSx", "Sistemas de arquivos de terceiros gerenciados", "Compatível com Windows File Server, computação de alto desempenho"],
+    ["AWS Storage Gateway", "Ponte entre o datacenter local e o armazenamento da AWS", "Ambiente híbrido com acesso contínuo, manter protocolos locais"],
+    ["AWS Backup", "Política central de cópias de segurança de vários serviços", "Backup coordenado, retenção padronizada, várias contas"],
+    ["Família Snow", "Dispositivos físicos para mover grandes volumes de dados", "Transferência única, local remoto, banda insuficiente"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A frase que separa EBS de EFS">
+Conte as instâncias. **Uma** instância com um disco próprio é **EBS**. **Várias**
+instâncias lendo e gravando na mesma pasta é **EFS**. Se o enunciado citar
+compatibilidade com Windows ou alto desempenho de arquivos, sobe para **FSx**.
+</Callout>
+
+## As classes do S3
+
+A CLF cobra as classes pelo padrão de acesso, não por números. A **Standard**
+serve a dado acessado com frequência. A **Standard-IA** e a **One Zone-IA**
+servem a dado acessado com pouca frequência, com a segunda guardando em uma
+única zona de disponibilidade e, por isso, custando menos e resistindo menos.
+A **Intelligent-Tiering** move o objeto entre camadas sozinha quando o padrão de
+acesso é imprevisível. As classes do **Glacier** servem ao arquivamento, com
+custo de armazenamento menor e recuperação mais lenta conforme a classe.
+
+Duas configurações completam o quadro. O **ciclo de vida** aplica regras por
+idade do objeto: mudar de classe depois de tantos dias, expirar depois de
+tantos outros. O **versionamento** guarda as versões anteriores no mesmo bucket
+e é a proteção contra sobrescrita e exclusão acidental.
+
+<Callout tipo="atencao" titulo="Versionamento não é backup">
+Os dois preservam dado e por isso aparecem juntos como alternativas. O
+**versionamento** age dentro de um bucket do S3, sobre objetos. O **AWS Backup**
+coordena cópias de **vários serviços** sob uma política única. Quando o
+enunciado fala em exclusão acidental de objeto, é versionamento; quando fala em
+padronizar cópias de serviços diferentes, é AWS Backup.
+</Callout>
+
+## Híbrido e migração
+
+Duas opções tratam de dado que ainda não está na nuvem e vivem trocadas nas
+alternativas. O **Storage Gateway** é permanente: fica no datacenter e dá ao
+ambiente local acesso contínuo ao armazenamento da AWS, com os protocolos que a
+equipe já usa. A **família Snow** é pontual: dispositivos físicos que a AWS envia
+para mover um grande volume de dados quando a rede não dá conta. Contínuo aponta
+Gateway, único aponta Snow.
+
+## Como responder o cenário
+
+Classifique o dado antes de ler as alternativas. Se a aplicação busca por chave e
+não monta disco, é S3, e aí a pergunta seguinte é a classe, decidida pela
+frequência de acesso. Se é o disco de uma instância, é EBS. Se várias instâncias
+compartilham a mesma pasta, é EFS, ou FSx quando aparece compatibilidade de
+sistema de arquivos. Se o problema é o datacenter falando com a nuvem todo dia, é
+Storage Gateway. Se é uma mudança única de muitos dados, é Snow. E se o pedido é
+política de cópia sobre vários serviços, é AWS Backup.

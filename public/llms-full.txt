@@ -34,6 +34,14 @@ Página: https://lumarys.com.br/trilhas/aws-cloud-practitioner/
 - [Os serviços de segurança e o que cada um detecta](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/servicos-de-seguranca-da-aws/): GuardDuty, Inspector, Macie, Security Hub, Detective, Shield, WAF, Firewall Manager, Network Firewall e Trusted Advisor: o que cada serviço detecta ou bloqueia, e a palavra do enunciado que aponta para ele.
 - [Criptografia em repouso e em trânsito](https://lumarys.com.br/trilhas/aws-cloud-practitioner/seguranca/criptografia-em-repouso-e-em-transito/): KMS e CloudHSM, chaves gerenciadas pela AWS e pelo cliente, criptografia padrão de S3, EBS e RDS, certificados do ACM para TLS e a escolha entre Secrets Manager e Parameter Store, com a pergunta que resolve cada questão: quem tem a chave.
 
+### Tecnologia e serviços
+
+- [Formas de implantar e operar na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/formas-de-operar-na-aws/): Console, CLI, SDK e API como formas de falar com a AWS; CloudFormation, CDK e Elastic Beanstalk como formas de implantar; e as opções de implantação pública, privada e híbrida no nível que a prova cobra.
+- [A infraestrutura global da AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/infraestrutura-global-da-aws/): Regiões, zonas de disponibilidade, Local Zones, Wavelength, Outposts e edge locations; CloudFront, Route 53 e Global Accelerator no nível de para que serve; e os quatro critérios que decidem em qual região implantar.
+- [Computação na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/computacao-na-aws/): EC2 e as famílias de instância, Auto Scaling e balanceadores no nível de conceito, Lambda, containers com ECS, EKS e Fargate, além de Lightsail e Batch: o que cada um é em uma linha e a pista que o denuncia no enunciado.
+- [Armazenamento na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/armazenamento-na-aws/): S3 e suas classes, ciclo de vida e versionamento; EBS, EFS, FSx, Storage Gateway, AWS Backup e a família Snow; e a pergunta que decide tudo no tema: o dado é objeto, bloco ou arquivo?
+- [Rede e conectividade na AWS](https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/rede-e-conectividade-na-aws/): VPC, sub-rede pública e privada, internet gateway e NAT, security group contra lista de controle de acesso de rede, VPN site a site, Direct Connect, PrivateLink e endpoints, e o Route 53 como DNS.
+
 ## AWS Solutions Architect Associate
 
 O guia oficial do exame SAA-C03 transformado em estudo ativo: um módulo por domínio, cenários no estilo da prova com o porquê de cada alternativa, cards de limites e números, e uma prova simulada cronometrada com nota na escala da AWS.
@@ -1220,6 +1228,480 @@ aplicação, saia da família de criptografia e vá para o Secrets Manager.
 - Usar o ACM para dado em repouso. O ACM emite e renova certificados para TLS, que é proteção em trânsito.
 - Supor que criptografar o volume dispensa controlar acesso. Quem tem permissão de usar a chave lê o dado normalmente; criptografia não substitui privilégio mínimo.
 - Achar que chave gerenciada pela AWS pode ser auditada e controlada como a do cliente. Quem precisa definir política da chave, rotação e registro de uso escolhe chave gerenciada pelo cliente.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Formas de implantar e operar na AWS
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/formas-de-operar-na-aws/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Console, CLI, SDK e API como formas de falar com a AWS; CloudFormation, CDK e Elastic Beanstalk como formas de implantar; e as opções de implantação pública, privada e híbrida no nível que a prova cobra.
+
+**Por que cai na prova.** Abre a tarefa 3.1 do guia e é o único tema do domínio que não fala de serviço, e sim de como se chega até ele. A prova gosta de opor console, script e modelo declarativo em uma mesma questão, e quem não separa o que é manual do que é repetível escolhe a alternativa mais conhecida em vez da pedida.
+
+**Como o entrevistador pergunta.** "Uma equipe precisa recriar o mesmo ambiente em três contas, sempre idêntico e sem passos manuais. Qual recurso da AWS atende a essa necessidade?"
+
+## Em uma frase
+
+Existem três portas para falar com a AWS, console, CLI e SDK, todas batendo na
+mesma API, e três formas de implantar o que foi decidido: clicando, descrevendo
+em um modelo ou entregando a aplicação a uma plataforma gerenciada.
+
+## As três portas para a mesma API
+
+Toda ação em uma conta da AWS é uma chamada de API. O que muda é quem faz a
+chamada. O **console** é a interface gráfica no navegador, boa para explorar e
+para tarefa pontual. A **CLI** é o comando no terminal, boa para automatizar em
+script e em pipeline. O **SDK** é a biblioteca dentro do código, boa para a
+aplicação chamar serviços em tempo de execução.
+
+Essa unidade explica um detalhe que a prova cobra em outro domínio: como o
+CloudTrail consegue registrar tudo o que acontece na conta. Ele registra
+chamadas de API, e clique, comando e linha de código viram a mesma chamada.
+
+## Implantar: modelo, código ou plataforma
+
+<Comparativo
+  colunas={["Recurso", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Console de gerenciamento", "Interface gráfica para operar a conta no navegador", "Primeira vez, olhar o recurso, ação manual única"],
+    ["AWS CLI", "Comandos de terminal que chamam a API da AWS", "Script de shell, pipeline, automatizar tarefa operacional"],
+    ["SDK da AWS", "Biblioteca da linguagem que chama a API de dentro da aplicação", "Chamar a AWS pelo código em Python, Java ou JavaScript"],
+    ["AWS CloudFormation", "Provisiona recursos a partir de um modelo declarativo, em pilhas", "Repetível, idêntico, versionado, criar e remover de uma vez"],
+    ["AWS CDK", "Escreve a infraestrutura em linguagem de programação e gera o modelo", "Infraestrutura como código na linguagem do time"],
+    ["AWS Elastic Beanstalk", "Plataforma que recebe o código e opera capacidade, escala e saúde", "Entregar a aplicação e não administrar servidor"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A pergunta que separa os três">
+Pergunte **o que o time entrega**. Se entrega cliques, é console. Se entrega um
+arquivo que descreve os recursos, é CloudFormation, ou CDK quando esse arquivo
+é escrito em linguagem de programação. Se entrega a aplicação pronta e não quer
+saber de servidor, é Elastic Beanstalk.
+</Callout>
+
+## Opções de implantação
+
+O guia também cobra os modelos de implantação no nível do nome. **Na nuvem**
+significa tudo na AWS. **Local** significa tudo no ambiente do cliente.
+**Híbrido** significa parte em cada lado, com VPN ou Direct Connect ligando os
+dois. O erro comum é ler híbrido como uso de dois provedores de nuvem, o que a
+AWS chama de outra coisa.
+
+Junto disso aparece a conectividade: acesso **público** pela internet, acesso
+**privado** por endpoints dentro da VPC e acesso **híbrido** pela ligação com o
+ambiente local. Esses três voltam no tema de rede, e aqui basta reconhecer que
+eles são escolhas de implantação, não serviços.
+
+<Callout tipo="atencao" titulo="Beanstalk não é infraestrutura como código">
+Os dois reduzem trabalho manual, e por isso aparecem juntos como alternativas.
+A diferença está no insumo: o CloudFormation recebe a **descrição da
+infraestrutura**; o Beanstalk recebe o **código da aplicação**. Quando o
+enunciado fala em versionar o ambiente, é modelo; quando fala em publicar a
+aplicação, é plataforma.
+</Callout>
+
+## Como responder o cenário
+
+Ache o verbo do pedido. Explorar aponta console. Automatizar no terminal aponta
+CLI. Chamar de dentro do programa aponta SDK. Repetir infraestrutura sem erro
+humano aponta CloudFormation, e CDK quando o enunciado insiste na linguagem de
+programação. Publicar uma aplicação sem administrar servidor aponta Elastic
+Beanstalk. Manter parte no datacenter aponta implantação híbrida. Se duas
+alternativas parecerem servir, escolha a que trata do insumo que o enunciado
+nomeou, e não a que automatiza mais coisas.
+
+## Erros comuns
+
+- Achar que a CLI e o SDK são coisas diferentes da API. Os três chamam a mesma API da AWS: a CLI é o comando no terminal, o SDK é a biblioteca dentro do código e a API é o contrato que os dois usam.
+- Confundir CloudFormation com CDK. O CloudFormation recebe um modelo declarativo em JSON ou YAML; o CDK deixa escrever esse modelo em linguagem de programação e o converte em CloudFormation na hora de implantar.
+- Trocar Elastic Beanstalk por infraestrutura como código. O Beanstalk recebe o código da aplicação e cuida da capacidade, do balanceamento e da saúde; ele é uma plataforma gerenciada, não um modelo de infraestrutura.
+- Responder console quando o enunciado pede repetição sem erro humano. Console serve para explorar e para tarefa pontual; o que se repete pede modelo ou script.
+- Achar que implantação híbrida quer dizer usar dois provedores de nuvem. Híbrido é nuvem e ambiente local trabalhando juntos, com VPN ou Direct Connect ligando os dois.
+- Esquecer que o CloudFormation é gratuito no serviço em si e que o custo vem dos recursos criados pelo modelo.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# A infraestrutura global da AWS
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/infraestrutura-global-da-aws/
+Tempo estimado: 25 minutos · Nível: fundamental
+
+**Resumo.** Regiões, zonas de disponibilidade, Local Zones, Wavelength, Outposts e edge locations; CloudFront, Route 53 e Global Accelerator no nível de para que serve; e os quatro critérios que decidem em qual região implantar.
+
+**Por que cai na prova.** É a tarefa 3.2 do guia e o vocabulário que sustenta o resto do domínio. Alta disponibilidade, latência e residência de dados aparecem em questões de computação, armazenamento e rede, e todas elas supõem que região e zona de disponibilidade já estão claras. Sem essa base, o candidato responde região quando o pedido é zona.
+
+**Como o entrevistador pergunta.** "Uma empresa quer que a aplicação continue no ar mesmo se um datacenter falhar, sem sair da mesma região. O que ela deve fazer?"
+
+## Em uma frase
+
+A infraestrutura global é uma hierarquia de lugares, da **região** à **zona de
+disponibilidade** e à **edge location**, e quase toda questão do tema se resolve
+identificando em qual desses níveis está o problema descrito.
+
+## Região, zona e borda
+
+A **região** é a área geográfica, isolada das outras, e é onde se decide
+residência de dados, preço e quais serviços estão disponíveis. Dentro dela, a
+**zona de disponibilidade** é um ou mais datacenters com energia, refrigeração e
+rede próprias, separados o bastante para não caírem juntos e perto o bastante
+para responderem rápido entre si. A **edge location** não fica nesse mesmo
+tabuleiro: é um ponto de presença para entregar conteúdo e resolver DNS perto de
+quem acessa.
+
+<Callout tipo="dica" titulo="A regra que resolve metade das questões">
+Falha de datacenter se resolve com **mais zonas**. Falha de região inteira se
+resolve com **mais regiões**. Lentidão de entrega de arquivo se resolve na
+**borda**. Antes de olhar as alternativas, decida em qual desses três níveis
+está o problema do enunciado.
+</Callout>
+
+## O catálogo da borda e dos lugares especiais
+
+<Comparativo
+  colunas={["Serviço ou peça", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Região", "Área geográfica com várias zonas de disponibilidade", "Residência de dados, país, preço, serviço disponível"],
+    ["Zona de disponibilidade", "Datacenters isolados dentro de uma região", "Resistir à falha de um datacenter sem sair da região"],
+    ["Edge location", "Ponto de presença para conteúdo em cache e DNS", "Entregar arquivo rápido a quem está longe"],
+    ["Amazon CloudFront", "Rede de entrega de conteúdo sobre as edge locations", "Imagem, vídeo, site estático, latência de download"],
+    ["AWS Global Accelerator", "Caminho otimizado pela rede da AWS, com endereços fixos", "TCP e UDP, sem conteúdo para cache, endereço de entrada fixo"],
+    ["Amazon Route 53", "DNS gerenciado com registro de domínio e roteamento", "Resolver nome, rotear por latência, por região ou por saúde"],
+    ["AWS Local Zones", "Extensão da região perto de um grande centro urbano", "Usuários de uma cidade específica, poucos milissegundos"],
+    ["AWS Wavelength", "Infraestrutura da AWS na rede de operadoras móveis", "Aplicação para dispositivos 5G"],
+    ["AWS Outposts", "Rack da AWS instalado no datacenter do cliente", "Dado que não pode sair do prédio, mesmas APIs da AWS"]
+  ]}
+/>
+
+## Escolher a região
+
+A prova costuma perguntar por que uma empresa escolheria uma região e não outra,
+e a resposta esperada combina quatro critérios: **latência** até os usuários,
+**residência de dados** e exigência legal, **preço**, que varia por região, e
+**disponibilidade do serviço**, porque nem todo serviço existe em toda região.
+Quando o enunciado cita lei ou país, o critério é residência de dados. Quando
+cita tempo de resposta, é latência.
+
+<Callout tipo="atencao" titulo="CloudFront não é Global Accelerator">
+Os dois aceleram, e por isso aparecem juntos. O CloudFront **guarda uma cópia**
+do conteúdo perto do usuário e brilha com arquivo estático. O Global Accelerator
+**encurta o caminho** até a aplicação e brilha com tráfego que não dá para
+guardar, como uma API interativa ou um jogo. Sem conteúdo em cache no enunciado,
+é Global Accelerator.
+</Callout>
+
+## Como responder o cenário
+
+Localize o nível antes do serviço. Se o problema é um datacenter, a resposta tem
+zona de disponibilidade. Se é a região inteira, a resposta tem uma segunda
+região. Se é lentidão para quem está longe, olhe se há conteúdo a guardar: com
+conteúdo é CloudFront, sem conteúdo é Global Accelerator. Se o dado não pode
+sair do prédio, é Outposts. Se o usuário está em uma cidade e a exigência é
+latência mínima, é Local Zone. E se o enunciado fala em lei ou país, a decisão é
+a escolha da região.
+
+## Erros comuns
+
+- Confundir região com zona de disponibilidade. Região é a área geográfica; a zona é um ou mais datacenters isolados dentro dela, e toda região tem várias zonas.
+- Achar que usar duas zonas de disponibilidade protege contra a falha de uma região inteira. Para isso é preciso uma segunda região.
+- Trocar CloudFront por Global Accelerator. O CloudFront guarda cópia do conteúdo perto de quem acessa; o Global Accelerator melhora o caminho de rede até a aplicação, sem guardar conteúdo.
+- Achar que edge location é uma zona de disponibilidade menor. Edge location é ponto de presença para entrega de conteúdo e DNS, não um lugar onde se roda instância comum.
+- Confundir Local Zones com Outposts. A Local Zone é infraestrutura da AWS perto de um grande centro urbano; o Outposts é um rack da AWS instalado no datacenter do cliente.
+- Esquecer que preço e disponibilidade de serviço variam por região, e que nem todo serviço existe em todas elas.
+- Achar que residência de dados se resolve com edge location. Ela se resolve escolhendo a região onde o dado fica.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Computação na AWS
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/computacao-na-aws/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** EC2 e as famílias de instância, Auto Scaling e balanceadores no nível de conceito, Lambda, containers com ECS, EKS e Fargate, além de Lightsail e Batch: o que cada um é em uma linha e a pista que o denuncia no enunciado.
+
+**Por que cai na prova.** É a tarefa 3.3 do guia e a categoria com mais alternativas parecidas da prova. EC2, Lambda e Fargate servem para rodar código, e o que separa os três é quanto do servidor o cliente administra. Quem não fixa essa escala responde EC2 em tudo ou Lambda em tudo.
+
+**Como o entrevistador pergunta.** "Uma empresa quer executar uma função curta em resposta a um evento, sem provisionar nem administrar servidores. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+Os serviços de computação da AWS formam uma escala de **quanto do servidor o
+cliente administra**, do EC2, onde ele administra tudo, ao Lambda, onde ele só
+entrega a função, e a questão se resolve encontrando onde o enunciado quer ficar
+nessa escala.
+
+## A escala que decide
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon EC2", "Servidor virtual com controle do sistema operacional", "Escolher o sistema, instalar software, migrar servidor existente"],
+    ["Amazon ECS", "Orquestrador de contêineres próprio da AWS", "Rodar contêiner sem exigência de Kubernetes"],
+    ["Amazon EKS", "Kubernetes gerenciado pela AWS", "A palavra Kubernetes ou o ecossistema dele"],
+    ["AWS Fargate", "Executa contêineres sem administrar as instâncias", "Contêiner mais a frase sem gerenciar servidores"],
+    ["AWS Lambda", "Função curta disparada por evento, cobrada por execução", "Evento, função, sem provisionar nada, código curto"],
+    ["Amazon Lightsail", "Pacote simples com preço mensal previsível", "Site pequeno, blog, simplicidade, começar rápido"],
+    ["AWS Batch", "Executa lotes de trabalhos em fila", "Muitos trabalhos independentes processados em lote"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="O trio que mais confunde">
+**EC2** entrega o servidor inteiro, **Fargate** entrega o contêiner sem servidor
+visível e **Lambda** entrega só a execução. Se o enunciado disser contêiner e
+disser sem administrar servidor, é Fargate. Se disser função e evento, é Lambda.
+Se disser sistema operacional específico ou software instalado na máquina, é
+EC2.
+</Callout>
+
+## Elasticidade: Auto Scaling e balanceador
+
+Os dois quase sempre aparecem juntos e resolvem coisas diferentes. O **EC2 Auto
+Scaling** muda **quantas** instâncias existem, acompanhando picos e vales sem
+intervenção humana. O **Elastic Load Balancing** decide **para qual** instância
+cada requisição vai e para de enviar tráfego às que falham na verificação de
+saúde. Quando o enunciado fala em acompanhar a demanda, é Auto Scaling; quando
+fala em distribuir requisições, é balanceador; quando fala nas duas coisas, a
+resposta traz os dois.
+
+## As famílias de instância
+
+A CLF cobra as famílias pelo nome e pelo caso, não pela geração nem pelo tamanho.
+**Uso geral** equilibra processador e memória e serve a aplicação web comum.
+**Computação** atende quem consome processador, como codificação de mídia e
+simulação. **Memória** atende quem mantém muito dado em memória, como banco de
+dados e análise em memória. **Armazenamento** atende leitura e escrita intensas
+em disco local. **Acelerada** atende carga com GPU, como treinamento de modelo e
+renderização.
+
+<Callout tipo="atencao" titulo="ECS não é EKS">
+Os dois orquestram contêineres e podem rodar sobre EC2 ou sobre Fargate. A
+diferença que a prova cobra é uma palavra: se o enunciado cita **Kubernetes**,
+padrão aberto ou ferramentas do ecossistema, é **EKS**. Se apenas pede rodar
+contêiner na AWS, é **ECS**.
+</Callout>
+
+## Como responder o cenário
+
+Comece pela unidade que o enunciado entrega. Função e evento apontam Lambda.
+Contêiner aponta ECS ou EKS, e a escolha entre eles depende da palavra
+Kubernetes; se o enunciado acrescentar que não quer administrar instâncias,
+acrescente Fargate. Servidor com sistema operacional próprio aponta EC2. Lote de
+trabalhos aponta Batch. Simplicidade e preço fixo apontam Lightsail. Depois olhe
+se há pico de demanda, porque aí entram Auto Scaling e balanceador, e só então
+escolha a família de instância pelo recurso que domina a carga.
+
+## Erros comuns
+
+- Responder EC2 quando o enunciado diz sem administrar servidor. Instância é servidor virtual e continua sendo responsabilidade do cliente manter o sistema operacional.
+- Confundir Lambda com Fargate. O Lambda executa uma função curta disparada por evento; o Fargate executa contêineres sem que o cliente administre as instâncias por baixo.
+- Confundir ECS com EKS. Os dois orquestram contêineres, mas o EKS é o Kubernetes gerenciado, e o enunciado que cita Kubernetes ou compatibilidade com ferramentas de Kubernetes aponta EKS.
+- Achar que Auto Scaling e balanceador são a mesma coisa. O Auto Scaling ajusta a quantidade de instâncias; o balanceador distribui as requisições entre as que existem.
+- Escolher a família de instância errada. Carga com muita memória pede família otimizada para memória, e não a de uso geral, ainda que a de uso geral pareça segura.
+- Responder Batch para qualquer processamento pesado. O Batch é para lotes de trabalhos em fila; carga contínua e interativa continua em EC2 ou em contêiner.
+- Ignorar o Lightsail quando o enunciado fala em simplicidade e preço mensal previsível para um site pequeno.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Armazenamento na AWS
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/armazenamento-na-aws/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** S3 e suas classes, ciclo de vida e versionamento; EBS, EFS, FSx, Storage Gateway, AWS Backup e a família Snow; e a pergunta que decide tudo no tema: o dado é objeto, bloco ou arquivo?
+
+**Por que cai na prova.** É a tarefa 3.4 do guia e o tema em que a alternativa errada é sempre um armazenamento vizinho. S3, EBS e EFS guardam dado e aparecem juntos em quase toda questão; o que separa os três é o tipo de acesso que a carga precisa. Quem não classifica o dado antes de escolher o serviço erra por associação.
+
+**Como o entrevistador pergunta.** "Uma empresa precisa de um volume que várias instâncias EC2 montem ao mesmo tempo como um sistema de arquivos compartilhado. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+Todo serviço de armazenamento da AWS guarda dado, então a questão se decide
+antes do serviço: o dado é **objeto**, **bloco** ou **arquivo compartilhado**?
+Respondida essa pergunta, sobra apenas uma alternativa plausível.
+
+## Objeto, bloco e arquivo
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon S3", "Armazenamento de objetos em buckets, acessado por API", "Arquivo, imagem, backup, site estático, acesso pela aplicação"],
+    ["Amazon EBS", "Volume de bloco ligado a uma instância EC2 em uma zona", "Disco da instância, sistema operacional, banco instalado na máquina"],
+    ["Amazon EFS", "Sistema de arquivos montado por várias instâncias ao mesmo tempo", "Compartilhado entre instâncias, pasta comum, capacidade elástica"],
+    ["Amazon FSx", "Sistemas de arquivos de terceiros gerenciados", "Compatível com Windows File Server, computação de alto desempenho"],
+    ["AWS Storage Gateway", "Ponte entre o datacenter local e o armazenamento da AWS", "Ambiente híbrido com acesso contínuo, manter protocolos locais"],
+    ["AWS Backup", "Política central de cópias de segurança de vários serviços", "Backup coordenado, retenção padronizada, várias contas"],
+    ["Família Snow", "Dispositivos físicos para mover grandes volumes de dados", "Transferência única, local remoto, banda insuficiente"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A frase que separa EBS de EFS">
+Conte as instâncias. **Uma** instância com um disco próprio é **EBS**. **Várias**
+instâncias lendo e gravando na mesma pasta é **EFS**. Se o enunciado citar
+compatibilidade com Windows ou alto desempenho de arquivos, sobe para **FSx**.
+</Callout>
+
+## As classes do S3
+
+A CLF cobra as classes pelo padrão de acesso, não por números. A **Standard**
+serve a dado acessado com frequência. A **Standard-IA** e a **One Zone-IA**
+servem a dado acessado com pouca frequência, com a segunda guardando em uma
+única zona de disponibilidade e, por isso, custando menos e resistindo menos.
+A **Intelligent-Tiering** move o objeto entre camadas sozinha quando o padrão de
+acesso é imprevisível. As classes do **Glacier** servem ao arquivamento, com
+custo de armazenamento menor e recuperação mais lenta conforme a classe.
+
+Duas configurações completam o quadro. O **ciclo de vida** aplica regras por
+idade do objeto: mudar de classe depois de tantos dias, expirar depois de
+tantos outros. O **versionamento** guarda as versões anteriores no mesmo bucket
+e é a proteção contra sobrescrita e exclusão acidental.
+
+<Callout tipo="atencao" titulo="Versionamento não é backup">
+Os dois preservam dado e por isso aparecem juntos como alternativas. O
+**versionamento** age dentro de um bucket do S3, sobre objetos. O **AWS Backup**
+coordena cópias de **vários serviços** sob uma política única. Quando o
+enunciado fala em exclusão acidental de objeto, é versionamento; quando fala em
+padronizar cópias de serviços diferentes, é AWS Backup.
+</Callout>
+
+## Híbrido e migração
+
+Duas opções tratam de dado que ainda não está na nuvem e vivem trocadas nas
+alternativas. O **Storage Gateway** é permanente: fica no datacenter e dá ao
+ambiente local acesso contínuo ao armazenamento da AWS, com os protocolos que a
+equipe já usa. A **família Snow** é pontual: dispositivos físicos que a AWS envia
+para mover um grande volume de dados quando a rede não dá conta. Contínuo aponta
+Gateway, único aponta Snow.
+
+## Como responder o cenário
+
+Classifique o dado antes de ler as alternativas. Se a aplicação busca por chave e
+não monta disco, é S3, e aí a pergunta seguinte é a classe, decidida pela
+frequência de acesso. Se é o disco de uma instância, é EBS. Se várias instâncias
+compartilham a mesma pasta, é EFS, ou FSx quando aparece compatibilidade de
+sistema de arquivos. Se o problema é o datacenter falando com a nuvem todo dia, é
+Storage Gateway. Se é uma mudança única de muitos dados, é Snow. E se o pedido é
+política de cópia sobre vários serviços, é AWS Backup.
+
+## Erros comuns
+
+- Responder S3 quando o enunciado pede um volume montado em uma instância. O S3 é armazenamento de objetos, acessado por API, e não aparece como disco no sistema operacional.
+- Confundir EBS com EFS. O EBS é um volume de bloco ligado a uma instância por vez na mesma zona; o EFS é um sistema de arquivos que várias instâncias montam ao mesmo tempo.
+- Achar que classe de armazenamento do S3 muda a durabilidade do dado. O que muda entre as classes é o padrão de acesso, o custo e o tempo de recuperação.
+- Escolher a classe de arquivamento profundo para dado que pode ser pedido a qualquer momento com resposta imediata.
+- Confundir versionamento com backup. O versionamento guarda versões anteriores de objetos dentro do bucket; o AWS Backup coordena e centraliza cópias de vários serviços.
+- Responder Storage Gateway quando o enunciado descreve transferência única de um volume grande. Transferência única e pontual, principalmente sem rede boa, aponta a família Snow.
+- Achar que o FSx é uma alternativa genérica ao EFS. O FSx entrega sistemas de arquivos de terceiros, como Windows File Server e Lustre, e o enunciado costuma citar essa compatibilidade.
+
+## Perguntas de sabatina e respostas-modelo
+
+---
+
+# Rede e conectividade na AWS
+
+Trilha: AWS Cloud Practitioner · Módulo: Tecnologia e serviços
+URL: https://lumarys.com.br/trilhas/aws-cloud-practitioner/tecnologia/rede-e-conectividade-na-aws/
+Tempo estimado: 30 minutos · Nível: fundamental
+
+**Resumo.** VPC, sub-rede pública e privada, internet gateway e NAT, security group contra lista de controle de acesso de rede, VPN site a site, Direct Connect, PrivateLink e endpoints, e o Route 53 como DNS.
+
+**Por que cai na prova.** É a tarefa 3.5 do guia e o tema com os dois pares mais confundidos da prova: security group contra lista de controle de acesso de rede, e VPN contra Direct Connect. Os dois pares se resolvem com uma pergunta cada, e quem não tem essas perguntas prontas escolhe pela familiaridade do nome.
+
+**Como o entrevistador pergunta.** "Uma empresa precisa de uma conexão dedicada e consistente entre o datacenter dela e a AWS, sem passar pela internet pública. Qual serviço atende a essa necessidade?"
+
+## Em uma frase
+
+A rede da AWS é uma **VPC** por região, dividida em sub-redes que são públicas ou
+privadas conforme tenham ou não rota para a internet, protegidas por dois
+firewalls em níveis diferentes e ligadas ao mundo de fora por três caminhos:
+internet, túnel e enlace dedicado.
+
+## Dentro da VPC
+
+A **VPC** é a rede isolada da empresa dentro de uma região. Cada **sub-rede** fica
+em uma zona de disponibilidade, e o que a torna pública é ter rota para o
+**internet gateway**. Sem essa rota, ela é privada. Para que uma instância
+privada consiga iniciar uma saída, sem aceitar conexões de fora, entra o
+**gateway NAT**.
+
+<Comparativo
+  colunas={["Componente", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon VPC", "Rede virtual isolada dentro de uma região", "Rede própria, faixa de endereços, isolamento"],
+    ["Internet gateway", "Liga a VPC à internet, com entrada e saída", "Recurso que precisa ser alcançado pela internet"],
+    ["Gateway NAT", "Saída para a internet iniciada de dentro, sem entrada", "Baixar atualização sem expor a instância"],
+    ["Endpoint da VPC", "Acesso privado a serviços da AWS pela rede interna", "Falar com o S3 sem tráfego pela internet"],
+    ["AWS PrivateLink", "Publica um serviço de forma privada dentro da rede", "Consumir serviço de outra conta sem expor à internet"],
+    ["VPN site a site", "Túnel criptografado sobre a internet pública", "Ligar o escritório rápido, custo menor"],
+    ["AWS Direct Connect", "Enlace dedicado até a AWS, fora da internet pública", "Banda consistente, conexão dedicada, tráfego sensível"],
+    ["Amazon Route 53", "DNS gerenciado com roteamento e verificação de saúde", "Registrar domínio, resolver nome, direcionar visitante"]
+  ]}
+/>
+
+## Os dois firewalls
+
+<Comparativo
+  colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
+  linhas={[
+    ["Protege", "O recurso, como uma instância", "A sub-rede inteira"],
+    ["Regras", "Só permitir", "Permitir e negar"],
+    ["Avalia estado", "Sim: a resposta volta sem regra extra", "Não: é preciso regra de ida e de volta"],
+    ["A pista", "Liberar porta para uma instância específica", "Bloquear um endereço para toda a sub-rede"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Duas perguntas prontas">
+Para o par de firewalls, pergunte **o controle é do recurso ou da sub-rede**, e
+lembre que só a lista sabe negar. Para o par de conectividade, pergunte **o
+tráfego pode ir pela internet**: se pode, VPN basta e é mais rápida de montar;
+se o enunciado pede dedicado, consistente ou fora da internet, é Direct Connect.
+</Callout>
+
+## Sair da VPC sem ir à internet
+
+Duas peças aparecem quando o enunciado insiste em tráfego privado. O **endpoint
+da VPC** alcança serviços da AWS pela rede interna, e é a resposta quando uma
+instância privada precisa falar com o S3 sem sair para a internet. O
+**PrivateLink** publica um serviço, seu ou de terceiro, de forma privada dentro
+da rede, sem expor endereço público.
+
+<Callout tipo="atencao" titulo="Route 53 não entrega conteúdo">
+Ele traduz o nome em um endereço e pode escolher o destino por latência, por
+região ou pela saúde do alvo. Quem entrega o arquivo perto do usuário é o
+CloudFront. Enunciado com domínio e resolução aponta Route 53; enunciado com
+imagem, vídeo ou site lento para quem está longe aponta CloudFront.
+</Callout>
+
+## Como responder o cenário
+
+Localize primeiro a fronteira do problema. Se é dentro da VPC e fala de porta ou
+endereço, escolha entre os dois firewalls com a pergunta do nível. Se é uma
+instância privada querendo alcançar algo, decida entre NAT, para internet, e
+endpoint, para serviço da AWS. Se é o datacenter falando com a AWS, decida entre
+VPN e Direct Connect pela exigência de dedicado. E se aparece nome de domínio, a
+resposta é Route 53, não CloudFront.
+
+## Erros comuns
+
+- Confundir security group com lista de controle de acesso de rede. O security group protege o recurso, avalia estado e só tem regra de permitir; a lista protege a sub-rede, não avalia estado e tem permitir e negar.
+- Achar que sub-rede privada é aquela sem endereço próprio. Privada é a que não tem rota para o internet gateway; ela pode sair para a internet por um gateway NAT.
+- Trocar internet gateway por gateway NAT. O internet gateway permite tráfego de entrada e de saída na sub-rede pública; o NAT deixa a sub-rede privada iniciar saída sem aceitar conexões de fora.
+- Responder VPN quando o enunciado pede largura de banda consistente e conexão dedicada. VPN vai pela internet pública; Direct Connect é o enlace dedicado.
+- Achar que endpoint da VPC é o mesmo que internet gateway. O endpoint alcança serviços da AWS pela rede interna, sem sair para a internet.
+- Confundir Route 53 com CloudFront. O Route 53 resolve nomes em endereços; o CloudFront entrega conteúdo em cache.
+- Esquecer que a VPC é regional e que as sub-redes ficam cada uma em uma zona de disponibilidade.
 
 ## Perguntas de sabatina e respostas-modelo
 

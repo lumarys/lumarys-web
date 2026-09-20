@@ -1,0 +1,259 @@
+---
+slug: formas-de-operar-na-aws
+titulo: "Formas de implantar e operar na AWS"
+resumo: "Console, CLI, SDK e API como formas de falar com a AWS; CloudFormation, CDK e Elastic Beanstalk como formas de implantar; e as opções de implantação pública, privada e híbrida no nível que a prova cobra."
+minutos: 25
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "Abre a tarefa 3.1 do guia e é o único tema do domínio que não fala de serviço, e sim de como se chega até ele. A prova gosta de opor console, script e modelo declarativo em uma mesma questão, e quem não separa o que é manual do que é repetível escolhe a alternativa mais conhecida em vez da pedida."
+comoCai: "Uma equipe precisa recriar o mesmo ambiente em três contas, sempre idêntico e sem passos manuais. Qual recurso da AWS atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre clicar para criar um servidor, rodar um comando que cria o servidor e escrever um arquivo que descreve o servidor que deve existir."
+preRequisitos: ["como-ler-uma-questao-clf"]
+errosComuns:
+  - "Achar que a CLI e o SDK são coisas diferentes da API. Os três chamam a mesma API da AWS: a CLI é o comando no terminal, o SDK é a biblioteca dentro do código e a API é o contrato que os dois usam."
+  - "Confundir CloudFormation com CDK. O CloudFormation recebe um modelo declarativo em JSON ou YAML; o CDK deixa escrever esse modelo em linguagem de programação e o converte em CloudFormation na hora de implantar."
+  - "Trocar Elastic Beanstalk por infraestrutura como código. O Beanstalk recebe o código da aplicação e cuida da capacidade, do balanceamento e da saúde; ele é uma plataforma gerenciada, não um modelo de infraestrutura."
+  - "Responder console quando o enunciado pede repetição sem erro humano. Console serve para explorar e para tarefa pontual; o que se repete pede modelo ou script."
+  - "Achar que implantação híbrida quer dizer usar dois provedores de nuvem. Híbrido é nuvem e ambiente local trabalhando juntos, com VPN ou Direct Connect ligando os dois."
+  - "Esquecer que o CloudFormation é gratuito no serviço em si e que o custo vem dos recursos criados pelo modelo."
+preTeste:
+  - enunciado: "Uma equipe quer criar a mesma pilha de recursos em três contas diferentes, de forma idêntica e sem passos manuais, e poder remover tudo depois em uma operação só. Qual recurso atende a esse pedido?"
+    alternativas:
+      - texto: "AWS CloudFormation."
+        correta: true
+        explicacao: "Ele provisiona e gerencia recursos a partir de um modelo declarativo, o que torna o ambiente repetível e permite remover a pilha inteira de uma vez."
+      - texto: "O console de gerenciamento da AWS."
+        correta: false
+        explicacao: "Serve para explorar e para tarefa pontual; repetir os mesmos cliques em três contas é justamente o que o enunciado quer evitar."
+      - texto: "AWS Elastic Beanstalk."
+        correta: false
+        explicacao: "Vizinho plausível: ele implanta e opera uma aplicação, mas o pedido é provisionar infraestrutura repetível a partir de um modelo."
+  - enunciado: "Uma pessoa desenvolvedora precisa chamar serviços da AWS de dentro de uma aplicação em Python, sem montar requisições HTTP assinadas na mão. O que ela deve usar?"
+    alternativas:
+      - texto: "O SDK da AWS para Python."
+        correta: true
+        explicacao: "O SDK é a biblioteca que expõe a API da AWS na linguagem da aplicação e cuida da assinatura e da repetição de chamadas."
+      - texto: "A AWS CLI."
+        correta: false
+        explicacao: "A CLI também chama a mesma API, mas é feita para o terminal e para scripts de shell, não para ser importada dentro do código da aplicação."
+      - texto: "O console de gerenciamento da AWS."
+        correta: false
+        explicacao: "É a interface gráfica no navegador e não pode ser chamada de dentro de um programa."
+videos:
+  - id: xfiW3u4vR7U
+    publicadoEm: "2021-09-27"
+    titulo: "Introdução ao CloudFormation - Português"
+    canal: "AWS Developers LATAM"
+    duracao: 5
+    porQue: "Cinco minutos da própria AWS explicando o que é infraestrutura como código e o papel do modelo e da pilha. É exatamente o nível que a CLF cobra: para que serve, sem sintaxe."
+  - id: H0lceT2rCVk
+    publicadoEm: "2026-04-28"
+    titulo: "CloudFormation COMPLETO  Infraestrutura como Código AWS SOA C03"
+    canal: "Jean Diogo"
+    duracao: 27
+    porQue: "Mais profundo do que a CLF exige, mas cobre modelo, pilha e reuso em sequência. Assista aos primeiros blocos e pare quando começar a sintaxe avançada."
+artigos:
+  - titulo: "What is AWS CloudFormation?"
+    url: "https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is the AWS CDK?"
+    url: "https://docs.aws.amazon.com/cdk/v2/guide/home.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Elastic Beanstalk?"
+    url: "https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is the AWS Command Line Interface?"
+    url: "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html"
+    fonte: "AWS"
+  - titulo: "AWS SDKs and Tools Reference Guide"
+    url: "https://docs.aws.amazon.com/sdkref/latest/guide/overview.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Console de gerenciamento da AWS, em uma linha."
+    verso: "Interface gráfica no navegador para explorar serviços e fazer tarefa pontual. A pista é primeira vez, olhar o recurso, ação manual única."
+  - frente: "AWS CLI, em uma linha."
+    verso: "Ferramenta de linha de comando que chama a API da AWS a partir do terminal. A pista é automatizar por script de shell, rodar em pipeline."
+  - frente: "SDK da AWS, em uma linha."
+    verso: "Biblioteca que expõe a API da AWS dentro do código da aplicação, em linguagens como Python, Java e JavaScript. A pista é chamar a AWS de dentro do programa."
+  - frente: "API da AWS, em uma linha."
+    verso: "O contrato que console, CLI e SDK usam por baixo. Tudo o que acontece na conta passa por uma chamada de API, e é por isso que o CloudTrail consegue registrar tudo."
+  - frente: "AWS CloudFormation, em uma linha."
+    verso: "Provisiona recursos a partir de um modelo declarativo em JSON ou YAML, agrupados em uma pilha. A pista é ambiente repetível, idêntico, criado e removido de uma vez."
+  - frente: "AWS CDK, em uma linha."
+    verso: "Escreve a infraestrutura em linguagem de programação e gera o modelo do CloudFormation. A pista é infraestrutura como código usando a linguagem do time."
+  - frente: "AWS Elastic Beanstalk, em uma linha."
+    verso: "Plataforma gerenciada que recebe o código da aplicação e cuida de capacidade, balanceamento, escala e saúde. A pista é subir a aplicação sem administrar a infraestrutura."
+  - frente: "A pista de infraestrutura como código no enunciado."
+    verso: "Palavras como repetível, idêntico, versionado, sem passo manual, recriar em outra conta ou outra região."
+  - frente: "A pista de Elastic Beanstalk no enunciado."
+    verso: "O time entrega o código e quer que a AWS cuide do resto, sem escolher tipo de instância nem configurar balanceador."
+  - frente: "Implantação na nuvem, em uma linha."
+    verso: "Tudo roda na AWS, sem parte local. A pista é aplicação nova, nativa da nuvem."
+  - frente: "Implantação híbrida, em uma linha."
+    verso: "Parte na AWS e parte no ambiente local, ligadas por VPN ou Direct Connect. A pista é manter um sistema no datacenter e integrar com a nuvem."
+  - frente: "Implantação local, em uma linha."
+    verso: "Tudo no ambiente do cliente, com ferramentas de nuvem privada. A pista é exigência regulatória ou equipamento que não pode sair do prédio."
+  - frente: "CloudFormation contra CDK contra Elastic Beanstalk."
+    verso: "CloudFormation descreve a infraestrutura em modelo, CDK escreve esse modelo em código de programação, Beanstalk recebe a aplicação pronta e opera por você."
+  - frente: "Console contra CLI contra SDK."
+    verso: "Mesma API por três portas: clique para explorar, comando para automatizar no terminal, biblioteca para chamar de dentro da aplicação."
+drills:
+  - titulo: "Qual forma de operar atende ao pedido?"
+    instrucao: "Para cada necessidade, indique a forma de implantar ou operar que a resolve."
+    opcoes:
+      ["Console de gerenciamento", "AWS CLI", "SDK da AWS", "AWS CloudFormation", "AWS CDK", "AWS Elastic Beanstalk"]
+    itens:
+      - enunciado: "Recriar o mesmo conjunto de recursos em outra região, de forma idêntica, a partir de um arquivo versionado no repositório."
+        resposta: "AWS CloudFormation"
+        explicacao: "Modelo declarativo e pilha: ambiente repetível."
+      - enunciado: "Subir uma aplicação web em Java sem escolher instância nem configurar balanceador, deixando a AWS cuidar da capacidade."
+        resposta: "AWS Elastic Beanstalk"
+        explicacao: "Plataforma gerenciada a partir do código da aplicação."
+      - enunciado: "Listar todos os buckets da conta dentro de um script de shell executado por um agendador."
+        resposta: "AWS CLI"
+        explicacao: "Comando no terminal, feito para script."
+      - enunciado: "Gravar um objeto no S3 a partir de uma aplicação em Python, sem assinar requisições na mão."
+        resposta: "SDK da AWS"
+        explicacao: "Biblioteca da linguagem sobre a mesma API."
+      - enunciado: "Olhar rapidamente, pela primeira vez, quais instâncias existem em uma conta nova."
+        resposta: "Console de gerenciamento"
+        explicacao: "Exploração visual e tarefa pontual."
+      - enunciado: "Declarar a infraestrutura em TypeScript, reutilizando construções do time, e gerar o modelo que será implantado."
+        resposta: "AWS CDK"
+        explicacao: "Infraestrutura como código em linguagem de programação."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa precisa provisionar sempre a mesma infraestrutura em várias contas, a partir de um arquivo guardado no controle de versão, e poder remover tudo em uma operação. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS CloudFormation."
+        correta: true
+        explicacao: "É o serviço de infraestrutura como código da AWS: um modelo declarativo cria e remove uma pilha inteira de recursos de forma repetível."
+      - texto: "AWS Elastic Beanstalk."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele implanta e opera uma aplicação; o pedido é provisionar infraestrutura a partir de um modelo versionado."
+      - texto: "AWS CLI."
+        correta: false
+        explicacao: "A CLI executa comandos avulsos e depende do script estar certo em cada passo; ela não mantém o estado de uma pilha de recursos."
+      - texto: "O console de gerenciamento da AWS."
+        correta: false
+        explicacao: "Repetir cliques em várias contas é exatamente o trabalho manual que o enunciado quer eliminar."
+  - tipo: unica
+    enunciado: "Um time pequeno tem uma aplicação web pronta e quer publicá-la na AWS com balanceamento, escala automática e verificação de saúde, sem administrar servidores nem escrever modelo de infraestrutura. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Elastic Beanstalk."
+        correta: true
+        explicacao: "Recebe o código da aplicação e provisiona e opera a capacidade, o balanceamento e o monitoramento por baixo."
+      - texto: "Amazon EC2."
+        correta: false
+        explicacao: "Daria o servidor, mas deixaria com o time toda a configuração de balanceador, escala e saúde, que é o que o enunciado quer evitar."
+      - texto: "AWS CloudFormation."
+        correta: false
+        explicacao: "Provisiona infraestrutura a partir de um modelo, e o time disse que não quer escrever modelo."
+      - texto: "AWS CDK."
+        correta: false
+        explicacao: "Também é infraestrutura como código, só que escrita em linguagem de programação; continua sendo trabalho de infraestrutura."
+  - tipo: unica
+    enunciado: "Uma empresa vai manter o sistema de gestão no próprio datacenter por exigência interna e colocar apenas o site e o processamento de imagens na AWS, com conexão dedicada entre os dois ambientes. Como se chama esse modelo de implantação?"
+    alternativas:
+      - texto: "Implantação híbrida."
+        correta: true
+        explicacao: "Parte da carga fica no ambiente local e parte na nuvem, com os dois ligados por conectividade dedicada ou VPN."
+      - texto: "Implantação totalmente na nuvem."
+        correta: false
+        explicacao: "Exigiria que tudo rodasse na AWS, e o sistema de gestão continua no datacenter."
+      - texto: "Implantação local."
+        correta: false
+        explicacao: "Seria tudo no ambiente do cliente, sem a parte que já está na AWS."
+      - texto: "Implantação multirregional."
+        correta: false
+        explicacao: "Descreve espalhar a carga por mais de uma região da AWS, e não a combinação de nuvem com ambiente local."
+  - tipo: multipla
+    enunciado: "Uma equipe quer automatizar operações na AWS a partir de um servidor de integração contínua e também chamar serviços da AWS de dentro de uma aplicação em Java. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Usar a AWS CLI nos passos do servidor de integração contínua."
+        correta: true
+        explicacao: "A CLI é feita para o terminal e para scripts, que é como um servidor de integração contínua executa tarefas."
+      - texto: "Usar o SDK da AWS para Java dentro da aplicação."
+        correta: true
+        explicacao: "O SDK expõe a API da AWS na linguagem da aplicação e cuida da assinatura das chamadas."
+      - texto: "Abrir o console de gerenciamento em cada execução do pipeline."
+        correta: false
+        explicacao: "O console é interface gráfica e não pode ser acionado por um passo automatizado."
+      - texto: "Escrever um modelo do CloudFormation para substituir as chamadas da aplicação."
+        correta: false
+        explicacao: "O CloudFormation provisiona infraestrutura; ele não substitui chamadas de serviço feitas pela aplicação em tempo de execução."
+      - texto: "Implantar a aplicação no Elastic Beanstalk para ter acesso à API da AWS."
+        correta: false
+        explicacao: "O Beanstalk hospeda e opera a aplicação, mas não é o meio pelo qual o código chama os serviços da AWS."
+---
+
+## Em uma frase
+
+Existem três portas para falar com a AWS, console, CLI e SDK, todas batendo na
+mesma API, e três formas de implantar o que foi decidido: clicando, descrevendo
+em um modelo ou entregando a aplicação a uma plataforma gerenciada.
+
+## As três portas para a mesma API
+
+Toda ação em uma conta da AWS é uma chamada de API. O que muda é quem faz a
+chamada. O **console** é a interface gráfica no navegador, boa para explorar e
+para tarefa pontual. A **CLI** é o comando no terminal, boa para automatizar em
+script e em pipeline. O **SDK** é a biblioteca dentro do código, boa para a
+aplicação chamar serviços em tempo de execução.
+
+Essa unidade explica um detalhe que a prova cobra em outro domínio: como o
+CloudTrail consegue registrar tudo o que acontece na conta. Ele registra
+chamadas de API, e clique, comando e linha de código viram a mesma chamada.
+
+## Implantar: modelo, código ou plataforma
+
+<Comparativo
+  colunas={["Recurso", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Console de gerenciamento", "Interface gráfica para operar a conta no navegador", "Primeira vez, olhar o recurso, ação manual única"],
+    ["AWS CLI", "Comandos de terminal que chamam a API da AWS", "Script de shell, pipeline, automatizar tarefa operacional"],
+    ["SDK da AWS", "Biblioteca da linguagem que chama a API de dentro da aplicação", "Chamar a AWS pelo código em Python, Java ou JavaScript"],
+    ["AWS CloudFormation", "Provisiona recursos a partir de um modelo declarativo, em pilhas", "Repetível, idêntico, versionado, criar e remover de uma vez"],
+    ["AWS CDK", "Escreve a infraestrutura em linguagem de programação e gera o modelo", "Infraestrutura como código na linguagem do time"],
+    ["AWS Elastic Beanstalk", "Plataforma que recebe o código e opera capacidade, escala e saúde", "Entregar a aplicação e não administrar servidor"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="A pergunta que separa os três">
+Pergunte **o que o time entrega**. Se entrega cliques, é console. Se entrega um
+arquivo que descreve os recursos, é CloudFormation, ou CDK quando esse arquivo
+é escrito em linguagem de programação. Se entrega a aplicação pronta e não quer
+saber de servidor, é Elastic Beanstalk.
+</Callout>
+
+## Opções de implantação
+
+O guia também cobra os modelos de implantação no nível do nome. **Na nuvem**
+significa tudo na AWS. **Local** significa tudo no ambiente do cliente.
+**Híbrido** significa parte em cada lado, com VPN ou Direct Connect ligando os
+dois. O erro comum é ler híbrido como uso de dois provedores de nuvem, o que a
+AWS chama de outra coisa.
+
+Junto disso aparece a conectividade: acesso **público** pela internet, acesso
+**privado** por endpoints dentro da VPC e acesso **híbrido** pela ligação com o
+ambiente local. Esses três voltam no tema de rede, e aqui basta reconhecer que
+eles são escolhas de implantação, não serviços.
+
+<Callout tipo="atencao" titulo="Beanstalk não é infraestrutura como código">
+Os dois reduzem trabalho manual, e por isso aparecem juntos como alternativas.
+A diferença está no insumo: o CloudFormation recebe a **descrição da
+infraestrutura**; o Beanstalk recebe o **código da aplicação**. Quando o
+enunciado fala em versionar o ambiente, é modelo; quando fala em publicar a
+aplicação, é plataforma.
+</Callout>
+
+## Como responder o cenário
+
+Ache o verbo do pedido. Explorar aponta console. Automatizar no terminal aponta
+CLI. Chamar de dentro do programa aponta SDK. Repetir infraestrutura sem erro
+humano aponta CloudFormation, e CDK quando o enunciado insiste na linguagem de
+programação. Publicar uma aplicação sem administrar servidor aponta Elastic
+Beanstalk. Manter parte no datacenter aponta implantação híbrida. Se duas
+alternativas parecerem servir, escolha a que trata do insumo que o enunciado
+nomeou, e não a que automatiza mais coisas.

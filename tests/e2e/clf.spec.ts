@@ -49,10 +49,10 @@ test("a trilha mostra o exame: versão, formato, corte e o peso de cada domínio
 
 test("os domínios ainda não escritos aparecem como 'em breve', sem abrir", async ({ page }) => {
   await page.goto(CLF);
-  // Dois domínios em breve: tecnologia e cobrança. Segurança saiu do "em breve"
-  // no LUM-144. Quando o último for publicado, esta contagem cai para zero e o
-  // teste falha de propósito.
-  await expect(page.getByText("em breve", { exact: true })).toHaveCount(2);
+  // Um domínio em breve: cobrança. Tecnologia saiu do "em breve" no LUM-145,
+  // com os cinco primeiros temas do Domínio 3. Quando cobrança for publicada no
+  // LUM-147, esta contagem cai para zero e o teste falha de propósito.
+  await expect(page.getByText("em breve", { exact: true })).toHaveCount(1);
   await expect(page.getByText("Conceitos de nuvem").first()).toBeVisible();
 });
 

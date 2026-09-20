@@ -1,0 +1,257 @@
+---
+slug: computacao-na-aws
+titulo: "Computação na AWS"
+resumo: "EC2 e as famílias de instância, Auto Scaling e balanceadores no nível de conceito, Lambda, containers com ECS, EKS e Fargate, além de Lightsail e Batch: o que cada um é em uma linha e a pista que o denuncia no enunciado."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 3.3 do guia e a categoria com mais alternativas parecidas da prova. EC2, Lambda e Fargate servem para rodar código, e o que separa os três é quanto do servidor o cliente administra. Quem não fixa essa escala responde EC2 em tudo ou Lambda em tudo."
+comoCai: "Uma empresa quer executar uma função curta em resposta a um evento, sem provisionar nem administrar servidores. Qual serviço atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre alugar um carro, chamar um motorista e pagar só pela corrida que você fez."
+preRequisitos: ["como-ler-uma-questao-clf", "infraestrutura-global-da-aws"]
+errosComuns:
+  - "Responder EC2 quando o enunciado diz sem administrar servidor. Instância é servidor virtual e continua sendo responsabilidade do cliente manter o sistema operacional."
+  - "Confundir Lambda com Fargate. O Lambda executa uma função curta disparada por evento; o Fargate executa contêineres sem que o cliente administre as instâncias por baixo."
+  - "Confundir ECS com EKS. Os dois orquestram contêineres, mas o EKS é o Kubernetes gerenciado, e o enunciado que cita Kubernetes ou compatibilidade com ferramentas de Kubernetes aponta EKS."
+  - "Achar que Auto Scaling e balanceador são a mesma coisa. O Auto Scaling ajusta a quantidade de instâncias; o balanceador distribui as requisições entre as que existem."
+  - "Escolher a família de instância errada. Carga com muita memória pede família otimizada para memória, e não a de uso geral, ainda que a de uso geral pareça segura."
+  - "Responder Batch para qualquer processamento pesado. O Batch é para lotes de trabalhos em fila; carga contínua e interativa continua em EC2 ou em contêiner."
+  - "Ignorar o Lightsail quando o enunciado fala em simplicidade e preço mensal previsível para um site pequeno."
+preTeste:
+  - enunciado: "Uma equipe precisa executar um trecho curto de código sempre que um arquivo novo chegar em um bucket, sem provisionar nem administrar nenhum servidor, pagando apenas pela execução. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Lambda."
+        correta: true
+        explicacao: "É o serviço de computação sem servidor orientado a evento: a função roda quando o evento acontece e a cobrança é pelo tempo de execução."
+      - texto: "Amazon EC2."
+        correta: false
+        explicacao: "Daria o servidor virtual, mas o cliente continuaria administrando sistema operacional e capacidade, o que o enunciado quer evitar."
+      - texto: "AWS Fargate."
+        correta: false
+        explicacao: "Vizinho plausível: também evita administrar instâncias, mas executa contêineres de longa duração, e o pedido é uma função curta disparada por evento."
+  - enunciado: "Uma empresa já usa Kubernetes no ambiente local e quer o mesmo padrão na AWS, com o plano de controle gerenciado pela AWS. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "Amazon EKS."
+        correta: true
+        explicacao: "É o serviço de Kubernetes gerenciado da AWS, o caminho natural para quem já padronizou nessa tecnologia."
+      - texto: "Amazon ECS."
+        correta: false
+        explicacao: "Também orquestra contêineres, mas com orquestração própria da AWS, e não com Kubernetes."
+      - texto: "AWS Batch."
+        correta: false
+        explicacao: "Executa lotes de trabalhos em fila; não é um orquestrador de contêineres de longa duração."
+videos:
+  - id: QLKP1YoOAvA
+    publicadoEm: "2023-02-13"
+    titulo: "Containers Docker e Kubernetes | EC2 ou Fargate | AWS ECS"
+    canal: "Garagem do Inventor"
+    duracao: 9
+    porQue: "Nove minutos separando ECS, EC2 e Fargate, que é o trio de distratores mais frequente do tema. Pare no nível de para que serve e ignore a parte de configuração."
+  - id: Zk_oWxQ4QY4
+    publicadoEm: "2025-02-07"
+    titulo: "EC2, Lambda ou Fargate: Qual o melhor para o seu workload?"
+    canal: "UpperStack"
+    duracao: 61
+    porQue: "Conversa longa comparando as três opções por tipo de carga. Assista por blocos e anote, para cada serviço, a frase de enunciado que apontaria para ele."
+artigos:
+  - titulo: "Amazon EC2 concepts"
+    url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Lambda?"
+    url: "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon Elastic Container Service?"
+    url: "https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon EKS?"
+    url: "https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html"
+    fonte: "AWS"
+  - titulo: "What is Amazon EC2 Auto Scaling?"
+    url: "https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon EC2, em uma linha."
+    verso: "Servidor virtual com controle total do sistema operacional. A pista é precisar escolher o sistema, instalar software específico ou migrar servidor existente."
+  - frente: "AWS Lambda, em uma linha."
+    verso: "Executa uma função curta em resposta a um evento, sem servidor para administrar, cobrando por execução. A pista é evento, função, sem provisionar nada."
+  - frente: "AWS Fargate, em uma linha."
+    verso: "Executa contêineres sem que o cliente administre as instâncias por baixo. A pista é contêiner mais a frase sem gerenciar servidores."
+  - frente: "Amazon ECS, em uma linha."
+    verso: "Orquestrador de contêineres próprio da AWS. A pista é rodar contêiner sem exigência de Kubernetes."
+  - frente: "Amazon EKS, em uma linha."
+    verso: "Kubernetes gerenciado pela AWS. A pista é a palavra Kubernetes ou compatibilidade com o ecossistema dele."
+  - frente: "Amazon Lightsail, em uma linha."
+    verso: "Pacote simples com servidor, armazenamento e rede por preço mensal previsível. A pista é site pequeno, blog, simplicidade, começar rápido."
+  - frente: "AWS Batch, em uma linha."
+    verso: "Executa lotes de trabalhos em fila, provisionando a capacidade necessária. A pista é processar muitos trabalhos independentes em lote."
+  - frente: "EC2 Auto Scaling, em uma linha."
+    verso: "Ajusta automaticamente a quantidade de instâncias conforme a demanda. A pista é acompanhar pico e vale sem intervenção."
+  - frente: "Elastic Load Balancing, em uma linha."
+    verso: "Distribui as requisições entre várias instâncias ou contêineres saudáveis. A pista é dividir a carga e tirar do ar quem está com falha."
+  - frente: "Família de instância de uso geral."
+    verso: "Equilíbrio entre processador, memória e rede. A pista é aplicação web comum, ambiente de teste, carga variada."
+  - frente: "Família otimizada para computação e para memória."
+    verso: "Computação para carga que consome processador, como codificação e simulação. Memória para banco de dados em memória e análise de grandes conjuntos."
+  - frente: "Família otimizada para armazenamento e acelerada."
+    verso: "Armazenamento para leitura e escrita intensas em disco local. Acelerada para carga com GPU, como treinamento de modelo e renderização."
+  - frente: "EC2 contra Fargate contra Lambda."
+    verso: "EC2 entrega o servidor inteiro, Fargate entrega o contêiner sem servidor visível, Lambda entrega só a execução da função. Quanto mais à direita, menos administração."
+  - frente: "Auto Scaling contra balanceador."
+    verso: "Auto Scaling muda quantas instâncias existem; o balanceador decide para qual delas cada requisição vai."
+drills:
+  - titulo: "Qual serviço de computação atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o serviço de computação que a resolve."
+    opcoes:
+      ["Amazon EC2", "AWS Lambda", "AWS Fargate", "Amazon EKS", "Amazon Lightsail", "AWS Batch"]
+    itens:
+      - enunciado: "Executar um código curto toda vez que uma mensagem chega em uma fila, sem provisionar capacidade."
+        resposta: "AWS Lambda"
+        explicacao: "Função curta disparada por evento."
+      - enunciado: "Migrar um servidor de aplicação legado que exige um sistema operacional específico e software instalado na máquina."
+        resposta: "Amazon EC2"
+        explicacao: "Controle total do servidor virtual."
+      - enunciado: "Rodar contêineres de longa duração sem administrar as instâncias por baixo deles."
+        resposta: "AWS Fargate"
+        explicacao: "Contêiner sem servidor para gerenciar."
+      - enunciado: "Manter o padrão Kubernetes já adotado pela empresa, com o plano de controle gerenciado pela AWS."
+        resposta: "Amazon EKS"
+        explicacao: "Kubernetes gerenciado."
+      - enunciado: "Publicar um site institucional pequeno com custo mensal previsível e o mínimo de configuração."
+        resposta: "Amazon Lightsail"
+        explicacao: "Pacote simples de preço fixo."
+      - enunciado: "Processar milhares de trabalhos independentes de simulação durante a noite, em fila."
+        resposta: "AWS Batch"
+        explicacao: "Lote de trabalhos com provisionamento automático."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma empresa precisa executar um trecho de código de poucos segundos sempre que um objeto novo é gravado em um bucket. Ela não quer provisionar nem administrar servidores e quer pagar apenas pelo tempo de execução. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Lambda."
+        correta: true
+        explicacao: "É computação sem servidor orientada a evento, com cobrança pelo tempo de execução, que é exatamente o cenário descrito."
+      - texto: "AWS Fargate."
+        correta: false
+        explicacao: "Vizinho plausível, porque também dispensa administrar instâncias, mas ele executa contêineres de longa duração, e não uma função curta por evento."
+      - texto: "Amazon EC2."
+        correta: false
+        explicacao: "Exigiria provisionar e manter o servidor virtual, o oposto do que o enunciado pede."
+      - texto: "AWS Batch."
+        correta: false
+        explicacao: "É para lotes de trabalhos em fila, não para reagir a um evento individual em segundos."
+  - tipo: unica
+    enunciado: "Uma aplicação sofre picos de acesso no fim do dia e fica ociosa de madrugada. A empresa quer que a quantidade de instâncias acompanhe a demanda automaticamente e que as requisições sejam distribuídas entre as instâncias saudáveis. Qual combinação atende a esses dois pedidos?"
+    alternativas:
+      - texto: "EC2 Auto Scaling com Elastic Load Balancing."
+        correta: true
+        explicacao: "O Auto Scaling ajusta a quantidade de instâncias conforme a demanda e o balanceador distribui as requisições entre as saudáveis."
+      - texto: "Apenas Elastic Load Balancing."
+        correta: false
+        explicacao: "O balanceador distribui a carga, mas não cria nem remove instâncias quando a demanda muda."
+      - texto: "Apenas EC2 Auto Scaling."
+        correta: false
+        explicacao: "Ajusta a quantidade de instâncias, mas sozinho não distribui as requisições entre elas."
+      - texto: "Amazon Lightsail com instâncias maiores."
+        correta: false
+        explicacao: "O Lightsail é um pacote simples de preço previsível e não é a resposta para elasticidade e distribuição de carga."
+  - tipo: unica
+    enunciado: "Uma equipe vai executar uma análise que mantém um conjunto muito grande de dados em memória durante o processamento. Qual família de instância do EC2 é a indicada?"
+    alternativas:
+      - texto: "Otimizada para memória."
+        correta: true
+        explicacao: "É a família feita para cargas que precisam de muita memória disponível, como análise em memória e bancos de dados."
+      - texto: "De uso geral."
+        correta: false
+        explicacao: "Equilibra processador, memória e rede, mas não é a escolha quando a memória é o recurso dominante."
+      - texto: "Otimizada para computação."
+        correta: false
+        explicacao: "Serve a cargas que consomem processador, como codificação de mídia e simulação, e não a cargas dominadas por memória."
+      - texto: "Otimizada para armazenamento."
+        correta: false
+        explicacao: "É para leitura e escrita intensas em disco local, que não é o gargalo descrito."
+  - tipo: multipla
+    enunciado: "Uma empresa quer executar contêineres na AWS sem administrar as instâncias por baixo e, em outra frente, publicar um site institucional simples com custo mensal previsível. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Executar os contêineres com AWS Fargate."
+        correta: true
+        explicacao: "O Fargate executa contêineres sem que o cliente provisione nem administre as instâncias por baixo."
+      - texto: "Publicar o site institucional no Amazon Lightsail."
+        correta: true
+        explicacao: "O Lightsail reúne servidor, armazenamento e rede em um pacote simples, com preço mensal previsível."
+      - texto: "Executar os contêineres em instâncias EC2 administradas pela equipe."
+        correta: false
+        explicacao: "Funcionaria, mas devolve à equipe a administração das instâncias, que é justamente o que o enunciado quer evitar."
+      - texto: "Publicar o site institucional com AWS Batch."
+        correta: false
+        explicacao: "O Batch executa lotes de trabalhos em fila e não hospeda um site."
+      - texto: "Usar AWS Lambda para manter os contêineres em execução contínua."
+        correta: false
+        explicacao: "O Lambda executa funções curtas por evento e não é o lugar de um contêiner de longa duração."
+---
+
+## Em uma frase
+
+Os serviços de computação da AWS formam uma escala de **quanto do servidor o
+cliente administra**, do EC2, onde ele administra tudo, ao Lambda, onde ele só
+entrega a função, e a questão se resolve encontrando onde o enunciado quer ficar
+nessa escala.
+
+## A escala que decide
+
+<Comparativo
+  colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon EC2", "Servidor virtual com controle do sistema operacional", "Escolher o sistema, instalar software, migrar servidor existente"],
+    ["Amazon ECS", "Orquestrador de contêineres próprio da AWS", "Rodar contêiner sem exigência de Kubernetes"],
+    ["Amazon EKS", "Kubernetes gerenciado pela AWS", "A palavra Kubernetes ou o ecossistema dele"],
+    ["AWS Fargate", "Executa contêineres sem administrar as instâncias", "Contêiner mais a frase sem gerenciar servidores"],
+    ["AWS Lambda", "Função curta disparada por evento, cobrada por execução", "Evento, função, sem provisionar nada, código curto"],
+    ["Amazon Lightsail", "Pacote simples com preço mensal previsível", "Site pequeno, blog, simplicidade, começar rápido"],
+    ["AWS Batch", "Executa lotes de trabalhos em fila", "Muitos trabalhos independentes processados em lote"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="O trio que mais confunde">
+**EC2** entrega o servidor inteiro, **Fargate** entrega o contêiner sem servidor
+visível e **Lambda** entrega só a execução. Se o enunciado disser contêiner e
+disser sem administrar servidor, é Fargate. Se disser função e evento, é Lambda.
+Se disser sistema operacional específico ou software instalado na máquina, é
+EC2.
+</Callout>
+
+## Elasticidade: Auto Scaling e balanceador
+
+Os dois quase sempre aparecem juntos e resolvem coisas diferentes. O **EC2 Auto
+Scaling** muda **quantas** instâncias existem, acompanhando picos e vales sem
+intervenção humana. O **Elastic Load Balancing** decide **para qual** instância
+cada requisição vai e para de enviar tráfego às que falham na verificação de
+saúde. Quando o enunciado fala em acompanhar a demanda, é Auto Scaling; quando
+fala em distribuir requisições, é balanceador; quando fala nas duas coisas, a
+resposta traz os dois.
+
+## As famílias de instância
+
+A CLF cobra as famílias pelo nome e pelo caso, não pela geração nem pelo tamanho.
+**Uso geral** equilibra processador e memória e serve a aplicação web comum.
+**Computação** atende quem consome processador, como codificação de mídia e
+simulação. **Memória** atende quem mantém muito dado em memória, como banco de
+dados e análise em memória. **Armazenamento** atende leitura e escrita intensas
+em disco local. **Acelerada** atende carga com GPU, como treinamento de modelo e
+renderização.
+
+<Callout tipo="atencao" titulo="ECS não é EKS">
+Os dois orquestram contêineres e podem rodar sobre EC2 ou sobre Fargate. A
+diferença que a prova cobra é uma palavra: se o enunciado cita **Kubernetes**,
+padrão aberto ou ferramentas do ecossistema, é **EKS**. Se apenas pede rodar
+contêiner na AWS, é **ECS**.
+</Callout>
+
+## Como responder o cenário
+
+Comece pela unidade que o enunciado entrega. Função e evento apontam Lambda.
+Contêiner aponta ECS ou EKS, e a escolha entre eles depende da palavra
+Kubernetes; se o enunciado acrescentar que não quer administrar instâncias,
+acrescente Fargate. Servidor com sistema operacional próprio aponta EC2. Lote de
+trabalhos aponta Batch. Simplicidade e preço fixo apontam Lightsail. Depois olhe
+se há pico de demanda, porque aí entram Auto Scaling e balanceador, e só então
+escolha a família de instância pelo recurso que domina a carga.

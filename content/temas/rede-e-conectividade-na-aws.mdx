@@ -1,0 +1,262 @@
+---
+slug: rede-e-conectividade-na-aws
+titulo: "Rede e conectividade na AWS"
+resumo: "VPC, sub-rede pública e privada, internet gateway e NAT, security group contra lista de controle de acesso de rede, VPN site a site, Direct Connect, PrivateLink e endpoints, e o Route 53 como DNS."
+minutos: 30
+nivel: fundamental
+formato: prova
+publicadoEm: "2026-09-19"
+porQue: "É a tarefa 3.5 do guia e o tema com os dois pares mais confundidos da prova: security group contra lista de controle de acesso de rede, e VPN contra Direct Connect. Os dois pares se resolvem com uma pergunta cada, e quem não tem essas perguntas prontas escolhe pela familiaridade do nome."
+comoCai: "Uma empresa precisa de uma conexão dedicada e consistente entre o datacenter dela e a AWS, sem passar pela internet pública. Qual serviço atende a essa necessidade?"
+feynman: "Explique em um minuto a diferença entre a portaria do prédio, a tranca da sua porta e uma linha telefônica exclusiva ligando dois escritórios."
+preRequisitos: ["como-ler-uma-questao-clf", "infraestrutura-global-da-aws"]
+errosComuns:
+  - "Confundir security group com lista de controle de acesso de rede. O security group protege o recurso, avalia estado e só tem regra de permitir; a lista protege a sub-rede, não avalia estado e tem permitir e negar."
+  - "Achar que sub-rede privada é aquela sem endereço próprio. Privada é a que não tem rota para o internet gateway; ela pode sair para a internet por um gateway NAT."
+  - "Trocar internet gateway por gateway NAT. O internet gateway permite tráfego de entrada e de saída na sub-rede pública; o NAT deixa a sub-rede privada iniciar saída sem aceitar conexões de fora."
+  - "Responder VPN quando o enunciado pede largura de banda consistente e conexão dedicada. VPN vai pela internet pública; Direct Connect é o enlace dedicado."
+  - "Achar que endpoint da VPC é o mesmo que internet gateway. O endpoint alcança serviços da AWS pela rede interna, sem sair para a internet."
+  - "Confundir Route 53 com CloudFront. O Route 53 resolve nomes em endereços; o CloudFront entrega conteúdo em cache."
+  - "Esquecer que a VPC é regional e que as sub-redes ficam cada uma em uma zona de disponibilidade."
+preTeste:
+  - enunciado: "Uma empresa precisa de uma conexão privada e dedicada entre o próprio datacenter e a AWS, com largura de banda consistente e sem trafegar pela internet pública. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Direct Connect."
+        correta: true
+        explicacao: "É o enlace dedicado entre o ambiente do cliente e a AWS, com desempenho mais consistente do que a internet pública."
+      - texto: "VPN site a site da AWS."
+        correta: false
+        explicacao: "Vizinho plausível: cria um túnel criptografado, mas o transporte continua sendo a internet pública, sem banda dedicada."
+      - texto: "Internet gateway."
+        correta: false
+        explicacao: "É o componente que dá acesso à internet a uma sub-rede pública dentro da VPC, não uma ligação com o datacenter."
+  - enunciado: "Uma instância em uma sub-rede privada precisa baixar atualizações da internet, mas não pode receber conexões vindas de fora. O que deve ser usado?"
+    alternativas:
+      - texto: "Um gateway NAT."
+        correta: true
+        explicacao: "Ele permite que a sub-rede privada inicie conexões de saída sem que a internet consiga iniciar conexões de entrada."
+      - texto: "Um internet gateway ligado diretamente à sub-rede privada."
+        correta: false
+        explicacao: "Isso tornaria a sub-rede pública e permitiria tráfego de entrada, exatamente o que o enunciado proíbe."
+      - texto: "Um endpoint da VPC."
+        correta: false
+        explicacao: "Dá acesso privado a serviços da AWS, e não à internet em geral para baixar atualizações de terceiros."
+videos:
+  - id: HtHuPAz3B7I
+    publicadoEm: "2023-05-24"
+    titulo: "Como criar VPCs e Subnets na AWS"
+    canal: "Fabricio Veronez"
+    duracao: 62
+    porQue: "Mostra na prática a diferença entre sub-rede pública e privada, com internet gateway e roteamento. Para a CLF, assista ao começo e pare quando entender quem tem rota para a internet e quem não tem."
+  - id: 3okhljXN9aA
+    publicadoEm: "2021-06-02"
+    titulo: "AWS - Como criar VPC com Subnet Pública e Privada"
+    canal: "Luiz Pessol"
+    duracao: 44
+    porQue: "Segunda passagem pelo mesmo desenho, útil se o primeiro vídeo não fixou o papel das tabelas de rota. Foque no conceito e ignore os detalhes de tela."
+artigos:
+  - titulo: "What is Amazon VPC?"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html"
+    fonte: "AWS"
+  - titulo: "Control traffic to your AWS resources using security groups"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html"
+    fonte: "AWS"
+  - titulo: "Control subnet traffic with network access control lists"
+    url: "https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Direct Connect?"
+    url: "https://docs.aws.amazon.com/directconnect/latest/UserGuide/Welcome.html"
+    fonte: "AWS"
+  - titulo: "What is AWS Site-to-Site VPN?"
+    url: "https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html"
+    fonte: "AWS"
+flashcards:
+  - frente: "Amazon VPC, em uma linha."
+    verso: "Rede virtual isolada da empresa dentro de uma região da AWS, onde os recursos são criados. A pista é rede própria, faixa de endereços, isolamento."
+  - frente: "Sub-rede pública e sub-rede privada."
+    verso: "Pública é a que tem rota para o internet gateway; privada é a que não tem. Cada sub-rede fica em uma zona de disponibilidade."
+  - frente: "Internet gateway, em uma linha."
+    verso: "Componente que liga a VPC à internet, permitindo entrada e saída para a sub-rede pública. A pista é recurso acessível pela internet."
+  - frente: "Gateway NAT, em uma linha."
+    verso: "Permite que a sub-rede privada inicie conexões de saída sem aceitar conexões de entrada. A pista é baixar atualização sem se expor."
+  - frente: "Security group, em uma linha."
+    verso: "Firewall do recurso, avalia estado e só tem regras de permitir. A pista é liberar porta para uma instância específica."
+  - frente: "Lista de controle de acesso de rede, em uma linha."
+    verso: "Firewall da sub-rede, não avalia estado e tem regras de permitir e de negar. A pista é bloquear um endereço para toda a sub-rede."
+  - frente: "VPN site a site, em uma linha."
+    verso: "Túnel criptografado entre o ambiente local e a VPC, trafegando pela internet pública. A pista é ligação rápida de montar e custo menor."
+  - frente: "AWS Direct Connect, em uma linha."
+    verso: "Enlace dedicado entre o datacenter do cliente e a AWS, sem passar pela internet pública. A pista é banda consistente e conexão dedicada."
+  - frente: "Endpoint da VPC, em uma linha."
+    verso: "Acesso privado a serviços da AWS pela rede interna, sem sair para a internet. A pista é alcançar o S3 ou outro serviço sem tráfego público."
+  - frente: "AWS PrivateLink, em uma linha."
+    verso: "Expõe um serviço de forma privada dentro da rede, sem expor à internet. A pista é consumir serviço de terceiro ou de outra conta sem tráfego público."
+  - frente: "Amazon Route 53, em uma linha."
+    verso: "DNS gerenciado com registro de domínio, verificação de saúde e políticas de roteamento. A pista é resolver nome de domínio."
+  - frente: "A pergunta que separa VPN de Direct Connect."
+    verso: "O tráfego pode ir pela internet? Se sim, VPN resolve e é mais rápida de montar. Se o enunciado exige dedicado e consistente, é Direct Connect."
+  - frente: "A pergunta que separa security group de lista de acesso."
+    verso: "O controle é do recurso ou da sub-rede inteira? Recurso aponta security group; sub-rede aponta lista de controle de acesso de rede."
+  - frente: "Route 53 contra CloudFront."
+    verso: "Route 53 resolve o nome em um endereço; CloudFront entrega o conteúdo em cache a partir da borda."
+drills:
+  - titulo: "Qual componente de rede atende ao pedido?"
+    instrucao: "Para cada necessidade, indique o componente de rede ou serviço de conectividade que a resolve."
+    opcoes:
+      ["Security group", "Lista de controle de acesso de rede", "Gateway NAT", "AWS Direct Connect", "VPN site a site", "Amazon Route 53"]
+    itens:
+      - enunciado: "Liberar a porta de um servidor web em uma única instância, permitindo que a resposta volte sem regra extra."
+        resposta: "Security group"
+        explicacao: "Firewall do recurso, que avalia estado."
+      - enunciado: "Negar explicitamente um intervalo de endereços para todos os recursos de uma sub-rede."
+        resposta: "Lista de controle de acesso de rede"
+        explicacao: "Só a lista tem regra de negar e age na sub-rede."
+      - enunciado: "Permitir que instâncias sem endereço público baixem pacotes de atualização sem aceitar conexões de entrada."
+        resposta: "Gateway NAT"
+        explicacao: "Saída iniciada de dentro, sem entrada."
+      - enunciado: "Ligar o datacenter da empresa à AWS com banda dedicada e desempenho consistente."
+        resposta: "AWS Direct Connect"
+        explicacao: "Enlace dedicado fora da internet pública."
+      - enunciado: "Criar rapidamente um túnel criptografado entre o escritório e a VPC, aceitando trafegar pela internet."
+        resposta: "VPN site a site"
+        explicacao: "Túnel sobre a internet pública."
+      - enunciado: "Registrar um domínio e direcionar os visitantes para o endereço da aplicação conforme a saúde de cada região."
+        resposta: "Amazon Route 53"
+        explicacao: "DNS gerenciado com roteamento e verificação de saúde."
+perguntas:
+  - tipo: unica
+    enunciado: "Uma equipe precisa negar explicitamente um intervalo de endereços de origem para todos os recursos de uma sub-rede, sem alterar a configuração de cada instância. Qual recurso atende a esse pedido?"
+    alternativas:
+      - texto: "Uma lista de controle de acesso de rede."
+        correta: true
+        explicacao: "Ela age na sub-rede inteira e é o único dos dois firewalls da VPC que tem regra de negar."
+      - texto: "Um security group."
+        correta: false
+        explicacao: "Vizinho plausível, mas ele protege o recurso e só aceita regras de permitir, sem regra explícita de negar."
+      - texto: "Um gateway NAT."
+        correta: false
+        explicacao: "Ele trata da saída de sub-redes privadas para a internet e não filtra origens de entrada."
+      - texto: "Um endpoint da VPC."
+        correta: false
+        explicacao: "Dá acesso privado a serviços da AWS e não é um mecanismo de filtragem por endereço."
+  - tipo: unica
+    enunciado: "Uma empresa quer ligar o datacenter próprio à AWS com desempenho consistente e sem trafegar pela internet pública, porque a aplicação é sensível a variações de rede. Qual serviço atende a esse pedido?"
+    alternativas:
+      - texto: "AWS Direct Connect."
+        correta: true
+        explicacao: "É a conexão dedicada entre o ambiente do cliente e a AWS, com desempenho mais previsível do que a internet pública."
+      - texto: "VPN site a site da AWS."
+        correta: false
+        explicacao: "Cria um túnel criptografado, mas o transporte continua na internet pública e fica sujeito às variações dela."
+      - texto: "AWS PrivateLink."
+        correta: false
+        explicacao: "Expõe serviços de forma privada dentro da rede da AWS; não é a ligação física com o datacenter do cliente."
+      - texto: "Internet gateway."
+        correta: false
+        explicacao: "Dá acesso à internet a uma sub-rede pública da VPC e não conecta o ambiente local."
+  - tipo: unica
+    enunciado: "Uma aplicação em uma sub-rede privada precisa gravar objetos no Amazon S3 sem que esse tráfego saia para a internet. Qual recurso atende a esse pedido?"
+    alternativas:
+      - texto: "Um endpoint da VPC para o S3."
+        correta: true
+        explicacao: "O endpoint permite alcançar o serviço pela rede da AWS, mantendo o tráfego fora da internet pública."
+      - texto: "Um gateway NAT."
+        correta: false
+        explicacao: "Permitiria a saída, mas justamente pela internet, que é o que o enunciado quer evitar."
+      - texto: "Um internet gateway."
+        correta: false
+        explicacao: "Tornaria a sub-rede pública e levaria o tráfego para a internet."
+      - texto: "Uma lista de controle de acesso de rede permissiva."
+        correta: false
+        explicacao: "Ela apenas filtra tráfego na sub-rede e não cria caminho privado até o serviço."
+  - tipo: multipla
+    enunciado: "Uma empresa quer expor um servidor web à internet em uma sub-rede pública e, ao mesmo tempo, permitir que servidores de aplicação em sub-rede privada baixem atualizações sem aceitar conexões de fora. Quais DUAS opções atendem a esses objetivos?"
+    alternativas:
+      - texto: "Associar um internet gateway à VPC e criar rota para ele na sub-rede pública."
+        correta: true
+        explicacao: "O internet gateway é o que dá entrada e saída de internet a uma sub-rede pública."
+      - texto: "Criar um gateway NAT para a sub-rede privada."
+        correta: true
+        explicacao: "O NAT permite que a sub-rede privada inicie conexões de saída sem aceitar conexões de entrada."
+      - texto: "Criar um endpoint da VPC para alcançar qualquer site da internet."
+        correta: false
+        explicacao: "Endpoint dá acesso privado a serviços da AWS, e não à internet em geral."
+      - texto: "Trocar a lista de controle de acesso de rede por um security group na sub-rede."
+        correta: false
+        explicacao: "Um não substitui o outro: a lista age na sub-rede e o security group no recurso, e nenhum deles cria rota para a internet."
+      - texto: "Contratar AWS Direct Connect para a saída de atualizações."
+        correta: false
+        explicacao: "Direct Connect liga o datacenter do cliente à AWS e não é o caminho de saída para a internet."
+---
+
+## Em uma frase
+
+A rede da AWS é uma **VPC** por região, dividida em sub-redes que são públicas ou
+privadas conforme tenham ou não rota para a internet, protegidas por dois
+firewalls em níveis diferentes e ligadas ao mundo de fora por três caminhos:
+internet, túnel e enlace dedicado.
+
+## Dentro da VPC
+
+A **VPC** é a rede isolada da empresa dentro de uma região. Cada **sub-rede** fica
+em uma zona de disponibilidade, e o que a torna pública é ter rota para o
+**internet gateway**. Sem essa rota, ela é privada. Para que uma instância
+privada consiga iniciar uma saída, sem aceitar conexões de fora, entra o
+**gateway NAT**.
+
+<Comparativo
+  colunas={["Componente", "O que é em uma linha", "A pista no enunciado"]}
+  linhas={[
+    ["Amazon VPC", "Rede virtual isolada dentro de uma região", "Rede própria, faixa de endereços, isolamento"],
+    ["Internet gateway", "Liga a VPC à internet, com entrada e saída", "Recurso que precisa ser alcançado pela internet"],
+    ["Gateway NAT", "Saída para a internet iniciada de dentro, sem entrada", "Baixar atualização sem expor a instância"],
+    ["Endpoint da VPC", "Acesso privado a serviços da AWS pela rede interna", "Falar com o S3 sem tráfego pela internet"],
+    ["AWS PrivateLink", "Publica um serviço de forma privada dentro da rede", "Consumir serviço de outra conta sem expor à internet"],
+    ["VPN site a site", "Túnel criptografado sobre a internet pública", "Ligar o escritório rápido, custo menor"],
+    ["AWS Direct Connect", "Enlace dedicado até a AWS, fora da internet pública", "Banda consistente, conexão dedicada, tráfego sensível"],
+    ["Amazon Route 53", "DNS gerenciado com roteamento e verificação de saúde", "Registrar domínio, resolver nome, direcionar visitante"]
+  ]}
+/>
+
+## Os dois firewalls
+
+<Comparativo
+  colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
+  linhas={[
+    ["Protege", "O recurso, como uma instância", "A sub-rede inteira"],
+    ["Regras", "Só permitir", "Permitir e negar"],
+    ["Avalia estado", "Sim: a resposta volta sem regra extra", "Não: é preciso regra de ida e de volta"],
+    ["A pista", "Liberar porta para uma instância específica", "Bloquear um endereço para toda a sub-rede"]
+  ]}
+/>
+
+<Callout tipo="dica" titulo="Duas perguntas prontas">
+Para o par de firewalls, pergunte **o controle é do recurso ou da sub-rede**, e
+lembre que só a lista sabe negar. Para o par de conectividade, pergunte **o
+tráfego pode ir pela internet**: se pode, VPN basta e é mais rápida de montar;
+se o enunciado pede dedicado, consistente ou fora da internet, é Direct Connect.
+</Callout>
+
+## Sair da VPC sem ir à internet
+
+Duas peças aparecem quando o enunciado insiste em tráfego privado. O **endpoint
+da VPC** alcança serviços da AWS pela rede interna, e é a resposta quando uma
+instância privada precisa falar com o S3 sem sair para a internet. O
+**PrivateLink** publica um serviço, seu ou de terceiro, de forma privada dentro
+da rede, sem expor endereço público.
+
+<Callout tipo="atencao" titulo="Route 53 não entrega conteúdo">
+Ele traduz o nome em um endereço e pode escolher o destino por latência, por
+região ou pela saúde do alvo. Quem entrega o arquivo perto do usuário é o
+CloudFront. Enunciado com domínio e resolução aponta Route 53; enunciado com
+imagem, vídeo ou site lento para quem está longe aponta CloudFront.
+</Callout>
+
+## Como responder o cenário
+
+Localize primeiro a fronteira do problema. Se é dentro da VPC e fala de porta ou
+endereço, escolha entre os dois firewalls com a pergunta do nível. Se é uma
+instância privada querendo alcançar algo, decida entre NAT, para internet, e
+endpoint, para serviço da AWS. Se é o datacenter falando com a AWS, decida entre
+VPN e Direct Connect pela exigência de dedicado. E se aparece nome de domínio, a
+resposta é Route 53, não CloudFront.

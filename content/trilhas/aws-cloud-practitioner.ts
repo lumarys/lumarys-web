@@ -14,11 +14,12 @@ import type { Trilha } from "../types";
  * são próprios, e não compartilhados com a SAA: uma questão de arquitetura
  * dentro de uma prova de CLF quebraria a calibração do sorteio por peso.
  *
- * Estado desta trilha: "como funciona a prova" e os Domínios 1 e 2 publicados.
- * Os outros dois domínios já aparecem como módulos "em breve", com o peso que
- * a AWS declara, e chegam nos cards LUM-145 e LUM-146 (Tecnologia e serviços)
- * e LUM-147 (Cobrança, preços e suporte). O `prazoSugeridoDias` acompanha o
- * que existe e cresce com eles.
+ * Estado desta trilha: "como funciona a prova" e os Domínios 1 e 2 completos,
+ * e o Domínio 3 pela metade: os cinco primeiros temas de Tecnologia e serviços
+ * já estão publicados. Faltam os quatro últimos temas desse domínio, no card
+ * LUM-146, que também traz o checkpoint do módulo, e o Domínio 4 inteiro, no
+ * card LUM-147 (Cobrança, preços e suporte). O `prazoSugeridoDias` acompanha
+ * o que existe e cresce com eles.
  */
 export const awsCloudPractitioner: Trilha = {
   slug: "aws-cloud-practitioner",
@@ -30,7 +31,7 @@ export const awsCloudPractitioner: Trilha = {
   resumo:
     "O guia oficial do exame CLF-C02 transformado em estudo ativo: um módulo por domínio, cenários curtos no estilo da prova com o porquê de cada alternativa, cards de serviço e pista, e uma prova simulada cronometrada com nota na escala da AWS.",
   formatoProva: "Prova objetiva, 65 questões em 90 minutos",
-  prazoSugeridoDias: 12,
+  prazoSugeridoDias: 17,
   status: "disponivel",
   exame: {
     codigo: "CLF-C02",
@@ -89,11 +90,17 @@ export const awsCloudPractitioner: Trilha = {
       titulo: "Tecnologia e serviços",
       resumo:
         "Formas de implantar e operar, infraestrutura global, computação, armazenamento, rede, bancos de dados, analytics e IA, integração e gestão.",
-      status: "em-breve",
+      status: "disponivel",
       oficial: true,
       dominioExame: "Domínio 3 · Cloud Technology and Services",
       pesoExame: 34,
-      temas: [],
+      temas: [
+        "formas-de-operar-na-aws",
+        "infraestrutura-global-da-aws",
+        "computacao-na-aws",
+        "armazenamento-na-aws",
+        "rede-e-conectividade-na-aws",
+      ],
     },
     {
       slug: "cobranca",
@@ -190,6 +197,41 @@ export const awsCloudPractitioner: Trilha = {
       temas: [],
       revisao: ["conceitos", "seguranca"],
       nota: "Agora com os dois domínios no banco. Compare o resultado por domínio com o da primeira prova: o de 30% precisa subir mais do que o de 24%.",
+    },
+    {
+      dia: 13,
+      titulo: "Formas de implantar e operar na AWS",
+      temas: ["formas-de-operar-na-aws"],
+      revisao: ["seguranca"],
+      nota: "Começa o domínio de 34%, o maior da prova. A partir daqui a questão descreve a necessidade e pede o serviço, então leia o enunciado procurando o verbo do pedido antes de olhar as alternativas.",
+    },
+    {
+      dia: 14,
+      titulo: "A infraestrutura global da AWS",
+      temas: ["infraestrutura-global-da-aws"],
+      revisao: ["seguranca"],
+      nota: "Vocabulário que sustenta o resto do domínio. Saia daqui sabendo dizer, sem pensar, quando o problema é de zona, quando é de região e quando é de borda.",
+    },
+    {
+      dia: 15,
+      titulo: "Computação na AWS",
+      temas: ["computacao-na-aws"],
+      revisao: ["tecnologia"],
+      nota: "A categoria com mais alternativas parecidas. Fixe a escala de quanto do servidor o cliente administra: EC2, depois contêiner, depois Lambda.",
+    },
+    {
+      dia: 16,
+      titulo: "Armazenamento na AWS",
+      temas: ["armazenamento-na-aws"],
+      revisao: ["tecnologia"],
+      nota: "Classifique o dado antes de escolher o serviço: objeto aponta S3, bloco aponta EBS, arquivo compartilhado aponta EFS. Depois disso, decida a classe pela frequência de acesso.",
+    },
+    {
+      dia: 17,
+      titulo: "Rede e conectividade na AWS",
+      temas: ["rede-e-conectividade-na-aws"],
+      revisao: ["tecnologia"],
+      nota: "Dois pares decidem o tema: security group contra lista de controle de acesso de rede, e VPN contra Direct Connect. Tenha as duas perguntas de desempate prontas.",
     },
   ],
 };
