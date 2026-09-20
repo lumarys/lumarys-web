@@ -60,6 +60,13 @@ isso em seis perspectivas.
 "Operações: entregar e sustentar serviços no nível acordado."
 ]} />
 
+O guia do exame também descreve os resultados que a jornada de adoção persegue,
+e é assim que eles aparecem no enunciado: **redução do risco do negócio**,
+melhora do desempenho **ambiental, social e de governança (ESG)**, **aumento de
+receita** e **ganho de eficiência operacional**. Quando a questão fala em
+benefício da adoção, e não em uma capacidade a desenvolver, é para esse conjunto
+que ela aponta.
+
 <Callout tipo="dica" titulo="CAF e Well-Architected respondem perguntas diferentes">
 Se o enunciado fala em preparar a empresa, desenvolver capacidades e montar
 roteiro de adoção, a resposta é **CAF**. Se fala em avaliar uma carga de
@@ -78,6 +85,8 @@ linhas={[
 ["AWS Migration Hub", "Acompanhar o andamento da migração num painel único"],
 ["AWS Application Discovery Service", "Levantar o inventário e as dependências do ambiente atual"],
 ["AWS Application Migration Service", "Replicar servidores inteiros para a AWS"],
+["Migration Evaluator", "Estimar o custo na AWS antes de decidir a migração"],
+["AWS Elastic Disaster Recovery", "Manter cópia pronta para assumir a operação se o ambiente de origem cair"],
 ["AWS Database Migration Service", "Migrar e replicar bancos, inclusive entre motores diferentes"],
 ["AWS DataSync", "Copiar arquivos entre o ambiente local e o armazenamento da AWS, pela rede"],
 ["Família AWS Snow", "Levar grande volume de dados em dispositivo físico quando a rede é o gargalo"]

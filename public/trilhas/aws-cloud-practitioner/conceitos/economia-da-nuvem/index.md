@@ -48,12 +48,13 @@ center não custa zero: ele ocupa espaço, consome energia e envelhece.
 ## Licenciamento: própria ou inclusa
 
 Quando o software é licenciado, existem dois caminhos, e o enunciado diz qual
-situação a empresa está vivendo.
+situação a empresa está vivendo. O primeiro aparece nas alternativas pelo nome
+em inglês, **bring your own license** (BYOL), e é bom reconhecer a sigla.
 
 <Comparativo
 colunas={["Caminho", "Quando faz sentido", "O que muda"]}
 linhas={[
-["Licença própria", "A empresa já pagou pela licença e o fabricante permite levá-la", "Evita pagar de novo; a gestão e a conformidade continuam com a empresa"],
+["Licença própria (BYOL)", "A empresa já pagou pela licença e o fabricante permite levá-la", "Evita pagar de novo; a gestão e a conformidade continuam com a empresa"],
 ["Licença inclusa", "Não há licença portável, ou a empresa quer parar de gerenciar isso", "O preço do serviço embute a licença; a gestão fica com o provedor"]
 ]}
 />

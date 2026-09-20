@@ -197,7 +197,8 @@ aponta um modelo de compra, e os demais viram distratores.
     ["Instância reservada", "Compromisso de uma configuração por 1 ou 3 anos", "Carga estável na mesma família, tamanho e região"],
     ["Instância Spot", "Capacidade ociosa a preço reduzido, recuperável pela AWS", "Trabalho tolerante a interrupção"],
     ["Host dedicado", "O servidor físico inteiro, com soquetes e núcleos visíveis", "Licença de software amarrada ao hardware"],
-    ["Instância dedicada", "Hardware não compartilhado com outra conta", "Exigência de isolamento, sem licença por hardware"]
+    ["Instância dedicada", "Hardware não compartilhado com outra conta", "Exigência de isolamento, sem licença por hardware"],
+    ["Reserva de capacidade", "Garante capacidade numa zona, sem desconto por prazo", "Assegurar máquina disponível em data crítica"]
   ]}
 />
 
@@ -208,6 +209,13 @@ gastar o que prometeu, a configuração pode mudar ao longo do contrato. Quando
 o enunciado cita evolução da aplicação ou troca de família, a resposta é
 Savings Plans; quando descreve uma configuração que vai ficar parada onde
 está, é reserva.
+
+A reserva ainda tem graus de flexibilidade que a prova cita de passagem. A
+**padrão** dá o desconto maior e quase nenhuma liberdade. A **conversível**
+desconta menos e permite trocar por outra configuração durante o contrato. E
+numa organização com faturamento consolidado, a reserva comprada por uma conta
+pode ser aproveitada por outra conta da mesma organização quando sobra
+capacidade, assunto que volta no tema de Organizations.
 
 <Callout tipo="atencao" titulo="Spot não é desconto por prazo">
 O Spot **não pede compromisso nenhum**. O que ele pede é tolerância à

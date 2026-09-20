@@ -17,6 +17,7 @@ colunas={["Serviço", "O que é em uma linha", "A pista no enunciado"]}
 linhas={[
 ["Amazon S3", "Armazenamento de objetos em buckets, acessado por API", "Arquivo, imagem, backup, site estático, acesso pela aplicação"],
 ["Amazon EBS", "Volume de bloco ligado a uma instância EC2 em uma zona", "Disco da instância, sistema operacional, banco instalado na máquina"],
+["Instance store", "Disco preso ao hardware da instância, apagado quando ela para", "Rascunho, cache local, dado que pode ser perdido"],
 ["Amazon EFS", "Sistema de arquivos montado por várias instâncias ao mesmo tempo", "Compartilhado entre instâncias, pasta comum, capacidade elástica"],
 ["Amazon FSx", "Sistemas de arquivos de terceiros gerenciados", "Compatível com Windows File Server, computação de alto desempenho"],
 ["AWS Storage Gateway", "Ponte entre o datacenter local e o armazenamento da AWS", "Ambiente híbrido com acesso contínuo, manter protocolos locais"],
@@ -29,6 +30,8 @@ linhas={[
 Conte as instâncias. **Uma** instância com um disco próprio é **EBS**. **Várias**
 instâncias lendo e gravando na mesma pasta é **EFS**. Se o enunciado citar
 compatibilidade com Windows ou alto desempenho de arquivos, sobe para **FSx**.
+O **instance store** também é bloco, mas é efêmero: some quando a instância
+para. Dado que precisa sobreviver ao desligamento vai para EBS.
 </Callout>
 
 ## As classes do S3

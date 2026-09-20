@@ -34,7 +34,8 @@ linhas={[
 ["AWS Trusted Advisor", "Recomendações contra boas práticas da AWS", "Sugestões de economia, segurança, desempenho, limites"],
 ["AWS Health Dashboard", "Eventos da própria AWS que afetam a conta", "Saber se o problema é da AWS, não do cliente"],
 ["AWS Service Catalog", "Catálogo de produtos aprovados para implantar", "Padronizar o que as equipes podem criar"],
-["AWS License Manager", "Controle de uso de licenças de fornecedores", "Conformidade de licença, contagem de uso"]
+["AWS License Manager", "Controle de uso de licenças de fornecedores", "Conformidade de licença, contagem de uso"],
+["Service Quotas", "Consulta e pedido de aumento dos limites de cada serviço", "Bati no limite da conta, preciso de mais"]
 ]}
 />
 
@@ -44,6 +45,11 @@ CloudWatch diz **o que está acontecendo agora** com um recurso. O Trusted
 Advisor diz **o que deveria mudar** na conta, comparando com boas práticas.
 Alerta sobre métrica é CloudWatch; sugestão de melhoria é Trusted Advisor.
 </Callout>
+
+O **AWS Health** aparece de duas formas, e a prova cita as duas. O **Health
+Dashboard** é a tela que mostra os eventos da AWS que afetam aquela conta. A
+**AWS Health API** entrega os mesmos eventos de forma programática, para quem
+quer disparar uma reação automática quando um evento aparece.
 
 ## As demais categorias, no nível de nome e propósito
 
@@ -56,7 +62,7 @@ linhas={[
 ["Ferramentas de desenvolvedor", "CodeBuild, CodeDeploy, CodePipeline", "Compilar e testar, implantar, e ligar as etapas em uma esteira"],
 ["Desenvolvimento e diagnóstico", "Cloud9, X-Ray", "Ambiente de desenvolvimento no navegador e rastreamento da requisição entre serviços"],
 ["Negócio e engajamento", "Amazon Connect, SES, Pinpoint", "Central de atendimento, envio de e-mail em volume e campanhas de comunicação"],
-["Computação de usuário final", "WorkSpaces, AppStream", "Área de trabalho completa na nuvem e transmissão de uma aplicação isolada"],
+["Computação de usuário final", "WorkSpaces, WorkSpaces Secure Browser, AppStream", "Área de trabalho completa na nuvem, navegador isolado no navegador do usuário e transmissão de uma aplicação isolada"],
 ["Dispositivos e aplicações", "IoT Core, Amplify, AppSync", "Conectar dispositivos, acelerar aplicações web e móveis e servir APIs GraphQL"]
 ]}
 />

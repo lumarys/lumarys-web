@@ -65,7 +65,10 @@ sobre caminhos entre entidades, então o enunciado fala em rede de contatos,
 recomendação por conexão ou fraude encadeada. O **DocumentDB** guarda documentos
 e costuma vir com a palavra MongoDB no texto. E o **DMS** não guarda nada: ele
 move o dado de um banco para outro, com a origem em uso durante a transferência,
-e é a resposta quando o verbo do enunciado é migrar.
+e é a resposta quando o verbo do enunciado é migrar. Ao lado dele vem o
+**AWS SCT**, a ferramenta de conversão de esquema, que entra quando a migração
+troca de motor, como de Oracle para PostgreSQL: o SCT converte esquema e código,
+o DMS move os dados.
 
 Vale lembrar que gerenciado não significa sem responsabilidade. A AWS cuida do
 servidor, do sistema operacional e das rotinas do banco; a modelagem, o controle

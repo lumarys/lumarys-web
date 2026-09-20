@@ -14,6 +14,7 @@
 O usuário tem sabatina de Engenharia de Dados numa grande instituição do mercado financeiro em ~2 semanas. A **Lumarys** (lumarys.com.br) nasce como site de estudos **mobile-first para profissionais**, organizado em **trilhas** derivadas do que empresas e certificadoras exigem. Método de estudo baseado nos 9 princípios de **Ultraaprendizado** (Scott Young) + práticas com evidência (recuperação, espaçamento, intercalação). Vídeos do YouTube só em **PT-BR**, explicações próprias, links para artigos.
 
 Trilhas iniciais:
+
 1. **Carreira · Engenharia de Dados (banco)** — prioridade; 17 artigos oficiais + Databricks + módulo "Além da ementa" **completo antes da sabatina** (decisão do usuário).
 2. **Carreira · Engenharia de Analytics (banco)** — módulo Big Data recebido (13 de 17 itens); AWS, Banco de dados, Programação, DevOps, Dataviz, Data Mesh pendentes de ementa.
 3. **Certificação · AWS Cloud Practitioner (CLF-C02)**, **Solutions Architect Associate (SAA-C03)** e **Solutions Architect Professional (SAP-C02)** — códigos confirmados nas páginas oficiais da AWS em 03/09/2026 (o "SAA-C04" citado em blogs não existe oficialmente).
@@ -30,7 +31,7 @@ Decisões tomadas: PT-BR · landing na raiz + `/trilhas/<slug>/` · estado Terra
 
 **Posicionamento**: "Estude do jeito que a prova cobra, e continue aprendendo depois dela." Cada trilha parte da ementa oficial (empresa ou certificadora) e vira estudo ativo: vídeo → explicação → recall → drill → simulado no formato real (oral para sabatina; múltipla escolha cronometrada para certificação). Ao concluir uma trilha, o site sugere a próxima da jornada (ex.: Eng. Dados → CLF-C02 → SAA-C03).
 
-**Catálogo** com duas categorias na landing: *Carreiras* (por empresa) e *Certificações* (por provedor). Cada trilha mostra origem, formato da prova, tempo estimado, progresso e "prontidão".
+**Catálogo** com duas categorias na landing: _Carreiras_ (por empresa) e _Certificações_ (por provedor). Cada trilha mostra origem, formato da prova, tempo estimado, progresso e "prontidão".
 
 **Design system** (Tailwind 4 `@theme`): dark-first, acento âmbar sobre azul-profundo, neutros quentes; Inter; base 16px, títulos 22–28px; toque ≥ 44px; sem scroll horizontal; `prefers-color-scheme`. Componentes: `AppShell` (header compacto + tab bar Hoje / Trilha / Cards / Simulado), `TrilhaCard`, `ModuloAccordion`, `TemaHeader`, `VideoEmbed` (facade), `Callout`, `Comparativo`, `Flashcard`, `Quiz` (única/múltipla resposta/oral), `Drill`, `Rubrica`, `PomodoroTimer`, `ProgressRing`, `ReadinessScore`, `CopyPromptButton`, `ShareCard`.
 
@@ -38,7 +39,7 @@ Decisões tomadas: PT-BR · landing na raiz + `/trilhas/<slug>/` · estado Terra
 
 ### 1.1 Briefing de marca e branding (base: "Lumarys — Life long Learning 4 Ever")
 
-- **Naming**: *Lumarys* evoca *lumen/luz* (clareza, iluminar o caminho) com sonoridade de nome próprio, memorável e registrável; o sufixo "-arys" dá ar de constelação/rota (ex.: Antares, Polaris). Leitura da marca: "a luz que guia o aprendizado ao longo da carreira".
+- **Naming**: _Lumarys_ evoca _lumen/luz_ (clareza, iluminar o caminho) com sonoridade de nome próprio, memorável e registrável; o sufixo "-arys" dá ar de constelação/rota (ex.: Antares, Polaris). Leitura da marca: "a luz que guia o aprendizado ao longo da carreira".
 - **Tagline**: **Life long Learning 4 Ever** (grafia oficial do usuário); monograma **LL4E**. Uso: hero da landing, rodapé, OG image, manifest, assinatura de e-mail Zoho, capa de LinkedIn.
 - **Propósito**: tornar o aprendizado contínuo viável para quem trabalha, em sessões curtas e com método.
 - **Missão**: transformar ementas oficiais (empresas e certificadoras) em trilhas de estudo ativo que preparam para a prova e ficam como base de carreira.
@@ -109,17 +110,20 @@ lumarys-web/
 ### 2.1 SEO completo — Google e agentes de IA
 
 **Arquitetura indexável**
+
 - Toda página de tema, trilha, glossário e método é HTML estático completo (sem conteúdo só via JS); URLs limpas com `trailingSlash`, canônica por página, `hreflang="pt-BR"`, breadcrumbs reais (`Início › Trilhas › Eng. de Dados › Spark › RDD`).
 - Hierarquia de headings (1 `h1` por página), texto de explicação visível (não escondido em acordeões fechados), flashcards e quizzes renderizados com conteúdo textual no HTML (interatividade progressiva por cima).
 - **Páginas long-tail**: `/glossario/<termo>/` (1 página por termo: "O que é particionamento de dados"), `/comparativos/<a>-vs-<b>/` (ETL vs ELT, Delta vs Iceberg, SQS vs SNS), `/certificacoes/<exame>/` (guia do exame, domínios, plano). São as buscas que profissionais fazem.
 - Linkagem interna: tema → glossário → comparativo → trilha; "temas relacionados" e "próximo tema" em todas as páginas; sitemap HTML.
 
 **Metadados e dados estruturados**
+
 - Next Metadata API: `title` (padrão "<tema> | <trilha> · Lumarys"), `description` única por página, OG/Twitter cards com imagem gerada por trilha/tema (`opengraph-image.tsx`, como em youco-web).
 - JSON-LD por tipo: `Organization` + `WebSite` (com `SearchAction`), `Course`/`LearningResource` (trilhas e temas, com `educationalLevel`, `timeRequired`, `teaches`), `BreadcrumbList`, `FAQPage` (pré-teste/perguntas frequentes do tema), `Quiz` (simulados), `DefinedTerm`/`DefinedTermSet` (glossário), `VideoObject` para vídeos embedados (título, canal, duração, thumbnail), `Person` (autor) para E-E-A-T.
 - Página de autor/"sobre" com credenciais, política editorial e fontes citadas em cada tema (sinal de confiabilidade para Google e para LLMs).
 
 **Descoberta por agentes de IA**
+
 - `robots.txt` liberando explicitamente `GPTBot`, `ClaudeBot`, `Claude-SearchBot`, `PerplexityBot`, `Google-Extended`, `Bingbot`, `Applebot` (decisão consciente: queremos ser citados).
 - `/llms.txt` (índice curto: o que é a Lumarys, trilhas, links canônicos) e `/llms-full.txt` (conteúdo integral em Markdown) gerados no build a partir do MDX — padrão já usado em `youco-web/public/`.
 - Versão Markdown de cada tema em `/<url>/index.md` (content negotiation não é possível em S3; expor como link `alternate type="text/markdown"`).
@@ -128,6 +132,7 @@ lumarys-web/
 **Performance e Core Web Vitals** (fator de ranking mobile): facade de vídeo (sem iframe até o clique), fontes self-hosted com `font-display: swap`, imagens AVIF/WebP com dimensões, sem CLS em cards/quizzes, JS mínimo por página (server components), Lighthouse CI com budget ≥ 90 perf/SEO/a11y/best-practices.
 
 **Operação de SEO**
+
 - Google Search Console e Bing Webmaster (verificação via registro TXT no Route 53 — Terraform), envio de sitemap, monitoramento de cobertura e Core Web Vitals.
 - **IndexNow** no deploy (chave em `public/`, POST das URLs alteradas no workflow) para Bing/Yandex; ping de sitemap no Google.
 - Conteúdo com data de atualização visível (`dateModified`), changelog por tema; títulos que espelham a pergunta do usuário ("O que é ETL vs ELT? Diferenças e quando usar cada um").
@@ -146,14 +151,17 @@ Tema (frontmatter) { slug; titulo; minutos; porQue; nivel; preTeste[3]; videos[{
          artigos[{titulo,url,fonte}]; flashcards[8–12]; drills[]; perguntas[{tipo:"oral"|"unica"|"multipla"; enunciado;
          opcoes?; corretas?; respostaModelo; explicacao; rubrica?}]; feynman; errosComuns[]; comoCai: string }
 ```
+
 Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas do mercado financeiro; IAM/VPC/S3 aparecem nas três AWS com profundidade marcada por `nivel`).
 
 ## 4. Ementas
 
 ### 4.1 Carreira · Engenharia de Dados (banco)
+
 **Oficial (8 módulos, 18 temas)**: Fundamentos (Big Data 3→5 Vs; OLAP/OLTP/ETL/DW; Data Centric vs Data Driven) · Hadoop (HDFS/YARN; MapReduce) · Processamento (batch vs stream; ETL vs ELT; particionamento) · Spark (introdução; RDD/transformações/ações/narrow-wide/DataFrame) · Camada de dados (zonas do Data Lake) · Databricks (Lakehouse, Delta Lake, medallion, Unity Catalog, Workflows, Auto Loader) · Tipos de dados (classificação; XML; JSON) · Qualidade (governança; Data Quality).
 
 **Além da ementa (módulo 9, completo, marcado `oficial: false`)** — ver §5 para justificativa:
+
 1. SQL para engenharia de dados: joins, agregações, CTEs, window functions, plano de execução, índices
 2. Modelagem: normalização (3NF), dimensional (Kimball: fato/dimensão, star/snowflake, SCD 1/2), Data Vault (noções)
 3. Formatos e armazenamento: Parquet/ORC/Avro vs CSV/JSON, compressão, colunar vs linha, formatos de tabela (Delta vs Iceberg vs Hudi)
@@ -168,32 +176,37 @@ Temas são compartilhados entre trilhas (ex.: Big Data aparece nas duas trilhas 
 12. Como responder na sabatina: estrutura de resposta, trade-offs, perguntas de cenário, erros de comunicação
 
 ### 4.2 Carreira · Engenharia de Analytics (banco)
+
 Big Data (disponível; = os 16 temas oficiais de Eng. de Dados + "Source of Record vs Source of Truth", conforme inferência em §5.2) · AWS, Banco de dados, Programação, DevOps, Dataviz, Data Mesh (sem itens na ementa recebida; construídos a partir da sugestão priorizada em §5.2, marcados `oficial: false` até o usuário validar) · "Além da ementa – Analytics" (dbt, camada semântica, modelagem para BI, estatística, reconciliação, LGPD, comunicação, como responder) · Feedback (link).
 
 ### 4.3 Certificação · AWS (ementa = guia oficial do exame; questões originais em estilo da prova, sem dumps)
-| Trilha | Exame | Formato | Domínios (peso) |
-|---|---|---|---|
-| Cloud Practitioner | CLF-C02 | 65 questões · 90 min · corte 700 · USD 100 | Conceitos de nuvem 24% · Segurança e conformidade 30% · Tecnologia e serviços 34% · Cobrança, preços e suporte 12% |
-| Solutions Architect Associate | SAA-C03 | 65 questões · 130 min · corte 720 · USD 150 | Arquiteturas seguras 30% · Resilientes 26% · Alto desempenho 24% · Otimizadas em custo 20% |
-| Solutions Architect Professional | SAP-C02 | 75 questões · 180 min · corte 750 · USD 300 | Complexidade organizacional 26% · Novas soluções 29% · Melhoria contínua 25% · Migração e modernização 20% |
 
-Cada domínio vira módulo; temas por serviço/conceito com `nivel` (fundamental/associate/professional). Recursos oficiais linkados por trilha: guia do exame (PDF), questões de exemplo, Skill Builder, FAQs, Well-Architected, whitepapers. Prazo sugerido: CLF 3 semanas · SAA 6–8 · SAP 10–12. Pré-requisito sugerido: SAA antes de SAP.
+| Trilha                           | Exame   | Formato                                     | Domínios (peso)                                                                                                    | Estado                                                                           |
+| -------------------------------- | ------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Cloud Practitioner               | CLF-C02 | 65 questões · 90 min · corte 700 · USD 100  | Conceitos de nuvem 24% · Segurança e conformidade 30% · Tecnologia e serviços 34% · Cobrança, preços e suporte 12% | **Completa** · 23 temas · cronograma de 30 dias · banco de 92 questões objetivas |
+| Solutions Architect Associate    | SAA-C03 | 65 questões · 130 min · corte 720 · USD 150 | Arquiteturas seguras 30% · Resilientes 26% · Alto desempenho 24% · Otimizadas em custo 20%                         | **Completa** · 23 temas · cronograma de 35 dias                                  |
+| Solutions Architect Professional | SAP-C02 | 75 questões · 180 min · corte 750 · USD 300 | Complexidade organizacional 26% · Novas soluções 29% · Melhoria contínua 25% · Migração e modernização 20%         | Não iniciada                                                                     |
+
+Cada domínio vira módulo; temas por serviço/conceito com `nivel` (fundamental/associate/professional). Recursos oficiais linkados por trilha: guia do exame (PDF), questões de exemplo, Skill Builder, FAQs, Well-Architected, whitepapers. Prazo sugerido: CLF 30 dias e SAA 35 dias, que são os cronogramas publicados; SAP 10–12 semanas, ainda estimativa. Pré-requisito sugerido: SAA antes de SAP.
 
 **Temas por domínio (ementa detalhada)**
 
-*CLF-C02 (≈ 24 temas)*
+_CLF-C02 (23 temas, entregue)_
+
 - D1 Conceitos de nuvem: benefícios e modelos de nuvem; 6 pilares do Well-Architected; economia da nuvem (CapEx→OpEx, TCO, economia de escala); estratégias de migração (7 Rs) e Cloud Adoption Framework.
 - D2 Segurança e conformidade: modelo de responsabilidade compartilhada; IAM (usuários, grupos, roles, políticas, MFA, root, Identity Center); conformidade (Artifact, Compliance Center); serviços de segurança (GuardDuty, Inspector, Shield, WAF, KMS, Macie, Security Hub, CloudTrail); criptografia em repouso e em trânsito.
 - D3 Tecnologia e serviços: formas de operar (console, CLI, SDK, IaC); infraestrutura global (Regiões, AZs, edge, CloudFront, Route 53, Global Accelerator); computação (EC2 e famílias, Lambda, ECS/EKS/Fargate, Beanstalk, Lightsail); armazenamento (classes S3, EBS, EFS, FSx, Storage Gateway, Backup); rede (VPC, sub-redes, SG vs NACL, VPN, Direct Connect); bancos (RDS, Aurora, DynamoDB, Redshift, ElastiCache, Neptune, DocumentDB); IA/ML e analytics (SageMaker, Rekognition, Lex, Athena, Glue, QuickSight, Kinesis, EMR, Bedrock); integração (SQS, SNS, EventBridge, Step Functions); gestão (CloudFormation, CloudWatch, Config, Systems Manager, Trusted Advisor, Health).
 - D4 Cobrança, preços e suporte: modelos de preço (On-Demand, Reserved, Savings Plans, Spot, Dedicated); Free Tier; ferramentas de custo (Cost Explorer, Budgets, CUR, Pricing Calculator); Organizations e faturamento consolidado; planos de suporte (Basic, Developer, Business, Enterprise On-Ramp, Enterprise); Marketplace e Partner Network.
 
-*SAA-C03 (≈ 32 temas)*
+_SAA-C03 (≈ 32 temas)_
+
 - D1 Arquiteturas seguras: IAM avançado (políticas, condições, roles cross-account, federação, Identity Center, SCPs); segurança de VPC (SG, NACL, NAT, endpoints, PrivateLink); proteção de dados (KMS, criptografia S3/EBS/RDS, Secrets Manager, ACM, Macie); WAF/Shield/GuardDuty; segurança de aplicações e logs.
 - D2 Arquiteturas resilientes: multi-AZ/multi-região; ELB e Auto Scaling; RDS Multi-AZ vs réplicas; Aurora; DynamoDB global tables; políticas de roteamento e failover do Route 53; replicação S3; desacoplamento (SQS, SNS, EventBridge); estratégias de DR (backup/restore, pilot light, warm standby, multi-site) com RTO/RPO.
 - D3 Alto desempenho: seleção de armazenamento (classes S3, tipos EBS, EFS, FSx); computação (famílias EC2, Lambda, containers); caching (CloudFront, ElastiCache, DAX); seleção de banco por caso de uso; rede (Global Accelerator, Direct Connect, Transit Gateway); ingestão e transformação (Kinesis, Glue, Athena, EMR, Lake Formation).
 - D4 Custo otimizado: modelos de preço; lifecycle e Intelligent-Tiering no S3; right-sizing; Spot e Savings Plans; custos de transferência (NAT, cross-AZ, egress); ferramentas de custo e tagging.
 
-*SAP-C02 (≈ 36 temas)*
+_SAP-C02 (≈ 36 temas)_
+
 - D1 Complexidade organizacional: multi-conta (Organizations, Control Tower, SCPs, landing zones); IAM cross-account e federação corporativa; rede em escala (Transit Gateway, peering, Direct Connect gateway, Route 53 Resolver, PrivateLink); segurança e logs centralizados; alocação de custos.
 - D2 Novas soluções: estratégias de deploy (blue/green, canary, CodeDeploy, StackSets); continuidade de negócio; controles de segurança; desempenho e confiabilidade (ELB, ASG, Aurora Global, DynamoDB); padrões (serverless, orientado a eventos, microsserviços, híbrido); API Gateway, Step Functions.
 - D3 Melhoria contínua: excelência operacional (CloudWatch, X-Ray, Systems Manager, CloudTrail); reforço de segurança; otimização de desempenho (caching, bancos); confiabilidade (AWS Backup, testes de falha); revisões de custo (Compute Optimizer, Cost Explorer, Trusted Advisor).
@@ -203,31 +216,33 @@ Cada tema de certificação inclui: "o que o examinador quer ver", 2 cenários n
 
 ## 5. Revisão de conteúdo — lacunas detalhadas por trilha
 
-Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento · **P2** provável · **P3** complementar. Profundidade: *conceito* (saber explicar) · *aplicação* (resolver cenário) · *prática* (escrever código/SQL).
+Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento · **P2** provável · **P3** complementar. Profundidade: _conceito_ (saber explicar) · _aplicação_ (resolver cenário) · _prática_ (escrever código/SQL).
 
 ### 5.1 Engenharia de Dados (banco) — o que a ementa oficial cobre e o que falta
 
 **Lacunas dentro dos temas oficiais** (ajustes nos 18 temas, não temas novos):
-| Tema oficial | Falta | Como cai |
-|---|---|---|
-| Big Data | 5 Vs (veracidade, valor); Big Data ≠ ferramenta; quando NÃO usar | "Todo problema de dados é Big Data?" |
-| OLAP/OLTP/ETL/DW | modelagem dimensional básica; DW vs Data Lake vs Lakehouse; camadas staging/ODS/DM | "Por que não fazer analytics direto no OLTP?" |
-| Data Centric vs Driven | exemplos de decisão; relação com governança e cultura | "Como você tornaria um time data-driven?" |
-| Hadoop | replicação HDFS, NameNode/DataNode, YARN; por que Hadoop perdeu espaço para cloud/object storage | "HDFS ainda faz sentido na AWS?" |
-| MapReduce | shuffle, combiner, custo de I/O em disco vs Spark em memória | "Explique um word count e onde está o gargalo" |
-| Batch x Stream | latência vs custo, micro-batch, event time vs processing time, watermark, exactly-once | "Fraude em tempo real: batch ou stream? Trade-offs" |
-| ETL x ELT | onde a transformação roda, custo de compute, governança de dados brutos, quando cada um | "ELT em Lakehouse: riscos?" |
-| Particionamento | por data vs por chave, small files, hot partitions, partition pruning, bucketing | "Como você particionaria transações de cartão?" |
-| Spark introdução | driver/executors, DAG, lazy evaluation, jobs/stages/tasks, cluster manager | "O que acontece quando você chama `.count()`?" |
-| Spark RDD | RDD é legado → DataFrame/Dataset; narrow vs wide; lineage e tolerância a falhas | "Quando ainda usaria RDD?" |
-| Zonas do Data Lake | mapeamento zonas ↔ medallion; retenção; controle de acesso por zona; dados sensíveis na raw | "PII pode ficar na raw?" |
-| Databricks | Delta (ACID, time travel, OPTIMIZE/Z-order, MERGE), Unity Catalog (linhagem, permissões), Jobs, Auto Loader, DLT, cluster vs serverless | "Por que Delta e não Parquet puro?" |
-| Classificação de dados | estruturado/semi/não; qualitativo/quantitativo; nominal/ordinal/discreto/contínuo; impacto em modelagem | "Como armazenar e consultar dados semiestruturados?" |
-| XML / JSON | schema (XSD/JSON Schema), aninhamento, evolução de schema, JSON no Spark (`explode`, schema inference) | "Como tratar JSON com schema variável?" |
-| Governança | papéis (owner/steward/custodian), catálogo, linhagem, políticas, LGPD, classificação de dados | "Quem responde por um dado errado no relatório?" |
-| Data Quality | 6 dimensões + testes automatizados, SLAs, quarentena, monitoramento | "Como você garantiria qualidade em um pipeline diário?" |
+
+| Tema oficial           | Falta                                                                                                                                   | Como cai                                                |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Big Data               | 5 Vs (veracidade, valor); Big Data ≠ ferramenta; quando NÃO usar                                                                        | "Todo problema de dados é Big Data?"                    |
+| OLAP/OLTP/ETL/DW       | modelagem dimensional básica; DW vs Data Lake vs Lakehouse; camadas staging/ODS/DM                                                      | "Por que não fazer analytics direto no OLTP?"           |
+| Data Centric vs Driven | exemplos de decisão; relação com governança e cultura                                                                                   | "Como você tornaria um time data-driven?"               |
+| Hadoop                 | replicação HDFS, NameNode/DataNode, YARN; por que Hadoop perdeu espaço para cloud/object storage                                        | "HDFS ainda faz sentido na AWS?"                        |
+| MapReduce              | shuffle, combiner, custo de I/O em disco vs Spark em memória                                                                            | "Explique um word count e onde está o gargalo"          |
+| Batch x Stream         | latência vs custo, micro-batch, event time vs processing time, watermark, exactly-once                                                  | "Fraude em tempo real: batch ou stream? Trade-offs"     |
+| ETL x ELT              | onde a transformação roda, custo de compute, governança de dados brutos, quando cada um                                                 | "ELT em Lakehouse: riscos?"                             |
+| Particionamento        | por data vs por chave, small files, hot partitions, partition pruning, bucketing                                                        | "Como você particionaria transações de cartão?"         |
+| Spark introdução       | driver/executors, DAG, lazy evaluation, jobs/stages/tasks, cluster manager                                                              | "O que acontece quando você chama `.count()`?"          |
+| Spark RDD              | RDD é legado → DataFrame/Dataset; narrow vs wide; lineage e tolerância a falhas                                                         | "Quando ainda usaria RDD?"                              |
+| Zonas do Data Lake     | mapeamento zonas ↔ medallion; retenção; controle de acesso por zona; dados sensíveis na raw                                             | "PII pode ficar na raw?"                                |
+| Databricks             | Delta (ACID, time travel, OPTIMIZE/Z-order, MERGE), Unity Catalog (linhagem, permissões), Jobs, Auto Loader, DLT, cluster vs serverless | "Por que Delta e não Parquet puro?"                     |
+| Classificação de dados | estruturado/semi/não; qualitativo/quantitativo; nominal/ordinal/discreto/contínuo; impacto em modelagem                                 | "Como armazenar e consultar dados semiestruturados?"    |
+| XML / JSON             | schema (XSD/JSON Schema), aninhamento, evolução de schema, JSON no Spark (`explode`, schema inference)                                  | "Como tratar JSON com schema variável?"                 |
+| Governança             | papéis (owner/steward/custodian), catálogo, linhagem, políticas, LGPD, classificação de dados                                           | "Quem responde por um dado errado no relatório?"        |
+| Data Quality           | 6 dimensões + testes automatizados, SLAs, quarentena, monitoramento                                                                     | "Como você garantiria qualidade em um pipeline diário?" |
 
 **Temas novos (módulo "Além da ementa", 12 temas)** — subtemas, profundidade e prioridade:
+
 1. **SQL para dados** (P1, prática): joins e anti-joins; agregações; CTEs; window functions (`ROW_NUMBER`, `LAG`, running totals); dedup; `EXPLAIN`; índices; SQL no Spark/Athena. Drill: 10 exercícios com dataset bancário fictício.
 2. **Modelagem de dados** (P1, aplicação): 3NF; Kimball (fato/dimensão, grão, star vs snowflake, SCD tipos 1/2/3, dimensões conformadas); Data Vault (hub/link/satellite, noções); One Big Table em Lakehouse.
 3. **Formatos e tabelas** (P1, conceito→aplicação): CSV/JSON vs Avro vs Parquet/ORC; colunar, compressão, predicate pushdown; Delta vs Iceberg vs Hudi (ACID, time travel, schema evolution, compaction).
@@ -252,11 +267,13 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 **Os 4 itens ausentes (inferência forte)**: a trilha de Eng. de Dados tem 16 itens únicos; os 13 acima cobrem 12 deles + SoR vs SoT. Os 4 que faltam para fechar 17 são exatamente os 4 da trilha de Dados que não aparecem aqui: **Tipos de dados – XML**, **Tipos de dados – JSON**, **Qualidade – Governança de dados**, **Qualidade – Data Quality**. Conclusão: o módulo Big Data de Analytics = módulo completo de Eng. de Dados + SoR vs SoT. Modelar assim (temas compartilhados) e confirmar com o usuário; se a inferência estiver errada, basta ajustar `content/trilhas/engenharia-de-analytics.ts`.
 
 **Avaliação do módulo Big Data para quem faz prova de Analytics** (mesmo conteúdo, ênfase diferente):
+
 - Reduzir profundidade em Hadoop/MapReduce/RDD (contexto histórico, 1 vídeo curto) e aumentar em **OLAP/DW/modelagem**, **zonas ↔ camadas de consumo**, **SoR vs SoT** (reconciliação de números, "qual fonte é a oficial do KPI") e **classificação de dados** (impacto em métricas e gráficos).
 - Acrescentar, dentro do módulo, "o que o engenheiro de analytics faz com isso": consumir a zona refined/gold, definir métricas, garantir consistência.
 - Tema SoR vs SoT: SoR = sistema onde o dado nasce (core bancário, CRM); SoT = visão consolidada e governada usada para decisão; regras de precedência, reconciliação, linhagem até a origem; exemplos bancários (saldo no core vs saldo no DW).
 
 **Módulos sem itens — o que deveria conter** (sugestão a validar; prioridade P1/P2):
+
 - **AWS**: S3 (P1), Glue catálogo/crawlers/jobs (P1), Athena (P1), Redshift + Spectrum + modelagem de distribuição (P1), QuickSight (P1), Lambda e Step Functions (P2), IAM e Lake Formation para dados (P2), Kinesis (P3).
 - **Banco de dados**: relacional vs NoSQL e quando usar (P1), ACID vs BASE (P1), normalização vs modelagem dimensional (P1), índices e planos de execução (P1), SQL avançado — window functions, CTEs, agregações, dedup (P1), views/materializadas e performance de consulta (P2), DynamoDB/Redis noções (P3).
 - **Programação**: Python para dados (pandas, tipos, funções, tratamento de nulos) (P1), SQL como linguagem principal (P1), Git básico e fluxo de PR (P1), testes (pytest) e qualidade de código (P2), notebooks e reprodutibilidade (P2), APIs/JSON (P2).
@@ -266,6 +283,7 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 - **Feedback**: não é conteúdo; vira formulário/link de avaliação da trilha.
 
 **O que falta na trilha inteira e é núcleo de Analytics Engineering (recomendo módulo "Além da ementa – Analytics")**:
+
 1. **dbt** (P1): models, refs, tests, docs, sources, snapshots (SCD), ambientes, CI.
 2. **Camada semântica e métricas** (P1): definição única de KPI, metric store, consistência entre dashboards.
 3. **Modelagem para BI** (P1): grão, tabelas agregadas, star schema para desempenho de dashboard, SCD na prática.
@@ -276,12 +294,14 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 8. **Como responder na prova** (P1): estrutura de resposta e perguntas de cenário, igual à trilha de Dados.
 
 ### 5.3 Certificações AWS — lacunas típicas de quem vem de dados
+
 - CLF-C02: cobrança/suporte (12%) é subestimado; decorar planos de suporte e modelos de preço. Segurança (30%) exige responsabilidade compartilhada de cor.
 - SAA-C03: quem vem de dados erra rede (VPC, SG vs NACL, endpoints), DR (RTO/RPO por estratégia) e custo de transferência; incluir módulo "fundamentos de rede para quem não é de infra".
 - SAP-C02: exige leitura de cenários longos; treinar gerenciamento de tempo (2,4 min/questão) e multi-conta/Organizations; incluir "como ler uma questão Pro" e simulados de 75 questões.
 - Comum às três: mudanças de nomes/serviços (ex.: Bedrock e IA generativa em CLF e SAA), diferença entre "mais barato" e "menos esforço operacional" no enunciado.
 
 ### 5.4 Lacunas do plano de aprendizado (método) e como fechá-las
+
 - **Diagnóstico inicial** por trilha (20 questões) para posicionar nível e priorizar módulos fracos → hoje o plano trata todos iguais.
 - **Marcos**: fim de cada módulo tem "checkpoint" (quiz 10 questões, mín. 70% para marcar concluído; abaixo, gera drills).
 - **Revisão semanal** (retrospectiva guiada: o que rendeu, o que mudar — princípio de experimentação) e **simulado final** obrigatório antes de marcar trilha concluída.
@@ -293,6 +313,7 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 ## 6. Evolução do site para atenção e aprendizado
 
 **v1 (antes da sabatina)**
+
 - **Onboarding em 3 toques**: escolher trilha → data da prova → minutos/dia ⇒ gera o plano. Retorno abre em **"Hoje"** com uma única próxima ação (tema, cards vencidos ou drill), não em um menu.
 - **Streak + meta diária** e **prontidão por módulo** (score ponderado por quiz, simulado e cards; para certificações, ponderado pelo peso do domínio) → "Você está 68% pronto; ponto fraco: Spark".
 - **Sessões curtas** (10–25 min), Pomodoro, modo sem distração, marcador "parei aqui".
@@ -307,24 +328,26 @@ Legenda de prioridade: **P1** alta probabilidade de cair / bloqueia entendimento
 
 ## 7. Ultraaprendizado → funcionalidades
 
-| Princípio | No site |
-|---|---|
+| Princípio       | No site                                                                                       |
+| --------------- | --------------------------------------------------------------------------------------------- |
 | Metaaprendizado | Página da trilha: o que/por que/como, pesos e formato da prova, `porQue` e `comoCai` por tema |
-| Foco | Pomodoro, um tema por sessão, modo sem distração |
-| Direcionamento | Simulado no formato real (oral ou múltipla escolha cronometrado) |
-| Drills | Exercício isolado do ponto fraco por tema |
-| Recuperação | Pré-teste, flashcards, quiz, intercalação |
-| Feedback | Rubrica 0-5, resposta-modelo, prontidão por módulo/domínio, prompt para IA |
-| Retenção | Leitner 1/3/7/12 dias em `localStorage`, fila "Hoje" |
-| Intuição | Feynman ("explique para um gerente"), cadeias de "por quê" |
-| Experimentação | Página método: variar técnica e registrar rendimento |
+| Foco            | Pomodoro, um tema por sessão, modo sem distração                                              |
+| Direcionamento  | Simulado no formato real (oral ou múltipla escolha cronometrado)                              |
+| Drills          | Exercício isolado do ponto fraco por tema                                                     |
+| Recuperação     | Pré-teste, flashcards, quiz, intercalação                                                     |
+| Feedback        | Rubrica 0-5, resposta-modelo, prontidão por módulo/domínio, prompt para IA                    |
+| Retenção        | Leitner 1/3/7/12 dias em `localStorage`, fila "Hoje"                                          |
+| Intuição        | Feynman ("explique para um gerente"), cadeias de "por quê"                                    |
+| Experimentação  | Página método: variar técnica e registrar rendimento                                          |
 
 **Cronograma Eng. Dados (14 dias)**: D1 método + Fundamentos · D2 Hadoop · D3 Processamento · D4 Spark · D5 Data Lake + Databricks 1/2 · D6 Databricks 2/2 + Tipos · D7 Qualidade + revisão · D8 SQL + modelagem · D9 formatos + Spark avançado · D10 Airflow + Kafka/CDC + AWS dados · D11 LGPD/PII + arquiteturas + como responder · D12–D13 simulados completos + revisões · D14 revisão leve.
 
 ## 8. Curadoria (PT-BR)
+
 Por tema: 1 vídeo principal + até 1 complementar, em português (para AWS: canais oficiais AWS Brasil e comunidade PT-BR). `WebSearch` (`site:youtube.com … português`) → `WebFetch` → **validação por oEmbed** (testado). Artigos PT-BR verificados (`verify-links`). Embed `youtube-nocookie.com` com facade. Questões de certificação **originais**, escritas por domínio, com explicação de cada alternativa.
 
 ## 9. Infra (Terraform em `infra/`)
+
 1. `infra/bootstrap/`: bucket `lumarys-terraform-state` (versionado, criptografado, público bloqueado).
 2. `infra/`: `data aws_route53_zone` (só adiciona A/AAAA apex + `www` e CNAME ACM) · ACM apex + SAN `www` (us-east-1) · S3 `lumarys-site-prod` + OAC · CloudFront (aliases apex+www, `PriceClass_100`, compress, CloudFront Function: `/x/`→`/x/index.html` e `www`→apex 301, 404→`/404.html`) · role OIDC `lumarys-web-github-actions-prod` (`sub` restrito a `repo:lumarys/lumarys-web:environment:production`; `s3:ListBucket/PutObject/DeleteObject` no bucket do site + `cloudfront:CreateInvalidation` na distribuição + `lambda:UpdateFunctionCode` na função da API) · política de cabeçalhos de resposta (CSP, HSTS, etc., §13) · registro CAA · recursos de auth/API/SES/DynamoDB/budget da §12.
 3. `gh variable set AWS_ROLE_ARN`; environment `production`.
@@ -337,6 +360,7 @@ Por tema: 1 vídeo principal + até 1 complementar, em português (para AWS: can
 **Objetivo**: em `lumarys.com.br`, uma pessoa abre no celular, estuda a trilha completa de Engenharia de Dados (ementa oficial da carreira + "Além da ementa") com o método Ultraaprendizado, faz o simulado da sabatina e, se quiser, entra com código por e-mail para continuar de onde parou em qualquer dispositivo. Prazo-alvo: pronto para uso antes da sabatina (≈ 2 semanas), com o conteúdo entrando por módulo para o usuário já estudar enquanto o resto é produzido.
 
 **Escopo do MVP (dentro)**
+
 - Fundação (§2): scaffold Next.js 16 + Tailwind 4, tooling (lint, typecheck, Vitest, Playwright smoke, Lefthook, Conventional Commits, Dependabot, gitleaks), infra Terraform (§9 + §12), CI no PR e deploy no `main`, cabeçalhos de segurança e demais controles da §13.
 - Marca aplicada (§1, §1.1, §1.2): design canvas **enxuto** (marca + 4 telas: Hoje, trilha, tema, simulado) → tokens; rodapé Cernyn; páginas `/sobre`, `/contato`, `/privacidade`, `/termos`, `/metodo`.
 - Landing com **uma** trilha (Eng. Dados) e catálogo com "em breve" para Analytics e AWS (sem conteúdo).
@@ -348,6 +372,7 @@ Por tema: 1 vídeo principal + até 1 complementar, em português (para AWS: can
 **Fora do MVP (entregas seguintes)**: trilha de Analytics, certificações AWS e o modelo `exame`/simulado cronometrado, glossário e páginas de comparativo, PWA/offline, leitura em voz alta, cheat-sheets e mapas mentais, card de conquista compartilhável, certificado de conclusão, feed Atom, feedback por tema, lembretes por e-mail, feedback de IA no simulado, analytics de produto.
 
 **Marcos do MVP** (o conteúdo entra em produção assim que cada marco fecha):
+
 - **M0 — Marca e telas** (dia 1): canvas de design aprovado, tokens e assets exportados.
 - **M1 — Site no ar com conta** (dias 1–3): fundação, infra (bootstrap → plan revisado → apply), Cognito + SES (pedido de saída do sandbox enviado no dia 1) + API + DynamoDB, landing, método, páginas legais, rodapé, tela Conta funcionando, SEO essencial. Até a org `lumarys` existir, roda local; o deploy acontece no primeiro push após a criação.
 - **M2 — Trilha oficial, módulos 1–4** (dias 3–5): loader MDX e features de estudo completas; Fundamentos, Hadoop, Processamento e Spark publicados. Produção de conteúdo em paralelo com subagentes (1 por módulo) seguindo o CONTENT-GUIDE, cada vídeo validado por oEmbed.
@@ -356,12 +381,14 @@ Por tema: 1 vídeo principal + até 1 complementar, em português (para AWS: can
 - **M5 — Endurecimento** (dias 10–12): verificação §11 completa, Lighthouse, securityheaders, teste real de login em 2 dispositivos, revisão de conteúdo (links, vídeos, ortografia), ajustes de UX vindos do uso do próprio usuário nos dias anteriores.
 
 ### Entregas seguintes (ordem sugerida, pós-MVP)
+
 - **Entrega 2 — Analytics**: tema SoR vs SoT, trilha de Analytics sobre os temas compartilhados, módulos pendentes conforme validação do usuário, módulo "Além da ementa – Analytics" (dbt etc.).
-- **Entrega 3 — Certificações AWS**: modelo `exame`, quiz de múltipla resposta, simulado cronometrado por domínio; CLF-C02 → SAA-C03 → SAP-C02.
+- **Entrega 3 — Certificações AWS**: modelo `exame`, quiz de múltipla resposta, simulado cronometrado por domínio; CLF-C02 → SAA-C03 → SAP-C02. **CLF-C02 e SAA-C03 entregues**: a SAA com 23 temas e cronograma de 35 dias, a CLF com 23 temas, cronograma de 30 dias e banco de 92 questões objetivas, auditada contra o guia oficial no LUM-148. Resta a SAP-C02.
 - **Entrega 4 — Engajamento e alcance**: PWA/offline, leitura em voz alta, cheat-sheets, mapas mentais, card de conquista, certificado, glossário e comparativos (cauda longa de SEO), feed Atom.
 - **Entrega 5 — v2** (§6): feedback por tema, lembretes, feedback de IA, analytics de produto, novas trilhas e empresas.
 
 ## 11. Verificação
+
 - `npm run lint && npm run typecheck && npm test && npm run build`; `verify-videos`/`verify-links`/`content-lint` 100%; e2e mobile verde; Lighthouse mobile ≥ 90.
 - `terraform plan`: zero mudanças em MX/TXT/DKIM; após apply `dig lumarys.com.br A`/`www` → CloudFront; `curl -I https://lumarys.com.br/trilhas/engenharia-de-dados/` = 200; `www` → 301; `dig MX` inalterado.
 - No celular: onboarding → Hoje → tema → vídeo no toque → cards → quiz → simulado; progresso persiste; offline abre tema visitado; sem scroll horizontal.
@@ -375,12 +402,14 @@ Por tema: 1 vídeo principal + até 1 complementar, em português (para AWS: can
 **Decisão**: Amazon Cognito com **login sem senha por código de e-mail** (`sign_in_policy.allowed_first_auth_factors = ["EMAIL_OTP"]`, `user_pool_tier = "ESSENTIALS"`, gratuito até 10.000 MAU) + API HTTP (API Gateway v2) + Lambda + DynamoDB, tudo em Terraform, na Fase 1. Alternativas avaliadas e descartadas: Supabase (dados fora da AWS), só código de sincronização (manual), Google Drive como armazenamento (frágil, só Google).
 
 **Experiência**
+
 - Estudar **não exige login**: progresso nasce em `localStorage` (modo convidado). O convite aparece em momentos de valor ("salve seu progresso para continuar no computador"), não na entrada.
 - Login: digita e-mail → recebe código de 6 dígitos → entra. Ao entrar pela primeira vez, o progresso local é **mesclado** na conta (união de temas concluídos, máximo de scores, cards com a caixa Leitner mais avançada).
 - Sincronização: a cada evento (tema concluído, card revisado, quiz) grava localmente e enfileira `PUT /progress` com debounce; ao abrir o app, `GET /progress` e mescla por `updatedAt` por item (last-write-wins por chave, nunca por documento inteiro). Funciona offline; sincroniza ao voltar.
 - Tela "Conta": e-mail, dispositivos, **exportar meus dados (JSON)** e **excluir conta** (LGPD), sair.
 
 **Modelo de dados (DynamoDB `lumarys-progress-prod`, PAY_PER_REQUEST, PITR ligado)**
+
 - `pk = u#<sub>`, `sk = trilha#<slug>` (documento por trilha: temas concluídos, scores, streak, plano) e `sk = cards#<slug>` (estado Leitner). Item ≤ 50 KB; TTL de 24 meses sem atividade (renovado a cada gravação). Apenas `sub` e e-mail (no Cognito) como dado pessoal.
 
 **API (`api.lumarys.com.br`, HTTP API + autorizador JWT do Cognito)**: `GET /me/progress`, `PUT /me/progress/{trilha}`, `PUT /me/cards/{trilha}`, `GET /me/export`, `DELETE /me` (apaga itens e o usuário no Cognito via `AdminDeleteUser`). Lambda Node 24 em TS (padrão `youco-io-neo/apps/neo-api` + `bundle-lambda.mjs`), validação de payload com zod, CORS restrito a `https://lumarys.com.br`, throttling 10 rps/burst 20 por rota.
@@ -410,6 +439,7 @@ Pontos fracos identificados no plano original e correções incorporadas:
 Riscos aceitos (documentados): sem WAF gerenciado pago além de rate limit; sem Cognito Plus (proteção avançada) no início; dependência do YouTube para vídeos (facade mitiga rastreamento, mas o conteúdo pode sumir — `verify-videos` detecta).
 
 ## Pendências do usuário (não bloqueiam)
+
 - Criar a org `lumarys` no GitHub após aprovar a identidade visual (Fase 0); até lá o código fica local.
 - Aprovar o pedido de saída do sandbox do SES (a AWS pede caso de uso; texto preparado na execução) e informar o e-mail da Cernyn que receberá relatórios DMARC e avisos de bounce.
 - Revisar política de privacidade e termos antes do lançamento público.

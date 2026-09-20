@@ -249,6 +249,14 @@ Organizations. Ambiente **novo** que precisa nascer padronizado e governado:
 Control Tower.
 </Callout>
 
+## Compartilhar recurso entre contas
+
+Separar as contas não obriga a duplicar tudo. O
+**AWS Resource Access Manager** (AWS RAM) compartilha recursos como sub-redes e
+regras de resolução de DNS com outras contas da mesma organização, que passam a
+usá-los sem cópia. A pista é **uma conta usa o recurso que outra criou**, e não
+transferir permissão de identidade, que continua sendo assunto do IAM.
+
 ## Como responder o cenário
 
 Procure quantas contas o enunciado menciona e o que ele quer delas. Se quer

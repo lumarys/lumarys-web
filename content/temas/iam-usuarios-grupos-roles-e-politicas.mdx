@@ -244,6 +244,25 @@ credenciais temporárias. O que a pessoa pode fazer dentro da conta continua
 sendo definido por política. Ele resolve **quem entra**; o IAM continua
 resolvendo **o que se pode fazer**.
 
+Quando as identidades já existem fora da AWS, o caminho é a **federação**: a
+pessoa se autentica no diretório corporativo ou em um provedor externo e recebe
+credenciais temporárias na conta, sem usuário do IAM próprio. O Identity Center
+é a forma gerenciada de federar; a pista no enunciado é aproveitar o login que a
+empresa já tem em vez de criar um novo. Quando o diretório em questão é o Active
+Directory da Microsoft, quem o hospeda ou o conecta na AWS é o
+**AWS Directory Service**.
+
+## Credenciais: senha, chave e segredo
+
+Três controles completam o desenho e a prova cobra cada um pelo nome. A
+**política de senha** da conta define tamanho mínimo, exigência de caracteres,
+troca periódica e proibição de reuso para os usuários do IAM. A **chave de
+acesso** serve ao acesso programático e não deve existir para o raiz. E segredo
+de aplicação, como a senha de um banco, não mora em política do IAM: fica no
+**Secrets Manager**, que ainda gira a credencial sozinho, ou no armazenamento de
+parâmetros do **Systems Manager**. Credencial dentro do código é o erro que o
+enunciado descreve para que a resposta seja um desses dois.
+
 ## Como responder o cenário
 
 Localize o sujeito do acesso. Se for um serviço da AWS, é role. Se for um grupo

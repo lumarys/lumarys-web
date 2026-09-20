@@ -45,14 +45,26 @@ sem chegar ao gerente técnico designado, é Enterprise On-Ramp. Se pede o
 
 Antes de pagar por um plano existem caminhos sem custo. O **AWS re:Post** é a
 comunidade de perguntas e respostas. O **Knowledge Center** reúne respostas
-documentadas às dúvidas mais frequentes do suporte. Documentação e
-documentos técnicos também estão abertos a qualquer conta. Quando o enunciado
-insiste em custo zero, a resposta está nesse grupo.
+documentadas às dúvidas mais frequentes do suporte. A
+**AWS Prescriptive Guidance** reúne padrões, guias e roteiros escritos pela AWS
+para problemas recorrentes. Documentação, blogs e documentos técnicos também
+estão abertos a qualquer conta. Quando o enunciado insiste em custo zero, a
+resposta está nesse grupo.
+
+Quando o plano é pago, o chamado técnico se abre no **AWS Support Center**, o
+console de atendimento da conta. Ele é o lugar do chamado, não um plano: a
+questão que pergunta _onde abrir_ aponta para ele, a que pergunta _qual
+contratar_ aponta para a escada dos cinco planos.
 
 Do lado contratado, três nomes não se misturam. O **AWS Professional Services**
 é a consultoria da própria AWS dentro de um projeto do cliente. O
 **AWS Partner Network** reúne empresas de consultoria e de tecnologia
-credenciadas pela AWS, para quem prefere contratar um parceiro. E o
+credenciadas pela AWS, para quem prefere contratar um parceiro; entre elas estão
+os **fornecedores independentes de software** (ISV), que publicam produto, e os
+**integradores de sistemas**, que conduzem a implantação na casa do cliente. Ser
+parceiro rende treinamento e certificação, acesso a eventos e desconto por
+volume, e é isso que o enunciado descreve quando pergunta pelo benefício de
+entrar na rede. E o
 **AWS Marketplace** é o catálogo de software de terceiros pronto para implantar
 na conta, com a cobrança integrada à fatura da AWS.
 
@@ -61,6 +73,14 @@ na conta, com a cobrança integrada à fatura da AWS.
 **Professional Services** entrega gente da AWS dentro de um projeto. Três
 respostas diferentes para três verbos diferentes.
 </Callout>
+
+## Denunciar abuso
+
+Existe um canal que não é suporte nem parceiro. A equipe de
+**Trust and Safety** da AWS recebe denúncia de abuso de recursos da nuvem, como
+spam, varredura de portas ou ataque partindo de um endereço da AWS. O enunciado
+que descreve tráfego malicioso **vindo da** AWS contra alguém de fora está
+pedindo esse canal, e não um plano de suporte nem o GuardDuty.
 
 ## Capacitação
 

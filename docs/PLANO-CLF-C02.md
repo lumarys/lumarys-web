@@ -253,3 +253,61 @@ as quatro trilhas, e a memória do projeto anotando a trilha concluída.
   no `docs/PLANO.md` §1: é funcionalidade de produto, não conteúdo, e merece
   card à parte.
 - Compartilhar temas entre CLF e SAA: decidido contra, seção 3.
+
+## 10. Como a trilha ficou
+
+Escrito no LUM-148, depois da auditoria de fechamento.
+
+A trilha saiu do tamanho planejado: **23 temas**, cronograma de **30 dias** em
+sequência, cada tema agendado uma vez só, e um banco objetivo de
+**92 questões** (69 de resposta única e 23 de resposta múltipla), sorteadas por
+peso de domínio na prova simulada. Somados, os temas dão **618 minutos**, que é
+o que a página da trilha exibe como 10 h 18 min; o cronograma acomoda isso em
+30 dias porque seis deles são checkpoint, prova simulada, ataque aos domínios
+fracos e véspera, sem tema novo.
+
+O que divergiu do plano:
+
+- **O modelo.** O plano previa que os cards de conteúdo pudessem ser escritos
+  por um modelo mais barato. Não deu: do card 3 ao 5, com quatro a nove temas
+  por card e um tema passando de 250 linhas, o Sonnet estourou o limite de
+  contexto antes de fechar o card. Os cards 3, 4 e 5 foram refeitos com Opus, e
+  o LUM-148 também. Fica a lição: tema de certificação é conteúdo longo e denso,
+  e o corte por modelo tem de ser feito por card, não por trilha.
+- **Tempo de resposta dos planos de suporte.** O plano pedia a tabela de
+  severidade com o tempo de resposta de cada plano. A página oficial de planos
+  mudou de estrutura e deixou de publicar esses tempos no formato antes citado,
+  então nenhum número entrou na trilha. Os planos são ensinados pelo que cada
+  degrau libera (canal de atendimento, alcance do Trusted Advisor,
+  acompanhamento designado), que é como a prova cobra.
+- **README.** A seção 8 previa o README citando as quatro trilhas. O README não
+  lista nem conta trilhas em lugar nenhum, então não houve o que atualizar; a
+  contagem vive no catálogo do site, que é gerado a partir de
+  `content/trilhas/index.ts`.
+- **Banco de questões.** O card de fechamento falava em 88 questões; a contagem
+  real no repositório é 92, e foi essa que entrou no `docs/PLANO.md`.
+
+A auditoria de cobertura do LUM-148 conferiu os task statements dos quatro
+domínios e a lista de serviços em escopo do guia oficial contra os 23 temas, e
+achou vinte e cinco assuntos sem nenhuma menção. Todos foram acrescentados aos temas
+existentes, sem tema novo: ESG nos resultados do CAF, a sigla BYOL, política de
+senha e identidade federada no IAM, o AWS Directory Service, o Security Center e
+o Security Blog, a sigla network ACL, os quatro motivos para usar mais de uma
+região, o instance store, o AWS SCT, o WorkSpaces Secure Browser, a reserva de
+capacidade e os graus de flexibilidade da reserva, a AWS Health API, o
+Prescriptive Guidance, o Support Center, a equipe de Trust and Safety, os ISVs e
+integradores de sistemas com os benefícios de parceiro, e os serviços que
+faltavam da lista em escopo: Transit Gateway, Service Quotas, Compute Optimizer,
+Migration Evaluator, Elastic Disaster Recovery e AWS RAM.
+
+A auditoria de coerência achou uma duplicação real: a tabela de security group
+contra lista de controle de acesso de rede estava repetida quase palavra por
+palavra em `servicos-de-seguranca-da-aws` (dia 10) e em
+`rede-e-conectividade-na-aws` (dia 17). A tabela ficou no tema que o leitor
+encontra primeiro e o outro passou a remeter a ele em uma frase, que é a mesma
+convenção já usada entre `gestao-monitoramento-e-outros-servicos` e
+`conformidade-e-governanca-na-aws`. Fora isso, as descrições de serviço
+repetido entre temas (Trusted Advisor, CloudWatch, CloudTrail, Config,
+Organizations, S3, IAM, Well-Architected) estavam consistentes: mudam a ênfase,
+não o significado. Nenhum tema da CLF referencia tema da SAA, e nenhum da SAA
+referencia tema da CLF.

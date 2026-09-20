@@ -14,11 +14,12 @@ import type { Trilha } from "../types";
  * são próprios, e não compartilhados com a SAA: uma questão de arquitetura
  * dentro de uma prova de CLF quebraria a calibração do sorteio por peso.
  *
- * Estado desta trilha: completa. São 23 temas cobrindo "como funciona a
- * prova" e os quatro domínios do exame, com o checkpoint de cada domínio e
- * um cronograma de 30 dias que termina em prova simulada completa, ataque
- * aos domínios fracos e véspera. A auditoria de ponta a ponta e a
- * verificação final ficam no card LUM-148.
+ * Estado desta trilha: completa e auditada. São 23 temas cobrindo "como
+ * funciona a prova" e os quatro domínios do exame, com o checkpoint de cada
+ * domínio e um cronograma de 30 dias que termina em prova simulada completa,
+ * ataque aos domínios fracos e véspera. O LUM-148 conferiu os task statements
+ * e a lista de serviços em escopo do guia oficial contra os temas e fechou as
+ * lacunas encontradas; o resultado está em `docs/PLANO-CLF-C02.md` §10.
  */
 export const awsCloudPractitioner: Trilha = {
   slug: "aws-cloud-practitioner",

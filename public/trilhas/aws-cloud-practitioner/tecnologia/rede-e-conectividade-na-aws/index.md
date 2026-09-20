@@ -27,6 +27,7 @@ linhas={[
 ["Gateway NAT", "Saída para a internet iniciada de dentro, sem entrada", "Baixar atualização sem expor a instância"],
 ["Endpoint da VPC", "Acesso privado a serviços da AWS pela rede interna", "Falar com o S3 sem tráfego pela internet"],
 ["AWS PrivateLink", "Publica um serviço de forma privada dentro da rede", "Consumir serviço de outra conta sem expor à internet"],
+["AWS Transit Gateway", "Concentrador que liga muitas VPCs e redes locais num ponto só", "Dezenas de VPCs, parar de ligar cada uma com cada uma"],
 ["VPN site a site", "Túnel criptografado sobre a internet pública", "Ligar o escritório rápido, custo menor"],
 ["AWS Direct Connect", "Enlace dedicado até a AWS, fora da internet pública", "Banda consistente, conexão dedicada, tráfego sensível"],
 ["Amazon Route 53", "DNS gerenciado com roteamento e verificação de saúde", "Registrar domínio, resolver nome, direcionar visitante"]
@@ -35,15 +36,14 @@ linhas={[
 
 ## Os dois firewalls
 
-<Comparativo
-colunas={["Aspecto", "Security group", "Lista de controle de acesso de rede"]}
-linhas={[
-["Protege", "O recurso, como uma instância", "A sub-rede inteira"],
-["Regras", "Só permitir", "Permitir e negar"],
-["Avalia estado", "Sim: a resposta volta sem regra extra", "Não: é preciso regra de ida e de volta"],
-["A pista", "Liberar porta para uma instância específica", "Bloquear um endereço para toda a sub-rede"]
-]}
-/>
+A VPC tem dois controles de tráfego, e o guia os cita em inglês: o
+**security group** protege o recurso, só sabe permitir e avalia estado, então a
+resposta de uma conexão permitida volta sem regra extra. A **network ACL**, a
+lista de controle de acesso de rede, protege a sub-rede inteira, sabe permitir e
+negar e não avalia estado, o que exige regra de ida e de volta. A comparação
+linha a linha entre os dois está no tema de serviços de segurança deste mesmo
+curso; aqui interessa decidir em qual nível o enunciado está pedindo o
+controle.
 
 <Callout tipo="dica" titulo="Duas perguntas prontas">
 Para o par de firewalls, pergunte **o controle é do recurso ou da sub-rede**, e
